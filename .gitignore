@@ -1,0 +1,6 @@
+*~
+Makefile.bak
+*.o
+build/
+.*
+/ilang
