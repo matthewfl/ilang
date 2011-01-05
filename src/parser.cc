@@ -27,7 +27,7 @@ extern int yydebug;
 
 namespace ilang {
   ilang::parserNode::Head * parser (FILE *file, ilang::Import *import) {
-    //    yydebug =1;
+    yydebug =1;
     yyscan_t scanner;
     ilang::parser_data data;
     data.import = import;

@@ -61,8 +61,7 @@ DeclList	:	DeclList Decl 			{}
 		|	Decl				{}
 		;
 
-Decl		:	Identifier '=' Function ';'	{}
-		|	Identifier '=' Expr ';'		{}
+Decl		:	Identifier '=' Expr ';'		{}
 		;
 
 Stmt		:	';'
@@ -73,12 +72,16 @@ Stmt		:	';'
 		|	ForStmt
 		;
 
+Stmts		:	Stmts Stmt
+		|	Stmt
+		;
+
 IfStmt:'a';
 WhileStmt:'b';
 ForStmt:'c';
 
-Function	:	'{' ExprList '}'		{}
-		|	'{' '|' PramList '|' ExprList '}'	{}
+Function	:	'{' Stmts '}'		{}
+		|	'{' '|' PramList '|' Stmts '}'	{}
 		;
 
 PramList	:	PramList ',' Identifier		{}
@@ -89,7 +92,7 @@ ExprList	:	ExprList Expr			{}
 		|	Expr				{}
 		;	
 	
-Expr		:
+Expr		:	Function			{}
 		
 		;
 
