@@ -1,6 +1,6 @@
 TARGET= ilang
 
-SRCS= main.cc parserTree.cc import.cc parser.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc
 LIBS=-lfl
 
 BUILDDIR=build

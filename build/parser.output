@@ -7,9 +7,6 @@ Nonterminals useless in grammar
 Terminals unused in grammar
 
    T_as
-   T_if
-   T_while
-   T_for
    T_break
    T_return
    T_continue
@@ -20,15 +17,15 @@ Terminals unused in grammar
 
 Rules useless in grammar
 
-   28 ExprList: ExprList Expr
-   29         | Expr
+   30 ExprList: ExprList Expr
+   31         | Expr
 
-   30 LValue: Identifier
-   31       | Expr '.' Identifier
-   32       | Expr '[' Expr ']'
+   32 LValue: Identifier
+   33       | Expr '.' Identifier
+   34       | Expr '[' Expr ']'
 
 
-State 33 conflicts: 1 reduce/reduce
+State 35 conflicts: 1 reduce/reduce
 
 
 Grammar
@@ -61,11 +58,11 @@ Grammar
    17 Stmts: Stmts Stmt
    18      | Stmt
 
-   19 IfStmt: 'a'
+   19 IfStmt: T_if '(' Expr ')' Stmt
 
-   20 WhileStmt: 'b'
+   20 WhileStmt: T_while '(' Expr ')' Stmt
 
-   21 ForStmt: 'c'
+   21 ForStmt: T_for '(' Expr ')' Stmt
 
    22 Function: '{' Stmts '}'
    23         | '{' '|' PramList '|' Stmts '}'
@@ -73,23 +70,25 @@ Grammar
    24 PramList: PramList ',' Identifier
    25         | Identifier
 
-   26 Expr: Function
+   26 Call: Identifier '(' PramList ')'
 
-   27 Identifier: T_Identifier
+   27 Expr: Function
+   28     | Call
+
+   29 Identifier: T_Identifier
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
+'(' (40) 19 20 21 26
+')' (41) 19 20 21 26
 ',' (44) 24
 '.' (46)
 ';' (59) 10 11 12
 '=' (61) 10
 '[' (91)
 ']' (93)
-'a' (97) 19
-'b' (98) 20
-'c' (99) 21
 '{' (123) 22 23
 '|' (124) 23
 '}' (125) 22 23
@@ -97,10 +96,10 @@ error (256)
 T_import (258) 4 5
 T_from (259) 5
 T_as (260)
-T_if (261)
-T_while (262)
-T_for (263)
-T_Identifier (264) 6 7 27
+T_if (261) 19
+T_while (262) 20
+T_for (263) 21
+T_Identifier (264) 6 7 29
 T_break (265)
 T_return (266)
 T_continue (267)
@@ -109,38 +108,40 @@ T_continue (267)
 
 Nonterminals, with rules where they appear
 
-$accept (26)
+$accept (25)
     on left: 0
-Program (27)
+Program (26)
     on left: 1, on right: 0
-Imports (28)
+Imports (27)
     on left: 2 3, on right: 1 2
-Import (29)
+Import (28)
     on left: 4 5, on right: 2
-ImportLoc (30)
+ImportLoc (29)
     on left: 6 7, on right: 4 5 6
-DeclList (31)
+DeclList (30)
     on left: 8 9, on right: 1 8
-Decl (32)
+Decl (31)
     on left: 10, on right: 8 9
-Stmt (33)
-    on left: 11 12 13 14 15 16, on right: 17 18
-Stmts (34)
+Stmt (32)
+    on left: 11 12 13 14 15 16, on right: 17 18 19 20 21
+Stmts (33)
     on left: 17 18, on right: 17 22 23
-IfStmt (35)
+IfStmt (34)
     on left: 19, on right: 14
-WhileStmt (36)
+WhileStmt (35)
     on left: 20, on right: 15
-ForStmt (37)
+ForStmt (36)
     on left: 21, on right: 16
-Function (38)
-    on left: 22 23, on right: 13 26
-PramList (39)
-    on left: 24 25, on right: 23 24
+Function (37)
+    on left: 22 23, on right: 13 27
+PramList (38)
+    on left: 24 25, on right: 23 24 26
+Call (39)
+    on left: 26, on right: 28
 Expr (40)
-    on left: 26, on right: 10 12
+    on left: 27 28, on right: 10 12 19 20 21
 Identifier (41)
-    on left: 27, on right: 10 24 25
+    on left: 29, on right: 10 24 25 26
 
 
 state 0
@@ -202,9 +203,9 @@ state 5
 
 state 6
 
-   27 Identifier: T_Identifier .
+   29 Identifier: T_Identifier .
 
-    $default  reduce using rule 27 (Identifier)
+    $default  reduce using rule 29 (Identifier)
 
 
 state 7
@@ -278,17 +279,20 @@ state 15
 
    10 Decl: Identifier '=' . Expr ';'
 
-    '{'  shift, and go to state 18
+    T_Identifier  shift, and go to state 6
+    '{'           shift, and go to state 18
 
-    Function  go to state 19
-    Expr      go to state 20
+    Function    go to state 19
+    Call        go to state 20
+    Expr        go to state 21
+    Identifier  go to state 22
 
 
 state 16
 
     6 ImportLoc: ImportLoc "." . T_Identifier
 
-    T_Identifier  shift, and go to state 21
+    T_Identifier  shift, and go to state 23
 
 
 state 17
@@ -297,7 +301,7 @@ state 17
 
     T_Identifier  shift, and go to state 11
 
-    ImportLoc  go to state 22
+    ImportLoc  go to state 24
 
 
 state 18
@@ -305,44 +309,61 @@ state 18
    22 Function: '{' . Stmts '}'
    23         | '{' . '|' PramList '|' Stmts '}'
 
-    ';'  shift, and go to state 23
-    'a'  shift, and go to state 24
-    'b'  shift, and go to state 25
-    'c'  shift, and go to state 26
-    '{'  shift, and go to state 18
-    '|'  shift, and go to state 27
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+    '|'           shift, and go to state 29
 
-    Stmt       go to state 28
-    Stmts      go to state 29
-    IfStmt     go to state 30
-    WhileStmt  go to state 31
-    ForStmt    go to state 32
-    Function   go to state 33
-    Expr       go to state 34
+    Stmt        go to state 30
+    Stmts       go to state 31
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
 
 
 state 19
 
-   26 Expr: Function .
+   27 Expr: Function .
 
-    $default  reduce using rule 26 (Expr)
+    $default  reduce using rule 27 (Expr)
 
 
 state 20
 
-   10 Decl: Identifier '=' Expr . ';'
+   28 Expr: Call .
 
-    ';'  shift, and go to state 35
+    $default  reduce using rule 28 (Expr)
 
 
 state 21
+
+   10 Decl: Identifier '=' Expr . ';'
+
+    ';'  shift, and go to state 37
+
+
+state 22
+
+   26 Call: Identifier . '(' PramList ')'
+
+    '('  shift, and go to state 38
+
+
+state 23
 
     6 ImportLoc: ImportLoc "." T_Identifier .
 
     $default  reduce using rule 6 (ImportLoc)
 
 
-state 22
+state 24
 
     5 Import: T_from ImportLoc T_import ImportLoc .
     6 ImportLoc: ImportLoc . "." T_Identifier
@@ -352,209 +373,388 @@ state 22
     $default  reduce using rule 5 (Import)
 
 
-state 23
+state 25
+
+   19 IfStmt: T_if . '(' Expr ')' Stmt
+
+    '('  shift, and go to state 39
+
+
+state 26
+
+   20 WhileStmt: T_while . '(' Expr ')' Stmt
+
+    '('  shift, and go to state 40
+
+
+state 27
+
+   21 ForStmt: T_for . '(' Expr ')' Stmt
+
+    '('  shift, and go to state 41
+
+
+state 28
 
    11 Stmt: ';' .
 
     $default  reduce using rule 11 (Stmt)
 
 
-state 24
-
-   19 IfStmt: 'a' .
-
-    $default  reduce using rule 19 (IfStmt)
-
-
-state 25
-
-   20 WhileStmt: 'b' .
-
-    $default  reduce using rule 20 (WhileStmt)
-
-
-state 26
-
-   21 ForStmt: 'c' .
-
-    $default  reduce using rule 21 (ForStmt)
-
-
-state 27
+state 29
 
    23 Function: '{' '|' . PramList '|' Stmts '}'
 
     T_Identifier  shift, and go to state 6
 
-    PramList    go to state 36
-    Identifier  go to state 37
+    PramList    go to state 42
+    Identifier  go to state 43
 
 
-state 28
+state 30
 
    18 Stmts: Stmt .
 
     $default  reduce using rule 18 (Stmts)
 
 
-state 29
+state 31
 
    17 Stmts: Stmts . Stmt
    22 Function: '{' Stmts . '}'
 
-    ';'  shift, and go to state 23
-    'a'  shift, and go to state 24
-    'b'  shift, and go to state 25
-    'c'  shift, and go to state 26
-    '{'  shift, and go to state 18
-    '}'  shift, and go to state 38
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+    '}'           shift, and go to state 44
 
-    Stmt       go to state 39
-    IfStmt     go to state 30
-    WhileStmt  go to state 31
-    ForStmt    go to state 32
-    Function   go to state 33
-    Expr       go to state 34
+    Stmt        go to state 45
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
 
 
-state 30
+state 32
 
    14 Stmt: IfStmt .
 
     $default  reduce using rule 14 (Stmt)
 
 
-state 31
+state 33
 
    15 Stmt: WhileStmt .
 
     $default  reduce using rule 15 (Stmt)
 
 
-state 32
+state 34
 
    16 Stmt: ForStmt .
 
     $default  reduce using rule 16 (Stmt)
 
 
-state 33
+state 35
 
    13 Stmt: Function .
-   26 Expr: Function .
+   27 Expr: Function .
 
     ';'       reduce using rule 13 (Stmt)
-    ';'       [reduce using rule 26 (Expr)]
+    ';'       [reduce using rule 27 (Expr)]
     $default  reduce using rule 13 (Stmt)
 
 
-state 34
+state 36
 
    12 Stmt: Expr . ';'
 
-    ';'  shift, and go to state 40
+    ';'  shift, and go to state 46
 
 
-state 35
+state 37
 
    10 Decl: Identifier '=' Expr ';' .
 
     $default  reduce using rule 10 (Decl)
 
 
-state 36
+state 38
+
+   26 Call: Identifier '(' . PramList ')'
+
+    T_Identifier  shift, and go to state 6
+
+    PramList    go to state 47
+    Identifier  go to state 43
+
+
+state 39
+
+   19 IfStmt: T_if '(' . Expr ')' Stmt
+
+    T_Identifier  shift, and go to state 6
+    '{'           shift, and go to state 18
+
+    Function    go to state 19
+    Call        go to state 20
+    Expr        go to state 48
+    Identifier  go to state 22
+
+
+state 40
+
+   20 WhileStmt: T_while '(' . Expr ')' Stmt
+
+    T_Identifier  shift, and go to state 6
+    '{'           shift, and go to state 18
+
+    Function    go to state 19
+    Call        go to state 20
+    Expr        go to state 49
+    Identifier  go to state 22
+
+
+state 41
+
+   21 ForStmt: T_for '(' . Expr ')' Stmt
+
+    T_Identifier  shift, and go to state 6
+    '{'           shift, and go to state 18
+
+    Function    go to state 19
+    Call        go to state 20
+    Expr        go to state 50
+    Identifier  go to state 22
+
+
+state 42
 
    23 Function: '{' '|' PramList . '|' Stmts '}'
    24 PramList: PramList . ',' Identifier
 
-    '|'  shift, and go to state 41
-    ','  shift, and go to state 42
+    '|'  shift, and go to state 51
+    ','  shift, and go to state 52
 
 
-state 37
+state 43
 
    25 PramList: Identifier .
 
     $default  reduce using rule 25 (PramList)
 
 
-state 38
+state 44
 
    22 Function: '{' Stmts '}' .
 
     $default  reduce using rule 22 (Function)
 
 
-state 39
+state 45
 
    17 Stmts: Stmts Stmt .
 
     $default  reduce using rule 17 (Stmts)
 
 
-state 40
+state 46
 
    12 Stmt: Expr ';' .
 
     $default  reduce using rule 12 (Stmt)
 
 
-state 41
+state 47
+
+   24 PramList: PramList . ',' Identifier
+   26 Call: Identifier '(' PramList . ')'
+
+    ')'  shift, and go to state 53
+    ','  shift, and go to state 52
+
+
+state 48
+
+   19 IfStmt: T_if '(' Expr . ')' Stmt
+
+    ')'  shift, and go to state 54
+
+
+state 49
+
+   20 WhileStmt: T_while '(' Expr . ')' Stmt
+
+    ')'  shift, and go to state 55
+
+
+state 50
+
+   21 ForStmt: T_for '(' Expr . ')' Stmt
+
+    ')'  shift, and go to state 56
+
+
+state 51
 
    23 Function: '{' '|' PramList '|' . Stmts '}'
 
-    ';'  shift, and go to state 23
-    'a'  shift, and go to state 24
-    'b'  shift, and go to state 25
-    'c'  shift, and go to state 26
-    '{'  shift, and go to state 18
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
 
-    Stmt       go to state 28
-    Stmts      go to state 43
-    IfStmt     go to state 30
-    WhileStmt  go to state 31
-    ForStmt    go to state 32
-    Function   go to state 33
-    Expr       go to state 34
+    Stmt        go to state 30
+    Stmts       go to state 57
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
 
 
-state 42
+state 52
 
    24 PramList: PramList ',' . Identifier
 
     T_Identifier  shift, and go to state 6
 
-    Identifier  go to state 44
+    Identifier  go to state 58
 
 
-state 43
+state 53
+
+   26 Call: Identifier '(' PramList ')' .
+
+    $default  reduce using rule 26 (Call)
+
+
+state 54
+
+   19 IfStmt: T_if '(' Expr ')' . Stmt
+
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+
+    Stmt        go to state 59
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
+
+
+state 55
+
+   20 WhileStmt: T_while '(' Expr ')' . Stmt
+
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+
+    Stmt        go to state 60
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
+
+
+state 56
+
+   21 ForStmt: T_for '(' Expr ')' . Stmt
+
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+
+    Stmt        go to state 61
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
+
+
+state 57
 
    17 Stmts: Stmts . Stmt
    23 Function: '{' '|' PramList '|' Stmts . '}'
 
-    ';'  shift, and go to state 23
-    'a'  shift, and go to state 24
-    'b'  shift, and go to state 25
-    'c'  shift, and go to state 26
-    '{'  shift, and go to state 18
-    '}'  shift, and go to state 45
+    T_if          shift, and go to state 25
+    T_while       shift, and go to state 26
+    T_for         shift, and go to state 27
+    T_Identifier  shift, and go to state 6
+    ';'           shift, and go to state 28
+    '{'           shift, and go to state 18
+    '}'           shift, and go to state 62
 
-    Stmt       go to state 39
-    IfStmt     go to state 30
-    WhileStmt  go to state 31
-    ForStmt    go to state 32
-    Function   go to state 33
-    Expr       go to state 34
+    Stmt        go to state 45
+    IfStmt      go to state 32
+    WhileStmt   go to state 33
+    ForStmt     go to state 34
+    Function    go to state 35
+    Call        go to state 20
+    Expr        go to state 36
+    Identifier  go to state 22
 
 
-state 44
+state 58
 
    24 PramList: PramList ',' Identifier .
 
     $default  reduce using rule 24 (PramList)
 
 
-state 45
+state 59
+
+   19 IfStmt: T_if '(' Expr ')' Stmt .
+
+    $default  reduce using rule 19 (IfStmt)
+
+
+state 60
+
+   20 WhileStmt: T_while '(' Expr ')' Stmt .
+
+    $default  reduce using rule 20 (WhileStmt)
+
+
+state 61
+
+   21 ForStmt: T_for '(' Expr ')' Stmt .
+
+    $default  reduce using rule 21 (ForStmt)
+
+
+state 62
 
    23 Function: '{' '|' PramList '|' Stmts '}' .
 

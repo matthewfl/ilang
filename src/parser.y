@@ -76,11 +76,16 @@ Stmts		:	Stmts Stmt
 		|	Stmt
 		;
 
-IfStmt:'a';
-WhileStmt:'b';
-ForStmt:'c';
+IfStmt		:	T_if '(' Expr ')' Stmt 		{}
+		;
 
-Function	:	'{' Stmts '}'		{}
+WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
+		;
+
+ForStmt		:	T_for '(' Expr ')' Stmt		{}
+		;
+
+Function	:	'{' Stmts '}'			{}
 		|	'{' '|' PramList '|' Stmts '}'	{}
 		;
 
@@ -88,17 +93,20 @@ PramList	:	PramList ',' Identifier		{}
 		|	Identifier			{}
 		;
 
+Call		:	Identifier '(' PramList ')'	{}
+
 ExprList	:	ExprList Expr			{}
 		|	Expr				{}
 		;	
 	
 Expr		:	Function			{}
-		
+		|	Call
 		;
 
 LValue		:	Identifier			{}
 		|	Expr '.' Identifier		{}
 		|	Expr '[' Expr ']'		{}
+		;
 
 Identifier	:	T_Identifier			{cout << $1 << endl; }
 		;
