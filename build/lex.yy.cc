@@ -548,9 +548,9 @@ static yyconst flex_int16_t yy_chk[116] =
 
 static yyconst flex_int16_t yy_rule_linenum[23] =
     {   0,
-       28,   29,   30,   31,   33,   34,   35,   36,   39,   40,
-       41,   42,   43,   44,   46,   47,   48,   49,   50,   51,
-       53,   57
+       31,   32,   33,   34,   36,   37,   38,   39,   42,   43,
+       44,   45,   46,   47,   49,   50,   51,   52,   53,   54,
+       56,   60
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -562,7 +562,10 @@ static yyconst flex_int16_t yy_rule_linenum[23] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "src/scanner.l"
 #line 2 "src/scanner.l"
-
+// only here for the union
+#include <string>
+#include <list>
+#include "parserTree.h"
 
 #include "parser.tab.hh"
 #include "string.h"
@@ -575,7 +578,7 @@ using namespace std;
 #include <stdlib.h>
 
 
-#line 579 "build/lex.yy.cc"
+#line 582 "build/lex.yy.cc"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -886,10 +889,10 @@ YY_DECL
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [7.0] user's declarations go here */
-#line 26 "src/scanner.l"
+#line 29 "src/scanner.l"
 
 
-#line 893 "build/lex.yy.cc"
+#line 896 "build/lex.yy.cc"
 
     yylval = yylval_param;
 
@@ -1009,121 +1012,121 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 28 "src/scanner.l"
+#line 31 "src/scanner.l"
 {;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "src/scanner.l"
+#line 32 "src/scanner.l"
 {;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "src/scanner.l"
+#line 33 "src/scanner.l"
 {;}
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 31 "src/scanner.l"
+#line 34 "src/scanner.l"
 {;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "src/scanner.l"
+#line 36 "src/scanner.l"
 {;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "src/scanner.l"
+#line 37 "src/scanner.l"
 {BEGIN(COMMENT);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "src/scanner.l"
+#line 38 "src/scanner.l"
 {BEGIN(0);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "src/scanner.l"
+#line 39 "src/scanner.l"
 {;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 39 "src/scanner.l"
+#line 42 "src/scanner.l"
 { return T_import; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 40 "src/scanner.l"
+#line 43 "src/scanner.l"
 { return T_from; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 41 "src/scanner.l"
+#line 44 "src/scanner.l"
 { return T_as; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 42 "src/scanner.l"
+#line 45 "src/scanner.l"
 { return T_if; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "src/scanner.l"
+#line 46 "src/scanner.l"
 { return T_while; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "src/scanner.l"
+#line 47 "src/scanner.l"
 { return T_for; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 46 "src/scanner.l"
+#line 49 "src/scanner.l"
 { yylval->count=1; return T_break; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 47 "src/scanner.l"
+#line 50 "src/scanner.l"
 { yylval->count=1; return T_return; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 48 "src/scanner.l"
+#line 51 "src/scanner.l"
 { yylval->count=1; return T_continue; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 49 "src/scanner.l"
+#line 52 "src/scanner.l"
 { yylval->count = atoi(yytext+5); return T_break; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 50 "src/scanner.l"
+#line 53 "src/scanner.l"
 { yylval->count = atoi(yytext+6); return T_return; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 51 "src/scanner.l"
+#line 54 "src/scanner.l"
 { yylval->count = atoi(yytext+8); return T_continue; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 53 "src/scanner.l"
+#line 56 "src/scanner.l"
 { return yytext[0]; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 57 "src/scanner.l"
+#line 60 "src/scanner.l"
 { strcpy(yylval->Identifier, yytext); return T_Identifier; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 61 "src/scanner.l"
+#line 64 "src/scanner.l"
 ECHO;
 	YY_BREAK
-#line 1127 "build/lex.yy.cc"
+#line 1130 "build/lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -2444,7 +2447,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 /* %ok-for-header */
 
-#line 61 "src/scanner.l"
+#line 64 "src/scanner.l"
 
 
 

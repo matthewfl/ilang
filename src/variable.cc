@@ -1,4 +1,5 @@
 #include "variable.h"
+#include <iostream>
 
 using namespace std;
 
@@ -6,29 +7,39 @@ namespace ilang {
   map<string, Variable_modifier*> ilang_Variable_modifier_list;
   
   bool Variable::Check (boost::any a) {
-    for(list<Variable_modifier*>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
+    for(list<Variable_modifier*>::iterator it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       if(!(*it)->Check(a))
 	return false;
     }
     return true;
+  }
+  Variable::Variable(string name, list<string> modifiers) {
+    Name = name;
+    for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
+      Variable_modifier *m = ilang_Variable_modifier_list[*it];
+      if(!m) 
+	cerr << "Variable modifier "<<*it<<" not found\n";
+      else
+	Modifiers.push_back(m);
+    }
   }
 }
 
 
 namespace {
   using namespace ilang;
-  class Int_var_type : public Variable_modifier {
+  class Int_var_type : public ilang::Variable_modifier {
   public:
     bool Check (const boost::any &a) {
       return true;
     }
   };
-  //ILANG_VARIABLE_MODIFIER(int, Int_var_type)
-  class String_var_type : public Variable_modifier {
+  ILANG_VARIABLE_MODIFIER(int, Int_var_type)
+  class String_var_type : public ilang::Variable_modifier {
   public:
     bool Check (const boost::any &a) {
       return false;
     }
   };
-  //ILANG_VARIABLE_MODIFIER(string, String_var_type)
+  ILANG_VARIABLE_MODIFIER(string, String_var_type)
 }

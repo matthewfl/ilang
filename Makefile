@@ -41,3 +41,22 @@ depend:
 
 
 # DO NOT DELETE
+
+src/main.o: include/parser.h /usr/include/stdio.h /usr/include/features.h
+src/main.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+src/main.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+src/main.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+src/main.o: /usr/include/libio.h /usr/include/_G_config.h
+src/main.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+src/main.o: /usr/include/bits/sys_errlist.h /usr/include/string.h
+src/main.o: /usr/include/xlocale.h
+src/parserTree.o: include/ilang/parserTree.h
+src/import.o: include/ilang/import.h
+src/parser.o: include/parser.h /usr/include/stdio.h /usr/include/features.h
+src/parser.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+src/parser.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+src/parser.o: /usr/include/bits/types.h /usr/include/bits/typesizes.h
+src/parser.o: /usr/include/libio.h /usr/include/_G_config.h
+src/parser.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
+src/parser.o: /usr/include/bits/sys_errlist.h
+src/variable.o: include/ilang/variable.h

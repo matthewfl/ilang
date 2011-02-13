@@ -1,5 +1,8 @@
 %{
-
+// only here for the union
+#include <string>
+#include <list>
+#include "parserTree.h"
 
 #include "parser.tab.hh"
 #include "string.h"

@@ -1,21 +1,15 @@
 #ifndef _ilang_parserTree
 #define _ilang_parserTree
 
-#include <deque>
+#include <list>
+#include <string>
 
 namespace ilang {
   namespace parserNode {
-    template <typename T> class List {
-    private:
-      std::deque<T*> holder;
-    public:
-      List(T* first) { holder.push_back(first); }
-      
-    };
-
+    using std::list;
     class Node {
     public:
-      virtual void Run();
+      virtual void Run()=0;
     };
 
     class Head {
@@ -23,20 +17,35 @@ namespace ilang {
     };
     
     class IfStmt : public Node {
-    
+    public:
+      IfStmt();
+      void Run();
     };
     class WhileStmt : public Node {
-    
+    public:
+      WhileStmt();
+      void Run();
     };
     class ForStmt : public Node {
-    
+    public:
+      ForStmt();
+      void Run();
     };
     
     class Function : public Node {
-      
+    public:
+      Function();
+      void Run();
+      void Call();
     };
     class Variable : public Node {
-      
+    public:
+      void Run();
+    };
+    class Call : public Node {
+    public:
+      Call();
+      void Run();
     };
   }
 }

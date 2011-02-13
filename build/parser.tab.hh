@@ -58,15 +58,18 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 31 "src/parser.y"
+#line 34 "src/parser.y"
 
   char Identifier[40];
   int count;
+  std::list<std::string> *string_list;
+  std::list<ilang::parserNode::Node*> *node_list;
+  ilang::parserNode::Node *node;
 
 
 
 /* Line 1685 of yacc.c  */
-#line 70 "build/parser.tab.hh"
+#line 73 "build/parser.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

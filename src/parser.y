@@ -7,7 +7,10 @@
 #include "parser.tab.hh"
 
 using namespace ilang;
+using namespace ilang::parserNode;
 #include <iostream>
+#include <string>
+#include <list>
 using namespace std;
 
 void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
@@ -31,6 +34,9 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %union {
   char Identifier[40];
   int count;
+  std::list<std::string> *string_list;
+  std::list<ilang::parserNode::Node*> *node_list;
+  ilang::parserNode::Node *node;
 }
 
 %token T_import T_from T_as T_if T_while T_for
@@ -38,6 +44,11 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %token <Identifier> T_Identifier
 %token <count> T_break T_return T_continue
+
+%type <string_list> ModifierList
+%type <Identifier> Identifier
+%type <node> Function
+%type <node_list> Stmts
 
 
 %%
@@ -61,7 +72,15 @@ DeclList	:	DeclList Decl 			{}
 		|	Decl				{}
 		;
 
-Decl		:	Identifier '=' Expr ';'		{}
+Decl		:	Variable '=' Expr ';'		{}
+		;
+
+Variable	:	Identifier			{}
+		;
+
+ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($1); }
+		|	Identifier			{($$ = new list<string>)->push_back($1); }
+		|					{ $$ = new list<string>; }
 		;
 
 Stmt		:	';'
@@ -72,9 +91,6 @@ Stmt		:	';'
 		|	ForStmt
 		;
 
-Stmts		:	Stmts Stmt
-		|	Stmt
-		;
 
 IfStmt		:	T_if '(' Expr ')' Stmt 		{}
 		;
@@ -85,9 +101,14 @@ WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
 ForStmt		:	T_for '(' Expr ')' Stmt		{}
 		;
 
-Function	:	'{' Stmts '}'			{}
-		|	'{' '|' PramList '|' Stmts '}'	{}
+Function	:	'{' Stmts '}'			{ $$ = new Function; }
+		|	'{' '|' PramList '|' Stmts '}'	{ $$ = new Function; }
 		;
+
+Stmts           :       Stmts Stmt                      { ($$=$1); }
+                |       Stmt                            { ($$ = new std::list<Node*>); }
+                ;
+
 
 PramList	:	PramList ',' Identifier		{}
 		|	Identifier			{}
@@ -108,7 +129,7 @@ LValue		:	Identifier			{}
 		|	Expr '[' Expr ']'		{}
 		;
 
-Identifier	:	T_Identifier			{cout << $1 << endl; }
+Identifier	:	T_Identifier			{ }
 		;
 
 %%

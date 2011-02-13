@@ -9,7 +9,7 @@
 namespace ilang {
   class Variable_modifier {
   public:
-    virtual bool Check(const boost::any&);
+    virtual bool Check(const boost::any&)=0;
   };
 
   extern std::map<std::string, Variable_modifier*> ilang_Variable_modifier_list;
@@ -17,8 +17,11 @@ namespace ilang {
 
   class Variable {
   private:
-    std::list<Variable_modifier*> modifiers;
+    std::list<Variable_modifier*> Modifiers;
+    std::string Name;
     bool Check (boost::any);
+  public:
+    Variable (std::string name, std::list<std::string> modifiers);
   };
   
   
@@ -29,7 +32,7 @@ namespace ilang {
   namespace { struct _ILANG_VAR_MOD_##name {				\
     _ILANG_VAR_MOD_##name () {						\
       ::ilang::ilang_Variable_modifier_list[ #name ] = new obj ;	\
-    } _ILANG_VAR_MOD_##name##_run;					\
+    }} _ILANG_VAR_MOD_##name##_run;					\
   }
 
  
