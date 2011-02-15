@@ -58,7 +58,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1685 of yacc.c  */
-#line 34 "src/parser.y"
+#line 35 "src/parser.y"
 
   char Identifier[40];
   int count;

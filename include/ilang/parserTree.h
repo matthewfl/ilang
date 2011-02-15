@@ -5,6 +5,7 @@
 #include <string>
 
 namespace ilang {
+  class Variable;
   namespace parserNode {
     using std::list;
     class Node {
@@ -14,6 +15,14 @@ namespace ilang {
 
     class Head {
       
+    };
+
+
+    class Expression : public Node {
+    };
+
+    class Value : public Node {
+    
     };
     
     class IfStmt : public Node {
@@ -32,19 +41,31 @@ namespace ilang {
       void Run();
     };
     
-    class Function : public Node {
+    class Function : public Value {
     public:
       Function();
       void Run();
       void Call();
     };
     class Variable : public Node {
+    private:
+      std::string name;
     public:
+      Variable (std::string n, std::list<std::string> *modifiers);
       void Run();
+      void Set(ilang::Variable *var);
+      ilang::Variable Get();
     };
     class Call : public Node {
     public:
       Call();
+      void Run();
+    };
+
+    
+    class AssignExpr : public Expression {
+    public:
+      AssignExpr (Variable *target, Value *value);
       void Run();
     };
   }

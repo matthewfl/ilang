@@ -1,6 +1,7 @@
-main = {
+int main = {
         /*
                 print("Test");
         */
         
+        ;
 };

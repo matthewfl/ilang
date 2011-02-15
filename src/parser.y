@@ -31,6 +31,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %debug
 %error-verbose
 
+
 %union {
   char Identifier[40];
   int count;
@@ -47,7 +48,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList
 %type <Identifier> Identifier
-%type <node> Function
+%type <node> Function Variable Decl Expr
 %type <node_list> Stmts
 
 
@@ -72,15 +73,16 @@ DeclList	:	DeclList Decl 			{}
 		|	Decl				{}
 		;
 
-Decl		:	Variable '=' Expr ';'		{}
+Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		;
 
-Variable	:	Identifier			{}
+Variable	:	Identifier			{ $$ = new Variable(std::string($1), new list<string>); }
+		|	ModifierList Identifier		{ $$ = new Variable(std::string($2), $1); }
 		;
 
-ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($1); }
-		|	Identifier			{($$ = new list<string>)->push_back($1); }
-		|					{ $$ = new list<string>; }
+
+ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($2); }
+		|	Identifier			{ ($$ = new list<string>)->push_back($1); }
 		;
 
 Stmt		:	';'
