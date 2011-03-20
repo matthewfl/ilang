@@ -6,7 +6,7 @@
 #include "parserTree.h"
 #include "parser.tab.hh"
 
-using namespace ilang;
+//using namespace ilang; // adding this in cause some conflicts with names
 using namespace ilang::parserNode;
 #include <iostream>
 #include <string>
@@ -35,6 +35,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %union {
   char Identifier[40];
   int count;
+  char *string;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
   ilang::parserNode::Node *node;
@@ -45,11 +46,12 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %token <Identifier> T_Identifier
 %token <count> T_break T_return T_continue
+%token <string> T_StringConst
 
-%type <string_list> ModifierList
+%type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable Decl Expr
-%type <node_list> Stmts
+%type <node> Function Variable Decl Expr Call
+%type <node_list> Stmts PramList
 
 
 %%
@@ -76,13 +78,17 @@ DeclList	:	DeclList Decl 			{}
 Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		;
 
-Variable	:	Identifier			{ $$ = new Variable(std::string($1), new list<string>); }
-		|	ModifierList Identifier		{ $$ = new Variable(std::string($2), $1); }
+Variable	:	AccessList			{ $$ = new Variable($1, new list<string>); }
+		|	ModifierList AccessList		{ $$ = new Variable($2, $1); }
 		;
 
 
 ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($2); }
 		|	Identifier			{ ($$ = new list<string>)->push_back($1); }
+		;
+
+AccessList	:	AccessList '.' Identifier	{ ($$ = $1)->push_back($3); }
+		|	Identifier			{ ($$ = new list<string>)->push_back($1);}
 		;
 
 Stmt		:	';'
@@ -103,7 +109,8 @@ WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
 ForStmt		:	T_for '(' Expr ')' Stmt		{}
 		;
 
-Function	:	'{' Stmts '}'			{ $$ = new Function; }
+Function	:	'{' '}'				{ $$ = new Function; }
+		|	'{' Stmts '}'			{ $$ = new Function; }
 		|	'{' '|' PramList '|' Stmts '}'	{ $$ = new Function; }
 		;
 
@@ -112,11 +119,11 @@ Stmts           :       Stmts Stmt                      { ($$=$1); }
                 ;
 
 
-PramList	:	PramList ',' Identifier		{}
-		|	Identifier			{}
+PramList	:	PramList ',' Expr		{ ($$=$1)->push_back($3); }
+		|	Expr				{ ($$ = new std::list<Node*>)->push_back($1); }
 		;
 
-Call		:	Identifier '(' PramList ')'	{}
+Call		:	Variable '(' PramList ')'	{ $$ = new Call(dynamic_cast<Variable*>($1)); }
 
 ExprList	:	ExprList Expr			{}
 		|	Expr				{}
@@ -124,6 +131,8 @@ ExprList	:	ExprList Expr			{}
 	
 Expr		:	Function			{}
 		|	Call
+		|	Variable
+		|	T_StringConst			{ $$ = new StringConst($1); }
 		;
 
 LValue		:	Identifier			{}

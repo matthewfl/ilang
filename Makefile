@@ -1,4 +1,4 @@
-TARGET= ilang
+TARGET= i
 
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc
 LIBS=-lfl
@@ -39,6 +39,8 @@ clean:
 depend:
 	makedepend -- $(CXXFLAGS) -- $(SRCSD)
 
+test: $(TARGET)
+	./i test.i
 
 # DO NOT DELETE
 
@@ -50,7 +52,7 @@ src/main.o: /usr/include/libio.h /usr/include/_G_config.h
 src/main.o: /usr/include/wchar.h /usr/include/bits/stdio_lim.h
 src/main.o: /usr/include/bits/sys_errlist.h /usr/include/string.h
 src/main.o: /usr/include/xlocale.h
-src/parserTree.o: include/ilang/parserTree.h
+src/parserTree.o: include/ilang/parserTree.h include/ilang/variable.h
 src/import.o: include/ilang/import.h
 src/parser.o: include/parser.h /usr/include/stdio.h /usr/include/features.h
 src/parser.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h

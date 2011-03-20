@@ -59,7 +59,7 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 
 {IDENTIFIER}		{ strcpy(yylval->Identifier, yytext); return T_Identifier; }
 
-
+\"[^\n]*\"		{ int len = strlen(yytext); yylval->string = new char[(len-1)]; strncpy(yylval->string, yytext+1, len-2); yylval->string[len-2]='\0'; return T_StringConst; }
 
 %%
 

@@ -5,11 +5,15 @@ using namespace std;
 
 namespace ilang {
   namespace parserNode {
-    void Function::Run() {}
+    StringConst::StringConst(char *str) :string(str){
+      cout << string << endl;
+    }
+    RunReturn StringConst::Run() {}
+    RunReturn Function::Run() {}
     void Function::Call() {}
-    void IfStmt::Run() {}
-    void WhileStmt::Run() {}
-    void ForStmt::Run() {}
+    RunReturn IfStmt::Run() {}
+    RunReturn WhileStmt::Run() {}
+    RunReturn ForStmt::Run() {}
 
 
 
@@ -27,26 +31,28 @@ namespace ilang {
       cout << "\t\t\tfunction constructed\n";
       
     }
-    Variable::Variable (string n, list<string> *modifiers):
+    Variable::Variable (list<string> *n, list<string> *modifiers):
       name(n) {
-      cout << "\t\t\t" << name << endl;
+      //cout << "\t\t\t" << name << "\n";
     }
-    void Variable::Run () {
-      cout << "\t\t\tSetting variable: " << name << endl;
+    RunReturn Variable::Run () {
+      cout << "\t\t\tSetting variable: " << name->front() << endl;
     }
     void Variable::Set (ilang::Variable *var) {
       
     }
-    Call::Call () {
-      
+    Call::Call (Variable *call):
+      calling(call) {
+      cout << "\n\t\t\tCalling function \n";
     }
-    void Call::Run() {
+    RunReturn Call::Run() {
+      
     }
 
     AssignExpr::AssignExpr (Variable *target, Value *value) {
       target->Run();
     }
-    void AssignExpr::Run () {
+    RunReturn  AssignExpr::Run () {
       //target->Set(value->Run())
     }
   }

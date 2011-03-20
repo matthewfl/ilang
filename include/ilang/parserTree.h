@@ -4,13 +4,18 @@
 #include <list>
 #include <string>
 
+#include <boost/shared_ptr.hpp>
+
+#include "variable.h"
+
 namespace ilang {
-  class Variable;
   namespace parserNode {
     using std::list;
+    using boost::shared_ptr;
+    typedef boost::shared_ptr<Value> RunReturn;
     class Node {
     public:
-      virtual void Run()=0;
+      virtual RunReturn Run()=0;
     };
 
     class Head {
@@ -24,49 +29,64 @@ namespace ilang {
     class Value : public Node {
     
     };
+    class Constant : public Value {
     
+    };
+
+    class StringConst : public Constant {
+    private:
+      char *string;
+    public:
+      StringConst(char *str);
+      RunReturn Run();
+    };
+
+
     class IfStmt : public Node {
     public:
       IfStmt();
-      void Run();
+      RunReturn Run();
     };
     class WhileStmt : public Node {
     public:
       WhileStmt();
-      void Run();
+      RunReturn Run();
     };
     class ForStmt : public Node {
     public:
       ForStmt();
-      void Run();
+      RunReturn  Run();
     };
     
     class Function : public Value {
     public:
       Function();
-      void Run();
+      RunReturn Run();
       void Call();
     };
+
     class Variable : public Node {
     private:
-      std::string name;
+      std::list<std::string> *name;
     public:
-      Variable (std::string n, std::list<std::string> *modifiers);
-      void Run();
+      Variable (std::list<std::string> *n, std::list<std::string> *modifiers);
+      RunReturn Run();
       void Set(ilang::Variable *var);
       ilang::Variable Get();
     };
-    class Call : public Node {
+    class Call : public Value {
+    private:
+      Variable *calling;
     public:
-      Call();
-      void Run();
+      Call(Variable *call);
+      RunReturn Run();
     };
 
     
     class AssignExpr : public Expression {
     public:
       AssignExpr (Variable *target, Value *value);
-      void Run();
+      RunReturn Run();
     };
   }
 }

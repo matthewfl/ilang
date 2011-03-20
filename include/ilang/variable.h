@@ -19,11 +19,14 @@ namespace ilang {
   private:
     std::list<Variable_modifier*> Modifiers;
     std::string Name;
-    bool Check (boost::any);
+    bool Check (boost::any&);
   public:
     Variable (std::string name, std::list<std::string> modifiers);
   };
   
+  class Value {
+    
+  };
   
 
 }

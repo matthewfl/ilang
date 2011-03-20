@@ -6,7 +6,7 @@ using namespace std;
 namespace ilang {
   map<string, Variable_modifier*> ilang_Variable_modifier_list;
   
-  bool Variable::Check (boost::any a) {
+  bool Variable::Check (boost::any &a) {
     for(list<Variable_modifier*>::iterator it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       if(!(*it)->Check(a))
 	return false;

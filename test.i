@@ -1,7 +1,3 @@
-int main = {
-        /*
-                print("Test");
-        */
-        
-        ;
+main = {
+       Print("Test"); 
 };

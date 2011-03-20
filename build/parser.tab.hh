@@ -47,7 +47,8 @@
      T_Identifier = 264,
      T_break = 265,
      T_return = 266,
-     T_continue = 267
+     T_continue = 267,
+     T_StringConst = 268
    };
 #endif
 
@@ -62,6 +63,7 @@ typedef union YYSTYPE
 
   char Identifier[40];
   int count;
+  char *string;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
   ilang::parserNode::Node *node;
@@ -69,7 +71,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 73 "build/parser.tab.hh"
+#line 75 "build/parser.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
