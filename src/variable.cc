@@ -23,6 +23,9 @@ namespace ilang {
 	Modifiers.push_back(m);
     }
   }
+
+  Value::Value(boost::any v): val(v) {}
+  Value::Value(){}
 }
 
 

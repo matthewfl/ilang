@@ -12,14 +12,19 @@ namespace ilang {
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
-    typedef boost::shared_ptr<Value> RunReturn;
+    typedef boost::shared_ptr<ilang::Value> ValueReturn;
     class Node {
     public:
-      virtual RunReturn Run()=0;
+      virtual void Run()=0;
+      void randomsdafasdf(){}
     };
 
     class Head {
-      
+    private:
+      std::list<Node*> *Declars;
+    public:
+      Head(std::list<Node*>*);
+      void Run();
     };
 
 
@@ -27,10 +32,11 @@ namespace ilang {
     };
 
     class Value : public Node {
-    
+    public:
+      virtual ValueReturn GetValue()=0;
     };
     class Constant : public Value {
-    
+      
     };
 
     class StringConst : public Constant {
@@ -38,31 +44,33 @@ namespace ilang {
       char *string;
     public:
       StringConst(char *str);
-      RunReturn Run();
+      void Run();
+      ValueReturn GetValue();
     };
 
 
     class IfStmt : public Node {
     public:
       IfStmt();
-      RunReturn Run();
+      void Run();
     };
     class WhileStmt : public Node {
     public:
       WhileStmt();
-      RunReturn Run();
+      void Run();
     };
     class ForStmt : public Node {
     public:
       ForStmt();
-      RunReturn  Run();
+      void Run();
     };
     
     class Function : public Value {
     public:
       Function();
-      RunReturn Run();
+      void Run();
       void Call();
+      ValueReturn GetValue();
     };
 
     class Variable : public Node {
@@ -70,23 +78,34 @@ namespace ilang {
       std::list<std::string> *name;
     public:
       Variable (std::list<std::string> *n, std::list<std::string> *modifiers);
-      RunReturn Run();
+      void Run();
       void Set(ilang::Variable *var);
       ilang::Variable Get();
     };
     class Call : public Value {
     private:
       Variable *calling;
+    protected:
+      std::list<Node*> *params;
     public:
-      Call(Variable *call);
-      RunReturn Run();
+      Call(Variable *call, std::list<Node*> *args);
+      void Run();
+      ValueReturn GetValue();
+    };
+    class PrintCall : public Call {
+    public:
+      PrintCall(std::list<Node*> *args);
+      ValueReturn GetValue (); // returns null
     };
 
     
     class AssignExpr : public Expression {
+    private:
+      Variable *target;
+      Value *eval;
     public:
       AssignExpr (Variable *target, Value *value);
-      RunReturn Run();
+      void Run();
     };
   }
 }

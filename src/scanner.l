@@ -45,6 +45,7 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 "if"			{ return T_if; }
 "while"			{ return T_while; }
 "for"			{ return T_for; }
+"Print"			{ return T_print; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }

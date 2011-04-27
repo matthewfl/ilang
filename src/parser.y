@@ -41,7 +41,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   ilang::parserNode::Node *node;
 }
 
-%token T_import T_from T_as T_if T_while T_for
+%token T_import T_from T_as T_if T_while T_for T_print
 
 
 %token <Identifier> T_Identifier
@@ -50,13 +50,13 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable Decl Expr Call
-%type <node_list> Stmts PramList
+%type <node> Function Variable Decl Expr Call Stmt
+%type <node_list> Stmts ParamList DeclList ExprList
 
 
 %%
 
-Program		:	Imports DeclList		{ cout << "head"; /*parser_handle.head = new ilang::parserNode::Head($2); */}
+Program		:	Imports DeclList		{ parser_handle->head = new ilang::parserNode::Head($2); }
 		;
 
 Imports		:	Imports Import			{ cout << "import\n"; }
@@ -67,12 +67,12 @@ Import		:	T_import ImportLoc			{}
 		|	T_from	ImportLoc T_import ImportLoc	{}
 		;	
 
-ImportLoc	:	ImportLoc "." T_Identifier 	{}
+ImportLoc	:	ImportLoc '.' T_Identifier 	{}
 		|	T_Identifier			{}
 		;
 
-DeclList	:	DeclList Decl 			{}
-		|	Decl				{}
+DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }
+		|	Decl				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
 Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
@@ -111,28 +111,30 @@ ForStmt		:	T_for '(' Expr ')' Stmt		{}
 
 Function	:	'{' '}'				{ $$ = new Function; }
 		|	'{' Stmts '}'			{ $$ = new Function; }
-		|	'{' '|' PramList '|' Stmts '}'	{ $$ = new Function; }
+		|	'{' '|' ParamList '|' Stmts '}'	{ $$ = new Function; }
 		;
 
-Stmts           :       Stmts Stmt                      { ($$=$1); }
-                |       Stmt                            { ($$ = new std::list<Node*>); }
+Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
+                |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }
                 ;
 
 
-PramList	:	PramList ',' Expr		{ ($$=$1)->push_back($3); }
-		|	Expr				{ ($$ = new std::list<Node*>)->push_back($1); }
+ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
+		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
-Call		:	Variable '(' PramList ')'	{ $$ = new Call(dynamic_cast<Variable*>($1)); }
+Call		:	Variable '(' ParamList ')'	{ $$ = new Call(dynamic_cast<Variable*>($1), $3); }
+		|	T_print '(' ParamList ')'	{ $$ = new PrintCall($3); }
 
-ExprList	:	ExprList Expr			{}
-		|	Expr				{}
+ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
+		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
 		;	
 	
 Expr		:	Function			{}
 		|	Call
 		|	Variable
 		|	T_StringConst			{ $$ = new StringConst($1); }
+		|	LValue
 		;
 
 LValue		:	Identifier			{}
@@ -142,5 +144,4 @@ LValue		:	Identifier			{}
 
 Identifier	:	T_Identifier			{ }
 		;
-
 %%

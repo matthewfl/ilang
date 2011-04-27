@@ -44,11 +44,12 @@
      T_if = 261,
      T_while = 262,
      T_for = 263,
-     T_Identifier = 264,
-     T_break = 265,
-     T_return = 266,
-     T_continue = 267,
-     T_StringConst = 268
+     T_print = 264,
+     T_Identifier = 265,
+     T_break = 266,
+     T_return = 267,
+     T_continue = 268,
+     T_StringConst = 269
    };
 #endif
 
@@ -71,7 +72,7 @@ typedef union YYSTYPE
 
 
 /* Line 1685 of yacc.c  */
-#line 75 "build/parser.tab.hh"
+#line 76 "build/parser.tab.hh"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

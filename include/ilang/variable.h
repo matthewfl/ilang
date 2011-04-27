@@ -25,7 +25,12 @@ namespace ilang {
   };
   
   class Value {
-    
+  private:
+    boost::any val;
+    friend class Variable;
+  public:
+    Value (boost::any);
+    Value ();
   };
   
 

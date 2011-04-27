@@ -1,7 +1,6 @@
 Nonterminals useless in grammar
 
    ExprList
-   LValue
 
 
 Terminals unused in grammar
@@ -10,21 +9,23 @@ Terminals unused in grammar
    T_break
    T_return
    T_continue
-   '['
-   ']'
 
 
 Rules useless in grammar
 
-   39 ExprList: ExprList Expr
-   40         | Expr
-
-   41 LValue: Identifier
-   42       | Expr '.' Identifier
-   43       | Expr '[' Expr ']'
+   44 ExprList: ExprList Expr
+   45         | Expr
 
 
-State 43 conflicts: 1 reduce/reduce
+Rules useless in parser due to conflicts
+
+   40 LValue: Identifier
+
+
+State 12 conflicts: 1 shift/reduce
+State 19 conflicts: 1 shift/reduce
+State 32 conflicts: 7 reduce/reduce
+State 47 conflicts: 1 reduce/reduce
 
 
 Grammar
@@ -39,7 +40,7 @@ Grammar
     4 Import: T_import ImportLoc
     5       | T_from ImportLoc T_import ImportLoc
 
-    6 ImportLoc: ImportLoc "." T_Identifier
+    6 ImportLoc: ImportLoc '.' T_Identifier
     7          | T_Identifier
 
     8 DeclList: DeclList Decl
@@ -71,35 +72,41 @@ Grammar
 
    26 Function: '{' '}'
    27         | '{' Stmts '}'
-   28         | '{' '|' PramList '|' Stmts '}'
+   28         | '{' '|' ParamList '|' Stmts '}'
 
    29 Stmts: Stmts Stmt
    30      | Stmt
 
-   31 PramList: PramList ',' Expr
-   32         | Expr
+   31 ParamList: ParamList ',' Expr
+   32          | Expr
 
-   33 Call: Variable '(' PramList ')'
+   33 Call: Variable '(' ParamList ')'
+   34     | T_print '(' ParamList ')'
 
-   34 Expr: Function
-   35     | Call
-   36     | Variable
-   37     | T_StringConst
+   35 Expr: Function
+   36     | Call
+   37     | Variable
+   38     | T_StringConst
+   39     | LValue
 
-   38 Identifier: T_Identifier
+   40 LValue: Identifier
+   41       | Expr '.' Identifier
+   42       | Expr '[' Expr ']'
+
+   43 Identifier: T_Identifier
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'(' (40) 23 24 25 33
-')' (41) 23 24 25 33
+'(' (40) 23 24 25 33 34
+')' (41) 23 24 25 33 34
 ',' (44) 31
-'.' (46) 15
+'.' (46) 6 15 41
 ';' (59) 10 17 18
 '=' (61) 10
-'[' (91)
-']' (93)
+'[' (91) 42
+']' (93) 42
 '{' (123) 26 27 28
 '|' (124) 28
 '}' (125) 26 27 28
@@ -110,12 +117,12 @@ T_as (260)
 T_if (261) 23
 T_while (262) 24
 T_for (263) 25
-T_Identifier (264) 6 7 38
-T_break (265)
-T_return (266)
-T_continue (267)
-T_StringConst (268) 37
-"." (269) 6
+T_print (264) 34
+T_Identifier (265) 6 7 43
+T_break (266)
+T_return (267)
+T_continue (268)
+T_StringConst (269) 38
 
 
 Nonterminals, with rules where they appear
@@ -135,7 +142,7 @@ DeclList (31)
 Decl (32)
     on left: 10, on right: 8 9
 Variable (33)
-    on left: 11 12, on right: 10 33 36
+    on left: 11 12, on right: 10 33 37
 ModifierList (34)
     on left: 13 14, on right: 12 13
 AccessList (35)
@@ -149,17 +156,19 @@ WhileStmt (38)
 ForStmt (39)
     on left: 25, on right: 22
 Function (40)
-    on left: 26 27 28, on right: 19 34
+    on left: 26 27 28, on right: 19 35
 Stmts (41)
     on left: 29 30, on right: 27 28 29
-PramList (42)
-    on left: 31 32, on right: 28 31 33
+ParamList (42)
+    on left: 31 32, on right: 28 31 33 34
 Call (43)
-    on left: 33, on right: 35
+    on left: 33 34, on right: 36
 Expr (44)
-    on left: 34 35 36 37, on right: 10 18 23 24 25 31 32
-Identifier (45)
-    on left: 38, on right: 13 14 15 16
+    on left: 35 36 37 38 39, on right: 10 18 23 24 25 31 32 41 42
+LValue (45)
+    on left: 40 41 42, on right: 39
+Identifier (46)
+    on left: 43, on right: 13 14 15 16 40 41
 
 
 state 0
@@ -224,9 +233,9 @@ state 5
 
 state 6
 
-   38 Identifier: T_Identifier .
+   43 Identifier: T_Identifier .
 
-    $default  reduce using rule 38 (Identifier)
+    $default  reduce using rule 43 (Identifier)
 
 
 state 7
@@ -284,6 +293,7 @@ state 12
 
     '.'  shift, and go to state 21
 
+    '.'       [reduce using rule 11 (Variable)]
     $default  reduce using rule 11 (Variable)
 
 
@@ -306,9 +316,9 @@ state 14
 state 15
 
     4 Import: T_import ImportLoc .
-    6 ImportLoc: ImportLoc . "." T_Identifier
+    6 ImportLoc: ImportLoc . '.' T_Identifier
 
-    "."  shift, and go to state 22
+    '.'  shift, and go to state 22
 
     $default  reduce using rule 4 (Import)
 
@@ -316,10 +326,10 @@ state 15
 state 16
 
     5 Import: T_from ImportLoc . T_import ImportLoc
-    6 ImportLoc: ImportLoc . "." T_Identifier
+    6 ImportLoc: ImportLoc . '.' T_Identifier
 
     T_import  shift, and go to state 23
-    "."       shift, and go to state 22
+    '.'       shift, and go to state 22
 
 
 state 17
@@ -333,17 +343,19 @@ state 18
 
    10 Decl: Variable '=' . Expr ';'
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    Call          go to state 28
-    Expr          go to state 29
-    Identifier    go to state 13
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 30
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
 state 19
@@ -353,6 +365,7 @@ state 19
 
     '.'  shift, and go to state 21
 
+    '.'       [reduce using rule 12 (Variable)]
     $default  reduce using rule 12 (Variable)
 
 
@@ -371,14 +384,14 @@ state 21
 
     T_Identifier  shift, and go to state 6
 
-    Identifier  go to state 30
+    Identifier  go to state 33
 
 
 state 22
 
-    6 ImportLoc: ImportLoc "." . T_Identifier
+    6 ImportLoc: ImportLoc '.' . T_Identifier
 
-    T_Identifier  shift, and go to state 31
+    T_Identifier  shift, and go to state 34
 
 
 state 23
@@ -387,551 +400,736 @@ state 23
 
     T_Identifier  shift, and go to state 14
 
-    ImportLoc  go to state 32
+    ImportLoc  go to state 35
 
 
 state 24
 
-   37 Expr: T_StringConst .
+   34 Call: T_print . '(' ParamList ')'
 
-    $default  reduce using rule 37 (Expr)
+    '('  shift, and go to state 36
 
 
 state 25
 
-   26 Function: '{' . '}'
-   27         | '{' . Stmts '}'
-   28         | '{' . '|' PramList '|' Stmts '}'
+   38 Expr: T_StringConst .
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-    '}'            shift, and go to state 37
-    '|'            shift, and go to state 38
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 39
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Stmts         go to state 44
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    $default  reduce using rule 38 (Expr)
 
 
 state 26
 
-   33 Call: Variable . '(' PramList ')'
-   36 Expr: Variable .
+   26 Function: '{' . '}'
+   27         | '{' . Stmts '}'
+   28         | '{' . '|' ParamList '|' Stmts '}'
 
-    '('  shift, and go to state 46
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+    '}'            shift, and go to state 41
+    '|'            shift, and go to state 42
 
-    $default  reduce using rule 36 (Expr)
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 43
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Stmts         go to state 48
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
 state 27
 
-   34 Expr: Function .
+   33 Call: Variable . '(' ParamList ')'
+   37 Expr: Variable .
 
-    $default  reduce using rule 34 (Expr)
+    '('  shift, and go to state 50
+
+    $default  reduce using rule 37 (Expr)
 
 
 state 28
 
-   35 Expr: Call .
+   35 Expr: Function .
 
     $default  reduce using rule 35 (Expr)
 
 
 state 29
 
-   10 Decl: Variable '=' Expr . ';'
+   36 Expr: Call .
 
-    ';'  shift, and go to state 47
+    $default  reduce using rule 36 (Expr)
 
 
 state 30
+
+   10 Decl: Variable '=' Expr . ';'
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    ';'  shift, and go to state 52
+    '['  shift, and go to state 53
+
+
+state 31
+
+   39 Expr: LValue .
+
+    $default  reduce using rule 39 (Expr)
+
+
+state 32
+
+   14 ModifierList: Identifier .
+   16 AccessList: Identifier .
+   40 LValue: Identifier .
+
+    T_Identifier  reduce using rule 14 (ModifierList)
+    '.'           reduce using rule 16 (AccessList)
+    '.'           [reduce using rule 40 (LValue)]
+    ';'           reduce using rule 16 (AccessList)
+    ';'           [reduce using rule 40 (LValue)]
+    ')'           reduce using rule 16 (AccessList)
+    ')'           [reduce using rule 40 (LValue)]
+    '|'           reduce using rule 16 (AccessList)
+    '|'           [reduce using rule 40 (LValue)]
+    ','           reduce using rule 16 (AccessList)
+    ','           [reduce using rule 40 (LValue)]
+    '['           reduce using rule 16 (AccessList)
+    '['           [reduce using rule 40 (LValue)]
+    ']'           reduce using rule 16 (AccessList)
+    ']'           [reduce using rule 40 (LValue)]
+    $default      reduce using rule 16 (AccessList)
+
+
+state 33
 
    15 AccessList: AccessList '.' Identifier .
 
     $default  reduce using rule 15 (AccessList)
 
 
-state 31
+state 34
 
-    6 ImportLoc: ImportLoc "." T_Identifier .
+    6 ImportLoc: ImportLoc '.' T_Identifier .
 
     $default  reduce using rule 6 (ImportLoc)
 
 
-state 32
+state 35
 
     5 Import: T_from ImportLoc T_import ImportLoc .
-    6 ImportLoc: ImportLoc . "." T_Identifier
+    6 ImportLoc: ImportLoc . '.' T_Identifier
 
-    "."  shift, and go to state 22
+    '.'  shift, and go to state 22
 
     $default  reduce using rule 5 (Import)
 
 
-state 33
+state 36
+
+   34 Call: T_print '(' . ParamList ')'
+
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Function      go to state 28
+    ParamList     go to state 54
+    Call          go to state 29
+    Expr          go to state 55
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 37
 
    23 IfStmt: T_if . '(' Expr ')' Stmt
 
-    '('  shift, and go to state 48
+    '('  shift, and go to state 56
 
 
-state 34
+state 38
 
    24 WhileStmt: T_while . '(' Expr ')' Stmt
 
-    '('  shift, and go to state 49
+    '('  shift, and go to state 57
 
 
-state 35
+state 39
 
    25 ForStmt: T_for . '(' Expr ')' Stmt
 
-    '('  shift, and go to state 50
+    '('  shift, and go to state 58
 
 
-state 36
+state 40
 
    17 Stmt: ';' .
 
     $default  reduce using rule 17 (Stmt)
 
 
-state 37
+state 41
 
    26 Function: '{' '}' .
 
     $default  reduce using rule 26 (Function)
 
 
-state 38
+state 42
 
-   28 Function: '{' '|' . PramList '|' Stmts '}'
+   28 Function: '{' '|' . ParamList '|' Stmts '}'
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    PramList      go to state 51
-    Call          go to state 28
-    Expr          go to state 52
-    Identifier    go to state 13
+    Function      go to state 28
+    ParamList     go to state 59
+    Call          go to state 29
+    Expr          go to state 55
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 39
+state 43
 
    30 Stmts: Stmt .
 
     $default  reduce using rule 30 (Stmts)
 
 
-state 40
+state 44
 
    20 Stmt: IfStmt .
 
     $default  reduce using rule 20 (Stmt)
 
 
-state 41
+state 45
 
    21 Stmt: WhileStmt .
 
     $default  reduce using rule 21 (Stmt)
 
 
-state 42
+state 46
 
    22 Stmt: ForStmt .
 
     $default  reduce using rule 22 (Stmt)
 
 
-state 43
+state 47
 
    19 Stmt: Function .
-   34 Expr: Function .
+   35 Expr: Function .
 
+    '.'       reduce using rule 35 (Expr)
     ';'       reduce using rule 19 (Stmt)
-    ';'       [reduce using rule 34 (Expr)]
+    ';'       [reduce using rule 35 (Expr)]
+    '['       reduce using rule 35 (Expr)
     $default  reduce using rule 19 (Stmt)
 
 
-state 44
+state 48
 
    27 Function: '{' Stmts . '}'
    29 Stmts: Stmts . Stmt
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-    '}'            shift, and go to state 53
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+    '}'            shift, and go to state 60
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Stmt          go to state 54
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    Stmt          go to state 61
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 45
+state 49
 
    18 Stmt: Expr . ';'
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
 
-    ';'  shift, and go to state 55
+    '.'  shift, and go to state 51
+    ';'  shift, and go to state 62
+    '['  shift, and go to state 53
 
 
-state 46
+state 50
 
-   33 Call: Variable '(' . PramList ')'
+   33 Call: Variable '(' . ParamList ')'
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    PramList      go to state 56
-    Call          go to state 28
-    Expr          go to state 52
-    Identifier    go to state 13
+    Function      go to state 28
+    ParamList     go to state 63
+    Call          go to state 29
+    Expr          go to state 55
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 47
+state 51
+
+   41 LValue: Expr '.' . Identifier
+
+    T_Identifier  shift, and go to state 6
+
+    Identifier  go to state 64
+
+
+state 52
 
    10 Decl: Variable '=' Expr ';' .
 
     $default  reduce using rule 10 (Decl)
 
 
-state 48
+state 53
+
+   42 LValue: Expr '[' . Expr ']'
+
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 65
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 54
+
+   31 ParamList: ParamList . ',' Expr
+   34 Call: T_print '(' ParamList . ')'
+
+    ')'  shift, and go to state 66
+    ','  shift, and go to state 67
+
+
+state 55
+
+   32 ParamList: Expr .
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    '['  shift, and go to state 53
+
+    $default  reduce using rule 32 (ParamList)
+
+
+state 56
 
    23 IfStmt: T_if '(' . Expr ')' Stmt
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    Call          go to state 28
-    Expr          go to state 57
-    Identifier    go to state 13
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 68
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 49
+state 57
 
    24 WhileStmt: T_while '(' . Expr ')' Stmt
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    Call          go to state 28
-    Expr          go to state 58
-    Identifier    go to state 13
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 69
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 50
+state 58
 
    25 ForStmt: T_for '(' . Expr ')' Stmt
 
+    T_print        shift, and go to state 24
     T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
 
-    Variable      go to state 26
+    Variable      go to state 27
     ModifierList  go to state 11
     AccessList    go to state 12
-    Function      go to state 27
-    Call          go to state 28
-    Expr          go to state 59
-    Identifier    go to state 13
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 70
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
-state 51
+state 59
 
-   28 Function: '{' '|' PramList . '|' Stmts '}'
-   31 PramList: PramList . ',' Expr
+   28 Function: '{' '|' ParamList . '|' Stmts '}'
+   31 ParamList: ParamList . ',' Expr
 
-    '|'  shift, and go to state 60
-    ','  shift, and go to state 61
-
-
-state 52
-
-   32 PramList: Expr .
-
-    $default  reduce using rule 32 (PramList)
+    '|'  shift, and go to state 71
+    ','  shift, and go to state 67
 
 
-state 53
+state 60
 
    27 Function: '{' Stmts '}' .
 
     $default  reduce using rule 27 (Function)
 
 
-state 54
+state 61
 
    29 Stmts: Stmts Stmt .
 
     $default  reduce using rule 29 (Stmts)
 
 
-state 55
+state 62
 
    18 Stmt: Expr ';' .
 
     $default  reduce using rule 18 (Stmt)
 
 
-state 56
-
-   31 PramList: PramList . ',' Expr
-   33 Call: Variable '(' PramList . ')'
-
-    ')'  shift, and go to state 62
-    ','  shift, and go to state 61
-
-
-state 57
-
-   23 IfStmt: T_if '(' Expr . ')' Stmt
-
-    ')'  shift, and go to state 63
-
-
-state 58
-
-   24 WhileStmt: T_while '(' Expr . ')' Stmt
-
-    ')'  shift, and go to state 64
-
-
-state 59
-
-   25 ForStmt: T_for '(' Expr . ')' Stmt
-
-    ')'  shift, and go to state 65
-
-
-state 60
-
-   28 Function: '{' '|' PramList '|' . Stmts '}'
-
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 39
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Stmts         go to state 66
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
-
-
-state 61
-
-   31 PramList: PramList ',' . Expr
-
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    '{'            shift, and go to state 25
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Function      go to state 27
-    Call          go to state 28
-    Expr          go to state 67
-    Identifier    go to state 13
-
-
-state 62
-
-   33 Call: Variable '(' PramList ')' .
-
-    $default  reduce using rule 33 (Call)
-
-
 state 63
 
-   23 IfStmt: T_if '(' Expr ')' . Stmt
+   31 ParamList: ParamList . ',' Expr
+   33 Call: Variable '(' ParamList . ')'
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 68
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    ')'  shift, and go to state 72
+    ','  shift, and go to state 67
 
 
 state 64
 
-   24 WhileStmt: T_while '(' Expr ')' . Stmt
+   41 LValue: Expr '.' Identifier .
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 69
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    $default  reduce using rule 41 (LValue)
 
 
 state 65
 
-   25 ForStmt: T_for '(' Expr ')' . Stmt
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+   42       | Expr '[' Expr . ']'
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 70
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    '.'  shift, and go to state 51
+    '['  shift, and go to state 53
+    ']'  shift, and go to state 73
 
 
 state 66
 
-   28 Function: '{' '|' PramList '|' Stmts . '}'
-   29 Stmts: Stmts . Stmt
+   34 Call: T_print '(' ParamList ')' .
 
-    T_if           shift, and go to state 33
-    T_while        shift, and go to state 34
-    T_for          shift, and go to state 35
-    T_Identifier   shift, and go to state 6
-    T_StringConst  shift, and go to state 24
-    ';'            shift, and go to state 36
-    '{'            shift, and go to state 25
-    '}'            shift, and go to state 71
-
-    Variable      go to state 26
-    ModifierList  go to state 11
-    AccessList    go to state 12
-    Stmt          go to state 54
-    IfStmt        go to state 40
-    WhileStmt     go to state 41
-    ForStmt       go to state 42
-    Function      go to state 43
-    Call          go to state 28
-    Expr          go to state 45
-    Identifier    go to state 13
+    $default  reduce using rule 34 (Call)
 
 
 state 67
 
-   31 PramList: PramList ',' Expr .
+   31 ParamList: ParamList ',' . Expr
 
-    $default  reduce using rule 31 (PramList)
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Function      go to state 28
+    Call          go to state 29
+    Expr          go to state 74
+    LValue        go to state 31
+    Identifier    go to state 32
 
 
 state 68
+
+   23 IfStmt: T_if '(' Expr . ')' Stmt
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    ')'  shift, and go to state 75
+    '['  shift, and go to state 53
+
+
+state 69
+
+   24 WhileStmt: T_while '(' Expr . ')' Stmt
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    ')'  shift, and go to state 76
+    '['  shift, and go to state 53
+
+
+state 70
+
+   25 ForStmt: T_for '(' Expr . ')' Stmt
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    ')'  shift, and go to state 77
+    '['  shift, and go to state 53
+
+
+state 71
+
+   28 Function: '{' '|' ParamList '|' . Stmts '}'
+
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 43
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Stmts         go to state 78
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 72
+
+   33 Call: Variable '(' ParamList ')' .
+
+    $default  reduce using rule 33 (Call)
+
+
+state 73
+
+   42 LValue: Expr '[' Expr ']' .
+
+    $default  reduce using rule 42 (LValue)
+
+
+state 74
+
+   31 ParamList: ParamList ',' Expr .
+   41 LValue: Expr . '.' Identifier
+   42       | Expr . '[' Expr ']'
+
+    '.'  shift, and go to state 51
+    '['  shift, and go to state 53
+
+    $default  reduce using rule 31 (ParamList)
+
+
+state 75
+
+   23 IfStmt: T_if '(' Expr ')' . Stmt
+
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 79
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 76
+
+   24 WhileStmt: T_while '(' Expr ')' . Stmt
+
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 80
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 77
+
+   25 ForStmt: T_for '(' Expr ')' . Stmt
+
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 81
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 78
+
+   28 Function: '{' '|' ParamList '|' Stmts . '}'
+   29 Stmts: Stmts . Stmt
+
+    T_if           shift, and go to state 37
+    T_while        shift, and go to state 38
+    T_for          shift, and go to state 39
+    T_print        shift, and go to state 24
+    T_Identifier   shift, and go to state 6
+    T_StringConst  shift, and go to state 25
+    ';'            shift, and go to state 40
+    '{'            shift, and go to state 26
+    '}'            shift, and go to state 82
+
+    Variable      go to state 27
+    ModifierList  go to state 11
+    AccessList    go to state 12
+    Stmt          go to state 61
+    IfStmt        go to state 44
+    WhileStmt     go to state 45
+    ForStmt       go to state 46
+    Function      go to state 47
+    Call          go to state 29
+    Expr          go to state 49
+    LValue        go to state 31
+    Identifier    go to state 32
+
+
+state 79
 
    23 IfStmt: T_if '(' Expr ')' Stmt .
 
     $default  reduce using rule 23 (IfStmt)
 
 
-state 69
+state 80
 
    24 WhileStmt: T_while '(' Expr ')' Stmt .
 
     $default  reduce using rule 24 (WhileStmt)
 
 
-state 70
+state 81
 
    25 ForStmt: T_for '(' Expr ')' Stmt .
 
     $default  reduce using rule 25 (ForStmt)
 
 
-state 71
+state 82
 
-   28 Function: '{' '|' PramList '|' Stmts '}' .
+   28 Function: '{' '|' ParamList '|' Stmts '}' .
 
     $default  reduce using rule 28 (Function)

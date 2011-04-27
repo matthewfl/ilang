@@ -11,7 +11,7 @@ int main (int argc, char **argv) {
   }
   cout << "running file: "<<argv[1]<<endl;
   FILE *f = fopen(argv[1], "r");
-  ilang::parser(f, NULL);
+  ilang::parser(f, NULL);//->Run();
   fclose(f);
   return 0;
 }
