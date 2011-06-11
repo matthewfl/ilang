@@ -20,6 +20,7 @@ namespace ilang {
     std::list<Variable_modifier*> Modifiers;
     std::string Name;
     bool Check (boost::any&);
+    Value *val;
   public:
     Variable (std::string name, std::list<std::string> modifiers);
   };
@@ -31,6 +32,7 @@ namespace ilang {
   public:
     Value (boost::any);
     Value ();
+    void Print();
   };
   
 

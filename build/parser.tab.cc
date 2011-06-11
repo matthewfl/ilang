@@ -1637,21 +1637,21 @@ yyreduce:
 
 /* Line 1464 of yacc.c  */
 #line 112 "src/parser.y"
-    { (yyval.node) = new Function; ;}
+    { (yyval.node) = new Function(NULL, NULL); ;}
     break;
 
   case 28:
 
 /* Line 1464 of yacc.c  */
 #line 113 "src/parser.y"
-    { (yyval.node) = new Function; ;}
+    { (yyval.node) = new Function(NULL, (yyvsp[(2) - (3)].node_list)); ;}
     break;
 
   case 29:
 
 /* Line 1464 of yacc.c  */
 #line 114 "src/parser.y"
-    { (yyval.node) = new Function; ;}
+    { (yyval.node) = new Function((yyvsp[(3) - (6)].node_list), (yyvsp[(5) - (6)].node_list)); ;}
     break;
 
   case 30:

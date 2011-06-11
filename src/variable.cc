@@ -26,6 +26,13 @@ namespace ilang {
 
   Value::Value(boost::any v): val(v) {}
   Value::Value(){}
+  void Value::Print () {
+    if(typeid(std::string) == val.type()) {
+      cout << boost::any_cast<std::string>(val);
+    }else if(typeid(int) == val.type()) {
+      cout << boost::any_cast<int>(val);
+    }
+  }
 }
 
 

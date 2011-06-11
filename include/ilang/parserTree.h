@@ -9,6 +9,7 @@
 #include "variable.h"
 
 namespace ilang {
+  class Scope;
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
@@ -16,6 +17,7 @@ namespace ilang {
     class Node {
     public:
       virtual void Run()=0;
+      virtual void Scope(Scope*)=0;
       void randomsdafasdf(){}
     };
 
@@ -25,6 +27,7 @@ namespace ilang {
     public:
       Head(std::list<Node*>*);
       void Run();
+      void Scope();
     };
 
 
@@ -34,6 +37,7 @@ namespace ilang {
     class Value : public Node {
     public:
       virtual ValueReturn GetValue()=0;
+      void Scope(Scope *p) {}
     };
     class Constant : public Value {
       
@@ -53,34 +57,43 @@ namespace ilang {
     public:
       IfStmt();
       void Run();
+      void Scope(Scope*);
     };
     class WhileStmt : public Node {
     public:
       WhileStmt();
       void Run();
+      void Scope(Scope*);
     };
     class ForStmt : public Node {
     public:
       ForStmt();
       void Run();
+      void Scope(Scope*);
     };
     
     class Function : public Value {
+    private:
+      std::list<Node*> *body;
+      std::list<Node*> *params;
     public:
-      Function();
+      Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run();
       void Call();
       ValueReturn GetValue();
+      void Scope(Scope*);
     };
 
     class Variable : public Node {
     private:
       std::list<std::string> *name;
+      std::list<std::string> *modifiers;
     public:
-      Variable (std::list<std::string> *n, std::list<std::string> *modifiers);
+      Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run();
       void Set(ilang::Variable *var);
       ilang::Variable Get();
+      void Scope(Scope*);
     };
     class Call : public Value {
     private:
@@ -91,11 +104,13 @@ namespace ilang {
       Call(Variable *call, std::list<Node*> *args);
       void Run();
       ValueReturn GetValue();
+      void Scope(Scope*);
     };
     class PrintCall : public Call {
     public:
       PrintCall(std::list<Node*> *args);
       ValueReturn GetValue (); // returns null
+      void Scope(Scope*);
     };
 
     
@@ -106,6 +121,7 @@ namespace ilang {
     public:
       AssignExpr (Variable *target, Value *value);
       void Run();
+      void Scope(Scope*);
     };
   }
 }

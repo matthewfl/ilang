@@ -41,7 +41,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   ilang::parserNode::Node *node;
 }
 
-%token T_import T_from T_as T_if T_while T_for T_print
+%token T_import T_from T_as T_if T_while T_for T_print T_class
 
 
 %token <Identifier> T_Identifier
@@ -109,9 +109,9 @@ WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
 ForStmt		:	T_for '(' Expr ')' Stmt		{}
 		;
 
-Function	:	'{' '}'				{ $$ = new Function; }
-		|	'{' Stmts '}'			{ $$ = new Function; }
-		|	'{' '|' ParamList '|' Stmts '}'	{ $$ = new Function; }
+Function	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
+		|	'{' Stmts '}'			{ $$ = new Function(NULL, $2); }
+		|	'{' '|' ParamList '|' Stmts '}'	{ $$ = new Function($3, $5); }
 		;
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }

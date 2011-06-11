@@ -46,6 +46,7 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 "while"			{ return T_while; }
 "for"			{ return T_for; }
 "Print"			{ return T_print; }
+"class"			{ return T_class; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }
