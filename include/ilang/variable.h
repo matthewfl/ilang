@@ -7,6 +7,7 @@
 #include <boost/any.hpp>
 
 namespace ilang {
+  class Value;
   class Variable_modifier {
   public:
     virtual bool Check(const boost::any&)=0;

@@ -11,20 +11,20 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 
 INCLUDEDIR=include
 
-CXXFLAGS= -ggdb -Wall -O0 -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+CXXFLAGS= -ggdb -Wall -O0 -std=c++0x -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
 
-CC= g++
+CXX= g++
 LD= g++
 
 all: $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
-	$(CC) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
 	bison -v -t -o $(BUILDDIR)/parser.tab.cc $<
 
-$(BUILDDIR)/lex.yy.cc: $(SRCDIR)/scanner.l $(BUILDDIR)/parser.tab.hh
+$(BUILDDIR)/lex.yy.cc: $(SRCDIR)/scanner.l $(BUILDDIR)/parser.tab.cc
 	flex -o $@ $<
 
 $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
@@ -60,7 +60,7 @@ src/parserTree.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
 src/parserTree.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 src/parserTree.o: /usr/include/_G_config.h /usr/include/wchar.h
 src/parserTree.o: /usr/include/bits/stdio_lim.h
-src/parserTree.o: /usr/include/bits/sys_errlist.h
+src/parserTree.o: /usr/include/bits/sys_errlist.h include/ilang/scope.h
 src/import.o: include/ilang/import.h
 src/parser.o: include/ilang/parser.h /usr/include/stdio.h
 src/parser.o: /usr/include/features.h /usr/include/sys/cdefs.h

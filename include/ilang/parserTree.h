@@ -16,9 +16,8 @@ namespace ilang {
     typedef boost::shared_ptr<ilang::Value> ValueReturn;
     class Node {
     public:
-      virtual void Run()=0;
-      virtual void Scope(Scope*)=0;
-      void randomsdafasdf(){}
+      virtual void Run(Scope*)=0;
+      void randomsdafasdf(){} // take this out eventually
     };
 
     class Head {
@@ -27,7 +26,6 @@ namespace ilang {
     public:
       Head(std::list<Node*>*);
       void Run();
-      void Scope();
     };
 
 
@@ -36,8 +34,7 @@ namespace ilang {
 
     class Value : public Node {
     public:
-      virtual ValueReturn GetValue()=0;
-      void Scope(Scope *p) {}
+      virtual ValueReturn GetValue(Scope*)=0;
     };
     class Constant : public Value {
       
@@ -48,28 +45,25 @@ namespace ilang {
       char *string;
     public:
       StringConst(char *str);
-      void Run();
-      ValueReturn GetValue();
+      void Run(Scope*);
+      ValueReturn GetValue(Scope*);
     };
 
 
     class IfStmt : public Node {
     public:
       IfStmt();
-      void Run();
-      void Scope(Scope*);
+      void Run(Scope*);
     };
     class WhileStmt : public Node {
     public:
       WhileStmt();
-      void Run();
-      void Scope(Scope*);
+      void Run(Scope*);
     };
     class ForStmt : public Node {
     public:
       ForStmt();
-      void Run();
-      void Scope(Scope*);
+      void Run(Scope*);
     };
     
     class Function : public Value {
@@ -78,10 +72,9 @@ namespace ilang {
       std::list<Node*> *params;
     public:
       Function(std::list<Node*> *p, std::list<Node*> *b); 
-      void Run();
-      void Call();
-      ValueReturn GetValue();
-      void Scope(Scope*);
+      void Run(Scope*);
+      void Call(std::list<ilang::parserNode::Value*>);
+      ValueReturn GetValue(Scope*);
     };
 
     class Variable : public Node {
@@ -90,10 +83,9 @@ namespace ilang {
       std::list<std::string> *modifiers;
     public:
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
-      void Run();
-      void Set(ilang::Variable *var);
-      ilang::Variable Get();
-      void Scope(Scope*);
+      void Run(Scope*);
+      void Set(Scope*, ilang::Variable *var);
+      ilang::Variable Get(Scope*);
     };
     class Call : public Value {
     private:
@@ -102,15 +94,13 @@ namespace ilang {
       std::list<Node*> *params;
     public:
       Call(Variable *call, std::list<Node*> *args);
-      void Run();
-      ValueReturn GetValue();
-      void Scope(Scope*);
+      void Run(Scope*);
+      ValueReturn GetValue(Scope*);
     };
     class PrintCall : public Call {
     public:
       PrintCall(std::list<Node*> *args);
-      ValueReturn GetValue (); // returns null
-      void Scope(Scope*);
+      ValueReturn GetValue (Scope*); // returns null
     };
 
     
@@ -120,8 +110,7 @@ namespace ilang {
       Value *eval;
     public:
       AssignExpr (Variable *target, Value *value);
-      void Run();
-      void Scope(Scope*);
+      void Run(Scope*);
     };
   }
 }
