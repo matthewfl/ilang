@@ -5,7 +5,7 @@ using namespace std;
 
 namespace ilang {
   map<string, Variable_modifier*> ilang_Variable_modifier_list;
-  
+
   bool Variable::Check (boost::any &a) {
     for(list<Variable_modifier*>::iterator it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       if(!(*it)->Check(a))
@@ -17,11 +17,22 @@ namespace ilang {
     Name = name;
     for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
       Variable_modifier *m = ilang_Variable_modifier_list[*it];
-      if(!m) 
+      if(!m)
 	cerr << "Variable modifier "<<*it<<" not found\n";
       else
 	Modifiers.push_back(m);
     }
+  }
+  void Variable::Set(ValuePass v) {
+    // this most likely will have a lot of calling of constructors and stuff for the shared_ptr
+    val=v;
+  }
+  Value *  Variable::Get () {
+    return val.get();
+  }
+
+  boost::any Value::Get() {
+    return val;
   }
 
   Value::Value(boost::any v): val(v) {}
@@ -31,6 +42,8 @@ namespace ilang {
       cout << boost::any_cast<std::string>(val);
     }else if(typeid(int) == val.type()) {
       cout << boost::any_cast<int>(val);
+    }else{
+      cout << "could not figure out type: "<< val.type().name() << endl;
     }
   }
 }

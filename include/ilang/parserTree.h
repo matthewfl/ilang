@@ -13,7 +13,7 @@ namespace ilang {
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
-    typedef boost::shared_ptr<ilang::Value> ValueReturn;
+    typedef boost::shared_ptr<ilang::Value> ValuePass;
     class Node {
     public:
       virtual void Run(Scope*)=0;
@@ -34,7 +34,7 @@ namespace ilang {
 
     class Value : public Node {
     public:
-      virtual ValueReturn GetValue(Scope*)=0;
+      virtual ValuePass GetValue(Scope*)=0;
     };
     class Constant : public Value {
       
@@ -46,7 +46,7 @@ namespace ilang {
     public:
       StringConst(char *str);
       void Run(Scope*);
-      ValueReturn GetValue(Scope*);
+      ValuePass GetValue(Scope*);
     };
 
 
@@ -73,8 +73,9 @@ namespace ilang {
     public:
       Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run(Scope*);
-      void Call(std::list<ilang::parserNode::Value*>);
-      ValueReturn GetValue(Scope*);
+      void Call(std::list<ilang::Value*>);
+      void Call(Scope*, std::list<ilang::Value*>);
+      ValuePass GetValue(Scope*);
     };
 
     class Variable : public Node {
@@ -84,7 +85,7 @@ namespace ilang {
     public:
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run(Scope*);
-      void Set(Scope*, ilang::Variable *var);
+      void Set(Scope*, ValuePass var);
       ilang::Variable Get(Scope*);
     };
     class Call : public Value {
@@ -95,12 +96,12 @@ namespace ilang {
     public:
       Call(Variable *call, std::list<Node*> *args);
       void Run(Scope*);
-      ValueReturn GetValue(Scope*);
+      ValuePass GetValue(Scope*);
     };
     class PrintCall : public Call {
     public:
       PrintCall(std::list<Node*> *args);
-      ValueReturn GetValue (Scope*); // returns null
+      ValuePass GetValue (Scope*); // returns null
     };
 
     

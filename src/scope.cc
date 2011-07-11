@@ -11,16 +11,24 @@ namespace ilang {
     return parent->_lookup(name);
   }
 
-  ilang::Variable * Scope::lookup (string name, list<string> modifiers) {
+  ilang::Variable * Scope::lookup (string name) {
     ilang::Variable * f = _lookup(name);
     if(f) return f;
-    f = new ilang::Variable(name, modifiers);
+    list<string> mod;
+    f = new ilang::Variable(name, mod);
     vars.insert(pair<string, ilang::Variable*>(name, f));
     return f;
   }
+
+  ilang::Variable * Scope::forceNew (string name, std::list<std::string> &modifiers) {
+    ilang::Variable *v = new ilang::Variable(name, modifiers);
+    vars.insert(pair<string, ilang::Variable*>(name, v));
+    return v;
+  }
+
   Scope::Scope(Scope *p): parent(p) {}
 
-  FileScope::FileScope(): Scope((Scope *)NULL) {}
+ 
   
   ilang::Variable * FileScope::_lookup (string &name) {
     return vars.find(name)->second; // there is nothing higher that can be looked at

@@ -11,7 +11,8 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 
 INCLUDEDIR=include
 
-CXXFLAGS= -ggdb -Wall -O0 -std=c++0x -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+# turn off all warnings so I can more easily view the errors, these need to be turn back on latter
+CXXFLAGS= -ggdb -Wall -O0 -std=c++0x -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
 
 CXX= g++
 LD= g++
@@ -71,3 +72,6 @@ src/parser.o: /usr/include/_G_config.h /usr/include/wchar.h
 src/parser.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 src/variable.o: include/ilang/variable.h
 src/scope.o: include/ilang/scope.h include/ilang/variable.h
+src/scope.o: /usr/include/assert.h /usr/include/features.h
+src/scope.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+src/scope.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h

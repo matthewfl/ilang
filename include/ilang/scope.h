@@ -13,20 +13,23 @@ namespace ilang {
     Scope *parent;
     virtual ilang::Variable * _lookup (std::string &name);
   public:
-    ilang::Variable * lookup (std::string name, std::list<std::string> modifiers);
-    ilang::Variable * forceNew (std::string name, std::list<std::string> modifiers);
+    ilang::Variable * lookup (std::string name);
+    ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
     Scope(Scope *parent);
   };
   class FileScope : public Scope {
   protected:
     virtual ilang::Variable * _lookup (std::string &name);
   public:
-    FileScope();
+    FileScope(): Scope((Scope *)NULL) {}
   };
   class FunctionScope : public Scope {
+  public:
+    FunctionScope(Scope *s) : Scope(s) {}
   };
   class ClassScope : public Scope {
-    
+  public:
+    ClassScope(Scope *s) : Scope(s) {}
   };
   
 }; // namespace ilang

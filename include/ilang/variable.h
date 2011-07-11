@@ -5,9 +5,11 @@
 #include <string>
 #include <list>
 #include <boost/any.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace ilang {
   class Value;
+  typedef boost::shared_ptr<ilang::Value> ValuePass;
   class Variable_modifier {
   public:
     virtual bool Check(const boost::any&)=0;
@@ -21,9 +23,11 @@ namespace ilang {
     std::list<Variable_modifier*> Modifiers;
     std::string Name;
     bool Check (boost::any&);
-    Value *val;
+    ValuePass val;
   public:
     Variable (std::string name, std::list<std::string> modifiers);
+    void Set(ValuePass v);
+    Value * Get();
   };
   
   class Value {
@@ -34,6 +38,7 @@ namespace ilang {
     Value (boost::any);
     Value ();
     void Print();
+    boost::any Get();
   };
   
 
