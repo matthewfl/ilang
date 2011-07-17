@@ -29,7 +29,7 @@ namespace ilang {
     }
     ValuePass StringConst::GetValue (Scope *scope) {
       cout << "string get value\n";
-      return ValuePass(new ilang::Value(string));
+      return ValuePass(new ilang::Value(std::string(string)));
     }
     void IfStmt::Run(Scope *scope) {}
     void WhileStmt::Run(Scope *scope) {}
