@@ -28,7 +28,8 @@ namespace ilang {
     val=v;
   }
   Value *  Variable::Get () {
-    return val.get();
+    return val;
+    //return val.get();
   }
 
   boost::any Value::Get() {

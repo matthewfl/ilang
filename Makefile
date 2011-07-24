@@ -41,7 +41,7 @@ depend:
 	makedepend -- $(CXXFLAGS) -- $(SRCSD)
 
 test: $(TARGET)
-	./i test.i
+	gdb i "--eval-command=run test.i" --eval-command=bt
 
 # DO NOT DELETE
 

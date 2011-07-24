@@ -7,6 +7,7 @@
 
 
 namespace ilang {
+  class FileScope;
   class Scope {
   protected:
     std::map<std::string, ilang::Variable*> vars;
@@ -15,6 +16,7 @@ namespace ilang {
   public:
     ilang::Variable * lookup (std::string name);
     ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
+    ilang::FileScope * fileScope ();
     Scope(Scope *parent);
   };
   class FileScope : public Scope {

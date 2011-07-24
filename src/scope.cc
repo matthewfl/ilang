@@ -28,6 +28,12 @@ namespace ilang {
 
   Scope::Scope(Scope *p): parent(p) {}
 
+  ilang::FileScope * Scope::fileScope() {
+    if(parent) return parent->fileScope();
+    assert(dynamic_cast<FileScope*>(this));
+    return dynamic_cast<FileScope*>(this);
+  }
+
  
   
   ilang::Variable * FileScope::_lookup (string &name) {

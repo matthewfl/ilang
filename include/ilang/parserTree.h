@@ -13,7 +13,8 @@ namespace ilang {
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
-    typedef boost::shared_ptr<ilang::Value> ValuePass;
+    //typedef boost::shared_ptr<ilang::Value> ValuePass;
+    using ilang::ValuePass; // defined in variable.h
     class Node {
     public:
       virtual void Run(Scope*)=0;
@@ -86,7 +87,7 @@ namespace ilang {
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run(Scope*);
       void Set(Scope*, ValuePass var);
-      ilang::Variable Get(Scope*);
+      ilang::Variable * Get(Scope*);
     };
     class Call : public Value {
     private:

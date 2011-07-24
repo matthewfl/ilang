@@ -1,3 +1,8 @@
+something = {
+        Print("other\n");
+};
+
 main = {
-       Print("Test"); 
+        Print("Test");
+        something();
 };

@@ -18,7 +18,7 @@ namespace ilang {
 	(*it)->Run(&scope);
       }
       list<ilang::Value*> v;
-      boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(v);
+      boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
       //return RunReturn(new ilang::Value);
     }
 
@@ -60,6 +60,7 @@ namespace ilang {
       return ValuePass(new ilang::Value(this));
     }
     void Function::Call(list<ilang::Value*> params) {
+      // this needs to be removed
       Call(NULL, params);
     }
     void Function::Call(Scope *_scope, list<ilang::Value*> p) {
@@ -75,6 +76,8 @@ namespace ilang {
 	}
       }
       for(Node *n : *body) {
+	assert(n);
+	cout <<"function run\n";
 	n->Run(&scope);
       }
       
@@ -95,26 +98,48 @@ namespace ilang {
 	v = scope->lookup(name->front());
       assert(v);
       v->Set(var);
+      cout << "Set: " << name->front() << " " << var << endl;
     }
-    ilang::Variable Get(Scope *scope) {
-
+    ilang::Variable * Variable::Get(Scope *scope) {
+      ilang::Variable *v;
+      v = scope->lookup(name->front());
+      assert(v);
+      cout << "Get: " << name->front() << " " << v->Get() << endl;
+      return v;
     }
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {
       cout << "\n\t\t\tCalling function \n";
     }
     void Call::Run(Scope *scope) {
+      cout << "call run\n";
       GetValue(scope);
     }
-    ValuePass Call::GetValue (Scope *scope) {}
+    ValuePass Call::GetValue (Scope *scope) {
+      ilang::Variable * func = calling->Get(scope);
+      std::list<ValuePass> par;
+      for(Node * n : *params) {
+	assert(dynamic_cast<parserNode::Value*>(n));
+	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
+      }
+      // needs to be changed to return the value
+      assert(func);
+      assert(func->Get());
+      //assert(func->Get()->Get());
+      func->Get()->Print();
+      assert(boost::any_cast<Function*>(func->Get()->Get()));
+      // boost::any_cast<Function*>(func->Get()->Get())->Call(scope->fileScope(), par);
+    }
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
     ValuePass PrintCall::GetValue (Scope *scope) {
       cout << "made into the print Call\n";
       //for(list<Node*>::iterator it = params->begin(), end = params->end(); it != end; it++) {
       for(Node *it : *params) {
+	assert(dynamic_cast<parserNode::Value*>(it));
 	dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
       }
+      cout << "made it out of print\n";
     }
 
     AssignExpr::AssignExpr (Variable *t, Value *v):target(t), eval(v) {

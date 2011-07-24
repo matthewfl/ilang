@@ -121,6 +121,7 @@ Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2)
 
 ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
+		|					{ $$ = new list<Node*>; }
 		;
 
 Call		:	Variable '(' ParamList ')'	{ $$ = new Call(dynamic_cast<Variable*>($1), $3); }
