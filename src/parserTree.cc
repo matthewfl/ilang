@@ -1,6 +1,7 @@
 #include "parserTree.h"
 #include "parser.h"
 #include "scope.h"
+#include "debug.h"
 
 #include <iostream>
 using namespace std;
@@ -8,15 +9,15 @@ using namespace std;
 namespace ilang {
   namespace parserNode {
     Head::Head(list<Node*> *declars): Declars(declars) {
-      cout << "head " << declars->size() << endl;
+      debug( "head " << declars->size() );
       Run();
     }
     void Head::Run () {
       FileScope scope;
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
-	cout << "calling run\n";
+	debug( "calling run" )
 	(*it)->Run(&scope);
-	scope.debug();
+	scope.Debug();
       }
       list<ilang::Value*> v;
       boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
@@ -29,7 +30,7 @@ namespace ilang {
       //return RunReturn(new ilang::Value(string));
     }
     ValuePass StringConst::GetValue (Scope *scope) {
-      cout << "string get value\n";
+      debug( "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
     }
     void IfStmt::Run(Scope *scope) {}
@@ -49,7 +50,7 @@ namespace ilang {
     }
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
-      cout << "\t\t\tfunction constructed\n";
+      debug( "\t\t\tfunction constructed" );
 
     }
     void Function::Run(Scope *scope) {
@@ -57,7 +58,7 @@ namespace ilang {
       Call(scope, p);
     }
     ValuePass Function::GetValue(Scope *scope) {
-      cout << "Function get value\n";
+      debug("Function get value");
       return ValuePass(new ilang::Value(this));
     }
     void Function::Call(list<ilang::Value*> params) {
@@ -66,7 +67,7 @@ namespace ilang {
     }
     void Function::Call(Scope *_scope, list<ilang::Value*> p) {
       FunctionScope scope(_scope);
-      cout << "function called\n" << flush;
+      debug("function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
 	for(ilang::Value * v : p) {
@@ -78,7 +79,7 @@ namespace ilang {
       }
       for(Node *n : *body) {
 	assert(n);
-	cout <<"function run\n";
+	debug("function run");
 	n->Run(&scope);
       }
       
@@ -89,10 +90,10 @@ namespace ilang {
       //cout << "\t\t\t" << name << "\n";
     }
     void Variable::Run (Scope *scope) {
-      cout << "\t\t\tSetting variable: " << name->front() << endl;
+      debug("\t\t\tSetting variable: " << name->front());
     }
     void Variable::Set (Scope *scope, ValuePass var) {
-      scope->debug();
+      scope->Debug();
       ilang::Variable *v;
       if(!modifiers->empty())
 	v = scope->forceNew(name->front(), *modifiers);
@@ -100,24 +101,23 @@ namespace ilang {
 	v = scope->lookup(name->front());
       assert(v);
       v->Set(var);
-      cout << "Set: " << name->front() << " " << var << " " << v->Get() << endl;
-      scope->debug();
-      cout << "end set\n";
+      debug("Set: " << name->front() << " " << var << " " << v->Get());
+      scope->Debug();
     }
     ilang::Variable * Variable::Get(Scope *scope) {
-      scope->debug();
+      scope->Debug();
       ilang::Variable *v;
       v = scope->lookup(name->front());
       assert(v);
-      cout << "Get: " << name->front() << " " << v->Get() << endl;
+      debug("Get: " << name->front() << " " << v->Get());
       return v;
     }
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {
-      cout << "\n\t\t\tCalling function \n";
+      debug("\t\t\tCalling function");
     }
     void Call::Run(Scope *scope) {
-      cout << "call run\n";
+      debug("call run");
       GetValue(scope);
     }
     ValuePass Call::GetValue (Scope *scope) {
@@ -138,13 +138,13 @@ namespace ilang {
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
     ValuePass PrintCall::GetValue (Scope *scope) {
-      cout << "made into the print Call\n";
+      debug("made into the print Call");
       //for(list<Node*>::iterator it = params->begin(), end = params->end(); it != end; it++) {
       for(Node *it : *params) {
 	assert(dynamic_cast<parserNode::Value*>(it));
 	dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
       }
-      cout << "made it out of print\n";
+      debug("made it out of print");
     }
 
     AssignExpr::AssignExpr (Variable *t, Value *v):target(t), eval(v) {
@@ -156,7 +156,7 @@ namespace ilang {
       ValuePass v = eval->GetValue(scope);
 
       target->Set(scope, v);
-      scope->debug();
+      scope->Debug();
       //return RunReturn(new ilang::Value);
       //ilang::Variable *var = target->Get();
     }

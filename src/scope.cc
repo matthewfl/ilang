@@ -1,5 +1,5 @@
 #include "scope.h"
-#include <assert.h>
+#include "debug.h"
 
 
 namespace ilang {
@@ -27,9 +27,10 @@ namespace ilang {
     return v;
   }
 
-  int Scope::debug() {
+  int Scope::Debug() {
+    debug_break(0);
     int indent=1;
-    if(parent) indent = parent->debug();
+    if(parent) indent = parent->Debug();
     for(pair<const string, ilang::Variable*> i : vars) {
       for(int i=0;i<indent;++i) cout << "\t";
       cout << i.first << "\t" << i.second->Get() << endl;

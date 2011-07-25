@@ -64,6 +64,7 @@ src/parserTree.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 src/parserTree.o: /usr/include/_G_config.h /usr/include/wchar.h
 src/parserTree.o: /usr/include/bits/stdio_lim.h
 src/parserTree.o: /usr/include/bits/sys_errlist.h include/ilang/scope.h
+src/parserTree.o: include/debug.h /usr/include/assert.h
 src/import.o: include/ilang/import.h
 src/parser.o: include/ilang/parser.h /usr/include/stdio.h
 src/parser.o: /usr/include/features.h /usr/include/sys/cdefs.h
@@ -72,8 +73,11 @@ src/parser.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
 src/parser.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 src/parser.o: /usr/include/_G_config.h /usr/include/wchar.h
 src/parser.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-src/variable.o: include/ilang/variable.h
-src/scope.o: include/ilang/scope.h include/ilang/variable.h
+src/variable.o: include/ilang/variable.h include/debug.h
+src/variable.o: /usr/include/assert.h /usr/include/features.h
+src/variable.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
+src/variable.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h
+src/scope.o: include/ilang/scope.h include/ilang/variable.h include/debug.h
 src/scope.o: /usr/include/assert.h /usr/include/features.h
 src/scope.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
 src/scope.o: /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h

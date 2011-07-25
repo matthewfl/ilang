@@ -18,7 +18,7 @@ namespace ilang {
     ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
     ilang::FileScope * fileScope ();
     Scope(Scope *parent);
-    int debug();
+    int Debug();
   };
   class FileScope : public Scope {
   protected:
