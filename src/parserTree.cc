@@ -16,6 +16,7 @@ namespace ilang {
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
 	cout << "calling run\n";
 	(*it)->Run(&scope);
+	scope.debug();
       }
       list<ilang::Value*> v;
       boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
@@ -91,6 +92,7 @@ namespace ilang {
       cout << "\t\t\tSetting variable: " << name->front() << endl;
     }
     void Variable::Set (Scope *scope, ValuePass var) {
+      scope->debug();
       ilang::Variable *v;
       if(!modifiers->empty())
 	v = scope->forceNew(name->front(), *modifiers);
@@ -98,9 +100,12 @@ namespace ilang {
 	v = scope->lookup(name->front());
       assert(v);
       v->Set(var);
-      cout << "Set: " << name->front() << " " << var << endl;
+      cout << "Set: " << name->front() << " " << var << " " << v->Get() << endl;
+      scope->debug();
+      cout << "end set\n";
     }
     ilang::Variable * Variable::Get(Scope *scope) {
+      scope->debug();
       ilang::Variable *v;
       v = scope->lookup(name->front());
       assert(v);
@@ -122,13 +127,13 @@ namespace ilang {
 	assert(dynamic_cast<parserNode::Value*>(n));
 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
       }
+      boost::any_cast<Function*>(
+				 //scope->lookup("something")
+				 func
+				 ->Get()->Get())->Call(scope->fileScope(), par);
+      
       // needs to be changed to return the value
-      assert(func);
-      assert(func->Get());
-      //assert(func->Get()->Get());
-      func->Get()->Print();
-      assert(boost::any_cast<Function*>(func->Get()->Get()));
-      // boost::any_cast<Function*>(func->Get()->Get())->Call(scope->fileScope(), par);
+      
     }
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
@@ -151,7 +156,7 @@ namespace ilang {
       ValuePass v = eval->GetValue(scope);
 
       target->Set(scope, v);
-
+      scope->debug();
       //return RunReturn(new ilang::Value);
       //ilang::Variable *var = target->Get();
     }

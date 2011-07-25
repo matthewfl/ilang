@@ -5,8 +5,9 @@
 namespace ilang {
   using namespace std;
   ilang::Variable * Scope::_lookup (string &name) {
-    ilang::Variable *v = vars.find(name)->second; // I think that this will work, but the dereference might crash it
-    if(v) return v;
+    auto it = vars.find(name);
+    if(it != vars.end())
+      return it->second;
     assert(parent);
     return parent->_lookup(name);
   }
@@ -24,6 +25,17 @@ namespace ilang {
     ilang::Variable *v = new ilang::Variable(name, modifiers);
     vars.insert(pair<string, ilang::Variable*>(name, v));
     return v;
+  }
+
+  int Scope::debug() {
+    int indent=1;
+    if(parent) indent = parent->debug();
+    for(pair<const string, ilang::Variable*> i : vars) {
+      for(int i=0;i<indent;++i) cout << "\t";
+      cout << i.first << "\t" << i.second->Get() << endl;
+    }
+    
+    return indent+1;
   }
 
   Scope::Scope(Scope *p): parent(p) {}

@@ -26,6 +26,7 @@ namespace ilang {
   void Variable::Set(ValuePass v) {
     // this most likely will have a lot of calling of constructors and stuff for the shared_ptr
     val=v;
+    cout << v << " " << val << endl;
   }
   Value *  Variable::Get () {
     return val;

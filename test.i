@@ -1,3 +1,4 @@
+what = {};
 something = {
         Print("other\n");
 };
