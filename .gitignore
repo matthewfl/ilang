@@ -5,3 +5,5 @@ Makefile.bak
 /i
 \#*
 build/*
+*.a
+*.so

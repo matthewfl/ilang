@@ -5,9 +5,10 @@
 
 #include <assert.h>
 #include <iostream>
+#include "../deps/glog/src/glog/logging.h"
 
 #ifndef NDEBUG
-#define debug(x) ::std::cout << __FILE__<<":"<<__LINE__<<"\t" << x  << ::std::endl;
+#define debug(x) DLOG(INFO) << __FILE__<<":"<<__LINE__<<"\t" << x  << ::std::endl;
 #define debug_act(x) x
 #define debug_break(x)
 #else

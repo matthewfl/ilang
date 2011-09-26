@@ -1,7 +1,7 @@
 TARGET= i
 
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc
-LIBS=-lfl
+LIBS=-lfl -lpthread
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
@@ -12,11 +12,21 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS= -ggdb -Wall -O0 -std=c++0x -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+CXXFLAGS= -ggdb -Wall -O0 -std=c++0x -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/glog/src
 
 CXX= g++
 LD= g++
 
+
+# settings for building deps
+glogLib=./deps/glog/.libs/libglog.a
+LIBS+= $(glogLib)
+
+DEPS= $(glogLib)
+
+
+
+# start of commands
 all: $(TARGET)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
@@ -31,11 +41,13 @@ $(BUILDDIR)/lex.yy.cc: $(SRCDIR)/scanner.l $(BUILDDIR)/parser.tab.cc
 $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
 $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 
-$(TARGET): $(OBJS)
+$(TARGET): $(DEPS) $(OBJS)
 	$(LD) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc
+clean-all: clean
+	rm -rf deps/glog/Makefile deps/glog/.libs
 
 depend:
 	makedepend -- $(CXXFLAGS) -- $(SRCSD) 
@@ -46,6 +58,13 @@ test: $(TARGET)
 	$(TARGET) test.i
 debug: $(TARGET)
 	gdb i "--eval-command=run test.i" --eval-command=bt
+
+
+
+# all the commands to build any deps
+$(glogLib): ./deps/glog/src/base/googleinit.h
+	cd deps/glog && ./configure
+	cd deps/glog && make
 
 # DO NOT DELETE
 
