@@ -30,15 +30,17 @@ namespace ilang {
     };
 
 
-    class Expression : public Node {
-    };
-
+    
     class Value : public Node {
     public:
       virtual ValuePass GetValue(Scope*)=0;
     };
     class Constant : public Value {
       
+    };
+
+    // I guess we will leave this in, but most things are using Value, not expression
+    class Expression : public Value {
     };
 
     class StringConst : public Constant {
@@ -52,13 +54,19 @@ namespace ilang {
 
 
     class IfStmt : public Node {
+    private:
+      Value *test;
+      Node *True, *False;
     public:
-      IfStmt();
+      IfStmt(Node*, Node*, Node*);
       void Run(Scope*);
     };
     class WhileStmt : public Node {
+    private:
+      Value *test;
+      Node *exe;
     public:
-      WhileStmt();
+      WhileStmt(Node*, Node*);
       void Run(Scope*);
     };
     class ForStmt : public Node {
@@ -113,6 +121,22 @@ namespace ilang {
     public:
       AssignExpr (Variable *target, Value *value);
       void Run(Scope*);
+    };
+    class MathEquation : public Expression {
+    public:
+      enum action {
+	add,
+	subtract,
+	multiply,
+	devide
+      };
+      MathEquation(Value *l, Value *r, action a);
+    private:
+      Value *left, *right;
+      action Act;
+    };
+    class LogicExpression : public Expression {
+      
     };
   }
 }

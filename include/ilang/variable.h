@@ -31,6 +31,24 @@ namespace ilang {
     void Set(ValuePass v);
     Value * Get();
   };
+
+  // a wrapper class for any numerical value
+  class Number {
+  private:
+    enum Type {
+      null,
+      Int,
+      Double
+    };
+    Type type;
+    union {
+      long INT;
+      double DOUBLE
+    };
+  public:
+    Number(){type=null;}
+    void Set(
+  };
   
   class Value {
   private:
@@ -40,6 +58,7 @@ namespace ilang {
     Value (boost::any);
     Value ();
     void Print();
+    bool isTrue();
     boost::any Get();
   };
   

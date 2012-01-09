@@ -54,6 +54,12 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 "break"[0-9]+		{ yylval->count = atoi(yytext+5); return T_break; }
 "return"[0-9]+		{ yylval->count = atoi(yytext+6); return T_return; }
 "continue"[0-9]+	{ yylval->count = atoi(yytext+8); return T_continue; }
+"=="			{ return T_eq; }
+"!="			{ return T_ne; }
+"<="			{ return T_le; }
+">="			{ return T_ge; }
+"&&"			{ return T_and; }
+"||"			{ return T_or; }
 
 {OPERATOR}		{ return yytext[0]; }
 

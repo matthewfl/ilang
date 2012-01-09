@@ -28,7 +28,8 @@ namespace ilang {
   }
 
   int Scope::Debug() {
-    debug_break(0);
+    return 0;
+    debug_break(return 0;)
     int indent=1;
     if(parent) indent = parent->Debug();
     for(pair<const string, ilang::Variable*> i : vars) {

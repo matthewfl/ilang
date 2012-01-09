@@ -27,7 +27,7 @@ namespace ilang {
   void Variable::Set(ValuePass v) {
     // this most likely will have a lot of calling of constructors and stuff for the shared_ptr
     val=v;
-    debug( v << " " << val );
+    debug(4, v << " " << val );
   }
   Value *  Variable::Get () {
     return val;
@@ -47,6 +47,15 @@ namespace ilang {
       cout << boost::any_cast<int>(val);
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
+    }
+  }
+  bool Value::isTrue () {
+    if(typeid(std::string) == val.type()) {
+      return boost::any_cast<std::string>(val) != "";
+    }else if(typeid(int) == val.type()) {
+      return boost::any_cast<int>(val) != 0;
+    }else{
+      return true; // I guess having a value, even if we can't figure out what it is makes it true
     }
   }
 }

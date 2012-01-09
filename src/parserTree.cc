@@ -9,13 +9,14 @@ using namespace std;
 namespace ilang {
   namespace parserNode {
     Head::Head(list<Node*> *declars): Declars(declars) {
-      debug( "head " << declars->size() );
+      debug(4, "head " << declars->size() );
+      debug(4, "running ++++++++++++++++++++++++++++++++++++++++++++" );
       Run();
     }
     void Head::Run () {
       FileScope scope;
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
-	debug( "calling run" )
+	debug(5, "calling run" )
 	(*it)->Run(&scope);
 	scope.Debug();
       }
@@ -30,27 +31,42 @@ namespace ilang {
       //return RunReturn(new ilang::Value(string));
     }
     ValuePass StringConst::GetValue (Scope *scope) {
-      debug( "string get value" );
+      debug(5, "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
     }
-    void IfStmt::Run(Scope *scope) {}
-    void WhileStmt::Run(Scope *scope) {}
+    
+  
     void ForStmt::Run(Scope *scope) {}
 
 
 
-    IfStmt::IfStmt () {
-
+    IfStmt::IfStmt (Node *test_, Node* True_, Node* False_): True(True_), False(False_) {
+      Value *t = dynamic_cast<Value*>(test_);
+      assert(t);
+      test=t;
+    }
+    void IfStmt::Run(Scope *scope) {
+      if(test->GetValue(scope)->isTrue()) {
+	if(True) True->Run(scope);
+      }else{
+	if(False) False->Run(scope);
+      }
     }
     ForStmt::ForStmt () {
 
     }
-    WhileStmt::WhileStmt () {
-
+    WhileStmt::WhileStmt (Node *test_, Node *exe_): exe(exe_) {
+      Value *t=dynamic_cast<Value*>(test);
+      assert(t);
+      test=t;
+    }
+    void WhileStmt::Run(Scope *scope) {
+      while(test->GetValue(scope)->isTrue())
+	exe->Run(scope);
     }
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
-      debug( "\t\t\tfunction constructed" );
+      debug(5, "\t\t\tfunction constructed" );
 
     }
     void Function::Run(Scope *scope) {
@@ -58,7 +74,7 @@ namespace ilang {
       Call(scope, p);
     }
     ValuePass Function::GetValue(Scope *scope) {
-      debug("Function get value");
+      debug(5, "Function get value");
       return ValuePass(new ilang::Value(this));
     }
     void Function::Call(list<ilang::Value*> params) {
@@ -67,19 +83,20 @@ namespace ilang {
     }
     void Function::Call(Scope *_scope, list<ilang::Value*> p) {
       FunctionScope scope(_scope);
-      debug("function called");
+      debug(5,"function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
 	for(ilang::Value * v : p) {
 	  if(it==params->end()) break;
-	  assert(dynamic_cast<Variable*>(*it));
+	  assert(dynamic_cast<parserNode::Variable*>(*it));
+	  assert(v);
 	  dynamic_cast<parserNode::Variable*>(*it)->Set(&scope, ValuePass(v));
 	  it++;
 	}
       }
       for(Node *n : *body) {
 	assert(n);
-	debug("function run");
+	debug(5,"function run");
 	n->Run(&scope);
       }
       
@@ -90,7 +107,7 @@ namespace ilang {
       //cout << "\t\t\t" << name << "\n";
     }
     void Variable::Run (Scope *scope) {
-      debug("\t\t\tSetting variable: " << name->front());
+      debug(4,"\t\t\tSetting variable: " << name->front());
     }
     void Variable::Set (Scope *scope, ValuePass var) {
       scope->Debug();
@@ -101,7 +118,7 @@ namespace ilang {
 	v = scope->lookup(name->front());
       assert(v);
       v->Set(var);
-      debug("Set: " << name->front() << " " << var << " " << v->Get());
+      debug(4,"Set: " << name->front() << " " << var << " " << v->Get());
       scope->Debug();
     }
     ilang::Variable * Variable::Get(Scope *scope) {
@@ -109,15 +126,15 @@ namespace ilang {
       ilang::Variable *v;
       v = scope->lookup(name->front());
       assert(v);
-      debug("Get: " << name->front() << " " << v->Get());
+      debug(4,"Get: " << name->front() << " " << v->Get());
       return v;
     }
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {
-      debug("\t\t\tCalling function");
+      debug(4,"\t\t\tCalling function");
     }
     void Call::Run(Scope *scope) {
-      debug("call run");
+      debug(4,"call run");
       GetValue(scope);
     }
     ValuePass Call::GetValue (Scope *scope) {
@@ -138,13 +155,13 @@ namespace ilang {
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
     ValuePass PrintCall::GetValue (Scope *scope) {
-      debug("made into the print Call");
+      debug(5,"made into the print Call");
       //for(list<Node*>::iterator it = params->begin(), end = params->end(); it != end; it++) {
       for(Node *it : *params) {
 	assert(dynamic_cast<parserNode::Value*>(it));
 	dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
       }
-      debug("made it out of print");
+      debug(5,"made it out of print");
     }
 
     AssignExpr::AssignExpr (Variable *t, Value *v):target(t), eval(v) {
@@ -159,6 +176,24 @@ namespace ilang {
       scope->Debug();
       //return RunReturn(new ilang::Value);
       //ilang::Variable *var = target->Get();
+    }
+    MathEquation::MathEquation(Value *r, Value *l, action a) : left(l), right(r), Act(a) {}
+    void MathEquation::Run(Scope *scope) {
+      switch(Act) {
+      case add:
+      case subtract:
+      case multiply:
+      case devide:
+      }
+    }
+    ValuePass MathEquation::GetValue(Scope *scope) {
+      switch(Act) {
+      case add:
+	return 
+      case subtract:
+      case multiply:
+      case devide:
+      }
     }
   }
 }

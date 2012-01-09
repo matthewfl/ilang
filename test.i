@@ -1,5 +1,6 @@
 what = {};
 something = {
+       if(what())  
         Print("other\n");
 };
 

@@ -41,8 +41,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   ilang::parserNode::Node *node;
 }
 
-%token T_import T_from T_as T_if T_while T_for T_print T_class
-
+%token T_import T_from T_as T_if T_while T_for T_print T_class T_else
+%token T_eq T_ne T_le T_ge T_and T_or
 
 %token <Identifier> T_Identifier
 %token <count> T_break T_return T_continue
@@ -50,7 +50,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable Decl Expr Call Stmt
+%type <node> Function Variable Decl Expr Call Stmt IfStmt
 %type <node_list> Stmts ParamList DeclList ExprList
 
 
@@ -100,7 +100,8 @@ Stmt		:	';'
 		;
 
 
-IfStmt		:	T_if '(' Expr ')' Stmt 		{}
+IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
+		|	T_if '(' Expr ')' Stmt T_else Stmt { $$ = new IfStmt($3, $5, $7); }
 		;
 
 WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
@@ -136,6 +137,19 @@ Expr		:	Function			{}
 		|	Variable
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	LValue
+		|	'(' Expr ')'			{$$=$2;}
+		|	Expr '+' Expr			{}
+		|	Expr '-' Expr
+		|	Expr '*' Expr
+		| 	Expr '/' Expr
+		|	Expr T_eq Expr
+		|	Expr T_ne Expr
+		|	Expr T_le Expr
+		|	Expr '<' Expr
+		|	Expr T_ge Expr
+		|	Expr '>' Expr
+		|	Expr T_and Expr
+		|	Expr T_or Expr
 		;
 
 LValue		:	Identifier			{}
