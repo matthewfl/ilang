@@ -17,7 +17,7 @@ namespace ilang {
       FileScope scope;
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
 	debug(5, "calling run" )
-	(*it)->Run(&scope);
+	  (*it)->Run(&scope);
 	scope.Debug();
       }
       list<ilang::Value*> v;
@@ -34,11 +34,6 @@ namespace ilang {
       debug(5, "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
     }
-    
-  
-    void ForStmt::Run(Scope *scope) {}
-
-
 
     IfStmt::IfStmt (Node *test_, Node* True_, Node* False_): True(True_), False(False_) {
       Value *t = dynamic_cast<Value*>(test_);
@@ -46,15 +41,19 @@ namespace ilang {
       test=t;
     }
     void IfStmt::Run(Scope *scope) {
-      if(test->GetValue(scope)->isTrue()) {
+      ilang::Value *search = test->GetValue(scope);
+      assert(search);
+      search->Print();
+      if(search->isTrue()) {
 	if(True) True->Run(scope);
       }else{
 	if(False) False->Run(scope);
       }
     }
-    ForStmt::ForStmt () {
 
-    }
+    ForStmt::ForStmt () {}
+    void ForStmt::Run(Scope *scope) {}
+
     WhileStmt::WhileStmt (Node *test_, Node *exe_): exe(exe_) {
       Value *t=dynamic_cast<Value*>(test);
       assert(t);
@@ -63,6 +62,18 @@ namespace ilang {
     void WhileStmt::Run(Scope *scope) {
       while(test->GetValue(scope)->isTrue())
 	exe->Run(scope);
+    }
+
+    ReturnStmt::ReturnStmt (Node *r) {
+      if(r) {
+	ret = dynamic_cast<Value*>(r);
+	assert(ret);
+      }
+    }
+    void ReturnStmt::Run(Scope *scope) {
+      ValuePass v;
+      if(ret) v = ret->GetValue(scope);
+      scope->ParentReturn(&v); // this should avoid copying any smart pointers and run much faster
     }
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
@@ -81,8 +92,14 @@ namespace ilang {
       // this needs to be removed
       Call(NULL, params);
     }
-    void Function::Call(Scope *_scope, list<ilang::Value*> p) {
-      FunctionScope scope(_scope);
+    void Function::Call(Scope *_scope, list<ilang::Value*> &p, ValuePass *_ret) {
+      bool returned=false;
+      auto returnHandle = [&returned, _ret] (ValuePass *ret) {
+	returned=true;
+	if(_ret) *_ret = *ret;
+	debug(6, "return hook set");
+      };
+      FunctionScope<decltype(returnHandle)> scope(_scope, returnHandle);
       debug(5,"function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
@@ -94,12 +111,14 @@ namespace ilang {
 	  it++;
 	}
       }
-      for(Node *n : *body) {
-	assert(n);
-	debug(5,"function run");
-	n->Run(&scope);
+      if(body) { // body can be null if there is nothing
+	for(Node *n : *body) {
+	  if(returned) return;
+	  assert(n);
+	  debug(6,"function run");
+	  n->Run(&scope);
+	}
       }
-      
     }
 
     Variable::Variable (list<string> *n, list<string> *mod):
@@ -144,13 +163,13 @@ namespace ilang {
 	assert(dynamic_cast<parserNode::Value*>(n));
 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
       }
+      ValuePass ret = ValuePass(new ilang::Value);
       boost::any_cast<Function*>(
 				 //scope->lookup("something")
 				 func
-				 ->Get()->Get())->Call(scope->fileScope(), par);
+				 ->Get()->Get()) ->Call(scope->fileScope(), par, &ret);
       
-      // needs to be changed to return the value
-      
+      return ret;
     }
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
@@ -177,22 +196,29 @@ namespace ilang {
       //return RunReturn(new ilang::Value);
       //ilang::Variable *var = target->Get();
     }
+    ValuePass AssignExpr::GetValue (Scope *scope) {
+      ValuePass v = eval->GetValue(scope);
+      target->Set(scope, v);
+      return v;
+    }
     MathEquation::MathEquation(Value *r, Value *l, action a) : left(l), right(r), Act(a) {}
     void MathEquation::Run(Scope *scope) {
-      switch(Act) {
-      case add:
-      case subtract:
-      case multiply:
-      case devide:
-      }
+      GetValue(scope); // should not have any difference between running
+      /*
+	switch(Act) {
+	case add:
+	case subtract:
+	case multiply:
+	case devide:
+	}*/
     }
     ValuePass MathEquation::GetValue(Scope *scope) {
       switch(Act) {
       case add:
-	return 
       case subtract:
       case multiply:
       case devide:
+	break;
       }
     }
   }

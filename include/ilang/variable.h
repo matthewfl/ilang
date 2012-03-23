@@ -43,11 +43,11 @@ namespace ilang {
     Type type;
     union {
       long INT;
-      double DOUBLE
+      double DOUBLE;
     };
   public:
     Number(){type=null;}
-    void Set(
+    void Set();
   };
   
   class Value {

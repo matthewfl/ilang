@@ -55,7 +55,7 @@ depend:
 	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile 
 
 test: $(TARGET)
-	$(TARGET) test.i
+	./$(TARGET) test.i -v 10
 debug: $(TARGET)
 	gdb i "--eval-command=run test.i" --eval-command=bt
 

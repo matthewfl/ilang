@@ -1,10 +1,13 @@
-what = {};
+what = {
+Print("something else that could go here");
+return 1;
+};
 something = {
-       if(what())  
+       Print( what() );  
         Print("other\n");
 };
 
 main = {
-        Print("Test");
-        something();
+        Print("Test	");
+	something();
 };

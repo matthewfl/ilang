@@ -41,6 +41,10 @@ namespace ilang {
   Value::Value(boost::any v): val(v) {}
   Value::Value(){}
   void Value::Print () {
+    //cout << "inside print " << this << endl;
+    if(val.empty()) {
+      cout << "printing an empty variable\n";
+    }else
     if(typeid(std::string) == val.type()) {
       cout << boost::any_cast<std::string>(val);
     }else if(typeid(int) == val.type()) {
@@ -48,6 +52,8 @@ namespace ilang {
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }
+    cout << flush;
+    //cout << "over the print\n";
   }
   bool Value::isTrue () {
     if(typeid(std::string) == val.type()) {

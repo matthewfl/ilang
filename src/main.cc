@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int Debug_level=5;
+int Debug_level=0;
 
 int main (int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
@@ -19,6 +19,11 @@ int main (int argc, char **argv) {
       case 'v':
 	Debug_level = atoi(argv[++i]);
 	break;
+      case 'h':
+	cout << "Usage: "<< argv[0] << " file name\n"
+	     << "\t-h\tthishelp document\n"
+	     << "\t-v #\tdebug level\n";
+	return 0;
       }
     }
   }

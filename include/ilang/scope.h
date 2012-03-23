@@ -17,8 +17,11 @@ namespace ilang {
     ilang::Variable * lookup (std::string name);
     ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
     ilang::FileScope * fileScope ();
+    virtual void ParentReturn(ValuePass *val) { assert(parent); parent->ParentReturn(val); }
     Scope(Scope *parent);
-    int Debug();
+    virtual ~Scope();
+
+    int Debug();    
   };
   class FileScope : public Scope {
   protected:
@@ -26,9 +29,12 @@ namespace ilang {
   public:
     FileScope(): Scope((Scope *)NULL) {}
   };
-  class FunctionScope : public Scope {
+  template <typename ReturnHook> class FunctionScope : public Scope {
   public:
-    FunctionScope(Scope *s) : Scope(s) {}
+    FunctionScope(Scope *s, ReturnHook h) : Scope(s), hook(h) {}
+    void ParentReturn(ValuePass *r) { hook(r); }
+  private:
+    ReturnHook hook;
   };
   class ClassScope : public Scope {
   public:

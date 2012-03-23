@@ -74,6 +74,14 @@ namespace ilang {
       ForStmt();
       void Run(Scope*);
     };
+
+    class ReturnStmt : public Node {
+    private:
+      Value *ret;
+    public:
+      ReturnStmt(Node*);
+      void Run(Scope*);
+    };
     
     class Function : public Value {
     private:
@@ -83,7 +91,7 @@ namespace ilang {
       Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run(Scope*);
       void Call(std::list<ilang::Value*>);
-      void Call(Scope*, std::list<ilang::Value*>);
+      void Call(Scope*, std::list<ilang::Value*>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
     };
 
@@ -121,6 +129,7 @@ namespace ilang {
     public:
       AssignExpr (Variable *target, Value *value);
       void Run(Scope*);
+      ValuePass GetValue(Scope *scope);
     };
     class MathEquation : public Expression {
     public:
@@ -131,6 +140,8 @@ namespace ilang {
 	devide
       };
       MathEquation(Value *l, Value *r, action a);
+      void Run(Scope *scope);
+      ValuePass GetValue(Scope *scope);
     private:
       Value *left, *right;
       action Act;
