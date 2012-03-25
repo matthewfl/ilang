@@ -1,6 +1,7 @@
 what = {
 Print("something else that could go here");
-return 1;
+return "returned";
+Print("this should never show");
 };
 something = {
        Print( what() );  

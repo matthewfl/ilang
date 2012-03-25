@@ -8,7 +8,6 @@ using namespace std;
 int Debug_level=0;
 
 int main (int argc, char **argv) {
-  google::InitGoogleLogging(argv[0]);
   if(argc < 2) {
     cout << "Usage: "<<argv[0]<<" file name\n";
     return 1;

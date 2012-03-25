@@ -39,7 +39,7 @@ namespace ilang {
   }
 
   Value::Value(boost::any v): val(v) {}
-  Value::Value(){}
+  Value::Value(): val(NULL){}
   void Value::Print () {
     //cout << "inside print " << this << endl;
     if(val.empty()) {
@@ -52,7 +52,7 @@ namespace ilang {
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }
-    cout << flush;
+    cout << endl <<  flush;
     //cout << "over the print\n";
   }
   bool Value::isTrue () {

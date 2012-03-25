@@ -68,7 +68,8 @@ namespace ilang {
       if(r) {
 	ret = dynamic_cast<Value*>(r);
 	assert(ret);
-      }
+      }else
+	ret = NULL;
     }
     void ReturnStmt::Run(Scope *scope) {
       ValuePass v;
@@ -158,6 +159,7 @@ namespace ilang {
     }
     ValuePass Call::GetValue (Scope *scope) {
       ilang::Variable * func = calling->Get(scope);
+      assert(func);
       std::list<ValuePass> par;
       for(Node * n : *params) {
 	assert(dynamic_cast<parserNode::Value*>(n));

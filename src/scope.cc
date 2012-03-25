@@ -51,6 +51,7 @@ namespace ilang {
   }
   
   ilang::Variable * FileScope::_lookup (string &name) {
+    //TODO: make this check to see if it can't find itx
     return vars.find(name)->second; // there is nothing higher that can be looked at
   }
 

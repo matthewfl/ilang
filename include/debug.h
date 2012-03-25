@@ -5,7 +5,7 @@
 
 #include <assert.h>
 #include <iostream>
-#include "../deps/glog/src/glog/logging.h"
+//#include "../deps/glog/src/glog/logging.h"
 
 #ifndef NDEBUG
 extern int Debug_level;
@@ -13,7 +13,7 @@ extern int Debug_level;
 #define debug_act(x) x
 #define debug_break(x)
 #else
-#define debug(x)
+#define debug(l, x)
 #define debug_act(x)
 #define debug_not(x) x
 #endif
