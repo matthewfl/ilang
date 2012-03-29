@@ -39,6 +39,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
   ilang::parserNode::Node *node;
+  long intNumber;
+  double floatNumber;
 }
 
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else
@@ -47,6 +49,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token <Identifier> T_Identifier
 %token <count> T_break T_return T_continue
 %token <string> T_StringConst
+%token <intNumber> T_IntConst
+%token <floatNumber> T_FloatConst
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
@@ -140,12 +144,14 @@ Expr		:	Function			{}
 		|	Call
 		|	Variable
 		|	T_StringConst			{ $$ = new StringConst($1); }
+		|	T_IntConst			{ $$ = new IntConst($1); }
+		|	T_FloatConst			{ $$ = new FloatConst($1); }
 		|	LValue
 		|	'(' Expr ')'			{$$=$2;}
-		|	Expr '+' Expr			{}
-		|	Expr '-' Expr
-		|	Expr '*' Expr
-		| 	Expr '/' Expr
+		|	Expr '+' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::add); }
+		|	Expr '-' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::subtract); }
+		|	Expr '*' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::multiply); }
+		| 	Expr '/' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::devide); }
 		|	Expr T_eq Expr
 		|	Expr T_ne Expr
 		|	Expr T_le Expr

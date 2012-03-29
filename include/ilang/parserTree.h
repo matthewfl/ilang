@@ -36,7 +36,8 @@ namespace ilang {
       virtual ValuePass GetValue(Scope*)=0;
     };
     class Constant : public Value {
-      
+    public:
+      void Run(Scope*);
     };
 
     // I guess we will leave this in, but most things are using Value, not expression
@@ -48,7 +49,21 @@ namespace ilang {
       char *string;
     public:
       StringConst(char *str);
-      void Run(Scope*);
+      ValuePass GetValue(Scope*);
+    };
+
+    class IntConst : public Constant {
+    private:
+      long num;
+    public:
+      IntConst(long n);
+      ValuePass GetValue(Scope*);
+    };
+    class FloatConst : public Constant {
+    private:
+      double num;
+    public:
+      FloatConst(double d);
       ValuePass GetValue(Scope*);
     };
 

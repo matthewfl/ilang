@@ -1,11 +1,11 @@
 what = {
 Print("something else that could go here");
-return "returned";
+return 0;
 Print("this should never show");
 };
 something = {
-       Print( what() );  
-        Print("other\n");
+      	if( what() )  
+        	Print("other\n");
 };
 
 main = {

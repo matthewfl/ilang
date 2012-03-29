@@ -26,14 +26,24 @@ namespace ilang {
     }
 
 
+    void Constant::Run(Scope *scope) {}
+
     StringConst::StringConst(char *str) :string(str){}
-    void StringConst::Run(Scope *scope) {
-      //return RunReturn(new ilang::Value(string));
-    }
     ValuePass StringConst::GetValue (Scope *scope) {
       debug(5, "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
     }
+
+    IntConst::IntConst(long n) : num(n) {}
+    ValuePass IntConst::GetValue (Scope *scope) {
+      return ValuePass(new ilang::Value(num));
+    }
+
+    FloatConst::FloatConst(double d) : num(d) {}
+    ValuePass FloatConst::GetValue (Scope *scope) {
+      return ValuePass(new ilang::Value(num));
+    }
+    
 
     IfStmt::IfStmt (Node *test_, Node* True_, Node* False_): True(True_), False(False_) {
       Value *t = dynamic_cast<Value*>(test_);
@@ -43,7 +53,6 @@ namespace ilang {
     void IfStmt::Run(Scope *scope) {
       ilang::Value *search = test->GetValue(scope);
       assert(search);
-      search->Print();
       if(search->isTrue()) {
 	if(True) True->Run(scope);
       }else{
@@ -203,9 +212,15 @@ namespace ilang {
       target->Set(scope, v);
       return v;
     }
-    MathEquation::MathEquation(Value *r, Value *l, action a) : left(l), right(r), Act(a) {}
+    MathEquation::MathEquation(Value *r, Value *l, action a) : left(l), right(r), Act(a) {
+      assert(left);
+      assert(right);
+    }
     void MathEquation::Run(Scope *scope) {
-      GetValue(scope); // should not have any difference between running
+      left->Run(scope);
+      right->Run(scope);
+      // we do not need the value so we should not request the vale from the nodes
+      //GetValue(scope); // should not have any difference between running
       /*
 	switch(Act) {
 	case add:
@@ -215,8 +230,18 @@ namespace ilang {
 	}*/
     }
     ValuePass MathEquation::GetValue(Scope *scope) {
+      ValuePass left = this->left->GetValue(scope);
+      ValuePass right = this->right->GetValue(scope);
       switch(Act) {
       case add:
+	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string)) {
+	  return ValuePass(new ilang::Value(std::string(boost::any_cast<std::string>(left->Get()) + boost::any_cast<std::string>(right->Get()))));
+	}else if(left->Get().type() == typeid(double)) {
+	  if(right->Get().type() == typeid(double))
+	    return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) + boost::any_cast<double>(right->Get())));
+	  else if(right->Get().type() == typeid(long)) 
+	    return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) + boost::any_cast<long>(right->Get())));
+	}
       case subtract:
       case multiply:
       case devide:

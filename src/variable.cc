@@ -41,14 +41,19 @@ namespace ilang {
   Value::Value(boost::any v): val(v) {}
   Value::Value(): val(NULL){}
   void Value::Print () {
+    // catch the type id to make this faster
     //cout << "inside print " << this << endl;
     if(val.empty()) {
       cout << "printing an empty variable\n";
-    }else
-    if(typeid(std::string) == val.type()) {
+    }else if(typeid(std::string) == val.type()) {
       cout << boost::any_cast<std::string>(val);
+    }else if(typeid(long) == val.type()) {
+      cout << boost::any_cast<long>(val);
     }else if(typeid(int) == val.type()) {
+      // this should not happen as all ints are currently long
       cout << boost::any_cast<int>(val);
+    }else if(typeid(double) == val.type()) {
+      cout << boost::any_cast<double>(val);
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }
@@ -58,8 +63,12 @@ namespace ilang {
   bool Value::isTrue () {
     if(typeid(std::string) == val.type()) {
       return boost::any_cast<std::string>(val) != "";
+    }else if(typeid(long) == val.type()) {
+      return boost::any_cast<long>(val) != 0;
     }else if(typeid(int) == val.type()) {
       return boost::any_cast<int>(val) != 0;
+    }else if(typeid(double) == val.type()) {
+      return boost::any_cast<double>(val) != 0;
     }else{
       return true; // I guess having a value, even if we can't figure out what it is makes it true
     }
