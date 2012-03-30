@@ -9,6 +9,8 @@ something = {
 };
 
 main = {
-        Print("Test	");
-	something();
+Print("1+1=", 1+1);
+//        Print("Test	");
+//	something();
+
 };
