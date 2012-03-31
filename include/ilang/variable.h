@@ -59,7 +59,7 @@ namespace ilang {
     Value ();
     void Print();
     bool isTrue();
-    boost::any Get();
+    boost::any & Get();
   };
   
 

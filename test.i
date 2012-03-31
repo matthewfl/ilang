@@ -1,16 +1,11 @@
-what = {
-Print("something else that could go here");
-return 0;
-Print("this should never show");
-};
-something = {
-      	if( what() )  
-        	Print("other\n");
+test = {| |
+	Print("what");
 };
 
 main = {
-Print("1+1=", 1+1);
-//        Print("Test	");
-//	something();
-
+	Print("the test program is running");
+	if(1 >= 1)
+		Print("true");
+	else
+		Print("false");
 };

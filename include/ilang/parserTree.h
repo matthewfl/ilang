@@ -162,7 +162,23 @@ namespace ilang {
       action Act;
     };
     class LogicExpression : public Expression {
-      
+    public:
+      enum action {
+	Equal,
+	Not_Equal,
+	Less_Equal,
+ 	Greater_Equal,
+	Less,
+	Greater,
+	And,
+	Or
+      };
+      LogicExpression(Value *l, Value *r, action a);
+      void Run(Scope *scope);
+      ValuePass GetValue(Scope *scope);
+    private:
+      Value *left, *right;
+      action Act;
     };
   }
 }

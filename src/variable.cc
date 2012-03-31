@@ -34,7 +34,7 @@ namespace ilang {
     //return val.get();
   }
 
-  boost::any Value::Get() {
+  boost::any & Value::Get() {
     return val;
   }
 
@@ -61,7 +61,9 @@ namespace ilang {
     //cout << "over the print\n";
   }
   bool Value::isTrue () {
-    if(typeid(std::string) == val.type()) {
+    if(typeid(bool) == val.type()) {
+      return boost::any_cast<bool>(val);
+    }else if(typeid(std::string) == val.type()) {
       return boost::any_cast<std::string>(val) != "";
     }else if(typeid(long) == val.type()) {
       return boost::any_cast<long>(val) != 0;

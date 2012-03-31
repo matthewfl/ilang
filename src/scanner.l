@@ -24,7 +24,7 @@ using namespace std;
 %x COMMENT
 
 IDENTIFIER	([a-zA-Z_][a-zA-Z0-9_]*)
-OPERATOR	([-+/*%=.,;!<>()[\]{}])
+OPERATOR	([-+/*%=.,;!<>()[\]{}\|])
 
 %%
 
@@ -43,6 +43,7 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 "from"			{ return T_from; }
 "as"			{ return T_as; }
 "if"			{ return T_if; }
+"else"			{ return T_else; }
 "while"			{ return T_while; }
 "for"			{ return T_for; }
 "Print"			{ return T_print; }
@@ -54,6 +55,7 @@ OPERATOR	([-+/*%=.,;!<>()[\]{}])
 "break"[0-9]+		{ yylval->count = atoi(yytext+5); return T_break; }
 "return"[0-9]+		{ yylval->count = atoi(yytext+6); return T_return; }
 "continue"[0-9]+	{ yylval->count = atoi(yytext+8); return T_continue; }
+
 "=="			{ return T_eq; }
 "!="			{ return T_ne; }
 "<="			{ return T_le; }
