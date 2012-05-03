@@ -25,7 +25,7 @@ namespace ilang {
       //return RunReturn(new ilang::Value);
     }
 
-
+    // this does not need to have anything
     void Constant::Run(Scope *scope) {}
 
     StringConst::StringConst(char *str) :string(str){}
@@ -158,6 +158,9 @@ namespace ilang {
       debug(4,"Get: " << name->front() << " " << v->Get());
       return v;
     }
+    ValuePass Variable::GetValue(Scope *scope) {
+      return Get(scope)->Get();
+    }
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {
       debug(4,"\t\t\tCalling function");
@@ -282,7 +285,7 @@ namespace ilang {
       }
     }
 
-    LogicExpression::LogicExpression(Value *r, Value *l, action a): left(l), right(r), Act(a) {
+    LogicExpression::LogicExpression(Value *l, Value *r, action a): left(l), right(r), Act(a) {
       assert(left);
       assert(right);
     }

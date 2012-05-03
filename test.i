@@ -1,5 +1,7 @@
-test = {| |
-	Print("what");
+test = {|a|
+	if(a == 1)
+		Print("what");
+	//Print(a);
 };
 
 main = {
@@ -8,4 +10,6 @@ main = {
 		Print("true");
 	else
 		Print("false");
+	int a = 1;
+	test(a);
 };

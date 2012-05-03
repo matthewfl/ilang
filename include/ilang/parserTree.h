@@ -44,6 +44,11 @@ namespace ilang {
     class Expression : public Value {
     };
 
+    class Object : public Value {
+    private:
+      Object();
+    };
+
     class StringConst : public Constant {
     private:
       char *string;
@@ -110,7 +115,7 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
 
-    class Variable : public Node {
+    class Variable : public Value {
     private:
       std::list<std::string> *name;
       std::list<std::string> *modifiers;
@@ -119,6 +124,7 @@ namespace ilang {
       void Run(Scope*);
       void Set(Scope*, ValuePass var);
       ilang::Variable * Get(Scope*);
+      ValuePass GetValue(Scope*);
     };
     class Call : public Value {
     private:

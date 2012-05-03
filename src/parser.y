@@ -11,6 +11,7 @@ using namespace ilang::parserNode;
 #include <iostream>
 #include <string>
 #include <list>
+#include <map>
 using namespace std;
 
 void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
@@ -38,12 +39,13 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   char *string;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
+  std::map<std::string, ilang::parserNode::Node*> *object_map;
   ilang::parserNode::Node *node;
   long intNumber;
   double floatNumber;
 }
 
-%token T_import T_from T_as T_if T_while T_for T_print T_class T_else
+%token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object
 %token T_eq T_ne T_le T_ge T_and T_or
 
 %token <Identifier> T_Identifier
@@ -54,8 +56,9 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable Decl Expr Call Stmt IfStmt ReturnStmt
-%type <node_list> Stmts ParamList DeclList ExprList
+%type <node> Function Variable Decl Expr Call Stmt IfStmt ReturnStmt ObjectNode Object Class
+%type <node_list> Stmts ParamList DeclList ExprList 
+%type <object_map> ObjectList
 
 
 %%
@@ -102,8 +105,21 @@ Stmt		:	';'
 		|	WhileStmt
 		|	ForStmt
 		|	ReturnStmt
+		|	Decl
 		;
 
+ObjectNode	:	Variable ':' Expr
+		;
+
+ObjectList	:	ObjectList ',' ObjectNode
+		|	ObjectNode
+		;	
+
+Object		:	T_object '{' ObjectList '}'
+		;
+
+Class		:	T_class '{' ObjectList '}'
+		;
 
 IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
 		|	T_if '(' Expr ')' Stmt T_else Stmt { $$ = new IfStmt($3, $5, $7); }
