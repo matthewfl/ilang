@@ -2,6 +2,7 @@
 #define _ilang_parserTree
 
 #include <list>
+#include <map>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
@@ -40,13 +41,31 @@ namespace ilang {
       void Run(Scope*);
     };
 
+    
+
     // I guess we will leave this in, but most things are using Value, not expression
     class Expression : public Value {
     };
 
+    class Variable;
+
     class Object : public Value {
     private:
-      Object();
+      std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+    public:
+    Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+      void Run(Scope*);
+      ValuePass GetValue(Scope*);
+    };
+
+    class Class : public Value {
+    private:
+      std::list<Node*> *parents;
+      std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+    public:
+      Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+      void Run(Scope*);
+      ValuePass GetValue(Scope*);
     };
 
     class StringConst : public Constant {
@@ -117,6 +136,7 @@ namespace ilang {
 
     class Variable : public Value {
     private:
+      friend class Variable_compare;
       std::list<std::string> *name;
       std::list<std::string> *modifiers;
     public:
@@ -126,6 +146,12 @@ namespace ilang {
       ilang::Variable * Get(Scope*);
       ValuePass GetValue(Scope*);
     };
+
+    class Variable_compare {
+    public:
+      bool operator() (Variable* a, Variable *b);
+    };
+
     class Call : public Value {
     private:
       Variable *calling;

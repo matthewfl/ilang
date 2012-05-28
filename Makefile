@@ -1,6 +1,6 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc
 LIBS=-lfl -lpthread
 
 BUILDDIR=build

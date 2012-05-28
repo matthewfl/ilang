@@ -161,6 +161,10 @@ namespace ilang {
     ValuePass Variable::GetValue(Scope *scope) {
       return Get(scope)->Get();
     }
+    bool Variable_compare::operator()(Variable *a, Variable *b) {
+      return true;
+    }
+
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {
       debug(4,"\t\t\tCalling function");
@@ -425,5 +429,28 @@ namespace ilang {
 	break;
       }
     }
-  }
-}
+    
+    Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj)// : objects(obj) 
+    {
+      
+    }
+    void Object::Run(Scope *scope) {
+      // should not be doing anything
+    }
+    ValuePass Object::GetValue(Scope *scope) {
+    }
+
+    Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj)//: parents(p), objects(obj) 
+    {
+      
+    }
+    void Class::Run(Scope *scope) {
+      // should not be doing anything
+    }
+    ValuePass Class::GetValue(Scope *scope) {
+      
+    }
+
+
+  } // namespace parserTree
+} // namespace ilang
