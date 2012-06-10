@@ -11,6 +11,8 @@
 
 namespace ilang {
   class Scope;
+  class Object;
+  class Class;
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
@@ -60,8 +62,8 @@ namespace ilang {
 
     class Class : public Value {
     private:
-      std::list<Node*> *parents;
-      std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+      //std::list<Node*> *parents;
+      //std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
     public:
       Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
       void Run(Scope*);
@@ -134,9 +136,14 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
 
+    
+
     class Variable : public Value {
     private:
       friend class Variable_compare;
+      friend class ::ilang::Object;
+      friend class ::ilang::Class;
+
       std::list<std::string> *name;
       std::list<std::string> *modifiers;
     public:

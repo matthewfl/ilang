@@ -1,7 +1,10 @@
 #include "parserTree.h"
 #include "parser.h"
 #include "scope.h"
+#include "object.h"
 #include "debug.h"
+
+
 
 #include <iostream>
 using namespace std;
@@ -155,14 +158,37 @@ namespace ilang {
       ilang::Variable *v;
       v = scope->lookup(name->front());
       assert(v);
+      if(name->size() > 1) {
+	for(auto it=++(name->begin());it != name->end(); it++) {
+	  ilang::Object *obj = boost::any_cast<ilang::Object*>(v->Get()->Get());
+	  v = obj->operator[](*it);
+	  assert(v);
+	}
+      }
       debug(4,"Get: " << name->front() << " " << v->Get());
       return v;
     }
+    
     ValuePass Variable::GetValue(Scope *scope) {
       return Get(scope)->Get();
     }
     bool Variable_compare::operator()(Variable *a, Variable *b) {
-      return true;
+      auto a_it = a->name->begin();
+      auto b_it = b->name->begin();
+      while(a_it != a->name->end() && b_it != b->name->end()) {
+	if(*a_it == *b_it) continue;
+	return *a_it > *b_it;
+      }
+      if(a_it == a->name->end()) {
+	if(b_it != b->name->end()) {
+	  return false;
+	}
+      }else{ // a_it != a->name->end()
+	if(b_it == b->name->end()) {
+	  return true;
+	}
+      }
+      return true; // just something if they are "equal"
     }
 
     Call::Call (Variable *call, list<Node*> *args):
@@ -430,14 +456,19 @@ namespace ilang {
       }
     }
     
-    Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj)// : objects(obj) 
+    Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj) 
     {
-      
+      // object created later so we are just going to store the informationa atm
     }
     void Object::Run(Scope *scope) {
       // should not be doing anything
     }
     ValuePass Object::GetValue(Scope *scope) {
+      // will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
+      debug(4, "Object getting value")
+      ilang::Object *obj = new ilang::Object(objects, scope);
+      ilang::Value *val = new ilang::Value(obj);
+      return ValuePass(val);
     }
 
     Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj)//: parents(p), objects(obj) 

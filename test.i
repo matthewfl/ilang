@@ -1,6 +1,6 @@
 
 
-
+/*
 random = class {
         init: {
                 // this would be run when the new is called
@@ -10,7 +10,13 @@ random = class {
         
         
 };
+*/
+
+what = object {
+	other: 123
+};
 
 main = {
-        something = new(random);
+  //      something = new(random);
+	Print(what.other);
 };

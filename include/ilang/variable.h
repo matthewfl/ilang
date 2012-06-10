@@ -9,11 +9,14 @@
 
 namespace ilang {
   class Value;
+  class Variable;
   //typedef boost::shared_ptr<ilang::Value> ValuePass;
   typedef ilang::Value* ValuePass;
   class Variable_modifier {
   public:
     virtual bool Check(const boost::any&)=0;
+    virtual Variable_modifier* new_variable(std::string, Variable*);
+    virtual void Set(const boost::any &a) {}
   };
 
   extern std::map<std::string, Variable_modifier*> ilang_Variable_modifier_list;

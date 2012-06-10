@@ -14,6 +14,10 @@ namespace ilang {
     }
     return true;
   }
+  Variable_modifier * Variable_modifier::new_variable(std::string name, Variable *v) {
+    return this;
+  }
+ 
   Variable::Variable(string name, list<string> modifiers) {
     Name = name;
     for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
@@ -21,7 +25,7 @@ namespace ilang {
       if(!m)
 	cerr << "Variable modifier "<<*it<<" not found\n";
       else
-	Modifiers.push_back(m);
+	Modifiers.push_back(m->new_variable(name, this));
     }
   }
   void Variable::Set(ValuePass v) {
@@ -82,14 +86,15 @@ namespace {
   using namespace ilang;
   class Int_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &a) {
-      return true;
+    bool Check (const boost::any &val) {
+      return typeid(int) == val.type() || typeid(long) == val.type();
     }
   };
   ILANG_VARIABLE_MODIFIER(int, Int_var_type)
   class String_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &a) {
+    bool Check (const boost::any &val) {
+      return typeid(std::string) == val.type();
       return false;
     }
   };

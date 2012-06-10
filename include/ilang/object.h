@@ -6,6 +6,7 @@
 #include <map>
 #include "variable.h"
 #include "parserTree.h"
+#include "scope.h"
 
 namespace ilang {
   class Object;
@@ -14,7 +15,7 @@ namespace ilang {
     std::vector<Class*> parents;
     std::map<std::string, ilang::Variable> members;
   public:
-    Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+    Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
     Object* NewClass();
     
   };
@@ -22,10 +23,12 @@ namespace ilang {
   private:
     Class *baseClass;
     std::map<std::string, ilang::Variable> members;
+    void Debug();
   public:
     Object(Class *base);
     Object();
-    ilang::Variable & operator [] (std::string name);
+    Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, Scope*);
+    ilang::Variable * operator [] (std::string name);
   };
 }
 

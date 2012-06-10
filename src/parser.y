@@ -110,6 +110,7 @@ Stmt		:	';'
 		;
 
 ObjectNode	:	Variable ':' Expr		{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), $3); /* should not have any problems with the cast */  }
+		|	Variable			{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), NULL); }
 		;
 
 ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
@@ -160,6 +161,7 @@ ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
 	
 Expr		:	Function			{}
 		|	Class
+		|	Object
 		|	Call
 		|	Variable
 		|	T_StringConst			{ $$ = new StringConst($1); }
