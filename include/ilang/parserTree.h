@@ -150,13 +150,36 @@ namespace ilang {
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run(Scope*);
       void Set(Scope*, ValuePass var);
-      ilang::Variable * Get(Scope*);
+      // not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
+      virtual ilang::Variable * Get(Scope*);
       ValuePass GetValue(Scope*);
     };
 
     class Variable_compare {
     public:
       bool operator() (Variable* a, Variable *b);
+    };
+
+
+    class FieldAccess : public Variable {
+    private:
+      std::string identifier;
+      Value *Obj;
+    public:
+      FieldAccess(Node*, std::string);
+      //void Run(Scope*);
+      //void Set(Scope*, ValuePass var);
+      ilang::Variable * Get(Scope*);
+      //ValuePass GetValue(Scope*);
+    };
+
+    class ArrayAccess : public Variable {
+      private:
+      Value *Obj;
+      Value *Lookup;
+    public:
+      ArrayAccess(Node*, Node*);
+      ilang::Variable * Get(Scope*);
     };
 
     class Call : public Value {

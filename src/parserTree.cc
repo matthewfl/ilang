@@ -136,6 +136,8 @@ namespace ilang {
 
     Variable::Variable (list<string> *n, list<string> *mod):
       name(n), modifiers(mod) {
+      if(!name) name = new list<string>;
+      if(!modifiers) modifiers = new list<string>;
       //cout << "\t\t\t" << name << "\n";
     }
     void Variable::Run (Scope *scope) {
@@ -146,14 +148,18 @@ namespace ilang {
       ilang::Variable *v;
       if(!modifiers->empty())
 	v = scope->forceNew(name->front(), *modifiers);
-      else
-	v = scope->lookup(name->front());
+      else {
+	//v = scope->lookup(name->front());
+	v = Get(scope);
+      }
       assert(v);
       v->Set(var);
       debug(4,"Set: " << name->front() << " " << var << " " << v->Get());
       scope->Debug();
     }
     ilang::Variable * Variable::Get(Scope *scope) {
+      // this should not happen
+      assert(0);
       scope->Debug();
       ilang::Variable *v;
       v = scope->lookup(name->front());
@@ -190,6 +196,45 @@ namespace ilang {
       }
       return true; // just something if they are "equal"
     }
+
+    FieldAccess::FieldAccess (Node *obj, std::string id) :Variable(NULL, NULL), identifier(id), Obj(NULL) {
+      if(obj) {
+	assert(dynamic_cast<Value*>(obj));
+	Obj = dynamic_cast<Value*>(obj);
+      }
+    }
+    ilang::Variable * FieldAccess::Get(Scope *scope) {
+      ilang::Variable *v;
+      if(Obj) {
+	// this might cause problems if what is returned is not an object
+	ilang::Object *obj = boost::any_cast<ilang::Object*>(Obj->GetValue(scope)->Get());
+	v = obj->operator[](identifier);
+      }else{
+	v = scope->lookup(identifier);
+      }
+      assert(v);
+      return v;
+    }
+
+    ArrayAccess::ArrayAccess(Node *obj, Node *look):Variable(NULL,NULL) {
+      assert(dynamic_cast<Value*>(obj));
+      Obj = dynamic_cast<Value*>(obj);
+      assert(dynamic_cast<Value*>(look));
+      Lookup = dynamic_cast<Value*>(look);
+    }
+
+    ilang::Variable * ArrayAccess::Get(Scope *scope) {
+      ilang::Object *obj = boost::any_cast<ilang::Object*>(Obj->GetValue(scope)->Get());
+      boost::any & val = Lookup->GetValue(scope)->Get();
+      if(val.type() == typeid(long)) {
+	assert(dynamic_cast<ilang::Array*>(obj));
+	return dynamic_cast<ilang::Array*>(obj)->operator[](boost::any_cast<long>(val));
+	
+      }else if(val.type() == typeid(std::string)) {
+	return obj->operator[](boost::any_cast<std::string>(val));
+      }
+    }
+
 
     Call::Call (Variable *call, list<Node*> *args):
       calling(call), params(args) {

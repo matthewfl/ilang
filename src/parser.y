@@ -57,7 +57,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable Decl Expr Call Stmt IfStmt ReturnStmt Object Class
+%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class
 %type <node_list> Stmts ParamList DeclList ExprList 
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -86,10 +86,14 @@ DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }
 Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		;
 
-Variable	:	AccessList			{ $$ = new Variable($1, new list<string>); }
+Variable	:	LValue				{ }
 		|	ModifierList AccessList		{ $$ = new Variable($2, $1); }
 		;
 
+LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
+		|	Expr '.' Identifier		{ $$ = new FieldAccess($1, $3); }
+		|	Expr '[' Expr ']'		{}
+		;
 
 ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($2); }
 		|	Identifier			{ ($$ = new list<string>)->push_back($1); }
@@ -181,11 +185,6 @@ Expr		:	Function			{}
 		|	Expr '>' Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Greater); }
 		|	Expr T_and Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::And); }
 		|	Expr T_or Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Or); }
-		;
-
-LValue		:	Identifier			{}
-		|	Expr '.' Identifier		{}
-		|	Expr '[' Expr ']'		{}
 		;
 
 Identifier	:	T_Identifier			{ }

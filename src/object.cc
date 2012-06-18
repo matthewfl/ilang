@@ -36,7 +36,10 @@ namespace ilang {
     auto iter = members.find(name);
     if(iter == members.end()) {
       debug(0, "Member "<< name << " not found in object");
-      assert(0);
+      // I guess create a new one and insert it
+      members.insert(pair<std::string, ilang::Variable>(name, Variable(name, list<string>())));
+      return &(members.find(name)->second);
+      //assert(0);
     }
     return &(iter->second);
   }
@@ -47,6 +50,20 @@ namespace ilang {
       cout << "\t\t" << it.first << "\t" << s->Get().type().name() << "\t" << endl;
       s->Print();
     }
+  }
+  
+  ilang::Variable * Array::operator [] (long place) {
+  }
+
+  ilang::Variable * Array::operator[] (std::string name) {
+    if(name == "length") {
+      ilang::Value *val = new ilang::Value((long)members.size());
+      
+    }
+    // idk what else this can be/should be
+    // maybe return functions such as push and pop etc
+    assert(0);
+    
   }
   
 }
