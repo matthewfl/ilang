@@ -72,7 +72,8 @@ namespace ilang {
 
     class StringConst : public Constant {
     private:
-      char *string;
+      //char *string;
+      std::string string;
     public:
       StringConst(char *str);
       ValuePass GetValue(Scope*);
@@ -153,6 +154,7 @@ namespace ilang {
       // not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
       virtual ilang::Variable * Get(Scope*);
       ValuePass GetValue(Scope*);
+      virtual std::string GetFirstName();
     };
 
     class Variable_compare {
@@ -171,6 +173,7 @@ namespace ilang {
       //void Set(Scope*, ValuePass var);
       ilang::Variable * Get(Scope*);
       //ValuePass GetValue(Scope*);
+      virtual std::string GetFirstName();
     };
 
     class ArrayAccess : public Variable {

@@ -16,8 +16,11 @@ namespace ilang {
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
   }
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL) {
+    assert(obj);
+    assert(scope);
     for(auto it : *obj) {
-      std::string name = it.first->name->front();
+      //assert(it.first->name);
+      std::string name = it.first->GetFirstName();
       if(members.find(name) != members.end()) {
 	debug(0, "Member in Object over written");
 	assert(0);

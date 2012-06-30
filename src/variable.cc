@@ -61,7 +61,7 @@ namespace ilang {
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }
-    cout << endl <<  flush;
+    cout <<  flush;
     //cout << "over the print\n";
   }
   bool Value::isTrue () {

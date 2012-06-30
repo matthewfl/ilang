@@ -4,7 +4,8 @@
 #include "object.h"
 #include "debug.h"
 
-
+// for string escape
+#include <boost/algorithm/string.hpp>
 
 #include <iostream>
 using namespace std;
@@ -31,7 +32,16 @@ namespace ilang {
     // this does not need to have anything
     void Constant::Run(Scope *scope) {}
 
-    StringConst::StringConst(char *str) :string(str){}
+    StringConst::StringConst(char *str) :string(str){
+      delete[] str;
+      using boost::replace_all;
+      replace_all(string, "\\n", "\n");
+      replace_all(string, "\\t", "\t");
+      replace_all(string, "\\\\", "\\");
+      replace_all(string, "\\\"", "\"");
+      replace_all(string, "\\'", "'"); 
+      
+    }
     ValuePass StringConst::GetValue (Scope *scope) {
       debug(5, "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
@@ -197,6 +207,10 @@ namespace ilang {
       return true; // just something if they are "equal"
     }
 
+    std::string Variable::GetFirstName() {
+      return name->front();
+    }
+
     FieldAccess::FieldAccess (Node *obj, std::string id) :Variable(NULL, NULL), identifier(id), Obj(NULL) {
       if(obj) {
 	assert(dynamic_cast<Value*>(obj));
@@ -214,6 +228,10 @@ namespace ilang {
       }
       assert(v);
       return v;
+    }
+    
+    std::string FieldAccess::GetFirstName() {
+      return identifier;
     }
 
     ArrayAccess::ArrayAccess(Node *obj, Node *look):Variable(NULL,NULL) {
