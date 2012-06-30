@@ -58,6 +58,8 @@ namespace ilang {
       cout << boost::any_cast<int>(val);
     }else if(typeid(double) == val.type()) {
       cout << boost::any_cast<double>(val);
+    }else if(typeid(bool) == val.type()) {
+      cout << boost::any_cast<bool>(val) ? "true" : "false" ;
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }

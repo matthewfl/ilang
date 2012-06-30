@@ -73,17 +73,27 @@ namespace ilang {
       }
     }
 
-    ForStmt::ForStmt () {}
-    void ForStmt::Run(Scope *scope) {}
+    ForStmt::ForStmt (Node *pre_, Node *test_, Node *each_, Node *exe_) :pre(pre_), each(each_), exe(exe_) {
+      Value *t = dynamic_cast<Value*>(test_);
+      assert(t);
+      test = t;
+    }
+    void ForStmt::Run(Scope *scope) {
+      for( pre->Run(scope) ; test->GetValue(scope)->isTrue() ; each->Run(scope) )
+	exe->Run(scope);
+    }
 
     WhileStmt::WhileStmt (Node *test_, Node *exe_): exe(exe_) {
-      Value *t=dynamic_cast<Value*>(test);
+      Value *t=dynamic_cast<Value*>(test_);
       assert(t);
       test=t;
     }
     void WhileStmt::Run(Scope *scope) {
-      while(test->GetValue(scope)->isTrue())
+      // note to self: must recall GetValue each time as it is what is actually doing the updating
+      while(test->GetValue(scope)->isTrue()) {
 	exe->Run(scope);
+	test->GetValue(scope)->Print();
+      }
     }
 
     ReturnStmt::ReturnStmt (Node *r) {
@@ -243,14 +253,16 @@ namespace ilang {
 
     ilang::Variable * ArrayAccess::Get(Scope *scope) {
       ilang::Object *obj = boost::any_cast<ilang::Object*>(Obj->GetValue(scope)->Get());
-      boost::any & val = Lookup->GetValue(scope)->Get();
-      if(val.type() == typeid(long)) {
+      ValuePass val = Lookup->GetValue(scope);
+      return obj->operator[](val);
+
+      /*if(val.type() == typeid(long)) {
 	assert(dynamic_cast<ilang::Array*>(obj));
 	return dynamic_cast<ilang::Array*>(obj)->operator[](boost::any_cast<long>(val));
 	
       }else if(val.type() == typeid(std::string)) {
 	return obj->operator[](boost::any_cast<std::string>(val));
-      }
+	}*/
     }
 
 
@@ -308,7 +320,7 @@ namespace ilang {
       target->Set(scope, v);
       return v;
     }
-    MathEquation::MathEquation(Value *r, Value *l, action a) : left(l), right(r), Act(a) {
+    MathEquation::MathEquation(Value *l, Value *r, action a) : left(l), right(r), Act(a) {
       assert(left);
       assert(right);
     }

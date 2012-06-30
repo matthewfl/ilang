@@ -18,6 +18,7 @@ namespace ilang {
     Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
     Object* NewClass();
     ilang::Variable * operator[](std::string name);
+    ilang::Variable * operator[](ValuePass);
   };
   class Object {
   private:
@@ -29,13 +30,14 @@ namespace ilang {
     Object();
     Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, Scope*);
     virtual ilang::Variable * operator [] (std::string name);
+    virtual ilang::Variable * operator [] (ValuePass);
   };
   class Array : public Object {
     std::vector<ilang::Variable> members;
   public:
     Array(std::list<ilang::parserNode::Node*>, Scope*);
     ilang::Variable * operator[] (std::string name);
-    ilang::Variable * operator[] (long place);
+    ilang::Variable * operator[] (ValuePass);
   };
 }
 

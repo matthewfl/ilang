@@ -112,8 +112,13 @@ namespace ilang {
       void Run(Scope*);
     };
     class ForStmt : public Node {
+    private:
+      Node *pre;
+      Value *test;
+      Node *each;
+      Node *exe;
     public:
-      ForStmt();
+      ForStmt(Node*, Node*, Node*, Node*);
       void Run(Scope*);
     };
 

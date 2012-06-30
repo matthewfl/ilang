@@ -1,11 +1,9 @@
-something = object {
-	what: "test",
-	other: {
-		Print("The other function\" worked");
-	}
-};
-
 main = {
-	Print("This is getting printed out from the object: " , something.what, "\n");
-	something.other();
+	a = 5;
+	Print(a, "\n");
+	a = 4;
+	Print(a, "\n");
+	a = a - 1;
+	Print(a, "\n");
+	Print(2 / 3.0, "\n");
 };

@@ -57,7 +57,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class
+%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class WhileStmt ForStmt
 %type <node_list> Stmts ParamList DeclList ExprList 
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -132,10 +132,10 @@ IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
 		|	T_if '(' Expr ')' Stmt T_else Stmt { $$ = new IfStmt($3, $5, $7); }
 		;
 
-WhileStmt	:	T_while	'(' Expr ')' Stmt 	{}
+WhileStmt	:	T_while	'(' Expr ')' Stmt 	{ $$ = new WhileStmt ($3, $5); }
 		;
 
-ForStmt		:	T_for '(' Expr ')' Stmt		{}
+ForStmt		:	T_for '(' Decl ';' Expr ';' Expr ')' Stmt	{ $$ = new ForStmt($3, $5, $7, $9); }
 		;
 
 ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
