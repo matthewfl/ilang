@@ -5,11 +5,54 @@
 using namespace std;
 
 namespace ilang {
-  Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) {
-  
+  Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope* scope) {
+    assert(p);
+    assert(obj);
+    assert(scope);
+    
+    for(auto it : *p) {
+      assert(dynamic_cast<ilang::parserNode::Value*>(it));
+      boost::any & a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(scope)->Get();
+      // this will probably need to get changed and stuff, idk
+      // this is going to return what ever type is returned by the GetValue from class
+      assert(a.type() == typeid(Class*));
+      parents.push_back(boost::any_cast<Class*>(a));
+    }
+    for(auto it : *obj) {
+      std::string name = it.first->GetFirstName();
+      if(members.find(name) != members.end()) {
+	debug(0, "Member in class overwritten within self");
+	assert(0);
+      }
+      ilang::Variable var(name, *(it.first->modifiers));
+      if(it.second) {
+	assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
+	var.Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
+      }
+      members.insert(pair<std::string, ilang::Variable>(name, var));
+    }
   }
   Object* Class::NewClass() {
     return new Object(this);
+  }
+  ilang::Variable * Class::operator[](std::string name) {
+    ilang::Variable *var;
+    auto search = members.find(name);
+    if(search == members.end()) {
+      for(auto it : parents) {
+	var = it->operator[](name);
+	if(var) return var;
+      }
+    }else{
+      return &(search->second);
+    }
+    
+  }
+  ilang::Variable * Class::operator[](ValuePass val) {
+    if(val->Get().type() == typeid(std::string))
+      return operator[](boost::any_cast<std::string>(val->Get()));
+    assert(0); 
+    return NULL; // this most likely will get changed in the future 
   }
 
   Object::Object(Class *base): baseClass(base) {
@@ -39,11 +82,18 @@ namespace ilang {
     debug_num(5, Debug() );
     auto iter = members.find(name);
     if(iter == members.end()) {
-      debug(4, "Member "<< name << " not found in object");
+      if(baseClass) {
+	// need to make something if the variable is getting set so that it is save differently
+	ilang::Variable * var = baseClass->operator[](name);
+	if(var)
+	  return var;
+      } // if we don't find the variable then make a new one and return it
+      debug(0, "Member "<< name << " not found in object");
       // I guess create a new one and insert it
       members.insert(pair<std::string, ilang::Variable>(name, Variable(name, list<string>())));
       return &(members.find(name)->second);
       //assert(0);
+      
     }
     return &(iter->second);
   }

@@ -62,8 +62,8 @@ namespace ilang {
 
     class Class : public Value {
     private:
-      //std::list<Node*> *parents;
-      //std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+      std::list<Node*> *parents;
+      std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
     public:
       Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
       void Run(Scope*);
@@ -204,6 +204,11 @@ namespace ilang {
     public:
       PrintCall(std::list<Node*> *args);
       ValuePass GetValue (Scope*); // returns null
+    };
+    class NewCall : public Call {
+    public:
+      NewCall(std::list<Node*> *args);
+      ValuePass GetValue(Scope*); 
     };
 
     

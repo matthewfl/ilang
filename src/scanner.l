@@ -49,6 +49,7 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "Print"			{ return T_print; }
 "class"			{ return T_class; }
 "object"		{ return T_object; }
+"new"			{ return T_new; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }
@@ -75,6 +76,4 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 [0-9]*"."[0-9]*([Ee][-+]?[0-9]+)?	{ yylval->floatNumber = atof(yytext); return T_FloatConst; }
 
 %%
-
-
 

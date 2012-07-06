@@ -118,6 +118,7 @@ namespace ilang {
       Call(scope, p);
     }
     ValuePass Function::GetValue(Scope *scope) {
+      // this need to track the scope at this point so that it could be use later in the funciton
       debug(5, "Function get value");
       return ValuePass(new ilang::Value(this));
     }
@@ -174,7 +175,7 @@ namespace ilang {
       }
       assert(v);
       v->Set(var);
-      debug(4,"Set: " << name->front() << " " << var << " " << v->Get());
+      debug(4,"Set: " << GetFirstName() << " " << var << " " << v->Get());
       scope->Debug();
     }
     ilang::Variable * Variable::Get(Scope *scope) {
@@ -198,6 +199,10 @@ namespace ilang {
     ValuePass Variable::GetValue(Scope *scope) {
       return Get(scope)->Get();
     }
+    std::string Variable::GetFirstName() {
+      return name->front();
+    }
+
     bool Variable_compare::operator()(Variable *a, Variable *b) {
       auto a_it = a->name->begin();
       auto b_it = b->name->begin();
@@ -217,9 +222,7 @@ namespace ilang {
       return true; // just something if they are "equal"
     }
 
-    std::string Variable::GetFirstName() {
-      return name->front();
-    }
+    
 
     FieldAccess::FieldAccess (Node *obj, std::string id) :Variable(NULL, NULL), identifier(id), Obj(NULL) {
       if(obj) {
@@ -332,6 +335,10 @@ namespace ilang {
     ValuePass MathEquation::GetValue(Scope *scope) {
       ValuePass left = this->left->GetValue(scope);
       ValuePass right = this->right->GetValue(scope);
+      /* when trying for speed boost
+	auto left_type = left->Get().type();
+	auto right_type = right->Get().type();
+       */
       switch(Act) {
       case add:
 	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string)) {
@@ -546,15 +553,31 @@ namespace ilang {
       return ValuePass(val);
     }
 
-    Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj)//: parents(p), objects(obj) 
+    Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj): parents(p), objects(obj) 
     {
-      
+      assert(p);
+      assert(obj);
     }
     void Class::Run(Scope *scope) {
       // should not be doing anything
     }
     ValuePass Class::GetValue(Scope *scope) {
-      
+      ilang::Class *c = new ilang::Class(parents, objects, scope);
+      ilang::Value *val = new ilang::Value(c);
+      return ValuePass(val);
+    }
+
+    NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
+      // might change the grammer to reflect that this needs one element
+      // might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
+      assert(args->size() == 1);
+      assert(dynamic_cast<Value*>(args->front()));
+    }
+    ValuePass NewCall::GetValue(Scope *scope) {
+      boost::any & a = dynamic_cast<Value*>(params->front())->GetValue(scope)->Get();
+      assert(a.type() == typeid(ilang::Class*));
+      ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() );
+      return ValuePass(val);
     }
 
 

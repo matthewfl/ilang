@@ -1,9 +1,13 @@
+something = class {
+	test: 123,
+	aa: {
+		Print("from the class");
+	}
+};
+
 main = {
-	a = 5;
-	Print(a, "\n");
-	a = 4;
-	Print(a, "\n");
-	a = a - 1;
-	Print(a, "\n");
-	Print(2 / 3.0, "\n");
+	what = new(something);
+	Print("working");
+	Print(what.test);
+	what.aa();
 };

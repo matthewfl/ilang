@@ -15,7 +15,7 @@ namespace ilang {
     std::vector<Class*> parents;
     std::map<std::string, ilang::Variable> members;
   public:
-    Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+    Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope*);
     Object* NewClass();
     ilang::Variable * operator[](std::string name);
     ilang::Variable * operator[](ValuePass);
