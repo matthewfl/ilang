@@ -3,9 +3,10 @@
 ~variables
 better errors regarding programming
 
-objects
+~objects
 import
 classes
+fix functions to support classes and bindings
 
 C++ bindings
 modifying code

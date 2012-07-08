@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "scope.h"
 #include "object.h"
+#include "function.h"
 #include "debug.h"
 
 // for string escape
@@ -24,9 +25,13 @@ namespace ilang {
 	  (*it)->Run(&scope);
 	scope.Debug();
       }
-      list<ilang::Value*> v;
-      boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
+      //list<ilang::Value*> v;
+      //boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
       //return RunReturn(new ilang::Value);
+      
+      vector<ilang::Value*> v;
+      boost::any_cast<ilang::Function_ptr>(scope.lookup("main")->Get()->Get())(&scope, v, NULL);
+      
     }
 
     // this does not need to have anything
@@ -111,22 +116,23 @@ namespace ilang {
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
       debug(5, "\t\t\tfunction constructed" );
-
     }
     void Function::Run(Scope *scope) {
-      list<ilang::Value*> p;
+      vector<ilang::Value*> p;
       Call(scope, p);
     }
     ValuePass Function::GetValue(Scope *scope) {
       // this need to track the scope at this point so that it could be use later in the funciton
       debug(5, "Function get value");
-      return ValuePass(new ilang::Value(this));
+      ilang::Function_ptr f = boost::bind(&Function::Call, this, scope, _2, _3);
+      return ValuePass(new ilang::Value(f));
+      //return ValuePass(new ilang::Value(this));
     }
-    void Function::Call(list<ilang::Value*> params) {
+    void Function::Call(vector<ilang::Value*> params) {
       // this needs to be removed
       Call(NULL, params);
     }
-    void Function::Call(Scope *_scope, list<ilang::Value*> &p, ValuePass *_ret) {
+    void Function::Call(Scope *_scope, vector<ilang::Value*> &p, ValuePass *_ret) {
       bool returned=false;
       auto returnHandle = [&returned, _ret] (ValuePass *ret) {
 	returned=true;
@@ -280,16 +286,20 @@ namespace ilang {
     ValuePass Call::GetValue (Scope *scope) {
       ilang::Variable * func = calling->Get(scope);
       assert(func);
-      std::list<ValuePass> par;
+      std::vector<ValuePass> par;
       for(Node * n : *params) {
 	assert(dynamic_cast<parserNode::Value*>(n));
 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
       }
       ValuePass ret = ValuePass(new ilang::Value);
-      boost::any_cast<Function*>(
-				 //scope->lookup("something")
-				 func
-				 ->Get()->Get()) ->Call(scope->fileScope(), par, &ret);
+      boost::any & an = func->Get()->Get();
+
+      assert(an.type() == typeid(ilang::Function_ptr));
+      boost::any_cast<ilang::Function_ptr>(an)(NULL, par, &ret);
+      // scope->fileScope();
+
+      //assert(an.type() == typeid(Function*));
+      //boost::any_cast<Function*>(an) ->Call(scope->fileScope(), par, &ret);
       
       return ret;
     }

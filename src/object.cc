@@ -62,6 +62,10 @@ namespace ilang {
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL) {
     assert(obj);
     assert(scope);
+    std::list<std::string> this_mod = {"const"};
+    ilang::Variable this_var("this", this_mod);
+    this_var.Set(new ilang::Value(this));
+    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
     for(auto it : *obj) {
       //assert(it.first->name);
       std::string name = it.first->GetFirstName();
@@ -138,4 +142,23 @@ namespace ilang {
     
   }
   
+}
+
+
+namespace {
+  class Class_var_type : public ilang::Variable_modifier {
+  public:
+    bool Check (const boost::any &val) {
+      return val.type() == typeid(ilang::Class);
+    }
+  };
+  ILANG_VARIABLE_MODIFIER(Class, Class_var_type)
+
+  class Object_var_type : public ilang::Variable_modifier {
+    bool Check (const boost::any &val) {
+      return val.type() == typeid(ilang::Object);
+    }
+  };
+
+  ILANG_VARIABLE_MODIFIER(Object, Object_var_type)
 }

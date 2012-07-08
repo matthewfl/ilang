@@ -103,7 +103,7 @@ AccessList	:	AccessList '.' Identifier	{ ($$ = $1)->push_back($3); }
 		|	Identifier			{ ($$ = new list<string>)->push_back($1);}
 		;
 
-Stmt		:	';'
+Stmt		:	';'				{ $$ = new Function(NULL, NULL) ; /* not quite right, but should work for the most part */}
 		| 	Expr ';'
 		|	Function
 		|	IfStmt

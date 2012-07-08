@@ -5,10 +5,12 @@
 #include <string>
 #include "variable.h"
 
+#include <boost/utility.hpp>
+
 
 namespace ilang {
   class FileScope;
-  class Scope {
+  class Scope  : boost::noncopyable {
   protected:
     std::map<std::string, ilang::Variable*> vars;
     Scope *parent;

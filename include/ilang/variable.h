@@ -8,6 +8,8 @@
 #include <boost/shared_ptr.hpp>
 
 namespace ilang {
+  using boost::shared_ptr;
+
   class Value;
   class Variable;
   //typedef boost::shared_ptr<ilang::Value> ValuePass;
@@ -15,16 +17,16 @@ namespace ilang {
   class Variable_modifier {
   public:
     virtual bool Check(const boost::any&)=0;
-    virtual Variable_modifier* new_variable(std::string, Variable*);
+    virtual shared_ptr<Variable_modifier> new_variable(std::string, Variable*);
     virtual void Set(const boost::any &a) {}
   };
 
-  extern std::map<std::string, Variable_modifier*> ilang_Variable_modifier_list;
+  extern std::map<std::string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
 
 
   class Variable {
   private:
-    std::list<Variable_modifier*> Modifiers;
+    std::list<shared_ptr<Variable_modifier> > Modifiers;
     std::string Name;
     bool Check (boost::any&);
     ValuePass val;
@@ -36,6 +38,7 @@ namespace ilang {
   };
 
   // a wrapper class for any numerical value
+  /*
   class Number {
   private:
     enum Type {
@@ -51,7 +54,7 @@ namespace ilang {
   public:
     Number(){type=null;}
     void Set();
-  };
+    };*/
   
   class Value {
   private:
@@ -70,9 +73,10 @@ namespace ilang {
 
 #define ILANG_VARIABLE_MODIFIER(name, obj)				\
   namespace { struct _ILANG_VAR_MOD_##name {				\
-    _ILANG_VAR_MOD_##name () {						\
-      ::ilang::ilang_Variable_modifier_list[ #name ] = new obj ;	\
-    }} _ILANG_VAR_MOD_##name##_run;					\
+  _ILANG_VAR_MOD_##name () {						\
+    ::ilang::ilang_Variable_modifier_list[ #name ] =			\
+      ::boost::shared_ptr< ::ilang::Variable_modifier > ( new obj );	\
+  }} _ILANG_VAR_MOD_##name##_run;					\
   }
 
  

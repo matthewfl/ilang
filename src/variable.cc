@@ -4,24 +4,26 @@
 #include <iostream>
 using namespace std;
 
+// TODO: make everything use a shared pointer or have some sort of memory heap managing thing to deal with variables going out of scope etc
+
 namespace ilang {
-  map<string, Variable_modifier*> ilang_Variable_modifier_list;
+  map<string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
 
   bool Variable::Check (boost::any &a) {
-    for(list<Variable_modifier*>::iterator it=Modifiers.begin(); it!=Modifiers.end(); it++) {
+    for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       if(!(*it)->Check(a))
 	return false;
     }
     return true;
   }
-  Variable_modifier * Variable_modifier::new_variable(std::string name, Variable *v) {
-    return this;
+  shared_ptr<Variable_modifier> Variable_modifier::new_variable(std::string name, Variable *v) {
+    return shared_ptr<Variable_modifier>( this );
   }
  
   Variable::Variable(string name, list<string> modifiers) {
     Name = name;
     for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
-      Variable_modifier *m = ilang_Variable_modifier_list[*it];
+      shared_ptr<Variable_modifier> m = ilang_Variable_modifier_list[*it];
       if(!m)
 	cerr << "Variable modifier "<<*it<<" not found\n";
       else
@@ -30,6 +32,8 @@ namespace ilang {
   }
   void Variable::Set(ValuePass v) {
     // this most likely will have a lot of calling of constructors and stuff for the shared_ptr
+    assert(Check(v->Get()));
+    
     val=v;
     debug(4, v << " " << val );
   }
@@ -92,7 +96,8 @@ namespace {
       return typeid(int) == val.type() || typeid(long) == val.type();
     }
   };
-  ILANG_VARIABLE_MODIFIER(int, Int_var_type)
+  ILANG_VARIABLE_MODIFIER(Int, Int_var_type)
+
   class String_var_type : public ilang::Variable_modifier {
   public:
     bool Check (const boost::any &val) {
@@ -100,5 +105,24 @@ namespace {
       return false;
     }
   };
-  ILANG_VARIABLE_MODIFIER(string, String_var_type)
+  ILANG_VARIABLE_MODIFIER(String, String_var_type)
+
+  class Const_var_type : public ilang::Variable_modifier {
+  private:
+    bool set;
+  public:
+    Const_var_type() : set(false) {}
+    boost::shared_ptr<Variable_modifier> new_variable(std::string name, Variable *v) {
+      // this will leak when the variable goes out of scope
+      // this should not leak now that shared pointer is being used to track this
+      boost::shared_ptr<Variable_modifier> p ( new Const_var_type );
+      return p;
+    }
+    bool Check(const boost::any &val) {
+      if(set) return false;
+      set = true;
+      return true;
+    }
+  };
+  ILANG_VARIABLE_MODIFIER(Const, Const_var_type)
 }
