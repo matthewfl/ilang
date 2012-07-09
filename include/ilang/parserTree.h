@@ -138,7 +138,7 @@ namespace ilang {
       Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run(Scope*);
       void Call(std::vector<ilang::Value*>);
-      void Call(Scope*, std::vector<ilang::Value*>&, ValuePass *_ret=NULL);
+      void Call(Scope *_scope_made, Scope *_scope_call, std::vector<ilang::Value*>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
     };
 
@@ -160,6 +160,7 @@ namespace ilang {
       virtual ilang::Variable * Get(Scope*);
       ValuePass GetValue(Scope*);
       virtual std::string GetFirstName();
+      virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
     };
 
     class Variable_compare {
@@ -179,6 +180,7 @@ namespace ilang {
       ilang::Variable * Get(Scope*);
       //ValuePass GetValue(Scope*);
       virtual std::string GetFirstName();
+      virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
     };
 
     class ArrayAccess : public Variable {

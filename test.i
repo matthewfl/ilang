@@ -20,7 +20,7 @@ Const Int a = 5;
 main = {
 	//a = "hello";
 	//a = 3;
-	Print(what.this.this.this.this.data);
+	//Print(what.this.this.this.this.data);
 	//Print("main ");
 	something();
 };

@@ -119,27 +119,27 @@ namespace ilang {
     }
     void Function::Run(Scope *scope) {
       vector<ilang::Value*> p;
-      Call(scope, p);
+      Call(scope, NULL, p);
     }
     ValuePass Function::GetValue(Scope *scope) {
       // this need to track the scope at this point so that it could be use later in the funciton
       debug(5, "Function get value");
-      ilang::Function_ptr f = boost::bind(&Function::Call, this, scope, _2, _3);
+      ilang::Function_ptr f = boost::bind(&Function::Call, this, scope, _1, _2, _3);
       return ValuePass(new ilang::Value(f));
       //return ValuePass(new ilang::Value(this));
     }
     void Function::Call(vector<ilang::Value*> params) {
       // this needs to be removed
-      Call(NULL, params);
+      Call(NULL, NULL, params);
     }
-    void Function::Call(Scope *_scope, vector<ilang::Value*> &p, ValuePass *_ret) {
+    void Function::Call(Scope *_scope_made, Scope *_scope_call, vector<ilang::Value*> &p, ValuePass *_ret) {
       bool returned=false;
       auto returnHandle = [&returned, _ret] (ValuePass *ret) {
 	returned=true;
 	if(_ret) *_ret = *ret;
 	debug(6, "return hook set");
       };
-      FunctionScope<decltype(returnHandle)> scope(_scope, returnHandle);
+      FunctionScope<decltype(returnHandle)> scope(_scope_made, returnHandle);
       debug(5,"function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
@@ -209,6 +209,20 @@ namespace ilang {
       return name->front();
     }
 
+    
+    ValuePass Variable::CallFun(Scope *scope, std::vector<ValuePass> &par) {
+      ilang::Variable * func = Get(scope);
+      assert(func);
+      boost::any & an = func->Get()->Get();
+      assert(an.type() == typeid(ilang::Function_ptr));
+       
+      ValuePass ret = ValuePass(new ilang::Value);
+    
+      boost::any_cast<ilang::Function_ptr>(an)(NULL, par, &ret);
+
+      return ret;
+    }
+
     bool Variable_compare::operator()(Variable *a, Variable *b) {
       auto a_it = a->name->begin();
       auto b_it = b->name->begin();
@@ -240,7 +254,9 @@ namespace ilang {
       ilang::Variable *v;
       if(Obj) {
 	// this might cause problems if what is returned is not an object
-	ilang::Object *obj = boost::any_cast<ilang::Object*>(Obj->GetValue(scope)->Get());
+	boost::any & a = Obj->GetValue(scope)->Get();
+	assert(a.type() == typeid(ilang::Object*));
+	ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
 	v = obj->operator[](identifier);
       }else{
 	v = scope->lookup(identifier);
@@ -253,6 +269,20 @@ namespace ilang {
       return identifier;
     }
 
+    ValuePass FieldAccess::CallFun(Scope *scope, vector<ValuePass> &par) {
+      ilang::Variable * func = Get(scope);
+      assert(func);
+      boost::any & an = func->Get()->Get();
+      assert(an.type() == typeid(ilang::Function_ptr));
+       
+      ValuePass ret = ValuePass(new ilang::Value);
+    
+      // need to turn the obj into a usable scope
+      boost::any_cast<ilang::Function_ptr>(an)(NULL, par, &ret);
+
+      return ret;
+    }
+
     ArrayAccess::ArrayAccess(Node *obj, Node *look):Variable(NULL,NULL) {
       assert(dynamic_cast<Value*>(obj));
       Obj = dynamic_cast<Value*>(obj);
@@ -261,7 +291,9 @@ namespace ilang {
     }
 
     ilang::Variable * ArrayAccess::Get(Scope *scope) {
-      ilang::Object *obj = boost::any_cast<ilang::Object*>(Obj->GetValue(scope)->Get());
+      boost::any & a = Obj->GetValue(scope)->Get();
+      assert(a.type() == typeid(ilang::Object*));
+      ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
       ValuePass val = Lookup->GetValue(scope);
       return obj->operator[](val);
 

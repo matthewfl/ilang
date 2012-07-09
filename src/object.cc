@@ -99,6 +99,7 @@ namespace ilang {
       //assert(0);
       
     }
+    
     return &(iter->second);
   }
 
@@ -141,7 +142,14 @@ namespace ilang {
     assert(0);
     
   }
-  
+
+  ScopeObject::ScopeObject (Scope *_scope, bool isolate) : scope(_scope), Isolate(isolate) {}
+  ilang::Variable * ScopeObject::operator [] (std::string name) {
+    //
+  }
+  ilang::Variable * ScopeObject::operator[] (ValuePass val) {
+    
+  }
 }
 
 

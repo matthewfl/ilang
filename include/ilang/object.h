@@ -20,8 +20,10 @@ namespace ilang {
     ilang::Variable * operator[](std::string name);
     ilang::Variable * operator[](ValuePass);
   };
+  class ObjectScope;
   class Object {
   private:
+    friend class ObjectScope;
     Class *baseClass;
     std::map<std::string, ilang::Variable> members;
     void Debug();
@@ -36,6 +38,17 @@ namespace ilang {
     std::vector<ilang::Variable> members;
   public:
     Array(std::list<ilang::parserNode::Node*>, Scope*);
+    ilang::Variable * operator[] (std::string name);
+    ilang::Variable * operator[] (ValuePass);
+  };
+
+  class ScopeObject : public Object {
+  private:
+    Scope *scope;
+    bool Isolate;
+  public:
+    // isolate causes variables that are modified to be put into their own copy of the object rather than the scope
+    ScopeObject(Scope*, bool isolate=true);
     ilang::Variable * operator[] (std::string name);
     ilang::Variable * operator[] (ValuePass);
   };
