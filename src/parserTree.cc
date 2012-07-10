@@ -307,7 +307,7 @@ namespace ilang {
     }
 
 
-    Call::Call (Variable *call, list<Node*> *args):
+    Call::Call (Value *call, list<Node*> *args):
       calling(call), params(args) {
       debug(4,"\t\t\tCalling function");
     }
@@ -316,15 +316,15 @@ namespace ilang {
       GetValue(scope);
     }
     ValuePass Call::GetValue (Scope *scope) {
-      ilang::Variable * func = calling->Get(scope);
-      assert(func);
+      //ilang::Variable * func = calling->Get(scope);
+      //assert(func);
       std::vector<ValuePass> par;
       for(Node * n : *params) {
 	assert(dynamic_cast<parserNode::Value*>(n));
 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
       }
       ValuePass ret = ValuePass(new ilang::Value);
-      boost::any & an = func->Get()->Get();
+      boost::any & an = calling->GetValue(scope)->Get();//func->Get()->Get();
 
       assert(an.type() == typeid(ilang::Function_ptr));
       boost::any_cast<ilang::Function_ptr>(an)(NULL, par, &ret);
@@ -346,6 +346,8 @@ namespace ilang {
       }
       debug(5,"made it out of print");
     }
+
+    
 
     AssignExpr::AssignExpr (Variable *t, Value *v):target(t), eval(v) {
       assert(eval);

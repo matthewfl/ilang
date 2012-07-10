@@ -194,11 +194,11 @@ namespace ilang {
 
     class Call : public Value {
     private:
-      Variable *calling;
+      Value *calling;
     protected:
       std::list<Node*> *params;
     public:
-      Call(Variable *call, std::list<Node*> *args);
+      Call(Value *call, std::list<Node*> *args);
       void Run(Scope*);
       ValuePass GetValue(Scope*);
     };

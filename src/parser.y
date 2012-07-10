@@ -156,7 +156,7 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	Variable '(' ParamList ')'	{ $$ = new Call(dynamic_cast<Variable*>($1), $3); }
+Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_print '(' ParamList ')'	{ $$ = new PrintCall($3); }
 		|	T_new '(' ParamList ')'		{ $$ = new NewCall($3); }
 		;
