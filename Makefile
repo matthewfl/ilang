@@ -12,7 +12,9 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS= -ggdb -Wall -O0 -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+CXXFLAGS_BASE=-Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+CXXFLAGS= -ggdb -O0 $(CXXFLAGS_BASE)
+LDFLAGS=
 # -Ideps/glog/src
 
 CXX= g++
@@ -31,6 +33,14 @@ DEPS=
 # start of commands
 all: $(TARGET)
 
+
+release: CXXFLAGS= -O3 -s $(CXXFLAGS_BASE)
+release: LDFLAGS= -s -static
+release: clean $(TARGET)
+
+submodule:
+	git submodule update --init --recursive 
+
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
@@ -44,7 +54,7 @@ $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
 $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 
 $(TARGET): $(DEPS) $(OBJS)
-	$(LD) -o $@ $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc
