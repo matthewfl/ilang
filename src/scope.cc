@@ -1,6 +1,8 @@
 #include "scope.h"
 #include "debug.h"
 
+#include "object.h"
+
 
 namespace ilang {
   using namespace std;
@@ -22,6 +24,7 @@ namespace ilang {
   }
 
   ilang::Variable * Scope::forceNew (string name, std::list<std::string> &modifiers) {
+    assert(vars.find(name) == vars.end());
     ilang::Variable *v = new ilang::Variable(name, modifiers);
     vars.insert(pair<string, ilang::Variable*>(name, v));
     return v;
@@ -51,8 +54,22 @@ namespace ilang {
   }
   
   ilang::Variable * FileScope::_lookup (string &name) {
-    //TODO: make this check to see if it can't find itx
+    //TODO: make this check to see if it can't find it
     return vars.find(name)->second; // there is nothing higher that can be looked at
+  }
+
+  ObjectScope::ObjectScope (Object *o) : Scope(NULL), obj(o) {}
+  ilang::Variable * ObjectScope::_lookup(std::string &name) {
+    auto it = obj->members.find(name);
+    if(it == obj->members.end()) {
+      ilang::Variable *var;
+      if(obj->baseClass) {
+	var = obj->baseClass->operator[](name);
+	if(var) return var;
+      }
+      return NULL;
+    }
+    return &(it->second);
   }
 
 }

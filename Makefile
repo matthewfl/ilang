@@ -763,6 +763,7 @@ build/scope.o: /usr/include/boost/preprocessor/logical/not.hpp
 build/scope.o: /usr/include/boost/utility/enable_if.hpp
 build/scope.o: /usr/include/boost/next_prior.hpp
 build/scope.o: /usr/include/boost/noncopyable.hpp include/debug.h
+build/scope.o: include/ilang/object.h include/ilang/parserTree.h
 build/object.o: include/ilang/object.h include/ilang/variable.h
 build/object.o: /usr/include/boost/any.hpp /usr/include/boost/config.hpp
 build/object.o: /usr/include/boost/type_traits/remove_reference.hpp

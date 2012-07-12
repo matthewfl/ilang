@@ -46,7 +46,7 @@ namespace ilang {
     }else{
       return &(search->second);
     }
-    
+    return NULL;
   }
   ilang::Variable * Class::operator[](ValuePass val) {
     if(val->Get().type() == typeid(std::string))
@@ -57,12 +57,21 @@ namespace ilang {
 
   Object::Object(Class *base): baseClass(base) {
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
+    std::list<std::string> this_mod = {"Const"};
+    ilang::Variable this_var("this", this_mod);
+    this_var.Set(new ilang::Value(this));
+    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
   }
-  Object::Object(): baseClass(NULL) {}
+  Object::Object(): baseClass(NULL) {
+    std::list<std::string> this_mod = {"Const"};
+    ilang::Variable this_var("this", this_mod);
+    this_var.Set(new ilang::Value(this));
+    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
+  }
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL) {
     assert(obj);
     assert(scope);
-    std::list<std::string> this_mod = {"const"};
+    std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
     this_var.Set(new ilang::Value(this));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 

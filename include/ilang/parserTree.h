@@ -37,6 +37,7 @@ namespace ilang {
     class Value : public Node {
     public:
       virtual ValuePass GetValue(Scope*)=0;
+      virtual ValuePass CallFun(Scope*, std::vector<ValuePass> &par); // I feel a little funny about having this here, but this should be the right place
     };
     class Constant : public Value {
     public:
@@ -155,12 +156,12 @@ namespace ilang {
     public:
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run(Scope*);
-      void Set(Scope*, ValuePass var);
+      void Set(Scope*, ValuePass var, bool force = false);
       // not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
       virtual ilang::Variable * Get(Scope*);
       ValuePass GetValue(Scope*);
       virtual std::string GetFirstName();
-      virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
+      //virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
     };
 
     class Variable_compare {
