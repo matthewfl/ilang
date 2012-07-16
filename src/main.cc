@@ -3,6 +3,8 @@
 #include <string.h>
 #include "debug.h"
 
+#include "import.h"
+
 using namespace std;
 
 void show_help_info(char *name) {
@@ -39,9 +41,17 @@ int main (int argc, char **argv) {
     }
   }
   
+  ilang::Init(argc, argv);
+  boost::filesystem::path a("/another");
+  cout << ilang::GlobalImportScope.locateFile(a) << endl;
+  
+
+  /*
   cout << "running file: "<<main_file<<endl;
   FILE *f = fopen(main_file, "r");
   ilang::parser(f, NULL);//->Run();
   fclose(f);
+  */
+
   return 0;
 }
