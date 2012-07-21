@@ -16,19 +16,19 @@ namespace ilang {
     Head::Head(list<Node*> *declars): Declars(declars) {
       debug(4, "head " << declars->size() );
       debug(4, "running ++++++++++++++++++++++++++++++++++++++++++++" );
-      Run();
+      import=NULL;
+      scope=NULL;
     }
     void Head::Run () {
-      FileScope scope;
+      if(scope) return;
+      scope = new FileScope;
+
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
 	debug(5, "calling run" )
-	  (*it)->Run(&scope);
-	scope.Debug();
+	  (*it)->Run(scope);
+	//scope->Debug();
       }
-      //list<ilang::Value*> v;
-      //boost::any_cast<Function*>(scope.lookup("main")->Get()->Get())->Call(&scope, v);
-      //return RunReturn(new ilang::Value);
-      
+            
       vector<ilang::Value*> v;
       boost::any_cast<ilang::Function_ptr>(scope.lookup("main")->Get()->Get())(&scope, v, NULL);
       

@@ -6,29 +6,39 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <map>
 
 #include <boost/filesystem.hpp>
 
 namespace ilang {
-  extern std::vector<boost::filesystem::path> ImportSearchPaths;
+  namespace fs = boost::filesystem;
+  class ImportScope;
+  extern std::vector<fs::path> ImportSearchPaths;
+  extern std::map<fs::path, ImportScope*> ImportedFiles;
 
   void Init (int argc, char **argv);
   
   class ImportScope {
   private:
     boost::filesystem::path file;
-    std::map<std::string, ImportScope*> childern;
+    //std::map<std::string, ImportScope*> childern;
     ImportScope *parent;
   public:
     ImportScope(); // for global
     ImportScope(ImportScope*, boost::filesystem::path);
     boost::filesystem::path locateFile(boost::filesystem::path search);
+    void Import (boost::filesystem::path p);
   };
   extern ImportScope GlobalImportScope;
 
   class ImportScopeFile : public ImportScope {
     // for ilang files
+  private:
+    std::list<std::pair<std::list<std::string>, fs::path> > imports;
+  public:
+    ImportScopeFile(fs::path p);
+    void push(std::list<std::string> *pre, std::list<std::string> *name);
   };
   
   class ImportScopeC : public ImportScope {

@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "parserTree.h"
 #include "parser.tab.hh"
+#include "import.h"
 
 //using namespace ilang; // adding this in cause some conflicts with names
 using namespace ilang::parserNode;
@@ -55,7 +56,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token <intNumber> T_IntConst
 %token <floatNumber> T_FloatConst
 
-%type <string_list> ModifierList AccessList
+%type <string_list> ModifierList AccessList ImportLoc
 %type <Identifier> Identifier
 %type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class WhileStmt ForStmt
 %type <node_list> Stmts ParamList DeclList ExprList 
@@ -67,16 +68,16 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 Program		:	Imports DeclList		{ parser_handle->head = new ilang::parserNode::Head($2); }
 		;
 
-Imports		:	Imports Import			{ cout << "import\n"; }
-		|					{ cout << "empty import\n"; }
+Imports		:	Imports Import			{ }
+		|					{ }
 		;
 
-Import		:	T_import ImportLoc			{}
-		|	T_from	ImportLoc T_import ImportLoc	{}
+Import		:	T_import ImportLoc			{ parser_handle->import->push(NULL, $2); }
+		|	T_from	ImportLoc T_import ImportLoc	{ parser_handle->import->push($2, $4); }
 		;	
 
-ImportLoc	:	ImportLoc '.' T_Identifier 	{}
-		|	T_Identifier			{}
+ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back($3); }
+		|	T_Identifier			{ ($$=new std::list<std::string>)->push_back($1); }
 		;
 
 DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }

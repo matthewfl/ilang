@@ -5,11 +5,12 @@ using namespace std;
 
 namespace ilang {
   std::vector<boost::filesystem::path> ImportSearchPaths;
+  std::map<fs::path, ImportScope*> ImportedFiles;
   ImportScope GlobalImportScope;
 
   void Init (int argc, char **argv) {
     //debug(0, "init import running");
-    namespace fs = boost::filesystem;
+    //namespace fs = boost::filesystem;
     
     ImportSearchPaths.push_back(fs::current_path());
     
@@ -56,9 +57,40 @@ namespace ilang {
       check.replace_extension(".io");
       cout << check << " " << fs::is_regular_file(check) <<  endl;
       if(fs::is_regular_file(check)) return check;
-      
     }
+    //ImportedFiles.find(search
     return fs::path();
   }
+
+  ImportScopeFile::ImportScopeFile(fs::path p) : ImportScope(&GlobalImportScope, p) {}
   
+  void ImportScopeFile::push(std::list<std::string> *pre, std::list<std::string> *name) {
+    string str;
+    fs::path p;
+    if(pre) {
+      for(auto it : *pre) {
+	str += "/" + it;
+      }
+      // first look for the file name
+      fs::path look(str);
+      p = locateFile(look);
+      if(p.empty()) {
+	for(auto it : *name) {
+	  str += "/" + it;
+	}
+	look = str;
+	p = locateFile(look);
+      }
+      delete pre; // no longer needed
+    }else{
+      for(auto it : *name) {
+	str += "/" + it;
+      }
+      fs::path look(str);
+      p = locateFile(look);
+    }
+    assert(! p.empty() ); // not able to find the file that is getting imported
+    imports.push_back(pair<std::list<std::string>, fs::path>(*name, p));
+    delete name;
+  }
 }

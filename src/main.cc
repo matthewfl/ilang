@@ -2,8 +2,11 @@
 #include "parser.h"
 #include <string.h>
 #include "debug.h"
+#include <string>
 
 #include "import.h"
+
+#include "parserTree.h"
 
 using namespace std;
 
@@ -34,6 +37,12 @@ int main (int argc, char **argv) {
       case 'f':
 	main_file = argv[++i];
 	break;
+      case '-':
+	string s(argv[i]+2);
+	if(s == "version") {
+	  cout << "pre alpha 0" << endl;
+	  return 1;
+	}
       }
     }else{
       if(!main_file)
@@ -42,16 +51,19 @@ int main (int argc, char **argv) {
   }
   
   ilang::Init(argc, argv);
-  boost::filesystem::path a("/another");
-  cout << ilang::GlobalImportScope.locateFile(a) << endl;
+  //  boost::filesystem::path a("/another");
+  //cout << ilang::GlobalImportScope.locateFile(a) << endl;
   
+  
+  ilang::ImportScopeFile mainImport(boost::filesystem::current_path());
 
-  /*
   cout << "running file: "<<main_file<<endl;
   FILE *f = fopen(main_file, "r");
-  ilang::parser(f, NULL);//->Run();
+  ilang::parserNode::Head *base = ilang::parser(f, &mainImport);
   fclose(f);
-  */
-
+  
+  base->Run();
+  
+  
   return 0;
 }

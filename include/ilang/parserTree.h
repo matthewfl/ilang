@@ -8,6 +8,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include "variable.h"
+#include "scope.h"
+#include "import.h"
 
 namespace ilang {
   class Scope;
@@ -26,10 +28,14 @@ namespace ilang {
 
     class Head {
     private:
+      FileScope *scope;
+      ImportScopeFile *import;
       std::list<Node*> *Declars;
     public:
       Head(std::list<Node*>*);
       void Run();
+      Scope *GetScope ();
+      void _setImport(ImportScopeFile*);
     };
 
 
@@ -139,7 +145,7 @@ namespace ilang {
       Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run(Scope*);
       void Call(std::vector<ilang::Value*>);
-      void Call(Scope *_scope_made, Scope *_scope_call, std::vector<ilang::Value*>&, ValuePass *_ret=NULL);
+      void Call(Scope *_scope_made, Scope *_scope_self, std::vector<ilang::Value*>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
     };
 

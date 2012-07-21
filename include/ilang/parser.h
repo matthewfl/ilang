@@ -13,15 +13,15 @@ YY_DECL ;
 #include <stdio.h>
 
 namespace ilang {
-  class Import;
+  class ImportScopeFile;
   namespace parserNode {
     class Head;
   };
   struct parser_data {
-    ilang::Import *import;
+    ilang::ImportScopeFile *import;
     ilang::parserNode::Head *head;
   };
-  ilang::parserNode::Head * parser (FILE *, ilang::Import *);
+  ilang::parserNode::Head * parser (FILE *, ilang::ImportScopeFile *);
 };
 
 

@@ -1,5 +1,6 @@
 import something
 
 main = {
-	something.what();
+	//something.what();
+	Print("ok");
 };

@@ -4,9 +4,11 @@
 better errors regarding programming
 
 ~objects
+Arrays
 import
-classes
+~classes
 fix functions to support classes and bindings
+
 
 C++ bindings
 modifying code

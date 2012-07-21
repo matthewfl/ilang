@@ -5,6 +5,10 @@
 
 #include "ilang/import.h"
 
+#ifndef ILANG_FILE
+#define ILANG_FILE __FILE__
+#endif
+
 
 #ifndef ILANG_STATIC
 #define ILANG_LIBRARY(x)
@@ -18,7 +22,8 @@
 #define ILANG_LIBRARY(x)			\ 
 namespace { struct _ILANG_STATIC_BIND {					\
   _LANG_STATIC_BIND () {						\
-    ::ilang::ImportScopeC *import = &( ::ilang::StaticImportScope );	\
+    ::ilang::ImportScopeC import_(ILANG_FILE);				\
+    ::ilang::ImportScopeC *import = &import_;				\
     x ;									\
   }} _ILANG_STATIC_BIND_RUN##__COUNT__## ;				\
 }
@@ -29,9 +34,9 @@ namespace { struct _ILANG_STATIC_BIND {					\
 
 #define ILANG_PATH(name, x) import->Local(name, x );
 
-#define ILANG_CLASS(x) dynamic_cast<ilang::Class> ( ilang::Class_Creater< x >() )
+#define ILANG_CLASS(x) ValuePass(new ilang::Value( ilang::Class_Creater< x >() ))
 
-#define ILANG_FUNCTION(x) ilang::Function_Creater( x );
+#define ILANG_FUNCTION(x) ValuePass(new ilang::Value( ilang::Function_Creater( x ) ))
 
 /* example:
    class Curl : public ilang::C_Class {
