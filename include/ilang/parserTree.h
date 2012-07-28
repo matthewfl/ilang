@@ -29,13 +29,13 @@ namespace ilang {
     class Head {
     private:
       FileScope *scope;
-      ImportScopeFile *import;
+      ImportScopeFile *Import;
       std::list<Node*> *Declars;
     public:
-      Head(std::list<Node*>*);
+      Head(std::list<Node*>*, ImportScopeFile*);
+      void Link();
       void Run();
       Scope *GetScope ();
-      void _setImport(ImportScopeFile*);
     };
 
 

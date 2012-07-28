@@ -2,5 +2,5 @@ import something
 
 main = {
 	//something.what();
-	Print("ok");
+	Print(what.inthe.world.test);
 };

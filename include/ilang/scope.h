@@ -27,12 +27,16 @@ namespace ilang {
 
     int Debug();    
   };
+  class ImportScopeFile;
   class FileScope : public Scope {
+  private:
+    friend class ImportScopeFile;
   protected:
     virtual ilang::Variable * _lookup (std::string &name);
   public:
     FileScope(): Scope((Scope *)NULL) {}
   };
+
   template <typename ReturnHook> class FunctionScope : public Scope {
   public:
     FunctionScope(Scope *s, Scope *other, ReturnHook h) : Scope(s), hook(h), objs(other) {}

@@ -1,4 +1,11 @@
 #include "import.h"
+#include "scope.h"
+#include "variable.h"
+#include "object.h"
+#include "parserTree.h"
+#include "parser.h"
+
+#include <stdio.h>
 
 #include <iostream>
 using namespace std;
@@ -32,6 +39,7 @@ namespace ilang {
     if(!parent) {
       parent = &GlobalImportScope;
     }
+    ImportedFiles[fs::absolute(file)] = this; // save the imported files into the list of global imports
   }
   ImportScope::ImportScope() : parent(NULL) {}
   boost::filesystem::path ImportScope::locateFile(boost::filesystem::path search) {
@@ -93,4 +101,68 @@ namespace ilang {
     imports.push_back(pair<std::list<std::string>, fs::path>(*name, p));
     delete name;
   }
+
+  /*void ImportScopeFile::provide(FileScope *scope) {
+    scope->vars.find("test");
+    }*/
+
+  void ImportScopeFile::load(Object *o) {
+    ilang::Variable *v = o->operator[]("test");
+    v->Set(new ilang::Value((long)123));
+  }
+
+  void ImportScopeFile::resolve(Scope *scope) {
+    Scope = scope;
+    std::list<std::string> tt = { "what", "inthe", "world" };
+    load(GetObject(scope, tt));
+    for(auto it : imports) {
+      Object *obj = GetObject(scope, it.first);
+      auto find = ImportedFiles.find(it.second);
+      if(find != ImportedFiles.end()) {
+	find->second->load(obj);
+      }else{
+	// need to create a new file and load it in
+	fs::path p = fs::absolute(it.second);
+	ilang::ImportScopeFile *imp = new ImportScopeFile(p);
+	FILE *f = fopen(p.c_str(), "r");
+	ilang::parserNode::Head *head = ilang::parser(f, imp);
+	fclose(f);
+	head->Link();
+	// imp is save into the map of ImportedFiles and thus we want it to stay around
+      }
+    }
+  }
+  
+  Object * ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
+    assert(!path.empty());
+    ilang::Variable *var = scope->lookup(path.front());
+    Object *obj;
+    if(var->isSet()) {
+      boost::any &a = var->Get()->Get();
+      assert(a.type() == typeid(ilang::Object*));
+      obj = boost::any_cast<ilang::Object*>(a);
+    }else{
+      ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
+      var->Set(val);
+    }
+    return GetObject(obj, path);
+  }
+  
+  Object * ImportScopeFile::GetObject(Object *o, std::list<std::string> &path) {
+    path.pop_front();
+    if(path.empty()) return o;
+    ilang::Variable *var = o->operator[](path.front());
+    Object *obj;
+    if(var->isSet()) {
+      boost::any &a = var->Get()->Get();
+      assert(a.type() == typeid(ilang::Object*));
+      obj = boost::any_cast<ilang::Object*>(a);
+    }else{
+      ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
+      var->Set(val);
+    }
+    return GetObject(obj, path);
+    
+  }
+  
 }

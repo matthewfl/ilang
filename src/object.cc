@@ -155,9 +155,12 @@ namespace ilang {
   ScopeObject::ScopeObject (Scope *_scope, bool isolate) : scope(_scope), Isolate(isolate) {}
   ilang::Variable * ScopeObject::operator [] (std::string name) {
     //
+    return scope->lookup(name);
   }
   ilang::Variable * ScopeObject::operator[] (ValuePass val) {
-    
+    boost::any &a = val->Get();
+    assert(a.type() == typeid(std::string));
+    return operator[](boost::any_cast<std::string>(a));
   }
 }
 

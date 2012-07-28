@@ -22,6 +22,7 @@ namespace ilang {
  
   Variable::Variable(string name, list<string> modifiers) {
     Name = name;
+    val = NULL;
     for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
       shared_ptr<Variable_modifier> m = ilang_Variable_modifier_list[*it];
       if(!m)
@@ -37,9 +38,13 @@ namespace ilang {
     val=v;
     debug(4, v << " " << val );
   }
-  Value *  Variable::Get () {
+  Value *  Variable::Get () { // will need to be changed to ValuePass
     return val;
     //return val.get();
+  }
+
+  bool Variable::isSet() {
+    return val != NULL;
   }
 
   boost::any & Value::Get() {

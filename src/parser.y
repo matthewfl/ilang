@@ -65,7 +65,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 
 %%
-Program		:	Imports DeclList		{ parser_handle->head = new ilang::parserNode::Head($2); }
+Program		:	Imports DeclList		{ parser_handle->head = new ilang::parserNode::Head($2, parser_handle->import); }
 		;
 
 Imports		:	Imports Import			{ }

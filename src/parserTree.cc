@@ -13,25 +13,32 @@ using namespace std;
 
 namespace ilang {
   namespace parserNode {
-    Head::Head(list<Node*> *declars): Declars(declars) {
+    Head::Head(list<Node*> *declars, ImportScopeFile *import): Import(import), Declars(declars) {
       debug(4, "head " << declars->size() );
       debug(4, "running ++++++++++++++++++++++++++++++++++++++++++++" );
-      import=NULL;
       scope=NULL;
     }
-    void Head::Run () {
+    void Head::Link () {
       if(scope) return;
       scope = new FileScope;
+      Import->resolve(scope);
 
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
 	debug(5, "calling run" )
 	  (*it)->Run(scope);
 	//scope->Debug();
       }
-            
-      vector<ilang::Value*> v;
-      boost::any_cast<ilang::Function_ptr>(scope.lookup("main")->Get()->Get())(&scope, v, NULL);
       
+      //for(
+            
+      //vector<ilang::Value*> v;
+      //boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, NULL);
+      
+    }
+    
+    void Head::Run() {
+      vector<ilang::Value*> v;
+      boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, NULL);
     }
 
     // this does not need to have anything

@@ -35,6 +35,7 @@ namespace ilang {
     Variable (std::string name, std::list<std::string> modifiers);
     void Set(ValuePass v);
     Value * Get();
+    bool isSet();
   };
 
   // a wrapper class for any numerical value

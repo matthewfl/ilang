@@ -1,6 +1,7 @@
 #include <iostream>
 #include "parser.h"
 #include <string.h>
+#include <stdio.h>
 #include "debug.h"
 #include <string>
 
@@ -55,13 +56,14 @@ int main (int argc, char **argv) {
   //cout << ilang::GlobalImportScope.locateFile(a) << endl;
   
   
-  ilang::ImportScopeFile mainImport(boost::filesystem::current_path());
+  ilang::ImportScopeFile *mainImport = new ilang::ImportScopeFile(main_file);
 
   cout << "running file: "<<main_file<<endl;
   FILE *f = fopen(main_file, "r");
-  ilang::parserNode::Head *base = ilang::parser(f, &mainImport);
+  ilang::parserNode::Head *base = ilang::parser(f, mainImport);
   fclose(f);
   
+  base->Link();
   base->Run();
   
   
