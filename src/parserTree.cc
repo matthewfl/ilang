@@ -297,7 +297,8 @@ namespace ilang {
 	boost::any & o = Obj->GetValue(scope)->Get();
 	assert(o.type() == typeid(ilang::Object*));
 	ObjectScope obj_scope(boost::any_cast<ilang::Object*>(o));
-      
+	
+	boost::any_cast<ilang::Function_ptr>(an)(&obj_scope, par, &ret);
       }else{
 	boost::any_cast<ilang::Function_ptr>(an)(NULL, par, &ret);
       }
@@ -656,6 +657,7 @@ namespace ilang {
       boost::any & a = dynamic_cast<Value*>(params->front())->GetValue(scope)->Get();
       assert(a.type() == typeid(ilang::Class*));
       ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() );
+      // TODO: make this call an init function that is defined in the class
       return ValuePass(val);
     }
 

@@ -109,11 +109,18 @@ namespace ilang {
   void ImportScopeFile::load(Object *o) {
     ilang::Variable *v = o->operator[]("test");
     v->Set(new ilang::Value((long)123));
+
+    for(auto it : m_Scope->vars) {
+      cout << it.first << endl;
+      ilang::Variable *v = o->operator[](it.first);
+      v->Set(it.second->Get());
+    }
   }
 
   void ImportScopeFile::resolve(Scope *scope) {
-    Scope = scope;
-    std::list<std::string> tt = { "what", "inthe", "world" };
+    assert(dynamic_cast<FileScope*>(scope));
+    m_Scope = dynamic_cast<FileScope*>(scope);
+    std::list<std::string> tt = { "what_", "inthe", "world" };
     load(GetObject(scope, tt));
     for(auto it : imports) {
       Object *obj = GetObject(scope, it.first);
@@ -121,6 +128,7 @@ namespace ilang {
       if(find != ImportedFiles.end()) {
 	find->second->load(obj);
       }else{
+	// TODO: check if it is a .io file or a .i file
 	// need to create a new file and load it in
 	fs::path p = fs::absolute(it.second);
 	ilang::ImportScopeFile *imp = new ImportScopeFile(p);
@@ -128,6 +136,8 @@ namespace ilang {
 	ilang::parserNode::Head *head = ilang::parser(f, imp);
 	fclose(f);
 	head->Link();
+	ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
+	imp->load(obj);
 	// imp is save into the map of ImportedFiles and thus we want it to stay around
       }
     }

@@ -3,6 +3,7 @@
 #include <string>
 #include <list>
 #include "parserTree.h"
+#include "parser.h"
 
 #include "parser.tab.hh"
 #include "string.h"

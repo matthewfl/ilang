@@ -9,6 +9,8 @@
 
 #include "parserTree.h"
 
+//#include "version.h"
+
 using namespace std;
 
 void show_help_info(char *name) {
@@ -41,7 +43,7 @@ int main (int argc, char **argv) {
       case '-':
 	string s(argv[i]+2);
 	if(s == "version") {
-	  cout << "pre alpha 0" << endl;
+	  cout << "ilang version: " <<  ILANG_VERSION << endl;
 	  return 1;
 	}
       }
@@ -60,6 +62,10 @@ int main (int argc, char **argv) {
 
   cout << "running file: "<<main_file<<endl;
   FILE *f = fopen(main_file, "r");
+  if(!f) {
+    cout << "file \""<<main_file<<"\" not found"<<endl;
+    return 1;
+  }
   ilang::parserNode::Head *base = ilang::parser(f, mainImport);
   fclose(f);
   

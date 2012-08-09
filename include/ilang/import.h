@@ -39,7 +39,7 @@ namespace ilang {
   class ImportScopeFile : public ImportScope {
     // for ilang files
   private:
-    FileScope *Scope;
+    FileScope *m_Scope;
     std::list<std::pair<std::list<std::string>, fs::path> > imports;
     Object * GetObject(Scope*, std::list<std::string>);
     Object * GetObject(Object*, std::list<std::string>&);

@@ -12,7 +12,7 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
 CXXFLAGS= -ggdb -O0 $(CXXFLAGS_BASE)
 LDFLAGS=
 # -Ideps/glog/src
@@ -31,7 +31,7 @@ DEPS=$(leveldb)
 #$(glogLib)
 
 
-.PHONY: all release test debug clean clean-all depend
+.PHONY: all release test debug clean clean-all depend include/version.h
 # start of commands
 all: $(TARGET)
 
@@ -1036,6 +1036,31 @@ build/import.o: /usr/include/boost/filesystem/operations.hpp
 build/import.o: /usr/include/boost/detail/scoped_enum_emulation.hpp
 build/import.o: /usr/include/boost/detail/bitmask.hpp
 build/import.o: /usr/include/boost/filesystem/convenience.hpp
+build/import.o: include/ilang/scope.h /usr/include/boost/utility.hpp
+build/import.o: /usr/include/boost/utility/base_from_member.hpp
+build/import.o: /usr/include/boost/preprocessor/repetition/enum_binary_params.hpp
+build/import.o: /usr/include/boost/preprocessor/repetition/repeat_from_to.hpp
+build/import.o: /usr/include/boost/utility/binary.hpp
+build/import.o: /usr/include/boost/preprocessor/control/deduce_d.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/cat.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/fold_left.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/seq.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/elem.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/size.hpp
+build/import.o: /usr/include/boost/preprocessor/seq/transform.hpp
+build/import.o: /usr/include/boost/preprocessor/arithmetic/mod.hpp
+build/import.o: /usr/include/boost/preprocessor/arithmetic/detail/div_base.hpp
+build/import.o: /usr/include/boost/preprocessor/comparison/less_equal.hpp
+build/import.o: /usr/include/boost/preprocessor/logical/not.hpp
+build/import.o: /usr/include/boost/utility/identity_type.hpp
+build/import.o: /usr/include/boost/type_traits/function_traits.hpp
+build/import.o: /usr/include/boost/next_prior.hpp include/ilang/object.h
+build/import.o: include/ilang/parserTree.h include/ilang/parser.h
+build/import.o: /usr/include/stdio.h /usr/include/bits/types.h
+build/import.o: /usr/include/bits/typesizes.h /usr/include/libio.h
+build/import.o: /usr/include/_G_config.h /usr/include/wchar.h
+build/import.o: /usr/include/bits/wchar.h /usr/include/xlocale.h
+build/import.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
 build/parser.o: include/ilang/parser.h /usr/include/stdio.h
 build/parser.o: /usr/include/features.h /usr/include/stdc-predef.h
 build/parser.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
