@@ -104,7 +104,7 @@ namespace ilang {
       // note to self: must recall GetValue each time as it is what is actually doing the updating
       while(test->GetValue(scope)->isTrue()) {
 	exe->Run(scope);
-	test->GetValue(scope)->Print();
+	//test->GetValue(scope)->Print();
       }
     }
 

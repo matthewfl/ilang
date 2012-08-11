@@ -47,9 +47,18 @@ namespace ilang {
   ImportScope::ImportScope() : parent(NULL) {}
   boost::filesystem::path ImportScope::locateFile(boost::filesystem::path search) {
     namespace fs = boost::filesystem;
+    cout << "search: " << search << endl;
+    auto it = ImportedFiles.find(search);
+    if(it != ImportedFiles.end()) {
+      return search;
+    }
+    for(auto it : ImportedFiles) {
+      cout << "maps: " << it.first << endl;
+    }
     fs::path check;
     if(!file.empty()) {
-      check = file;
+      check = fs::absolute(file).parent_path();
+      check += "/";
       check += search;
       check.replace_extension(".i");
       cout << check << " " << fs::is_regular_file(check) <<  endl;
@@ -61,6 +70,7 @@ namespace ilang {
     }
     for(auto it : ImportSearchPaths) {
       check = it;
+      check += "/";
       check += search;
       check.replace_extension(".i");
       cout << check << " " << fs::is_regular_file(check) <<  endl;
@@ -80,22 +90,26 @@ namespace ilang {
     fs::path p;
     if(pre) {
       for(auto it : *pre) {
-	str += "/" + it;
+	if(!str.empty()) str += "/";
+	str += it;
       }
       // first look for the file name
-      fs::path look(str);
-      p = locateFile(look);
-      if(p.empty()) {
+      // TODO: put this back in when the import system is advance enough to be able to handel importing individual items in
+      fs::path look;//(str);
+      //p = locateFile(look);
+      //if(p.empty()) {
 	for(auto it : *name) {
-	  str += "/" + it;
+	  if(!str.empty()) str += "/";
+	  str +=  it;
 	}
 	look = str;
 	p = locateFile(look);
-      }
+	//}
       delete pre; // no longer needed
     }else{
       for(auto it : *name) {
-	str += "/" + it;
+	if(!str.empty()) str += "/";
+	str += it;
       }
       fs::path look(str);
       p = locateFile(look);
@@ -188,7 +202,9 @@ namespace ilang {
   }
   void ImportScopeC::load(Object *obj) {
     for(auto it : m_members) {
-      
+      cout << "load: " << it.first << endl;
+      ilang::Variable *v = obj->operator[](it.first);
+      v->Set(it.second);
     }
   }
 }
@@ -211,12 +227,18 @@ namespace ilang {
 namespace {
   using namespace ilang;
   ValuePass ilang_import_get(std::vector<ValuePass> &args) {
+    cout << "the ilang_import_get was called\n";
     
+    return ValuePass(new ilang::Value);
   }
 
 
   ILANG_LIBRARY_NAME("i/Import", 
-		     ILANG_FUNCTION("get", ilang_import_get);
+		     ILANG_FUNCTION("get", ilang_import_get)
 		     )
-
+  
+  /*namespace { struct sssss { sssss () {
+    ImportedFiles.insert(pair<fs::path, ImportScope*>("eeeee/www", NULL));
+  }} wwwww; }
+  */
 }

@@ -17,7 +17,7 @@ INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
-CXXFLAGS= -ggdb -O0 $(CXXFLAGS_BASE)
+CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CSSFLAGS_MODULES= -ggdb -O0 -fPIC -shared $(CXXFLAGS_BASE)
 LDFLAGS=
 # -Ideps/glog/src
@@ -41,7 +41,7 @@ DEPS=$(leveldb)
 all: $(TARGET)
 
 release: CXXFLAGS= -O3 -s $(CXXFLAGS_BASE)
-release: CXXFLAGS_MODULES= -O3 -s
+release: CXXFLAGS_MODULES= -O3 -s -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 release: LDFLAGS+= -s -static
 release: clean $(TARGET)
 
@@ -1073,6 +1073,49 @@ build/import.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 build/import.o: /usr/include/_G_config.h /usr/include/wchar.h
 build/import.o: /usr/include/bits/wchar.h /usr/include/xlocale.h
 build/import.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
+build/import.o: include/ilang/function.h /usr/include/boost/bind.hpp
+build/import.o: /usr/include/boost/bind/bind.hpp /usr/include/boost/ref.hpp
+build/import.o: /usr/include/boost/mem_fn.hpp
+build/import.o: /usr/include/boost/bind/mem_fn.hpp
+build/import.o: /usr/include/boost/get_pointer.hpp
+build/import.o: /usr/include/boost/bind/mem_fn_template.hpp
+build/import.o: /usr/include/boost/bind/mem_fn_cc.hpp
+build/import.o: /usr/include/boost/type.hpp
+build/import.o: /usr/include/boost/is_placeholder.hpp
+build/import.o: /usr/include/boost/bind/arg.hpp
+build/import.o: /usr/include/boost/visit_each.hpp
+build/import.o: /usr/include/boost/bind/storage.hpp
+build/import.o: /usr/include/boost/bind/bind_template.hpp
+build/import.o: /usr/include/boost/bind/bind_cc.hpp
+build/import.o: /usr/include/boost/bind/bind_mf_cc.hpp
+build/import.o: /usr/include/boost/bind/bind_mf2_cc.hpp
+build/import.o: /usr/include/boost/bind/placeholders.hpp
+build/import.o: /usr/include/boost/function.hpp
+build/import.o: /usr/include/boost/preprocessor/iterate.hpp
+build/import.o: /usr/include/boost/preprocessor/iteration/iterate.hpp
+build/import.o: /usr/include/boost/preprocessor/slot/slot.hpp
+build/import.o: /usr/include/boost/preprocessor/slot/detail/def.hpp
+build/import.o: /usr/include/boost/function/detail/prologue.hpp
+build/import.o: /usr/include/boost/config/no_tr1/functional.hpp
+build/import.o: /usr/include/boost/function/function_base.hpp
+build/import.o: /usr/include/boost/integer.hpp
+build/import.o: /usr/include/boost/integer_fwd.hpp
+build/import.o: /usr/include/boost/integer_traits.hpp
+build/import.o: /usr/include/boost/type_traits/has_trivial_copy.hpp
+build/import.o: /usr/include/boost/type_traits/has_trivial_destructor.hpp
+build/import.o: /usr/include/boost/type_traits/composite_traits.hpp
+build/import.o: /usr/include/boost/type_traits/alignment_of.hpp
+build/import.o: /usr/include/boost/type_traits/detail/size_t_trait_def.hpp
+build/import.o: /usr/include/boost/mpl/size_t.hpp
+build/import.o: /usr/include/boost/mpl/size_t_fwd.hpp
+build/import.o: /usr/include/boost/type_traits/detail/size_t_trait_undef.hpp
+build/import.o: /usr/include/boost/function_equal.hpp
+build/import.o: /usr/include/boost/function/function_fwd.hpp
+build/import.o: /usr/include/boost/preprocessor/enum.hpp
+build/import.o: /usr/include/boost/preprocessor/repetition/enum.hpp
+build/import.o: /usr/include/boost/preprocessor/enum_params.hpp
+build/import.o: include/ilang/ilang.h include/ilang/import.h
+build/import.o: include/ilang/object.h
 build/parser.o: include/ilang/parser.h /usr/include/stdio.h
 build/parser.o: /usr/include/features.h /usr/include/stdc-predef.h
 build/parser.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h

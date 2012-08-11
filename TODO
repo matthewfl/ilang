@@ -2,6 +2,7 @@
 ~program flow control
 ~variables
 better errors regarding programming
+make ValuePass a shared pointer
 
 ~objects
 Arrays
