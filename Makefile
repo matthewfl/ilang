@@ -3,17 +3,22 @@ TARGET= i
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc
 LIBS=-lfl -ldl -lboost_filesystem -lboost_system
 
+MODULES= test.io
+
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
 
 SRCDIR=src
 SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 
+MODULESDIR=modules
+
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
 CXXFLAGS= -ggdb -O0 $(CXXFLAGS_BASE)
+CSSFLAGS_MODULES= -ggdb -O0 -fPIC -shared $(CXXFLAGS_BASE)
 LDFLAGS=
 # -Ideps/glog/src
 
@@ -36,6 +41,7 @@ DEPS=$(leveldb)
 all: $(TARGET)
 
 release: CXXFLAGS= -O3 -s $(CXXFLAGS_BASE)
+release: CXXFLAGS_MODULES= -O3 -s
 release: LDFLAGS+= -s -static
 release: clean $(TARGET)
 
@@ -44,6 +50,12 @@ submodule:
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
+$(BUILDDIR)/modules/%.o: $(MODULES)/%.cc
+	
+
+%.io: $(BUILDDIR)/modules/%.o
+	$(CXX) $(CXXFLAGS_MODULES) -o $@ -c $<
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
 	bison -v -t -o $(BUILDDIR)/parser.tab.cc $<
@@ -58,7 +70,7 @@ $(TARGET): $(DEPS) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
-	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc
+	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULES)
 clean-all: clean
 	rm -rf deps/glog/Makefile deps/glog/.libs
 	cd deps/leveldb && make clean

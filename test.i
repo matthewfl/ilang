@@ -1,6 +1,6 @@
 import something
 
-main = {
+main123 = {
 	//something.what();
 	Print(what_.inthe.world.test);
 	
@@ -21,4 +21,8 @@ main = {
 
 wwww = {
 	Print("wwwww function\n");
+};
+
+main = {
+	something.sss();
 };

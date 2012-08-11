@@ -658,6 +658,7 @@ namespace ilang {
       assert(a.type() == typeid(ilang::Class*));
       ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() );
       // TODO: make this call an init function that is defined in the class
+      // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
       return ValuePass(val);
     }
 

@@ -4,11 +4,14 @@
 #include "object.h"
 #include "parserTree.h"
 #include "parser.h"
+#include "function.h"
 
 #include <stdio.h>
 
 #include <iostream>
 using namespace std;
+
+#include "ilang.h"
 
 namespace ilang {
   std::vector<boost::filesystem::path> ImportSearchPaths;
@@ -107,8 +110,8 @@ namespace ilang {
     }*/
 
   void ImportScopeFile::load(Object *o) {
-    ilang::Variable *v = o->operator[]("test");
-    v->Set(new ilang::Value((long)123));
+    //ilang::Variable *v = o->operator[]("test");
+    //v->Set(new ilang::Value((long)123));
 
     for(auto it : m_Scope->vars) {
       cout << it.first << endl;
@@ -120,8 +123,8 @@ namespace ilang {
   void ImportScopeFile::resolve(Scope *scope) {
     assert(dynamic_cast<FileScope*>(scope));
     m_Scope = dynamic_cast<FileScope*>(scope);
-    std::list<std::string> tt = { "what_", "inthe", "world" };
-    load(GetObject(scope, tt));
+    //std::list<std::string> tt = { "what_", "inthe", "world" };
+    //load(GetObject(scope, tt));
     for(auto it : imports) {
       Object *obj = GetObject(scope, it.first);
       auto find = ImportedFiles.find(it.second);
@@ -175,4 +178,45 @@ namespace ilang {
     
   }
   
+  ImportScopeC::ImportScopeC (char *name): m_name(name) {
+    fs::path p(name);
+    ImportedFiles.insert(pair<fs::path, ImportScope*>(p, this));
+  }
+  void ImportScopeC::Set(char *name, ValuePass val) {
+    string n = name;
+    m_members.insert(pair<std::string, ValuePass>(n, val));
+  }
+  void ImportScopeC::load(Object *obj) {
+    for(auto it : m_members) {
+      
+    }
+  }
+}
+
+namespace ilang {
+  ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
+    ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+      *ret = (*fun)(args);
+    };
+    return ValuePass(new ilang::Value(f));
+  }
+  ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
+    ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+      *ret = (*fun)(scope, args);
+    };
+    return ValuePass(new ilang::Value(f));
+  }
+}
+
+namespace {
+  using namespace ilang;
+  ValuePass ilang_import_get(std::vector<ValuePass> &args) {
+    
+  }
+
+
+  ILANG_LIBRARY_NAME("i/Import", 
+		     ILANG_FUNCTION("get", ilang_import_get);
+		     )
+
 }

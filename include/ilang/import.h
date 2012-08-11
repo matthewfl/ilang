@@ -53,8 +53,12 @@ namespace ilang {
   
   class ImportScopeC : public ImportScope {
     // for C++ files
+    char *m_name;
+    std::map<std::string, ValuePass> m_members;
   public:
-    void Local(std::string name, ValuePass val);
+    ImportScopeC(char *);
+    void Set(char *name, ValuePass val);
+    void load(Object*);
   };
 }
 
