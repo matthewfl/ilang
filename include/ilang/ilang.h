@@ -13,7 +13,9 @@
 namespace ilang {
   // used to create wrapper for C++ classes
   // other helpers for wrappers in import.cc
-
+  ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
+  ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
+  
   template<typename cc> class Class_Creater_class {
     
   };
@@ -28,6 +30,8 @@ namespace ilang {
   {								\
     x ;								\
   }
+
+
 
 #define ILANG_LIBRARY_NAME(name, x)					\
   ILANG_LIBRARY(x)

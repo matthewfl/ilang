@@ -12,13 +12,14 @@ SRCDIR=src
 SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 
 MODULESDIR=modules
+MODULESD=$(addprefix $(MODULESDIR)/, $(MODULES))
 
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
 CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-CSSFLAGS_MODULES= -ggdb -O0 -fPIC -shared $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES= -ggdb -O0 -fPIC -shared $(CXXFLAGS_BASE)
 LDFLAGS=
 # -Ideps/glog/src
 
@@ -38,11 +39,11 @@ DEPS=$(leveldb)
 
 .PHONY: all release test debug clean clean-all depend include/version.h
 # start of commands
-all: $(TARGET)
+all: $(TARGET) $(MODULESD)
 
 release: CXXFLAGS= -O3 -s $(CXXFLAGS_BASE)
 release: CXXFLAGS_MODULES= -O3 -s -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-release: LDFLAGS+= -s -static
+release: LDFLAGS+= -s -static $(MODULESD)
 release: clean $(TARGET)
 
 submodule:
@@ -51,11 +52,8 @@ submodule:
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(BUILDDIR)/modules/%.o: $(MODULES)/%.cc
-	
-
-%.io: $(BUILDDIR)/modules/%.o
-	$(CXX) $(CXXFLAGS_MODULES) -o $@ -c $<
+$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang.h
+	$(CXX) $(CXXFLAGS_MODULES) $(MLIBS) $(MINCLUDE) -o $@ -c $<
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
 	bison -v -t -o $(BUILDDIR)/parser.tab.cc $<
@@ -69,10 +67,11 @@ $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 $(TARGET): $(DEPS) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
+modules: $(MODULESD)
+
 clean:
-	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULES)
+	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD)
 clean-all: clean
-	rm -rf deps/glog/Makefile deps/glog/.libs
 	cd deps/leveldb && make clean
 
 depend:
@@ -85,6 +84,9 @@ test: $(TARGET)
 debug: $(TARGET)
 	gdb i "--eval-command=run test.i -v 10" --eval-command=bt
 
+# all the settings to build modules
+
+#$(MODULESDIR)/test.io: LIBS= -lssl
 
 # all the commands to build any deps
 $(glogLib): ./deps/glog/build/base/g.ogleinit.h
