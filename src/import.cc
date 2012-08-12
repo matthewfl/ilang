@@ -16,8 +16,13 @@ using namespace std;
 namespace ilang {
   std::vector<boost::filesystem::path> ImportSearchPaths;
   std::map<fs::path, ImportScope*> ImportedFiles;
-  std::map<std::string, ImportScope*> StaticImportedFiles;
+  static std::map<std::string, ImportScope*> *_StaticImportedFiles;
   ImportScope GlobalImportScope;
+
+  std::map<std::string, ImportScope*> & StaticImportedFiles () {
+    if(!_StaticImportedFiles) _StaticImportedFiles = new std::map<std::string, ImportScope*>;
+    return *_StaticImportedFiles;
+  }
 
   void Init (int argc, char **argv) {
     //debug(0, "init import running");
@@ -56,12 +61,12 @@ namespace ilang {
     for(auto it : ImportedFiles) {
       cout << "maps: " << it.first << endl;
     }
-    for(auto it2 : StaticImportedFiles) {
+    for(auto it2 : StaticImportedFiles()) {
       cout << "static map: " << it2.first << endl;
     }
     //cout << "aaa: " << search.generic_string() << endl;
-    auto it2 = StaticImportedFiles.find((std::string)search.c_str());
-    if(it2 != StaticImportedFiles.end()) {
+    auto it2 = StaticImportedFiles().find((std::string)search.c_str());
+    if(it2 != StaticImportedFiles().end()) {
       return search;
     }
     fs::path check;
@@ -154,8 +159,8 @@ namespace ilang {
       if(find != ImportedFiles.end()) {
 	find->second->load(obj);
       }else{
-	auto find2 = StaticImportedFiles.find((std::string)it.second.c_str());
-	if(find2 != StaticImportedFiles.end()) {
+	auto find2 = StaticImportedFiles().find((std::string)it.second.c_str());
+	if(find2 != StaticImportedFiles().end()) {
 	  find2->second->load(obj);
 	}else{
 	  // TODO: check if it is a .io file or a .i file
@@ -208,7 +213,7 @@ namespace ilang {
 
   ImportScopeC::ImportScopeC (char *name) { //: m_name(name) {
     //fs::path p(name);
-    StaticImportedFiles.insert(pair<std::string, ImportScope*>(name, this));
+    StaticImportedFiles().insert(pair<std::string, ImportScope*>(name, this));
   }
   ImportScopeC::ImportScopeC(fs::path p) {
     ImportedFiles.insert(pair<fs::path, ImportScope*>(p, this));

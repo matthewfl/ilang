@@ -19,7 +19,7 @@ namespace ilang {
   class ImportScope;
   extern std::vector<fs::path> ImportSearchPaths;
   extern std::map<fs::path, ImportScope*> ImportedFiles;
-  extern std::map<std::string, ImportScope*> StaticImportedFiles;
+  std::map<std::string, ImportScope*> & StaticImportedFiles();
 
   void Init (int argc, char **argv);
   
