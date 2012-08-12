@@ -16,14 +16,15 @@ using namespace std;
 namespace ilang {
   std::vector<boost::filesystem::path> ImportSearchPaths;
   std::map<fs::path, ImportScope*> ImportedFiles;
+  std::map<std::string, ImportScope*> StaticImportedFiles;
   ImportScope GlobalImportScope;
 
   void Init (int argc, char **argv) {
     //debug(0, "init import running");
     //namespace fs = boost::filesystem;
-    
+
     ImportSearchPaths.push_back(fs::current_path());
-    
+
     fs::path mod = fs::current_path();
     mod /= "/modules";
     ImportSearchPaths.push_back(mod);
@@ -55,6 +56,14 @@ namespace ilang {
     for(auto it : ImportedFiles) {
       cout << "maps: " << it.first << endl;
     }
+    for(auto it2 : StaticImportedFiles) {
+      cout << "static map: " << it2.first << endl;
+    }
+    //cout << "aaa: " << search.generic_string() << endl;
+    auto it2 = StaticImportedFiles.find((std::string)search.c_str());
+    if(it2 != StaticImportedFiles.end()) {
+      return search;
+    }
     fs::path check;
     if(!file.empty()) {
       check = fs::absolute(file).parent_path();
@@ -84,7 +93,7 @@ namespace ilang {
   }
 
   ImportScopeFile::ImportScopeFile(fs::path p) : ImportScope(&GlobalImportScope, p) {}
-  
+
   void ImportScopeFile::push(std::list<std::string> *pre, std::list<std::string> *name) {
     string str;
     fs::path p;
@@ -98,13 +107,13 @@ namespace ilang {
       fs::path look;//(str);
       //p = locateFile(look);
       //if(p.empty()) {
-	for(auto it : *name) {
-	  if(!str.empty()) str += "/";
-	  str +=  it;
-	}
-	look = str;
-	p = locateFile(look);
-	//}
+      for(auto it : *name) {
+	if(!str.empty()) str += "/";
+	str +=	it;
+      }
+      look = str;
+      p = locateFile(look);
+      //}
       delete pre; // no longer needed
     }else{
       for(auto it : *name) {
@@ -145,21 +154,26 @@ namespace ilang {
       if(find != ImportedFiles.end()) {
 	find->second->load(obj);
       }else{
-	// TODO: check if it is a .io file or a .i file
-	// need to create a new file and load it in
-	fs::path p = fs::absolute(it.second);
-	ilang::ImportScopeFile *imp = new ImportScopeFile(p);
-	FILE *f = fopen(p.c_str(), "r");
-	ilang::parserNode::Head *head = ilang::parser(f, imp);
-	fclose(f);
-	head->Link();
-	ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
-	imp->load(obj);
-	// imp is save into the map of ImportedFiles and thus we want it to stay around
+	auto find2 = StaticImportedFiles.find((std::string)it.second.c_str());
+	if(find2 != StaticImportedFiles.end()) {
+	  find2->second->load(obj);
+	}else{
+	  // TODO: check if it is a .io file or a .i file
+	  // need to create a new file and load it in
+	  fs::path p = fs::absolute(it.second);
+	  ilang::ImportScopeFile *imp = new ImportScopeFile(p);
+	  FILE *f = fopen(p.c_str(), "r");
+	  ilang::parserNode::Head *head = ilang::parser(f, imp);
+	  fclose(f);
+	  head->Link();
+	  ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
+	  imp->load(obj);
+	  // imp is save into the map of ImportedFiles and thus we want it to stay around
+	}
       }
     }
   }
-  
+
   Object * ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
     assert(!path.empty());
     ilang::Variable *var = scope->lookup(path.front());
@@ -174,7 +188,7 @@ namespace ilang {
     }
     return GetObject(obj, path);
   }
-  
+
   Object * ImportScopeFile::GetObject(Object *o, std::list<std::string> &path) {
     path.pop_front();
     if(path.empty()) return o;
@@ -189,11 +203,14 @@ namespace ilang {
       var->Set(val);
     }
     return GetObject(obj, path);
-    
+
   }
-  
-  ImportScopeC::ImportScopeC (char *name): m_name(name) {
-    fs::path p(name);
+
+  ImportScopeC::ImportScopeC (char *name) { //: m_name(name) {
+    //fs::path p(name);
+    StaticImportedFiles.insert(pair<std::string, ImportScope*>(name, this));
+  }
+  ImportScopeC::ImportScopeC(fs::path p) {
     ImportedFiles.insert(pair<fs::path, ImportScope*>(p, this));
   }
   void ImportScopeC::Set(char *name, ValuePass val) {
@@ -228,17 +245,18 @@ namespace {
   using namespace ilang;
   ValuePass ilang_import_get(std::vector<ValuePass> &args) {
     cout << "the ilang_import_get was called\n";
-    
+
     return ValuePass(new ilang::Value);
   }
 
+  ValuePass ilang_import_check(std::vector<ValuePass> &args) {
 
-  ILANG_LIBRARY_NAME("i/Import", 
+    return ValuePass(new ilang::Value(false));
+  }
+
+  ILANG_LIBRARY_NAME("i/Import",
 		     ILANG_FUNCTION("get", ilang_import_get)
+		     ILANG_FUNCTION("check", ilang_import_check)
 		     )
-  
-  /*namespace { struct sssss { sssss () {
-    ImportedFiles.insert(pair<fs::path, ImportScope*>("eeeee/www", NULL));
-  }} wwwww; }
-  */
+
 }

@@ -33,26 +33,29 @@ namespace ilang {
 
 
 
-#define ILANG_LIBRARY_NAME(name, x)					\
+#define ILANG_LIBRARY_NAME(name, x)		\
+  ILANG_LIBRARY(x)
+#define ILANG_LIBRARY_NAME_REAL(name, uid, x)	\
   ILANG_LIBRARY(x)
 
 //  #warning "ILANG_LIBRARY_NAME, NAME IS NOT USED WHEN NOT STATIC" 
 
 
 #else // ILANG_STATIC_LIBRARY
-#define ILANG_LIBRARY_NAME_REAL(name, x, line)			\ 
-namespace { struct _ILANG_STATIC_BIND {				\
-  _ILANG_STATIC_BIND () {						\
-    ::ilang::ImportScopeC *import = new ImportScopeC(name);		\
+#define ILANG_LIBRARY_NAME_REAL(name, uid, x)			\ 
+namespace { struct _ILANG_STATIC_BIND##uid {					\
+  _ILANG_STATIC_BIND##uid () {						\
+    ::ilang::ImportScopeC *import = new ::ilang::ImportScopeC(name);	\
     x ;									\
-  }} _ILANG_STATIC_BIND_RUN ;				\
+  }} _ILANG_STATIC_BIND_RUN##uid ;						\
 }
 
-#define ILANG_LIBRARY_NAME(name, x) ILANG_LIBRARY_NAME_REAL(name, x, __LINE__)
+#define ILANG_LIBRARY_NAME(name, x) ILANG_LIBRARY_NAME_REAL(name, __COUNTER__, x)
 
 // it appears that an error can not work in this way, but all we need to do is pervent this from compiling which I guess this will do, but it will not be very clear
-#define ILANG_LIBRARY(x)
-#warning "ILANG_LIBRARY CAN NOT BE USED WHEN STATIC, USE ILANG_LIBRARY_NAME"
+// if there is no macro then this should cause an error and stop
+//#define ILANG_LIBRARY(x)
+//#warning "ILANG_LIBRARY CAN NOT BE USED WHEN STATIC, USE ILANG_LIBRARY_NAME"
 
 
 #endif // ILANG_STATIC 

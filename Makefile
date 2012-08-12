@@ -41,10 +41,11 @@ DEPS=$(leveldb)
 # start of commands
 all: $(TARGET) $(MODULESD)
 
-release: CXXFLAGS= -O3 -s $(CXXFLAGS_BASE)
-release: CXXFLAGS_MODULES= -O3 -s -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-release: LDFLAGS+= -s -static $(MODULESD)
-release: clean $(TARGET)
+#add back in to everything -s to remove symbols table
+release: CXXFLAGS= -ggdb -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+release: CXXFLAGS_MODULES= -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+release: LDFLAGS+= -static -static-libgcc $(MODULESD)
+release: clean $(MODULESD) $(TARGET)
 
 submodule:
 	git submodule update --init --recursive 
@@ -52,7 +53,7 @@ submodule:
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang.h
+$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang/ilang.h
 	$(CXX) $(CXXFLAGS_MODULES) $(MLIBS) $(MINCLUDE) -o $@ -c $<
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
@@ -65,7 +66,7 @@ $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
 $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 
 $(TARGET): $(DEPS) $(OBJS)
-	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
 
 modules: $(MODULESD)
 

@@ -19,6 +19,7 @@ namespace ilang {
   class ImportScope;
   extern std::vector<fs::path> ImportSearchPaths;
   extern std::map<fs::path, ImportScope*> ImportedFiles;
+  extern std::map<std::string, ImportScope*> StaticImportedFiles;
 
   void Init (int argc, char **argv);
   
@@ -53,10 +54,12 @@ namespace ilang {
   
   class ImportScopeC : public ImportScope {
     // for C++ files
-    char *m_name;
+  private:
+    //char *m_name;
     std::map<std::string, ValuePass> m_members;
   public:
     ImportScopeC(char *);
+    explicit ImportScopeC(fs::path p);
     void Set(char *name, ValuePass val);
     void load(Object*);
   };
