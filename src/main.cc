@@ -20,7 +20,10 @@ void show_help_info(char *name) {
        << "\t-v #\t\tdebug level\n";
 }
 
-int Debug_level=0;
+extern "C" int Debug_level=0;
+extern "C" int get_Debug_level() {
+  return Debug_level;
+}
 
 int main (int argc, char **argv) {
   if(argc < 2) {

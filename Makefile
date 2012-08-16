@@ -3,7 +3,7 @@ TARGET= i
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc
 LIBS=-lfl -ldl -lboost_filesystem -lboost_system
 
-MODULES= test.io
+MODULES= i/test.io
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
@@ -18,8 +18,9 @@ INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
-CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-CXXFLAGS_MODULES= -ggdb -O0 -fPIC -shared $(CXXFLAGS_BASE)
+CXXFLAGS= -ggdb -O0 -fPIC -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES= -ggdb -O0 -fPIC $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES_LINK= -shared
 LDFLAGS=
 # -Ideps/glog/src
 
@@ -54,7 +55,8 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
 $(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang/ilang.h
-	$(CXX) $(CXXFLAGS_MODULES) $(MLIBS) $(MINCLUDE) -o $@ -c $<
+	$(CXX) $(CXXFLAGS_MODULES) $(MINCLUDE) -o $(BUILDDIR)/mod.o -c $<
+	$(CXX) $(CXXFLAGS_MODULES_LINK) $(MLIBS) -o $@ $(BUILDDIR)/mod.o
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
 	bison -v -t -o $(BUILDDIR)/parser.tab.cc $<

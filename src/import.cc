@@ -7,6 +7,7 @@
 #include "function.h"
 
 #include <stdio.h>
+#include <dlfcn.h>
 
 #include <iostream>
 using namespace std;
@@ -18,6 +19,7 @@ namespace ilang {
   std::map<fs::path, ImportScope*> ImportedFiles;
   static std::map<std::string, ImportScope*> *_StaticImportedFiles;
   ImportScope GlobalImportScope;
+  bool dl_inited=false;
 
   std::map<std::string, ImportScope*> & StaticImportedFiles () {
     if(!_StaticImportedFiles) _StaticImportedFiles = new std::map<std::string, ImportScope*>;
@@ -166,14 +168,39 @@ namespace ilang {
 	  // TODO: check if it is a .io file or a .i file
 	  // need to create a new file and load it in
 	  fs::path p = fs::absolute(it.second);
-	  ilang::ImportScopeFile *imp = new ImportScopeFile(p);
-	  FILE *f = fopen(p.c_str(), "r");
-	  ilang::parserNode::Head *head = ilang::parser(f, imp);
-	  fclose(f);
-	  head->Link();
-	  ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
-	  imp->load(obj);
+	  if(p.extension() == ".io") {
+	    assert(0);
+	    // TODO: make the system able to dynamically load in libraries
+	    // atm disable this feature due to a number of complications with linking
+	    if(dl_inited == false) {
+	      // this is to make the system able to use the symbols that are contained inside this program
+	      
+	      void *self = dlopen(NULL, RTLD_GLOBAL | RTLD_NOW);
+	      //cout << "self " << self << " " << dlerror() << endl;
+	      dl_inited=true;
+	    }
+	    void *handle = dlopen(p.c_str(), RTLD_NOW);
+	    cout << p << " " << handle << endl;
+	    if(!handle) {
+	      cout << "error open library " << dlerror() << endl;
+	    }
+	    typedef void (*load_fun_t)(ImportScopeC*);
+	    load_fun_t load_fun = (load_fun_t) dlsym(handle, "ILANG_LOAD");
+	    //if(!load_fun) 
+	    cout << "error getting function " << dlerror() << endl;
+	    cout << flush;
+	    ImportScopeC *imp = new ImportScopeC(p);
+	    //load_fun(imp);
+	  }else{
+	    ilang::ImportScopeFile *imp = new ImportScopeFile(p);
+	    FILE *f = fopen(p.c_str(), "r");
+	    ilang::parserNode::Head *head = ilang::parser(f, imp);
+	    fclose(f);
+	    head->Link();
+	    ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
+	    imp->load(obj);
 	  // imp is save into the map of ImportedFiles and thus we want it to stay around
+	  }
 	}
       }
     }
@@ -230,7 +257,7 @@ namespace ilang {
     }
   }
 }
-
+/*
 namespace ilang {
   ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
     ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
@@ -245,6 +272,7 @@ namespace ilang {
     return ValuePass(new ilang::Value(f));
   }
 }
+*/
 
 namespace {
   using namespace ilang;

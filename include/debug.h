@@ -8,11 +8,12 @@
 //#include "../deps/glog/src/glog/logging.h"
 
 #ifndef NDEBUG
-extern int Debug_level;
-#define debug(l, x) if(l <= Debug_level) ::std::cout << __FILE__<<":"<<__LINE__<<"\t" << x  << ::std::endl;
+extern "C" int Debug_level;
+extern "C" int get_Debug_level();
+#define debug(l, x) if(l <= get_Debug_level()) ::std::cout << __FILE__<<":"<<__LINE__<<"\t" << x  << ::std::endl;
 #define debug_act(x) x
 #define debug_break(x)
-#define debug_num(l, x) if(l <= Debug_level) { x ; }
+#define debug_num(l, x) if(l <= get_Debug_level()) { x ; }
 #else
 #define debug(l, x)
 #define debug_act(x)
