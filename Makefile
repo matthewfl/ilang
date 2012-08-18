@@ -12,16 +12,16 @@ SRCDIR=src
 SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 
 MODULESDIR=modules
-MODULESD=$(addprefix $(MODULESDIR)/, $(MODULES))
+MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/
-CXXFLAGS= -ggdb -O0 -fPIC -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-CXXFLAGS_MODULES= -ggdb -O0 -fPIC $(CXXFLAGS_BASE)
-CXXFLAGS_MODULES_LINK= -shared
-LDFLAGS=
+CXXFLAGS= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES_LINK=
+LDFLAGS= -static
 # -Ideps/glog/src
 
 CXX= g++
@@ -45,7 +45,7 @@ all: $(TARGET) $(MODULESD)
 #add back in to everything -s to remove symbols table
 release: CXXFLAGS= -ggdb -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 release: CXXFLAGS_MODULES= -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-release: LDFLAGS+= -static -static-libgcc $(MODULESD)
+release: LDFLAGS+= -static $(MODULESD)
 release: clean $(MODULESD) $(TARGET)
 
 submodule:
@@ -54,9 +54,9 @@ submodule:
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang/ilang.h
-	$(CXX) $(CXXFLAGS_MODULES) $(MINCLUDE) -o $(BUILDDIR)/mod.o -c $<
-	$(CXX) $(CXXFLAGS_MODULES_LINK) $(MLIBS) -o $@ $(BUILDDIR)/mod.o
+$(BUILDDIR)/$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang/ilang.h
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS_MODULES) $(MINCLUDE) -o $@ -c $<
 
 $(BUILDDIR)/parser.tab.cc $(BUILDDIR)/parser.tab.hh: $(SRCDIR)/parser.y
 	bison -v -t -o $(BUILDDIR)/parser.tab.cc $<
@@ -67,8 +67,8 @@ $(BUILDDIR)/lex.yy.cc: $(SRCDIR)/scanner.l $(BUILDDIR)/parser.tab.cc $(BUILDDIR)
 $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
 $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 
-$(TARGET): $(DEPS) $(OBJS)
-	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(LIBS)
+$(TARGET): $(DEPS) $(OBJS) $(MODULESD) 
+	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
 
 modules: $(MODULESD)
 
