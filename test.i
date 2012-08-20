@@ -1,5 +1,6 @@
 import i.Import
 import i.test
+from net import curl
 
 a_class = class {
 	eeee: {
@@ -25,4 +26,8 @@ main = {
 	Print(something.eeee);
 
 	something.eeee();
+
+	Print("\n\n\ntryin curl\n");
+	Print(curl.simpleGet);
+	Print(curl.simpleGet("http://www.google.com/"));
 };
