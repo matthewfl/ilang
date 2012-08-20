@@ -21,6 +21,7 @@ using namespace std;
 %option bison-bridge
 %option bison-locations
 %option debug
+%option noyywrap
 
 %x COMMENT
 

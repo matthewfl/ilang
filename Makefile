@@ -1,9 +1,9 @@
 TARGET= i
 
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc
-LIBS=-lfl -ldl -lboost_filesystem -lboost_system
+LIBS= -lboost_filesystem -lboost_system
 
-MODULES= i/test.io
+MODULES= i/test.io net/curl.io
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
@@ -21,7 +21,7 @@ CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --a
 CXXFLAGS= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
-LDFLAGS= -static
+LDFLAGS= -static-libgcc
 # -Ideps/glog/src
 
 CXX= g++
@@ -37,6 +37,9 @@ LIBS+=$(leveldb)
 DEPS=$(leveldb)
 #$(glogLib)
 
+#libs for modules
+#LIBS+= $(shell pkg-config libcurl --libs --static)
+LIBS+= $(shell curl-config --static-libs)
 
 .PHONY: all release test debug clean clean-all depend include/version.h
 # start of commands
@@ -73,7 +76,7 @@ $(TARGET): $(DEPS) $(OBJS) $(MODULESD)
 modules: $(MODULESD)
 
 clean:
-	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD)
+	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
 clean-all: clean
 	cd deps/leveldb && make clean
 
@@ -90,6 +93,7 @@ debug: $(TARGET)
 # all the settings to build modules
 
 #$(MODULESDIR)/test.io: LIBS= -lssl
+#$(BUILDDIR)/$(MODULESDIR)/net/curl.io: MLIBS= -lcurl
 
 # all the commands to build any deps
 $(glogLib): ./deps/glog/build/base/g.ogleinit.h
@@ -1120,7 +1124,7 @@ build/import.o: /usr/include/boost/preprocessor/enum.hpp
 build/import.o: /usr/include/boost/preprocessor/repetition/enum.hpp
 build/import.o: /usr/include/boost/preprocessor/enum_params.hpp
 build/import.o: include/ilang/ilang.h include/ilang/import.h
-build/import.o: include/ilang/object.h
+build/import.o: include/ilang/object.h include/ilang/function.h
 build/parser.o: include/ilang/parser.h /usr/include/stdio.h
 build/parser.o: /usr/include/features.h /usr/include/stdc-predef.h
 build/parser.o: /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h
@@ -1790,3 +1794,5 @@ build/object.o: /usr/include/boost/filesystem/operations.hpp
 build/object.o: /usr/include/boost/detail/scoped_enum_emulation.hpp
 build/object.o: /usr/include/boost/detail/bitmask.hpp
 build/object.o: /usr/include/boost/filesystem/convenience.hpp
+build/object.o: include/ilang/ilang.h include/ilang/import.h
+build/object.o: include/ilang/object.h include/ilang/function.h

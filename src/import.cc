@@ -7,7 +7,7 @@
 #include "function.h"
 
 #include <stdio.h>
-#include <dlfcn.h>
+//#include <dlfcn.h>
 
 #include <iostream>
 using namespace std;
@@ -172,7 +172,7 @@ namespace ilang {
 	    assert(0);
 	    // TODO: make the system able to dynamically load in libraries
 	    // atm disable this feature due to a number of complications with linking
-	    if(dl_inited == false) {
+	    /*	    if(dl_inited == false) {
 	      // this is to make the system able to use the symbols that are contained inside this program
 	      
 	      void *self = dlopen(NULL, RTLD_GLOBAL | RTLD_NOW);
@@ -191,6 +191,7 @@ namespace ilang {
 	    cout << flush;
 	    ImportScopeC *imp = new ImportScopeC(p);
 	    //load_fun(imp);
+	    */
 	  }else{
 	    ilang::ImportScopeFile *imp = new ImportScopeFile(p);
 	    FILE *f = fopen(p.c_str(), "r");
@@ -257,7 +258,7 @@ namespace ilang {
     }
   }
 }
-/*
+
 namespace ilang {
   ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
     ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
@@ -272,7 +273,7 @@ namespace ilang {
     return ValuePass(new ilang::Value(f));
   }
 }
-*/
+
 
 namespace {
   using namespace ilang;

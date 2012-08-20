@@ -1,11 +1,15 @@
 #include "object.h"
 #include "debug.h"
 
+// I do not like including this one here, but it is for C_Class->operator[]
+#include "ilang.h"
+
 #include <iostream>
 using namespace std;
 
 namespace ilang {
   Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope* scope) {
+    if(!p && !obj && !scope) return;
     assert(p);
     assert(obj);
     assert(scope);
@@ -55,20 +59,21 @@ namespace ilang {
     return NULL; // this most likely will get changed in the future 
   }
 
-  Object::Object(Class *base): baseClass(base) {
+  Object::Object(Class *base): baseClass(base), C_baseClass(NULL) {
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
     this_var.Set(new ilang::Value(this));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
   }
-  Object::Object(): baseClass(NULL) {
+  Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL) {}
+  Object::Object(): baseClass(NULL), C_baseClass(NULL) {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
     this_var.Set(new ilang::Value(this));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
   }
-  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL) {
+  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL) {
     assert(obj);
     assert(scope);
     std::list<std::string> this_mod = {"Const"};
@@ -100,7 +105,12 @@ namespace ilang {
 	ilang::Variable * var = baseClass->operator[](name);
 	if(var)
 	  return var;
-      } // if we don't find the variable then make a new one and return it
+      }else if(C_baseClass) {
+	ilang::Variable *var = C_baseClass->operator[](name);
+	if(var)
+	  return var;
+      } 
+      // if we don't find the variable then make a new one and return it
       debug(0, "Member "<< name << " not found in object");
       // I guess create a new one and insert it
       members.insert(pair<std::string, ilang::Variable>(name, Variable(name, list<string>())));

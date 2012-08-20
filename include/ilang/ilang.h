@@ -6,42 +6,75 @@
 #include "ilang/import.h"
 #include "ilang/object.h"
 #include "ilang/function.h"
+#include <string>
+
 
 #ifndef ILANG_FILE
 #define ILANG_FILE __FILE__
 #endif
 
-namespace ilang {
+/*
+  namespace ilang {
   // a very bad hack, I would like to find a better way
   namespace {
-    ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(std::vector<ilang::ValuePass>&) ) {
-      ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
-	*ret = (*fun)(args);
-      };
-      return ValuePass(new ilang::Value(f));
-    }
-    ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(ilang::Scope*, std::vector<ilang::ValuePass>&) ) {
-      ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
-	*ret = (*fun)(scope, args);
-      };
-      return ValuePass(new ilang::Value(f));
-    }
+  ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(std::vector<ilang::ValuePass>&) ) {
+  ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
+  *ret = (*fun)(args);
+  };
+  return ValuePass(new ilang::Value(f));
   }
-}
+  ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(ilang::Scope*, std::vector<ilang::ValuePass>&) ) {
+  ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
+  *ret = (*fun)(scope, args);
+  };
+  return ValuePass(new ilang::Value(f));
+  }
+  }
+  }
+*/
 
 
 
 namespace ilang {
   // used to create wrapper for C++ classes
   // other helpers for wrappers in import.cc
-  //ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
-  //ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
+  ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
+  ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
 
-  template<typename cc> class Class_Creater_class {
+  class C_Class {
+  private:
+    std::map<std::string, ilang::Variable*> m_members;
+  public:
+    C_Class() {}
+    template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(std::vector<ValuePass> &args) ) {
+      assert(m_members.find(name) == m_members.end());
+      cla *self = (cla*)this;
+      assert(self);
+      ilang::Function_ptr f = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+	*ret = (self ->* fun)(args);
+      };
+      std::list<std::string> mod = {"Const"};
+      ilang::Variable *var = new ilang::Variable(name, mod);
+      var->Set(ValuePass(new ilang::Value(f)));
+      m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
+    }
+    ilang::Variable* operator[](std::string name) {
+      auto it = m_members.find(name);
+      if(it != m_members.end()) return it->second;
+      return NULL;
+    }
+  };
 
+  template<typename cc> class Class_Creater_class : public Class {
+  public:
+    Class_Creater_class () : Class(NULL, NULL, NULL) {}
+    Object * NewClass () {
+      return new Object(new cc);
+    }
   };
   template<typename cc> ValuePass Class_Creater() {
-    return ValuePass(new ilang::Value(new Class_Creater_class<cc>));
+    ilang::Class *c = new Class_Creater_class<cc>();
+    return ValuePass(new ilang::Value(c));
   }
 }
 
@@ -71,7 +104,7 @@ namespace ilang {
       }} _ILANG_STATIC_BIND_RUN##uid ;					\
   }
 
-#define ILANG_LIBRARY_NAME(name, x) ILANG_LIBRARY_NAME_REAL(name, __COUNTER__, x)
+#define ILANG_LIBRARY_NAME(name, x) ILANG_LIBRARY_NAME_REAL(name, __, x)
 
 // it appears that an error can not work in this way, but all we need to do is pervent this from compiling which I guess this will do, but it will not be very clear
 // if there is no macro then this should cause an error and stop
