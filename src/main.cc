@@ -6,8 +6,9 @@
 #include <string>
 
 #include "import.h"
-
+#include "database.h"
 #include "parserTree.h"
+
 
 //#include "version.h"
 
@@ -56,7 +57,13 @@ int main (int argc, char **argv) {
     }
   }
   
+  boost::filesystem::path db_path = boost::filesystem::current_path();
+  db_path += "/DB";
+  ilang::System_Database = new ilang::DatabaseFile(db_path);
+
+  // for setting up the import search path
   ilang::Init(argc, argv);
+  
   //  boost::filesystem::path a("/another");
   //cout << ilang::GlobalImportScope.locateFile(a) << endl;
   
@@ -74,7 +81,9 @@ int main (int argc, char **argv) {
   
   base->Link();
   base->Run();
-  
+
+
+  delete ilang::System_Database;  
   
   return 0;
 }

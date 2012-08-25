@@ -34,6 +34,7 @@ namespace ilang {
     boost::filesystem::path locateFile(boost::filesystem::path search);
     void Import (boost::filesystem::path p);
     virtual void load(Object*) {};
+    void get(Object*, fs::path&);
   };
   extern ImportScope GlobalImportScope;
 
@@ -47,7 +48,8 @@ namespace ilang {
   public:
     ImportScopeFile(fs::path p);
     void push(std::list<std::string> *pre, std::list<std::string> *name);
-    void resolve(Scope*);
+    void resolve(Scope*); 
+    
     void load(Object*);
     //void provide(FileScope*);
   };

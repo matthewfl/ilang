@@ -13,7 +13,7 @@ main = {
 	Print(i);
 	Print(i.Import);
 	Print(i.Import.get);
-	i.Import.get();
+	i.Import.get("net.curl");
 
 	Print("\n\ntry 2\n");
 	Print(i.test.ttt);

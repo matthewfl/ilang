@@ -18,3 +18,10 @@ modifying code
 auto parallization
 distrubited process
 
+
+Networking:
+To make the system able to work over the network I need to transisition it to use a callback like system, so that data can be delayed
+what will need to happen is that there is some even loop like system, and that it will be able to use callbacks to get values over network
+
+I am thinking that for the first version I could use threads, there is a yeild system, then there could be a relativetly simple even system used for waking up the threads when something happends, that should keep the design simpler
+

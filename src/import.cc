@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 //#include <dlfcn.h>
+#include <boost/algorithm/string/replace.hpp>
 
 #include <iostream>
 using namespace std;
@@ -150,6 +151,56 @@ namespace ilang {
     }
   }
 
+  void ImportScope::get(Object *obj, fs::path &pa) {
+    auto find = ImportedFiles.find(pa);
+    if(find != ImportedFiles.end()) {
+      find->second->load(obj);
+    }else{
+      auto find2 = StaticImportedFiles().find((std::string)pa.c_str());
+      if(find2 != StaticImportedFiles().end()) {
+	find2->second->load(obj);
+      }else{
+	// TODO: check if it is a .io file or a .i file
+	// need to create a new file and load it in
+	fs::path p = fs::absolute(pa);
+	if(p.extension() == ".io") {
+	  assert(0);
+	  // TODO: make the system able to dynamically load in libraries
+	  // atm disable this feature due to a number of complications with linking
+	  /*	    if(dl_inited == false) {
+	  // this is to make the system able to use the symbols that are contained inside this program
+
+	  void *self = dlopen(NULL, RTLD_GLOBAL | RTLD_NOW);
+	  //cout << "self " << self << " " << dlerror() << endl;
+	  dl_inited=true;
+	  }
+	  void *handle = dlopen(p.c_str(), RTLD_NOW);
+	  cout << p << " " << handle << endl;
+	  if(!handle) {
+	  cout << "error open library " << dlerror() << endl;
+	  }
+	  typedef void (*load_fun_t)(ImportScopeC*);
+	  load_fun_t load_fun = (load_fun_t) dlsym(handle, "ILANG_LOAD");
+	  //if(!load_fun)
+	  cout << "error getting function " << dlerror() << endl;
+	  cout << flush;
+	  ImportScopeC *imp = new ImportScopeC(p);
+	  //load_fun(imp);
+	  */
+	}else{
+	  ilang::ImportScopeFile *imp = new ImportScopeFile(p);
+	  FILE *f = fopen(p.c_str(), "r");
+	  ilang::parserNode::Head *head = ilang::parser(f, imp);
+	  fclose(f);
+	  head->Link();
+	  ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
+	  imp->load(obj);
+	  // imp is save into the map of ImportedFiles and thus we want it to stay around
+	}
+      }
+    }
+  }
+
   void ImportScopeFile::resolve(Scope *scope) {
     assert(dynamic_cast<FileScope*>(scope));
     m_Scope = dynamic_cast<FileScope*>(scope);
@@ -157,53 +208,7 @@ namespace ilang {
     //load(GetObject(scope, tt));
     for(auto it : imports) {
       Object *obj = GetObject(scope, it.first);
-      auto find = ImportedFiles.find(it.second);
-      if(find != ImportedFiles.end()) {
-	find->second->load(obj);
-      }else{
-	auto find2 = StaticImportedFiles().find((std::string)it.second.c_str());
-	if(find2 != StaticImportedFiles().end()) {
-	  find2->second->load(obj);
-	}else{
-	  // TODO: check if it is a .io file or a .i file
-	  // need to create a new file and load it in
-	  fs::path p = fs::absolute(it.second);
-	  if(p.extension() == ".io") {
-	    assert(0);
-	    // TODO: make the system able to dynamically load in libraries
-	    // atm disable this feature due to a number of complications with linking
-	    /*	    if(dl_inited == false) {
-	      // this is to make the system able to use the symbols that are contained inside this program
-	      
-	      void *self = dlopen(NULL, RTLD_GLOBAL | RTLD_NOW);
-	      //cout << "self " << self << " " << dlerror() << endl;
-	      dl_inited=true;
-	    }
-	    void *handle = dlopen(p.c_str(), RTLD_NOW);
-	    cout << p << " " << handle << endl;
-	    if(!handle) {
-	      cout << "error open library " << dlerror() << endl;
-	    }
-	    typedef void (*load_fun_t)(ImportScopeC*);
-	    load_fun_t load_fun = (load_fun_t) dlsym(handle, "ILANG_LOAD");
-	    //if(!load_fun) 
-	    cout << "error getting function " << dlerror() << endl;
-	    cout << flush;
-	    ImportScopeC *imp = new ImportScopeC(p);
-	    //load_fun(imp);
-	    */
-	  }else{
-	    ilang::ImportScopeFile *imp = new ImportScopeFile(p);
-	    FILE *f = fopen(p.c_str(), "r");
-	    ilang::parserNode::Head *head = ilang::parser(f, imp);
-	    fclose(f);
-	    head->Link();
-	    ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
-	    imp->load(obj);
-	  // imp is save into the map of ImportedFiles and thus we want it to stay around
-	  }
-	}
-      }
+      get(obj, it.second);
     }
   }
 
@@ -279,8 +284,24 @@ namespace {
   using namespace ilang;
   ValuePass ilang_import_get(std::vector<ValuePass> &args) {
     cout << "the ilang_import_get was called\n";
+    Object *obj = new Object;
 
-    return ValuePass(new ilang::Value);
+    assert(args.size() == 1);
+    assert(args[0]->Get().type() == typeid(std::string));
+    std::string name = boost::any_cast<std::string>(args[0]->Get());
+    boost::replace_all(name, ".", "\/");
+    /*auto it = ImportedFiles.find(name);
+      if(it == ImportedFiles.end());
+    */
+    /*auto it = StaticImportedFiles().find(name);
+    if(it != StaticImportedFiles().end()) {
+      it->second->load(obj);
+      return ValuePass(new ilang::Value(obj));
+      }*/
+    fs::path p = GlobalImportScope.locateFile(name);
+    GlobalImportScope.get(obj, p);
+    
+    return ValuePass(new ilang::Value(obj));
   }
 
   ValuePass ilang_import_check(std::vector<ValuePass> &args) {
@@ -289,8 +310,8 @@ namespace {
   }
 
   ILANG_LIBRARY_NAME("i/Import",
-		     ILANG_FUNCTION("get", ilang_import_get)
-		     ILANG_FUNCTION("check", ilang_import_check)
+		     ILANG_FUNCTION("get", ilang_import_get);
+		     ILANG_FUNCTION("check", ilang_import_check);
 		     )
 
 }
