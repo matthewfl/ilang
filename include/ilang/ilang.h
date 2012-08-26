@@ -52,6 +52,7 @@ namespace ilang {
       assert(self);
       ilang::Function_ptr f = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
 	*ret = (self ->* fun)(args);
+	assert(*ret);
       };
       std::list<std::string> mod = {"Const"};
       ilang::Variable *var = new ilang::Variable(name, mod);

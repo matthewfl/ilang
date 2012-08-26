@@ -18,7 +18,9 @@ void show_help_info(char *name) {
   cout << "Usage: "<< name << " file name\n"
        << "\t-h\t\tthis help document\n"
        << "\t-f [file]\tthe start file\n"
-       << "\t-v #\t\tdebug level\n";
+       << "\t-v #\t\tdebug level\n"
+       << "\t--version\tdispay version\n"
+       << "\t-d\t\tset location of database files\n";
 }
 
 extern "C" int Debug_level=0;
@@ -31,7 +33,11 @@ int main (int argc, char **argv) {
     show_help_info(argv[0]);
     return 1;
   }
+
   char *main_file = NULL;
+  boost::filesystem::path db_path = boost::filesystem::current_path();
+  db_path += "/DB/";
+
   for(int i=1;i<argc;i++) {
     if(*argv[i] == '-') {
       switch(argv[i][1]) {
@@ -43,6 +49,9 @@ int main (int argc, char **argv) {
 	return 0;
       case 'f':
 	main_file = argv[++i];
+	break;
+      case 'd':
+	db_path = argv[++i];
 	break;
       case '-':
 	string s(argv[i]+2);
@@ -57,8 +66,7 @@ int main (int argc, char **argv) {
     }
   }
   
-  boost::filesystem::path db_path = boost::filesystem::current_path();
-  db_path += "/DB";
+
   ilang::System_Database = new ilang::DatabaseFile(db_path);
 
   // for setting up the import search path

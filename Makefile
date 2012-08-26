@@ -79,6 +79,7 @@ clean:
 	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
 clean-all: clean
 	cd deps/leveldb && make clean
+	rm -rf DB/
 
 depend:
 	makedepend -- $(CXXFLAGS) -- $(SRCSD) 

@@ -5,13 +5,13 @@ better errors regarding programming
 make ValuePass a shared pointer
 
 ~objects
-Arrays
-import
+Arrays <---- really need to do this
+~import
 ~classes
-fix functions to support classes and bindings
+~fix functions to support classes and bindings
 
 
-C++ bindings
+~C++ bindings <------ only working when it is statically linked, there is some problem with dlopen in that symbols are not being taking from the main program
 modifying code
 
 "unlimited" ram
