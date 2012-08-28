@@ -99,7 +99,13 @@ namespace ilang {
       }
       if(a.type() == typeid(std::string)) {
 	// this is for special cases, most likely string and objects
-	
+	string str = boost::any_cast<std::string>(a);
+	storedData *dat = (storedData*) new char[sizeof(storedData) + str.size()];
+	dat->type = storedData::String;
+	dat->string_length = str.size();
+	memcpy( ((char*)(dat)) + sizeof(storedData), str.c_str(), str.size() );
+	System_Database->Set(name, dat);
+	delete dat;
       }else{
 	storedData dat;
 	if(a.type() == typeid(long)) {

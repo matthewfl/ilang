@@ -10,9 +10,13 @@ main2 = {
 
 Db test = 1; // make this first value be the default value or something like that
 Db long_and_annoying_thing = 1;
+Db string_test = "something new\n";
 
 main = {
 	test = test + 1;
-	long_and_annoying_thing = 2;	
+	long_and_annoying_thing = 2;
+	string_test = string_test + "another\n";	
 	Print("test: ", test);
+
+	Print("string:\n", string_test);
 };
