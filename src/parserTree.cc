@@ -178,6 +178,7 @@ namespace ilang {
     }
     void Variable::Run (Scope *scope) {
       debug(4,"\t\t\tSetting variable: " << name->front());
+      scope->forceNew(GetFirstName(), *modifiers);
     }
     void Variable::Set (Scope *scope, ValuePass var, bool force) {
       scope->Debug();
@@ -216,6 +217,7 @@ namespace ilang {
       ilang::Variable *v = Get(scope);
       assert(v);
       auto p = v->Get();
+      // TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
       assert(p);
       return p;
     }

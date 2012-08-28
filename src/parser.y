@@ -85,6 +85,7 @@ DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }
 		;
 
 Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
+		|	Variable ';'			{ $$ = $1; }
 		;
 
 Variable	:	LValue				{ }

@@ -63,48 +63,56 @@ namespace ilang {
   private:
     Variable *var;
     std::string name;
+    ValuePass toSet;
   public:
     bool Check(const boost::any &a) { return true; }
-    Database_variable(std::string _name, Variable *_var): var(_var), name(_name) {
+    Database_variable(std::string _name, Variable *_var): var(_var), name(_name), toSet(NULL) {
       cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
-	ValuePass val;
 	switch(dat->type) {
 	case storedData::IntNumber:
-	  val = ValuePass(new ilang::Value(dat->Int));
+	  toSet = ValuePass(new ilang::Value(dat->Int));
 	  break;
 	case storedData::FloatNumber:
-	  val = ValuePass(new ilang::Value(dat->Float));
+	  toSet = ValuePass(new ilang::Value(dat->Float));
 	  break;
 	case storedData::Bool:
-	  val = ValuePass(new ilang::Value(dat->BoolDat));
+	  toSet = ValuePass(new ilang::Value(dat->BoolDat));
 	  break;
 	case storedData::String:
-	  val = ValuePass(new ilang::Value(std::string(dat + sizeof(storedData), dat->string_length)));
+	  toSet = ValuePass(new ilang::Value(std::string((char*)(dat) + sizeof(storedData), dat->string_length)));
 	  break;
 	}
-	var->Set(val);
+	//var->Set(val);
       }
     }
     void Set(const boost::any &a) {
-
-      auto type = a.type();
-      if(type == typeid(std::string)) {
+      if(!var) return; // to pervent the system from recursion
+      if(toSet) { // replace the default value
+	Variable *vvv = var;
+	var = NULL;
+	vvv->Set(toSet);
+	toSet = NULL;
+	var = vvv;
+	return;
+      }
+      if(a.type() == typeid(std::string)) {
 	// this is for special cases, most likely string and objects
 	
       }else{
 	storedData dat;
-	if(type == typeid(long)) {
+	if(a.type() == typeid(long)) {
 	  dat.type = storedData::IntNumber;
 	  dat.Int = boost::any_cast<long>(a);
-	}else if(type == typeid(double)) {
+	}else if(a.type() == typeid(double)) {
 	  dat.type = storedData::FloatNumber;
 	  dat.Float = boost::any_cast<double>(a);
-	}else if(type == typeid(bool)) {
+	}else if(a.type() == typeid(bool)) {
 	  dat.type = storedData::Bool;
 	  dat.BoolDat = boost::any_cast<bool>(a);
 	}
+	cout << "setting data for variable " << name << endl;
 	System_Database->Set(name, &dat);
       }
     }

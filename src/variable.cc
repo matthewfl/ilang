@@ -34,9 +34,11 @@ namespace ilang {
   void Variable::Set(ValuePass v) {
     // this most likely will have a lot of calling of constructors and stuff for the shared_ptr
     assert(Check(v->Get()));
-    
     val=v;
     debug(4, v << " " << val );
+    for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
+      (*it)->Set(v->Get());
+    }
   }
   Value *  Variable::Get () { // will need to be changed to ValuePass
     return val;
@@ -107,10 +109,25 @@ namespace {
   public:
     bool Check (const boost::any &val) {
       return typeid(std::string) == val.type();
-      return false;
     }
   };
   ILANG_VARIABLE_MODIFIER(String, String_var_type)
+
+  class Bool_var_type : public ilang::Variable_modifier {
+  public:
+    bool Check (const boost::any &val) {
+      return typeid(bool) == val.type();
+    }
+  };
+  ILANG_VARIABLE_MODIFIER(Bool, Bool_var_type)
+  
+  class Float_var_type : public ilang::Variable_modifier {
+  public:
+    bool Check (const boost::any &val) {
+      return typeid(double) == val.type();
+    }
+  };
+  ILANG_VARIABLE_MODIFIER(Float, Float_var_type)
 
   class Const_var_type : public ilang::Variable_modifier {
   private:

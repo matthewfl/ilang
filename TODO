@@ -3,6 +3,7 @@
 ~variables
 better errors regarding programming
 make ValuePass a shared pointer
+add in single operators like += -= *= /= -- ++, unary -
 
 ~objects
 Arrays <---- really need to do this
