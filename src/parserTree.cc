@@ -37,8 +37,9 @@ namespace ilang {
     }
     
     void Head::Run() {
-      vector<ilang::Value*> v;
-      boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, NULL);
+      vector<ValuePass> v;
+      ValuePass ret;
+      boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
     }
 
     // this does not need to have anything
@@ -76,7 +77,7 @@ namespace ilang {
       test=t;
     }
     void IfStmt::Run(Scope *scope) {
-      ilang::Value *search = test->GetValue(scope);
+      ValuePass search = test->GetValue(scope);
       assert(search);
       if(search->isTrue()) {
 	if(True) True->Run(scope);
@@ -125,21 +126,25 @@ namespace ilang {
       debug(5, "\t\t\tfunction constructed" );
     }
     void Function::Run(Scope *scope) {
-      vector<ilang::Value*> p;
+      vector<ValuePass> p;
       Call(scope, NULL, p);
     }
-    ValuePass Function::GetValue(Scope *scope) {
+    ValuePass Function::GetValue(Scope *this_scope) {
       // this need to track the scope at this point so that it could be use later in the funciton
       debug(5, "Function get value");
-      ilang::Function_ptr f = boost::bind(&Function::Call, this, scope, _1, _2, _3);
+      Function *self = this;
+      //ilang::Function_ptr f = boost::bind(&Function::Call, this, scope, _1, _2, _3);
+      ilang::Function_ptr f = [self, this_scope](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+	self->Call((Scope*)this_scope, scope, args, ret);
+      };
       return ValuePass(new ilang::Value(f));
       //return ValuePass(new ilang::Value(this));
     }
-    void Function::Call(vector<ilang::Value*> params) {
+    /*void Function::Call(vector<ilang::Value*> params) {
       // this needs to be removed
       Call(NULL, NULL, params);
-    }
-    void Function::Call(Scope *_scope_made, Scope *_scope_self, vector<ilang::Value*> &p, ValuePass *_ret) {
+      }*/
+    void Function::Call(Scope *_scope_made, Scope *_scope_self, vector<ValuePass> &p, ValuePass *_ret) {
       bool returned=false;
       auto returnHandle = [&returned, _ret] (ValuePass *ret) {
 	returned=true;
@@ -152,7 +157,7 @@ namespace ilang {
       debug(5,"function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
-	for(ilang::Value * v : p) {
+	for(ValuePass v : p) {
 	  if(it==params->end()) break;
 	  assert(dynamic_cast<parserNode::Variable*>(*it));
 	  assert(v);

@@ -16,7 +16,9 @@
 namespace ilang {
   //class Scope;
   // First, scope that is running in, arguments passed, return value
-  typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
+  //typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
+  //typedef ValuePass* ValuePass_ptr;
+  typedef boost::function3<void, Scope*, std::vector<ValuePass>, ValuePass*> Function_ptr;
   /*
   class Function {
     Scope *bound_scope;

@@ -144,8 +144,8 @@ namespace ilang {
     public:
       Function(std::list<Node*> *p, std::list<Node*> *b); 
       void Run(Scope*);
-      void Call(std::vector<ilang::Value*>);
-      void Call(Scope *_scope_made, Scope *_scope_self, std::vector<ilang::Value*>&, ValuePass *_ret=NULL);
+      //void Call(std::vector<ilang::Value*>);
+      void Call(Scope *_scope_made, Scope *_scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
     };
 

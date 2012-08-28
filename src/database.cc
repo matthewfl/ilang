@@ -66,7 +66,7 @@ namespace ilang {
     ValuePass toSet;
   public:
     bool Check(const boost::any &a) { return true; }
-    Database_variable(std::string _name, Variable *_var): var(_var), name(_name), toSet(NULL) {
+    Database_variable(std::string _name, Variable *_var): var(_var), name(_name) {
       cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
@@ -93,7 +93,7 @@ namespace ilang {
 	Variable *vvv = var;
 	var = NULL;
 	vvv->Set(toSet);
-	toSet = NULL;
+	//toSet = NULL;
 	var = vvv;
 	return;
       }

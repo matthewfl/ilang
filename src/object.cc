@@ -63,14 +63,14 @@ namespace ilang {
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
-    this_var.Set(new ilang::Value(this));
+    this_var.Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
   }
   Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL) {}
   Object::Object(): baseClass(NULL), C_baseClass(NULL) {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
-    this_var.Set(new ilang::Value(this));
+    this_var.Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
   }
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL) {
@@ -78,7 +78,7 @@ namespace ilang {
     assert(scope);
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
-    this_var.Set(new ilang::Value(this));
+    this_var.Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
     for(auto it : *obj) {
       //assert(it.first->name);

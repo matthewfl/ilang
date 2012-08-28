@@ -12,8 +12,8 @@ namespace ilang {
 
   class Value;
   class Variable;
-  //typedef boost::shared_ptr<ilang::Value> ValuePass;
-  typedef ilang::Value* ValuePass;
+  typedef boost::shared_ptr<ilang::Value> ValuePass;
+  //typedef ilang::Value* ValuePass;
   class Variable_modifier {
   public:
     virtual bool Check(const boost::any&)=0;
@@ -34,7 +34,7 @@ namespace ilang {
   public:
     Variable (std::string name, std::list<std::string> modifiers);
     void Set(ValuePass v);
-    Value * Get();
+    ValuePass Get();
     bool isSet();
   };
 
