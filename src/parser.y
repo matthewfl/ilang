@@ -58,7 +58,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList ImportLoc
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class WhileStmt ForStmt
+%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt
 %type <node_list> Stmts ParamList DeclList ExprList 
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -130,6 +130,10 @@ Class		:	T_class '{' ObjectList '}'	{ $$ = new Class(new std::list<Node*>, $3); 
 		|	T_class	'(' ParamList ')' '{' ObjectList '}'	{ $$ = new Class($3, $6); }
 		;
 
+Array		:	'[' ParamList ']'		{ $$ = new Array($2, NULL); }
+		|	'[' ModifierList '|' ParamList ']' { $$ = new Array($4, $2); }
+		;
+
 IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
 		|	T_if '(' Expr ')' Stmt T_else Stmt { $$ = new IfStmt($3, $5, $7); }
 		;
@@ -170,6 +174,7 @@ ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
 Expr		:	Function			{}
 		|	Class
 		|	Object
+		|	Array
 		|	Call
 		|	Variable
 		|	T_StringConst			{ $$ = new StringConst($1); }

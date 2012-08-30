@@ -66,7 +66,7 @@ namespace ilang {
     ValuePass toSet;
   public:
     bool Check(const boost::any &a) { return true; }
-    Database_variable(std::string _name, Variable *_var): var(_var), name(_name) {
+    Database_variable(std::string _name, Variable *_var): var(_var), name("N" + _name) {
       cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
@@ -83,6 +83,8 @@ namespace ilang {
 	case storedData::String:
 	  toSet = ValuePass(new ilang::Value(std::string((char*)(dat) + sizeof(storedData), dat->string_length)));
 	  break;
+	  //case storedData::Object:
+	  //toSet = ValuePass(new ilang::Value(new 
 	}
 	//var->Set(val);
       }

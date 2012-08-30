@@ -95,6 +95,10 @@ namespace ilang {
       members.insert(pair<std::string, ilang::Variable>(name, var));
     }
   }
+
+  Object::~Object () {
+    if(C_baseClass) delete C_baseClass;
+  }
   
   ilang::Variable * Object::operator [] (std::string name) {
     debug_num(5, Debug() );
@@ -134,6 +138,17 @@ namespace ilang {
       auto s = it.second.Get();
       cout << "\t\t" << it.first << "\t" << s->Get().type().name() << "\t" << endl;
       s->Print();
+    }
+  }
+  
+  Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod) {
+    members.reserve(elements->size());
+    for(auto it=elements->begin(); it!= elements->end(); it++) {
+      ilang::parserNode::Value *v = dynamic_cast<parserNode::Value*>(*it);
+      assert(v);
+      ilang::Variable var("", *modifiers);
+      var.Set(v->GetValue(scope));
+      members.push_back(var);
     }
   }
   

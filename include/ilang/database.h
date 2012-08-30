@@ -37,6 +37,11 @@
  *           1: reserved for system to contain local meta data
  *           2: R/W all, contains data
  *  N bytes: variable number of bytes representing the 'key'
+ *
+ *
+ * Name prefixes:
+ * N: Named variable
+ * O: Object member
  */
 
 namespace ilang {

@@ -1,6 +1,10 @@
 #include "variable.h"
 #include "debug.h"
 
+// for the deconstructor of the Value
+// TODO: take this out when there is a better solution for dealing with the leaking of Object* and Class* values
+#include "object.h"
+
 #include <iostream>
 using namespace std;
 
@@ -55,6 +59,17 @@ namespace ilang {
 
   Value::Value(boost::any v): val(v) {}
   Value::Value(): val(NULL){}
+  Value::~Value() {
+    // TODO: fix this to not only work with these classes
+    //cout << "destroying Value\n";
+    if(val.type() == typeid(ilang::Class*))
+      delete boost::any_cast<ilang::Class*>(val);
+    else if(val.type() == typeid(ilang::Object*))
+      delete boost::any_cast<ilang::Object*>(val);
+    else if(val.type() == typeid(ilang::Array*))
+      delete boost::any_cast<ilang::Array*>(val);
+    //else cout << "nothing deleted  " << val.type().name() << endl;
+  }
   void Value::Print () {
     // catch the type id to make this faster
     //cout << "inside print " << this << endl;

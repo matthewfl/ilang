@@ -64,6 +64,7 @@ namespace ilang {
   public:
     Value (boost::any);
     Value ();
+    ~Value();
     void Print();
     bool isTrue();
     boost::any & Get();

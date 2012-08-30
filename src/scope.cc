@@ -45,7 +45,11 @@ namespace ilang {
 
 
   Scope::Scope(Scope *p): parent(p) {}
-  Scope::~Scope() {}
+  Scope::~Scope() {
+    for(auto it : vars) {
+      delete it.second;
+    }
+  }
 
   ilang::FileScope * Scope::fileScope() {
     if(parent) return parent->fileScope();

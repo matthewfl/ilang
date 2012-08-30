@@ -77,6 +77,16 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
 
+    class Array : public Value {
+    private:
+      std::list<Node*> *elements;
+      std::list<std::string> *modifiers;
+    public:
+      Array(std::list<Node*> *e, std::list<std::string> *m);
+      void Run(Scope*);
+      ValuePass GetValue(Scope*);
+    };
+
     class StringConst : public Constant {
     private:
       //char *string;

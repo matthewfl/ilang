@@ -33,14 +33,16 @@ namespace ilang {
     Object(Class *base);
     Object(C_Class *base);
     Object();
+    ~Object();
     Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, Scope*);
     virtual ilang::Variable * operator [] (std::string name);
     virtual ilang::Variable * operator [] (ValuePass);
   };
   class Array : public Object {
     std::vector<ilang::Variable> members;
+    std::list<std::string> *modifiers;
   public:
-    Array(std::list<ilang::parserNode::Node*>, Scope*);
+    Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, Scope*);
     ilang::Variable * operator[] (std::string name);
     ilang::Variable * operator[] (ValuePass);
   };

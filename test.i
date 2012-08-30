@@ -5,7 +5,7 @@ main2 = {
 	Print(db.metaGet("test"));
 	db.metaSet("test", "something new \n" + db.metaGet("test"));
 };
-*/
+
 
 
 Db test = 1; // make this first value be the default value or something like that
@@ -19,4 +19,27 @@ main = {
 	Print("test: ", test);
 
 	Print("string:\n", string_test);
+};
+
+
+
+main = {
+	Print([1,2,3]);
+	Print("some test");
+};
+
+*/
+
+test = {
+	something = object {
+		test: 1
+	};
+	Print(something);
+};
+
+main = {
+	Print("ok ish");
+	wwww = 1;
+	test();
+	
 };

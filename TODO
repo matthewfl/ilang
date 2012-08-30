@@ -2,7 +2,7 @@
 ~program flow control
 ~variables
 better errors regarding programming
-make ValuePass a shared pointer
+~make ValuePass a shared pointer
 add in single operators like += -= *= /= -- ++, unary -
 
 ~objects
@@ -10,7 +10,7 @@ Arrays <---- really need to do this
 ~import
 ~classes
 ~fix functions to support classes and bindings
-
+database, need to still do for objects
 
 ~C++ bindings <------ only working when it is statically linked, there is some problem with dlopen in that symbols are not being taking from the main program
 modifying code

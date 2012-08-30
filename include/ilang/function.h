@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include <boost/bind.hpp>
+//#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 #include "variable.h"

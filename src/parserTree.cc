@@ -654,6 +654,33 @@ namespace ilang {
       return ValuePass(val);
     }
 
+    Array::Array (std::list<Node*> *e, std::list<string> *m) : elements(e), modifiers(m) {
+      assert(e);
+      if(!modifiers) modifiers = new std::list<string>;
+    }
+
+    void Array::Run(Scope *scope) {
+      for(auto it=elements->begin(); it!= elements->end(); it++) {
+	(*it)->Run(scope);
+      }
+    }
+
+    ValuePass Array::GetValue(Scope *scope) {
+      /*
+      vector<ValuePass> ret;
+      ret.reserve(elements->size());
+      for(auto it=elements->begin(); it!= elements->end(); it++) {
+	Value *v = dynamic_cast<parserNode::Value*>(*it);
+	assert(v);
+	ret.push_back(v->GetValue(scope));
+      }
+      return ValuePass(new ilang::Value(ret));
+      */
+      ilang::Array *arr = new ilang::Array(elements, modifiers, scope);
+      ilang::Value *val = new ilang::Value(arr);
+      return ValuePass(val);
+    }
+
     NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
       // might change the grammer to reflect that this needs one element
       // might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
@@ -663,7 +690,7 @@ namespace ilang {
     ValuePass NewCall::GetValue(Scope *scope) {
       boost::any & a = dynamic_cast<Value*>(params->front())->GetValue(scope)->Get();
       assert(a.type() == typeid(ilang::Class*));
-      ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() );
+      ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() ); // returns an Object*
       // TODO: make this call an init function that is defined in the class
       // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
       return ValuePass(val);

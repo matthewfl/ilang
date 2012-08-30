@@ -672,24 +672,7 @@ build/parserTree.o: /usr/include/libio.h /usr/include/_G_config.h
 build/parserTree.o: /usr/include/wchar.h /usr/include/bits/wchar.h
 build/parserTree.o: /usr/include/xlocale.h /usr/include/bits/stdio_lim.h
 build/parserTree.o: /usr/include/bits/sys_errlist.h include/ilang/object.h
-build/parserTree.o: include/ilang/function.h /usr/include/boost/bind.hpp
-build/parserTree.o: /usr/include/boost/bind/bind.hpp /usr/include/boost/ref.hpp
-build/parserTree.o: /usr/include/boost/mem_fn.hpp
-build/parserTree.o: /usr/include/boost/bind/mem_fn.hpp
-build/parserTree.o: /usr/include/boost/get_pointer.hpp
-build/parserTree.o: /usr/include/boost/bind/mem_fn_template.hpp
-build/parserTree.o: /usr/include/boost/bind/mem_fn_cc.hpp
-build/parserTree.o: /usr/include/boost/type.hpp
-build/parserTree.o: /usr/include/boost/is_placeholder.hpp
-build/parserTree.o: /usr/include/boost/bind/arg.hpp
-build/parserTree.o: /usr/include/boost/visit_each.hpp
-build/parserTree.o: /usr/include/boost/bind/storage.hpp
-build/parserTree.o: /usr/include/boost/bind/bind_template.hpp
-build/parserTree.o: /usr/include/boost/bind/bind_cc.hpp
-build/parserTree.o: /usr/include/boost/bind/bind_mf_cc.hpp
-build/parserTree.o: /usr/include/boost/bind/bind_mf2_cc.hpp
-build/parserTree.o: /usr/include/boost/bind/placeholders.hpp
-build/parserTree.o: /usr/include/boost/function.hpp
+build/parserTree.o: include/ilang/function.h /usr/include/boost/function.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/iterate.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/iteration/iterate.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/slot/slot.hpp
@@ -703,6 +686,7 @@ build/parserTree.o: /usr/include/boost/integer_traits.hpp
 build/parserTree.o: /usr/include/boost/type_traits/has_trivial_copy.hpp
 build/parserTree.o: /usr/include/boost/type_traits/has_trivial_destructor.hpp
 build/parserTree.o: /usr/include/boost/type_traits/composite_traits.hpp
+build/parserTree.o: /usr/include/boost/ref.hpp
 build/parserTree.o: /usr/include/boost/type_traits/alignment_of.hpp
 build/parserTree.o: /usr/include/boost/type_traits/detail/size_t_trait_def.hpp
 build/parserTree.o: /usr/include/boost/mpl/size_t.hpp
@@ -710,6 +694,11 @@ build/parserTree.o: /usr/include/boost/mpl/size_t_fwd.hpp
 build/parserTree.o: /usr/include/boost/type_traits/detail/size_t_trait_undef.hpp
 build/parserTree.o: /usr/include/boost/function_equal.hpp
 build/parserTree.o: /usr/include/boost/function/function_fwd.hpp
+build/parserTree.o: /usr/include/boost/mem_fn.hpp
+build/parserTree.o: /usr/include/boost/bind/mem_fn.hpp
+build/parserTree.o: /usr/include/boost/get_pointer.hpp
+build/parserTree.o: /usr/include/boost/bind/mem_fn_template.hpp
+build/parserTree.o: /usr/include/boost/bind/mem_fn_cc.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/enum.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/repetition/enum.hpp
 build/parserTree.o: /usr/include/boost/preprocessor/enum_params.hpp
@@ -1087,24 +1076,7 @@ build/import.o: /usr/include/bits/typesizes.h /usr/include/libio.h
 build/import.o: /usr/include/_G_config.h /usr/include/wchar.h
 build/import.o: /usr/include/bits/wchar.h /usr/include/xlocale.h
 build/import.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-build/import.o: include/ilang/function.h /usr/include/boost/bind.hpp
-build/import.o: /usr/include/boost/bind/bind.hpp /usr/include/boost/ref.hpp
-build/import.o: /usr/include/boost/mem_fn.hpp
-build/import.o: /usr/include/boost/bind/mem_fn.hpp
-build/import.o: /usr/include/boost/get_pointer.hpp
-build/import.o: /usr/include/boost/bind/mem_fn_template.hpp
-build/import.o: /usr/include/boost/bind/mem_fn_cc.hpp
-build/import.o: /usr/include/boost/type.hpp
-build/import.o: /usr/include/boost/is_placeholder.hpp
-build/import.o: /usr/include/boost/bind/arg.hpp
-build/import.o: /usr/include/boost/visit_each.hpp
-build/import.o: /usr/include/boost/bind/storage.hpp
-build/import.o: /usr/include/boost/bind/bind_template.hpp
-build/import.o: /usr/include/boost/bind/bind_cc.hpp
-build/import.o: /usr/include/boost/bind/bind_mf_cc.hpp
-build/import.o: /usr/include/boost/bind/bind_mf2_cc.hpp
-build/import.o: /usr/include/boost/bind/placeholders.hpp
-build/import.o: /usr/include/boost/function.hpp
+build/import.o: include/ilang/function.h /usr/include/boost/function.hpp
 build/import.o: /usr/include/boost/preprocessor/iterate.hpp
 build/import.o: /usr/include/boost/preprocessor/iteration/iterate.hpp
 build/import.o: /usr/include/boost/preprocessor/slot/slot.hpp
@@ -1118,6 +1090,7 @@ build/import.o: /usr/include/boost/integer_traits.hpp
 build/import.o: /usr/include/boost/type_traits/has_trivial_copy.hpp
 build/import.o: /usr/include/boost/type_traits/has_trivial_destructor.hpp
 build/import.o: /usr/include/boost/type_traits/composite_traits.hpp
+build/import.o: /usr/include/boost/ref.hpp
 build/import.o: /usr/include/boost/type_traits/alignment_of.hpp
 build/import.o: /usr/include/boost/type_traits/detail/size_t_trait_def.hpp
 build/import.o: /usr/include/boost/mpl/size_t.hpp
@@ -1125,6 +1098,11 @@ build/import.o: /usr/include/boost/mpl/size_t_fwd.hpp
 build/import.o: /usr/include/boost/type_traits/detail/size_t_trait_undef.hpp
 build/import.o: /usr/include/boost/function_equal.hpp
 build/import.o: /usr/include/boost/function/function_fwd.hpp
+build/import.o: /usr/include/boost/mem_fn.hpp
+build/import.o: /usr/include/boost/bind/mem_fn.hpp
+build/import.o: /usr/include/boost/get_pointer.hpp
+build/import.o: /usr/include/boost/bind/mem_fn_template.hpp
+build/import.o: /usr/include/boost/bind/mem_fn_cc.hpp
 build/import.o: /usr/include/boost/preprocessor/enum.hpp
 build/import.o: /usr/include/boost/preprocessor/repetition/enum.hpp
 build/import.o: /usr/include/boost/preprocessor/enum_params.hpp
@@ -1314,7 +1292,173 @@ build/variable.o: /usr/include/boost/smart_ptr/detail/spinlock.hpp
 build/variable.o: /usr/include/boost/smart_ptr/detail/spinlock_nt.hpp
 build/variable.o: /usr/include/boost/memory_order.hpp
 build/variable.o: /usr/include/boost/smart_ptr/detail/operator_bool.hpp
-build/variable.o: include/debug.h
+build/variable.o: include/debug.h include/ilang/object.h
+build/variable.o: include/ilang/parserTree.h include/ilang/scope.h
+build/variable.o: /usr/include/boost/utility.hpp
+build/variable.o: /usr/include/boost/utility/addressof.hpp
+build/variable.o: /usr/include/boost/utility/base_from_member.hpp
+build/variable.o: /usr/include/boost/preprocessor/repetition/enum_binary_params.hpp
+build/variable.o: /usr/include/boost/preprocessor/repetition/enum_params.hpp
+build/variable.o: /usr/include/boost/preprocessor/repetition/repeat_from_to.hpp
+build/variable.o: /usr/include/boost/preprocessor/arithmetic/add.hpp
+build/variable.o: /usr/include/boost/preprocessor/arithmetic/dec.hpp
+build/variable.o: /usr/include/boost/preprocessor/control/while.hpp
+build/variable.o: /usr/include/boost/preprocessor/list/fold_left.hpp
+build/variable.o: /usr/include/boost/preprocessor/list/detail/fold_left.hpp
+build/variable.o: /usr/include/boost/preprocessor/list/fold_right.hpp
+build/variable.o: /usr/include/boost/preprocessor/list/detail/fold_right.hpp
+build/variable.o: /usr/include/boost/preprocessor/list/reverse.hpp
+build/variable.o: /usr/include/boost/preprocessor/logical/bitand.hpp
+build/variable.o: /usr/include/boost/preprocessor/control/detail/while.hpp
+build/variable.o: /usr/include/boost/preprocessor/arithmetic/sub.hpp
+build/variable.o: /usr/include/boost/utility/binary.hpp
+build/variable.o: /usr/include/boost/preprocessor/control/deduce_d.hpp
+build/variable.o: /usr/include/boost/preprocessor/facilities/identity.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/cat.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/fold_left.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/seq.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/elem.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/size.hpp
+build/variable.o: /usr/include/boost/preprocessor/seq/transform.hpp
+build/variable.o: /usr/include/boost/preprocessor/arithmetic/mod.hpp
+build/variable.o: /usr/include/boost/preprocessor/arithmetic/detail/div_base.hpp
+build/variable.o: /usr/include/boost/preprocessor/comparison/less_equal.hpp
+build/variable.o: /usr/include/boost/preprocessor/logical/not.hpp
+build/variable.o: /usr/include/boost/utility/enable_if.hpp
+build/variable.o: /usr/include/boost/utility/identity_type.hpp
+build/variable.o: /usr/include/boost/type_traits/function_traits.hpp
+build/variable.o: /usr/include/boost/type_traits/is_function.hpp
+build/variable.o: /usr/include/boost/type_traits/detail/false_result.hpp
+build/variable.o: /usr/include/boost/type_traits/detail/is_function_ptr_helper.hpp
+build/variable.o: /usr/include/boost/type_traits/add_pointer.hpp
+build/variable.o: /usr/include/boost/next_prior.hpp
+build/variable.o: /usr/include/boost/noncopyable.hpp include/ilang/import.h
+build/variable.o: /usr/include/boost/filesystem.hpp
+build/variable.o: /usr/include/boost/filesystem/config.hpp
+build/variable.o: /usr/include/boost/system/api_config.hpp
+build/variable.o: /usr/include/boost/config/auto_link.hpp
+build/variable.o: /usr/include/boost/filesystem/path.hpp
+build/variable.o: /usr/include/boost/filesystem/path_traits.hpp
+build/variable.o: /usr/include/boost/type_traits/is_array.hpp
+build/variable.o: /usr/include/boost/type_traits/decay.hpp
+build/variable.o: /usr/include/boost/type_traits/remove_bounds.hpp
+build/variable.o: /usr/include/boost/mpl/eval_if.hpp
+build/variable.o: /usr/include/boost/mpl/if.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/value_wknd.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/integral.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/eti.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/na_spec.hpp
+build/variable.o: /usr/include/boost/mpl/lambda_fwd.hpp
+build/variable.o: /usr/include/boost/mpl/void_fwd.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/na.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/arity.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/dtp.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/preprocessor/def_params_tail.hpp
+build/variable.o: /usr/include/boost/mpl/limits/arity.hpp
+build/variable.o: /usr/include/boost/preprocessor/logical/and.hpp
+build/variable.o: /usr/include/boost/preprocessor/identity.hpp
+build/variable.o: /usr/include/boost/preprocessor/empty.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/lambda_arity_param.hpp
+build/variable.o: /usr/include/boost/mpl/identity.hpp
+build/variable.o: /usr/include/boost/system/error_code.hpp
+build/variable.o: /usr/include/boost/system/config.hpp
+build/variable.o: /usr/include/boost/cstdint.hpp /usr/include/boost/limits.hpp
+build/variable.o: /usr/include/limits.h /usr/include/bits/posix1_lim.h
+build/variable.o: /usr/include/bits/local_lim.h /usr/include/linux/limits.h
+build/variable.o: /usr/include/bits/posix2_lim.h
+build/variable.o: /usr/include/boost/operators.hpp
+build/variable.o: /usr/include/boost/iterator.hpp /usr/include/boost/cerrno.hpp
+build/variable.o: /usr/include/boost/config/abi_prefix.hpp
+build/variable.o: /usr/include/boost/config/abi_suffix.hpp
+build/variable.o: /usr/include/boost/system/system_error.hpp
+build/variable.o: /usr/include/boost/iterator/iterator_facade.hpp
+build/variable.o: /usr/include/boost/iterator/interoperable.hpp
+build/variable.o: /usr/include/boost/mpl/or.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/use_preprocessed.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/nested_type_wknd.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/include_preprocessed.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/compiler.hpp
+build/variable.o: /usr/include/boost/preprocessor/stringize.hpp
+build/variable.o: /usr/include/boost/type_traits/is_convertible.hpp
+build/variable.o: /usr/include/boost/type_traits/intrinsics.hpp
+build/variable.o: /usr/include/boost/type_traits/add_reference.hpp
+build/variable.o: /usr/include/boost/type_traits/is_arithmetic.hpp
+build/variable.o: /usr/include/boost/type_traits/is_integral.hpp
+build/variable.o: /usr/include/boost/type_traits/is_float.hpp
+build/variable.o: /usr/include/boost/type_traits/is_void.hpp
+build/variable.o: /usr/include/boost/type_traits/is_abstract.hpp
+build/variable.o: /usr/include/boost/type_traits/is_class.hpp
+build/variable.o: /usr/include/boost/type_traits/is_union.hpp
+build/variable.o: /usr/include/boost/type_traits/remove_cv.hpp
+build/variable.o: /usr/include/boost/type_traits/detail/cv_traits_impl.hpp
+build/variable.o: /usr/include/boost/type_traits/add_rvalue_reference.hpp
+build/variable.o: /usr/include/boost/iterator/detail/config_def.hpp
+build/variable.o: /usr/include/boost/iterator/detail/config_undef.hpp
+build/variable.o: /usr/include/boost/iterator/iterator_traits.hpp
+build/variable.o: /usr/include/boost/detail/iterator.hpp
+build/variable.o: /usr/include/boost/iterator/detail/facade_iterator_category.hpp
+build/variable.o: /usr/include/boost/iterator/iterator_categories.hpp
+build/variable.o: /usr/include/boost/mpl/placeholders.hpp
+build/variable.o: /usr/include/boost/mpl/arg.hpp
+build/variable.o: /usr/include/boost/mpl/arg_fwd.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/na_assert.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/arity_spec.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/arg_typedef.hpp
+build/variable.o: /usr/include/boost/mpl/and.hpp
+build/variable.o: /usr/include/boost/mpl/assert.hpp
+build/variable.o: /usr/include/boost/mpl/not.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/pp_counter.hpp
+build/variable.o: /usr/include/boost/type_traits/is_same.hpp
+build/variable.o: /usr/include/boost/type_traits/is_const.hpp
+build/variable.o: /usr/include/boost/detail/indirect_traits.hpp
+build/variable.o: /usr/include/boost/type_traits/is_pointer.hpp
+build/variable.o: /usr/include/boost/type_traits/is_member_pointer.hpp
+build/variable.o: /usr/include/boost/type_traits/is_member_function_pointer.hpp
+build/variable.o: /usr/include/boost/type_traits/detail/is_mem_fun_pointer_impl.hpp
+build/variable.o: /usr/include/boost/type_traits/is_volatile.hpp
+build/variable.o: /usr/include/boost/type_traits/remove_pointer.hpp
+build/variable.o: /usr/include/boost/iterator/detail/enable_if.hpp
+build/variable.o: /usr/include/boost/type_traits/add_const.hpp
+build/variable.o: /usr/include/boost/type_traits/remove_const.hpp
+build/variable.o: /usr/include/boost/type_traits/is_pod.hpp
+build/variable.o: /usr/include/boost/type_traits/is_scalar.hpp
+build/variable.o: /usr/include/boost/type_traits/is_enum.hpp
+build/variable.o: /usr/include/boost/mpl/always.hpp
+build/variable.o: /usr/include/boost/mpl/apply.hpp
+build/variable.o: /usr/include/boost/mpl/apply_fwd.hpp
+build/variable.o: /usr/include/boost/mpl/apply_wrap.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/has_apply.hpp
+build/variable.o: /usr/include/boost/mpl/has_xxx.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/type_wrapper.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/has_xxx.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/msvc_typename.hpp
+build/variable.o: /usr/include/boost/preprocessor/array/elem.hpp
+build/variable.o: /usr/include/boost/preprocessor/array/data.hpp
+build/variable.o: /usr/include/boost/preprocessor/array/size.hpp
+build/variable.o: /usr/include/boost/preprocessor/repetition/enum_trailing_params.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/has_apply.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/msvc_never_true.hpp
+build/variable.o: /usr/include/boost/mpl/lambda.hpp
+build/variable.o: /usr/include/boost/mpl/bind.hpp
+build/variable.o: /usr/include/boost/mpl/bind_fwd.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/config/bind.hpp
+build/variable.o: /usr/include/boost/mpl/next.hpp
+build/variable.o: /usr/include/boost/mpl/next_prior.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/common_name_wknd.hpp
+build/variable.o: /usr/include/boost/mpl/protect.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/lambda_no_ctps.hpp
+build/variable.o: /usr/include/boost/mpl/is_placeholder.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/template_arity.hpp
+build/variable.o: /usr/include/boost/mpl/aux_/has_rebind.hpp
+build/variable.o: /usr/include/boost/io/detail/quoted_manip.hpp
+build/variable.o: /usr/include/boost/io/ios_state.hpp
+build/variable.o: /usr/include/boost/io_fwd.hpp
+build/variable.o: /usr/include/boost/functional/hash_fwd.hpp
+build/variable.o: /usr/include/boost/functional/hash/hash_fwd.hpp
+build/variable.o: /usr/include/boost/filesystem/operations.hpp
+build/variable.o: /usr/include/boost/detail/scoped_enum_emulation.hpp
+build/variable.o: /usr/include/boost/detail/bitmask.hpp
+build/variable.o: /usr/include/boost/filesystem/convenience.hpp
 build/scope.o: include/ilang/scope.h include/ilang/variable.h
 build/scope.o: /usr/include/boost/any.hpp /usr/include/boost/config.hpp
 build/scope.o: /usr/include/boost/config/select_compiler_config.hpp
@@ -2135,3 +2279,5 @@ build/database.o: /usr/include/boost/filesystem/operations.hpp
 build/database.o: /usr/include/boost/detail/scoped_enum_emulation.hpp
 build/database.o: /usr/include/boost/detail/bitmask.hpp
 build/database.o: /usr/include/boost/filesystem/convenience.hpp
+build/database.o: include/ilang/ilang.h include/ilang/import.h
+build/database.o: include/ilang/object.h include/ilang/function.h
