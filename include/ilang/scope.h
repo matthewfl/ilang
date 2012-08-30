@@ -58,10 +58,11 @@ namespace ilang {
       return parent->_lookup(name);
     }
   };
-  class ClassScope : public Scope {
+
+  /*  class ClassScope : public Scope {
   public:
     ClassScope(Scope *s) : Scope(s) {}
-  };
+    };*/
 
   class Object;
   class ObjectScope : public Scope {

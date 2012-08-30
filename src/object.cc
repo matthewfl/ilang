@@ -76,10 +76,12 @@ namespace ilang {
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL) {
     assert(obj);
     assert(scope);
+    
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
     this_var.Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
+    members.insert(pair<std::string, ilang::Variable>("this", this_var));
+    
     for(auto it : *obj) {
       //assert(it.first->name);
       std::string name = it.first->GetFirstName();
@@ -97,6 +99,7 @@ namespace ilang {
   }
 
   Object::~Object () {
+    members.find("this")->second.Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
     if(C_baseClass) delete C_baseClass;
   }
   

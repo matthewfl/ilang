@@ -36,6 +36,7 @@ namespace ilang {
     void Set(ValuePass v);
     ValuePass Get();
     bool isSet();
+    ~Variable();
   };
 
   // a wrapper class for any numerical value
