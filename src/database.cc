@@ -119,6 +119,9 @@ namespace ilang {
 	}else if(a.type() == typeid(bool)) {
 	  dat.type = storedData::Bool;
 	  dat.BoolDat = boost::any_cast<bool>(a);
+	}else if(a.type() == typeid(ilang::Object*)) {
+	  dat.type == storedData::Object;
+	  
 	}
 	cout << "setting data for variable " << name << endl;
 	System_Database->Set(name, &dat);

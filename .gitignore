@@ -8,4 +8,5 @@ build/*
 *.a
 *.so
 *.io
+*/DB/*
 DB/*

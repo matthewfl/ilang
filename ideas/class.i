@@ -12,5 +12,5 @@ Class const random = class {
 };
 
 main = {
-        something = new(random);
+//       something = new(random);
 };

@@ -53,9 +53,9 @@ namespace ilang {
     return val != NULL;
   }
 
-  Variable::~Variable () {
+  /*Variable::~Variable () {
     cout << "deleting varaible " << Name << endl;
-  }
+    }*/
 
   boost::any & Value::Get() {
     return val;
@@ -65,14 +65,14 @@ namespace ilang {
   Value::Value(): val(NULL){}
   Value::~Value() {
     // TODO: fix this to not only work with these classes
-    cout << "destroying Value " << val.type().name() << endl;
+    //cout << "destroying Value " << val.type().name() << endl;
     if(val.type() == typeid(ilang::Class*))
       delete boost::any_cast<ilang::Class*>(val);
     else if(val.type() == typeid(ilang::Object*))
       delete boost::any_cast<ilang::Object*>(val);
     else if(val.type() == typeid(ilang::Array*))
       delete boost::any_cast<ilang::Array*>(val);
-    else cout << "nothing deleted\n";
+    //else cout << "nothing deleted\n";
   }
   void Value::Print () {
     // catch the type id to make this faster

@@ -688,9 +688,10 @@ namespace ilang {
       assert(dynamic_cast<Value*>(args->front()));
     }
     ValuePass NewCall::GetValue(Scope *scope) {
-      boost::any & a = dynamic_cast<Value*>(params->front())->GetValue(scope)->Get();
-      assert(a.type() == typeid(ilang::Class*));
-      ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() ); // returns an Object*
+      ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
+      assert(a->Get().type() == typeid(ilang::Class*));
+      //ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a)->NewClass() ); // returns an Object*
+      ilang::Value *val = new ilang::Value( new ilang::Object(a) );
       // TODO: make this call an init function that is defined in the class
       // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
       return ValuePass(val);

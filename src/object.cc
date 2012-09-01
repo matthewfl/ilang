@@ -36,9 +36,9 @@ namespace ilang {
       members.insert(pair<std::string, ilang::Variable>(name, var));
     }
   }
-  Object* Class::NewClass() {
+  /*Object* Class::NewClass() {
     return new Object(this);
-  }
+    }*/
   ilang::Variable * Class::operator[](std::string name) {
     ilang::Variable *var;
     auto search = members.find(name);
@@ -59,8 +59,11 @@ namespace ilang {
     return NULL; // this most likely will get changed in the future 
   }
 
-  Object::Object(Class *base): baseClass(base), C_baseClass(NULL) {
+  Object::Object(ValuePass base): baseClassValue(base), C_baseClass(NULL) {
+    // pass the value as a ValuePass so that it keeps the pointer count that something is using the class incase it is use in an un-named fassion
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
+    assert(base->Get().type() == typeid(Class*));
+    baseClass = boost::any_cast<Class*>(base->Get());
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable this_var("this", this_mod);
     this_var.Set(ValuePass(new ilang::Value(this)));
