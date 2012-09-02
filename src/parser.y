@@ -121,9 +121,10 @@ ObjectNode	:	Variable ':' Expr		{ $$ = new std::pair<ilang::parserNode::Variable
 
 ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
 		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
-		;	
+		;
 
 Object		:	T_object '{' ObjectList '}'	{ $$ = new Object($3); }
+		|	T_object '{' '}'		{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
 		;
 
 Class		:	T_class '{' ObjectList '}'	{ $$ = new Class(new std::list<Node*>, $3); } 

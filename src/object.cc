@@ -28,17 +28,22 @@ namespace ilang {
 	debug(0, "Member in class overwritten within self");
 	assert(0);
       }
-      ilang::Variable var(name, *(it.first->modifiers));
+      ilang::Variable *var = new Variable(name, *(it.first->modifiers));
       if(it.second) {
 	assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
-	var.Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
+	var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
       }
-      members.insert(pair<std::string, ilang::Variable>(name, var));
+      members.insert(pair<std::string, ilang::Variable*>(name, var));
     }
   }
   /*Object* Class::NewClass() {
     return new Object(this);
     }*/
+  Class::~Class () {
+    for(auto it = members.begin(); it!=members.end(); it++) {
+      delete it->second;
+    }
+  }
   ilang::Variable * Class::operator[](std::string name) {
     ilang::Variable *var;
     auto search = members.find(name);
@@ -48,7 +53,7 @@ namespace ilang {
 	if(var) return var;
       }
     }else{
-      return &(search->second);
+      return (search->second);
     }
     return NULL;
   }
@@ -59,31 +64,31 @@ namespace ilang {
     return NULL; // this most likely will get changed in the future 
   }
 
-  Object::Object(ValuePass base): baseClassValue(base), C_baseClass(NULL) {
+  Object::Object(ValuePass base): baseClassValue(base), C_baseClass(NULL), DB_name(NULL) {
     // pass the value as a ValuePass so that it keeps the pointer count that something is using the class incase it is use in an un-named fassion
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
     assert(base->Get().type() == typeid(Class*));
     baseClass = boost::any_cast<Class*>(base->Get());
     std::list<std::string> this_mod = {"Const"};
-    ilang::Variable this_var("this", this_mod);
-    this_var.Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
+    ilang::Variable *this_var = new Variable("this", this_mod);
+    this_var->Set(ValuePass(new ilang::Value(this)));
+    members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
   }
-  Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL) {}
+  Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {}
   Object::Object(): baseClass(NULL), C_baseClass(NULL) {
     std::list<std::string> this_mod = {"Const"};
-    ilang::Variable this_var("this", this_mod);
-    this_var.Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable>("this", this_var)); 
+    ilang::Variable *this_var = new Variable("this", this_mod);
+    this_var->Set(ValuePass(new ilang::Value(this)));
+    members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
   }
-  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL) {
+  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
     assert(obj);
     assert(scope);
     
     std::list<std::string> this_mod = {"Const"};
-    ilang::Variable this_var("this", this_mod);
-    this_var.Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable>("this", this_var));
+    ilang::Variable *this_var = new Variable("this", this_mod);
+    this_var->Set(ValuePass(new ilang::Value(this)));
+    members.insert(pair<std::string, ilang::Variable*>("this", this_var));
     
     for(auto it : *obj) {
       //assert(it.first->name);
@@ -92,24 +97,41 @@ namespace ilang {
 	debug(0, "Member in Object over written");
 	assert(0);
       }
-      ilang::Variable var(name, *(it.first->modifiers));
+      ilang::Variable *var = new ilang::Variable(name, *(it.first->modifiers));
       if(it.second) { // != NULL
 	assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
-	var.Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
+	var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
       }
-      members.insert(pair<std::string, ilang::Variable>(name, var));
+      members.insert(pair<std::string, ilang::Variable*>(name, var));
     }
   }
 
   Object::~Object () {
-    members.find("this")->second.Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
-    if(C_baseClass) delete C_baseClass;
+    members.find("this")->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
+    for(auto it=members.begin(); it!=members.end(); it++) {
+      delete it->second;
+    }
+    delete C_baseClass;
+    delete DB_name;
   }
   
   ilang::Variable * Object::operator [] (std::string name) {
     debug_num(5, Debug() );
     auto iter = members.find(name);
     if(iter == members.end()) {
+      if(DB_name) {
+	//storedData *dat;
+	//if(dat = System_Database->Get(DB_name + name)) {
+	string use_name = DB_name;
+	use_name += name;
+	ilang::Variable *ret;
+	members.insert(pair<std::string, ilang::Variable*>(name, ret = new Variable(use_name, list<string>({"Db"}))));
+	//ret->Set(ValuePass(new ilang::Value)); // prime it to make it get the value out of the database
+	// for the moment a hack
+	return ret;
+	//}
+	// if there is a database, then there can be the base class thing, we also then need to set the system up to insert the variable into the database
+      }
       if(baseClass) {
 	// need to make something if the variable is getting set so that it is save differently
 	ilang::Variable * var = baseClass->operator[](name);
@@ -123,13 +145,14 @@ namespace ilang {
       // if we don't find the variable then make a new one and return it
       debug(0, "Member "<< name << " not found in object");
       // I guess create a new one and insert it
-      members.insert(pair<std::string, ilang::Variable>(name, Variable(name, list<string>())));
-      return &(members.find(name)->second);
+      Variable *var;
+      members.insert(pair<std::string, ilang::Variable*>(name, var = new Variable(name, list<string>())));
+      return var;(members.find(name)->second);
       //assert(0);
       
     }
     
-    return &(iter->second);
+    return (iter->second);
   }
 
   ilang::Variable * Object::operator[] (ValuePass name) {
@@ -141,7 +164,7 @@ namespace ilang {
 
   void Object::Debug() {
     for(auto it : members) {
-      auto s = it.second.Get();
+      auto s = it.second->Get();
       cout << "\t\t" << it.first << "\t" << s->Get().type().name() << "\t" << endl;
       s->Print();
     }
@@ -152,17 +175,23 @@ namespace ilang {
     for(auto it=elements->begin(); it!= elements->end(); it++) {
       ilang::parserNode::Value *v = dynamic_cast<parserNode::Value*>(*it);
       assert(v);
-      ilang::Variable var("", *modifiers);
-      var.Set(v->GetValue(scope));
+      ilang::Variable *var = new Variable("", *modifiers);
+      var->Set(v->GetValue(scope));
       members.push_back(var);
     }
   }
   
+  Array::~Array () {
+    for(auto it=members.begin();it != members.end(); it++) {
+      delete *it;
+    }
+  }
+
   ilang::Variable * Array::operator [] (ValuePass name) {
     boost::any & n = name->Get();
     if(n.type() == typeid(long)) { // look for the array number
       long place = boost::any_cast<long>(n);
-      return &(members[place]);
+      return (members[place]);
     }else if(n.type() == typeid(std::string)) {
       return operator[](boost::any_cast<std::string>(n));
     }

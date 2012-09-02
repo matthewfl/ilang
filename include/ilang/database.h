@@ -69,6 +69,13 @@ namespace ilang {
     } type;
     char name[256];
   };
+  // creates a ValuePass with the correct value when given a poitner to a storedData
+  // does not delete the storedData
+  ValuePass DB_readStoredData (storedData*);
+  // creats a storedData from a boost::any, returned value needs to be delete by calling function
+  storedData *DB_createStoredData (const boost::any&);
+  char *DB_createName();
+
   class Database {
   public:
     virtual void Set(std::string, storedData*)=0;

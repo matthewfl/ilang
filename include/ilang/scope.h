@@ -67,11 +67,12 @@ namespace ilang {
   class Object;
   class ObjectScope : public Scope {
   private:
+    ValuePass hold;
     Object *obj;
   protected:
     virtual ilang::Variable * _lookup(std::string &name);
   public:
-    ObjectScope(Object*);
+    ObjectScope(Object*); // TODO: fix this to have the valuePass
   };
   
 }; // namespace ilang

@@ -73,7 +73,7 @@ namespace ilang {
       }
       return NULL;
     }
-    return &(it->second);
+    return (it->second);
   }
 
 }

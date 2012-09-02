@@ -15,6 +15,7 @@ namespace ilang {
 
   bool Variable::Check (boost::any &a) {
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
+      assert(*it);
       if(!(*it)->Check(a))
 	return false;
     }
@@ -45,6 +46,7 @@ namespace ilang {
     }
   }
   ValuePass Variable::Get () { // will need to be changed to ValuePass
+    if(!val) val = ValuePass(new ilang::Value);
     return val;
     //return val.get();
   }
@@ -62,7 +64,7 @@ namespace ilang {
   }
 
   Value::Value(boost::any v): val(v) {}
-  Value::Value(): val(NULL){}
+  Value::Value(){}
   Value::~Value() {
     // TODO: fix this to not only work with these classes
     //cout << "destroying Value " << val.type().name() << endl;
@@ -108,7 +110,7 @@ namespace ilang {
     }else if(typeid(double) == val.type()) {
       return boost::any_cast<double>(val) != 0;
     }else{
-      return true; // I guess having a value, even if we can't figure out what it is makes it true
+      return !val.empty(); // I guess having a value, even if we can't figure out what it is makes it true
     }
   }
 }
