@@ -172,33 +172,46 @@ namespace ilang {
     Variable *var;
     std::string name;
     ValuePass toSet;
+    bool hasRead;
   public:
     bool Check(const boost::any &a) { return true; }
-    Database_variable(std::string _name, Variable *_var): var(NULL), name(_name) {
+    Database_variable(std::string _name, Variable *_var): var(_var), name(_name), hasRead(false) {
       cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
 	toSet = DB_readStoredData(dat);
 	delete dat;
-	_var->Set(toSet);
+	//_var->Set(toSet);
       }
-      var = _var;
     }
     void Set(const boost::any &a) {
       cout << "setting data for variable " << name << endl;
       if(!var) return; // to pervent the system from recursion
+      //if(!hasRead) return;
       if(toSet) { // replace the default value
 	cout << "setting defualt value for " << name << endl;
-	Variable *vvv = var;
-	var = NULL;
-	vvv->Set(toSet);
-	toSet  = ValuePass();
-	var = vvv;
-	return;
+	if(!hasRead) {
+	  Variable *vvv = var;
+	  var = NULL;
+	  vvv->Set(toSet);
+	  var = vvv;
+	}
+	toSet = ValuePass();
+	if(!hasRead) return;
       }
       storedData *dat = DB_createStoredData(a);
       System_Database->Set(name, dat);
       delete dat;
+    }
+    void Read(ValuePass &val) {
+      /*storedData *dat = System_Database->Get(name);
+      if(dat) {
+	val = DB_readStoredData(dat);
+	delete dat;
+	}*/
+      if(toSet)
+	val = toSet;
+      hasRead = true;
     }
   };
 

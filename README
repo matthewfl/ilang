@@ -1,6 +1,5 @@
 Install:
 	yaourt --needed -S base-devel makedepend boost bison flex snappy curl
 	make submodule
-	make depend
 	make			OR	make release
 	ln -s i ~/bin			cp i ~/bin

@@ -46,8 +46,12 @@ namespace ilang {
     }
   }
   ValuePass Variable::Get () { // will need to be changed to ValuePass
-    if(!val) val = ValuePass(new ilang::Value);
-    return val;
+    ValuePass ret = val;
+    if(!ret) ret = ValuePass(new ilang::Value);
+    for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
+      (*it)->Read(ret);
+    }
+    return ret;
     //return val.get();
   }
 

@@ -10,10 +10,10 @@ main = {
 	Print("The current message:\n", say);
 	say = say + message;
 	//obj_db.test = 1;
-	//if(obj_db.test || true) {
+	if(obj_db.test || true) {
 		Print("obj count ", obj_db.test);
-		obj_db.test = 3;
-	//}else{
-	//	obj_db.test = 1;
-	//}
+		obj_db.test = obj_db.test + 1;
+	}else{
+		obj_db.test = 1;
+	}
 };

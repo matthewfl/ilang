@@ -19,6 +19,7 @@ namespace ilang {
     virtual bool Check(const boost::any&)=0;
     virtual shared_ptr<Variable_modifier> new_variable(std::string, Variable*);
     virtual void Set(const boost::any &a) {}
+    virtual void Read(ValuePass &val) {}
   };
 
   extern std::map<std::string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
