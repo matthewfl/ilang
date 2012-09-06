@@ -123,6 +123,7 @@ namespace ilang {
 	//storedData *dat;
 	//if(dat = System_Database->Get(DB_name + name)) {
 	string use_name = DB_name;
+	//cout << "database name: " << use_name << endl;
 	use_name += name;
 	ilang::Variable *ret;
 	members.insert(pair<std::string, ilang::Variable*>(name, ret = new Variable(use_name, list<string>({"Db"}))));

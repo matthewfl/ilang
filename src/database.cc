@@ -51,11 +51,11 @@ namespace ilang {
 	assert(obj->members.size() <= 1); // we will say that objs can't have default values for the time being, that will make it so that, the this variable will be ok for the time being
 	//obj->members.clear();
 	obj->DB_name = DB_createName();
-	cout << "db name given " << obj->DB_name << endl;
+	//cout << "db name given " << obj->DB_name << endl;
       }
       dat = (storedData*) new char[sizeof(storedData) + strlen(obj->DB_name)];
       dat->type = storedData::Object;
-      dat->string_length = strlen(obj->DB_name);
+      dat->string_length = strlen(obj->DB_name) +1;
       memcpy( ((char*)(dat)) + sizeof(storedData), obj->DB_name, dat->string_length );
       cout << "length: " << dat->string_length << " " << ((char*)(dat)) + sizeof(storedData) << endl; 
     }else{
@@ -89,8 +89,9 @@ namespace ilang {
     if(DB_name_last.empty()) {
       assert(System_Database);
       DB_name_last = System_Database->getMeta("Object_counter");
-      if(DB_name_last.empty())
-	DB_name_last = "-something"; // needs to be large enough so that it is buffered
+      if(DB_name_last.empty()) {
+	DB_name_last = "-A";
+      }
     }
     int pos=1, len=DB_name_last.size();
     while(true) {
@@ -105,7 +106,8 @@ namespace ilang {
 	break;
       }
     }
-    cout << "name: " << DB_name_prefix << " " << DB_name_last << endl << flush;
+    System_Database->setMeta("Object_counter", DB_name_last);
+    //cout << "name: " << DB_name_prefix << " " << DB_name_last << endl << flush;
     std::string str = DB_name_prefix;
     str += DB_name_last;
     str += "-";
@@ -120,7 +122,7 @@ namespace ilang {
     leveldb::Options options;
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, path.c_str(), &db);
-    cout << "created database " << path << endl;
+    //cout << "created database " << path << endl;
     assert(status.ok());
   }
   DatabaseFile::~DatabaseFile() {
@@ -176,7 +178,7 @@ namespace ilang {
   public:
     bool Check(const boost::any &a) { return true; }
     Database_variable(std::string _name, Variable *_var): var(_var), name(_name), hasRead(false) {
-      cout << "new database variable created " << name << endl;
+      //cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
 	toSet = DB_readStoredData(dat);
@@ -185,11 +187,11 @@ namespace ilang {
       }
     }
     void Set(const boost::any &a) {
-      cout << "setting data for variable " << name << endl;
+      //cout << "setting data for variable " << name << endl;
       if(!var) return; // to pervent the system from recursion
       //if(!hasRead) return;
       if(toSet) { // replace the default value
-	cout << "setting defualt value for " << name << endl;
+	//cout << "setting defualt value for " << name << endl;
 	if(!hasRead) {
 	  Variable *vvv = var;
 	  var = NULL;
