@@ -1,7 +1,8 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc
-LIBS= -lboost_filesystem -lboost_system -lboost_thread -lpthread -lsnappy -lssl
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc
+LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy
+#LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
 MODULES= i/test.io net/curl.io
 
@@ -38,8 +39,11 @@ DEPS=$(leveldb)
 #$(glogLib)
 
 #libs for modules
-#LIBS+= $(shell pkg-config libcurl --libs --static)
-LIBS+= $(shell curl-config --static-libs)
+#LIBS+= -Wl,-Bstatic $(shell pkg-config libcurl --libs --static)
+#LIBS+= $(shell curl-config --static-libs)
+LIBS+=-lcurl
+
+
 
 .PHONY: all release test debug clean clean-all depend submodule
 # start of commands
@@ -144,3 +148,8 @@ build/database.o: deps/leveldb/include/leveldb/status.h
 build/database.o: deps/leveldb/include/leveldb/options.h include/ilang/ilang.h
 build/database.o: include/ilang/import.h include/ilang/object.h
 build/database.o: include/ilang/function.h
+build/modification.o: include/ilang/modification.h include/ilang/parserTree.h
+build/modification.o: include/ilang/variable.h include/ilang/scope.h
+build/modification.o: include/ilang/import.h include/debug.h
+build/modification.o: include/ilang/ilang.h include/ilang/import.h
+build/modification.o: include/ilang/object.h include/ilang/function.h

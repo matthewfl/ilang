@@ -75,7 +75,7 @@ namespace ilang {
     members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
   }
   Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {}
-  Object::Object(): baseClass(NULL), C_baseClass(NULL) {
+  Object::Object(): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
     this_var->Set(ValuePass(new ilang::Value(this)));

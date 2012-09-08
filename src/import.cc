@@ -257,7 +257,7 @@ namespace ilang {
   }
   void ImportScopeC::load(Object *obj) {
     for(auto it : m_members) {
-      cout << "load: " << it.first << endl;
+      //cout << "load: " << it.first << endl;
       ilang::Variable *v = obj->operator[](it.first);
       v->Set(it.second);
     }

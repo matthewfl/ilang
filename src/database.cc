@@ -75,6 +75,8 @@ namespace ilang {
       }else if(a.type() == typeid(ilang::Function_ptr)) {
 	assert(0);
 	
+      }else{
+	assert(0);
       }
     }
     return dat;
@@ -230,7 +232,9 @@ namespace ilang {
 
   ILANG_VARIABLE_MODIFIER(DB, Database_variable_wrap);
   ILANG_VARIABLE_MODIFIER(Db, Database_variable_wrap);
-
+  
+  // I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
+  // if programmers couldn't break it, what fun would there be
   namespace {
     ValuePass DB_metaSet(vector<ValuePass> &args) {
       assert(args.size() == 2);
@@ -249,4 +253,5 @@ namespace ilang {
 		     ILANG_FUNCTION("metaSet", DB_metaSet)
 		     ILANG_FUNCTION("metaGet", DB_metaGet)
 		     );
+  
 }
