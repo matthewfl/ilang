@@ -5,6 +5,7 @@
 #include <iostream>
 using namespace std;
 
+namespace {
 ilang::ValuePass ttt (std::vector<ilang::ValuePass> &args) {
 	cout << "ttt function called" << endl;
 	debug(5, "what");
@@ -43,3 +44,4 @@ ILANG_LIBRARY_NAME("i/test",
 		   ILANG_FUNCTION("ttt", ttt);
 		   ILANG_CLASS("wwww", wwww);
 )
+}

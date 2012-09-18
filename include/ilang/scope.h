@@ -10,8 +10,10 @@
 
 namespace ilang {
   class FileScope;
+  class Modification;
   template <typename ReturnHook> class FunctionScope;
   class Scope  : boost::noncopyable {
+    friend class Modification;
   protected:
     template <typename ReturnHook> friend class FunctionScope;
     std::map<std::string, ilang::Variable*> vars;
@@ -31,6 +33,7 @@ namespace ilang {
   class FileScope : public Scope {
   private:
     friend class ImportScopeFile;
+    friend class Modification;
   protected:
     virtual ilang::Variable * _lookup (std::string &name);
   public:
@@ -38,6 +41,7 @@ namespace ilang {
   };
 
   template <typename ReturnHook> class FunctionScope : public Scope {
+    friend class Modification;
   public:
     FunctionScope(Scope *s, Scope *other, ReturnHook h) : Scope(s), hook(h), objs(other) {}
     void ParentReturn(ValuePass *r) { hook(r); }
@@ -66,6 +70,7 @@ namespace ilang {
 
   class Object;
   class ObjectScope : public Scope {
+    friend class Modification;
   private:
     ValuePass hold;
     Object *obj;

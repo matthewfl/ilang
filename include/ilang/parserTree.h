@@ -15,18 +15,21 @@ namespace ilang {
   class Scope;
   class Object;
   class Class;
+  class Modification;
   namespace parserNode {
     using std::list;
     using boost::shared_ptr;
     //typedef boost::shared_ptr<ilang::Value> ValuePass;
     using ilang::ValuePass; // defined in variable.h
     class Node {
+      friend class Modification;
     public:
       virtual void Run(Scope*)=0;
       void randomsdafasdf(){} // take this out eventually
     };
 
     class Head {
+      friend class Modification;
     private:
       FileScope *scope;
       ImportScopeFile *Import;
@@ -41,11 +44,13 @@ namespace ilang {
 
     
     class Value : public Node {
+      friend class Modification;
     public:
       virtual ValuePass GetValue(Scope*)=0;
       virtual ValuePass CallFun(Scope*, std::vector<ValuePass> &par); // I feel a little funny about having this here, but this should be the right place
     };
     class Constant : public Value {
+      friend class Modification;
     public:
       void Run(Scope*);
     };
@@ -54,11 +59,13 @@ namespace ilang {
 
     // I guess we will leave this in, but most things are using Value, not expression
     class Expression : public Value {
+      friend class Modification;
     };
 
     class Variable;
 
     class Object : public Value {
+      friend class Modification;
     private:
       std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
     public:
@@ -68,6 +75,7 @@ namespace ilang {
     };
 
     class Class : public Value {
+      friend class Modification;
     private:
       std::list<Node*> *parents;
       std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
@@ -78,6 +86,7 @@ namespace ilang {
     };
 
     class Array : public Value {
+      friend class Modification;
     private:
       std::list<Node*> *elements;
       std::list<std::string> *modifiers;
@@ -88,6 +97,7 @@ namespace ilang {
     };
 
     class StringConst : public Constant {
+      friend class Modification;
     private:
       //char *string;
       std::string string;
@@ -97,6 +107,7 @@ namespace ilang {
     };
 
     class IntConst : public Constant {
+      friend class Modification;
     private:
       long num;
     public:
@@ -104,6 +115,7 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
     class FloatConst : public Constant {
+      friend class Modification;
     private:
       double num;
     public:
@@ -113,6 +125,7 @@ namespace ilang {
 
 
     class IfStmt : public Node {
+      friend class Modification;
     private:
       Value *test;
       Node *True, *False;
@@ -121,6 +134,7 @@ namespace ilang {
       void Run(Scope*);
     };
     class WhileStmt : public Node {
+      friend class Modification;
     private:
       Value *test;
       Node *exe;
@@ -129,6 +143,7 @@ namespace ilang {
       void Run(Scope*);
     };
     class ForStmt : public Node {
+      friend class Modification;
     private:
       Node *pre;
       Value *test;
@@ -140,6 +155,7 @@ namespace ilang {
     };
 
     class ReturnStmt : public Node {
+      friend class Modification;
     private:
       Value *ret;
     public:
@@ -148,6 +164,7 @@ namespace ilang {
     };
     
     class Function : public Value {
+      friend class Modification;
     private:
       std::list<Node*> *body;
       std::list<Node*> *params;
@@ -162,6 +179,7 @@ namespace ilang {
     
 
     class Variable : public Value {
+      friend class Modification;
     private:
       friend class Variable_compare;
       friend class ::ilang::Object;
@@ -180,6 +198,9 @@ namespace ilang {
       //virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
     };
 
+    // TODO: take this out
+    // this is currently not being used anymore
+    // was planning at one point to use this for sorting variables
     class Variable_compare {
     public:
       bool operator() (Variable* a, Variable *b);
@@ -187,6 +208,7 @@ namespace ilang {
 
 
     class FieldAccess : public Variable {
+      friend class Modification;
     private:
       std::string identifier;
       Value *Obj;
@@ -201,7 +223,8 @@ namespace ilang {
     };
 
     class ArrayAccess : public Variable {
-      private:
+      friend class Modification;
+    private:
       Value *Obj;
       Value *Lookup;
     public:
@@ -210,6 +233,7 @@ namespace ilang {
     };
 
     class Call : public Value {
+      friend class Modification;
     private:
       Value *calling;
     protected:
@@ -220,11 +244,13 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
     class PrintCall : public Call {
+      friend class Modification;
     public:
       PrintCall(std::list<Node*> *args);
       ValuePass GetValue (Scope*); // returns null
     };
     class NewCall : public Call {
+      friend class Modification;
     public:
       NewCall(std::list<Node*> *args);
       ValuePass GetValue(Scope*); 
@@ -232,6 +258,7 @@ namespace ilang {
 
     
     class AssignExpr : public Expression {
+      friend class Modification;
     private:
       Variable *target;
       Value *eval;
@@ -241,6 +268,7 @@ namespace ilang {
       ValuePass GetValue(Scope *scope);
     };
     class MathEquation : public Expression {
+      friend class Modification;
     public:
       enum action {
 	add,
@@ -256,6 +284,7 @@ namespace ilang {
       action Act;
     };
     class LogicExpression : public Expression {
+      friend class Modification;
     public:
       enum action {
 	Equal,

@@ -19,6 +19,17 @@ namespace ilang {
   //typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
   //typedef ValuePass* ValuePass_ptr;
   typedef boost::function3<void, Scope*, std::vector<ValuePass>, ValuePass*> Function_ptr;
+
+  namespace parserNode {
+    class Function;
+  }
+
+  struct Function {
+    bool native;
+    Function_ptr ptr;
+    ilang::parserNode::Function *func;
+    Function():native(false), func(NULL) {}
+  };
   /*
   class Function {
     Scope *bound_scope;

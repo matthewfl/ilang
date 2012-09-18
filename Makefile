@@ -50,9 +50,11 @@ LIBS+=-lcurl
 all: $(TARGET) $(MODULESD)
 
 #add back in to everything -s to remove symbols table
-release: CXXFLAGS= -ggdb -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-release: CXXFLAGS_MODULES= -O3 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-release: LDFLAGS+= -static $(MODULESD)
+#would like to make the system build it static, but curl pervents this atm
+# -O3 seems to cause a segfault with simple programs now, -O2 works
+release: CXXFLAGS= -ggdb -O2 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+release: CXXFLAGS_MODULES= -O2 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+release: LDFLAGS+= $(MODULESD)
 release: clean $(MODULESD) $(TARGET)
 
 submodule:
