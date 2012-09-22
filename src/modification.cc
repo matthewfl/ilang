@@ -1,6 +1,8 @@
 #include "modification.h"
 #include "ilang/ilang.h"
 #include "parserTree.h"
+#include "error.h"
+#include "debug.h"
 
 #include <iostream>
 using namespace std;

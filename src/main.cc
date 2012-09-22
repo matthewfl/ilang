@@ -4,10 +4,12 @@
 #include <stdio.h>
 #include "debug.h"
 #include <string>
+#include <signal.h>
 
 #include "import.h"
 #include "database.h"
 #include "parserTree.h"
+#include "error.h"
 
 
 //#include "version.h"
@@ -28,7 +30,26 @@ extern "C" int get_Debug_level() {
   return Debug_level;
 }
 
+void segfault_singal(int signal, siginfo_t *si, void *arg) {
+  ilang::error_print_trace();
+  cout << "message from seg fault land\n";
+  exit(10);
+}
+
 int main (int argc, char **argv) {
+  ilang::error_trace main_error("Calling int main, before code has even run");
+  
+  // set up system to report error trace on seg fault
+  {
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(struct sigaction));
+    sigemptyset(&sa.sa_mask);
+    sa.sa_sigaction = segfault_singal;
+    sa.sa_flags = SA_SIGINFO;
+    
+    sigaction(SIGSEGV, &sa, NULL);
+  }
+  
   if(argc < 2) {
     show_help_info(argv[0]);
     return 1;
@@ -86,9 +107,12 @@ int main (int argc, char **argv) {
   }
   ilang::parserNode::Head *base = ilang::parser(f, mainImport);
   fclose(f);
-  
-  base->Link();
-  base->Run();
+  { ilang::error_trace ee("linking main file");
+    base->Link();
+  }
+  { ilang::error_trace ee("running main file");
+    base->Run();
+  }
 
 
   delete ilang::System_Database;  

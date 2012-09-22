@@ -1,6 +1,6 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
@@ -119,11 +119,12 @@ build/main.o: deps/leveldb/include/leveldb/iterator.h
 build/main.o: deps/leveldb/include/leveldb/slice.h
 build/main.o: deps/leveldb/include/leveldb/status.h
 build/main.o: deps/leveldb/include/leveldb/options.h include/ilang/parserTree.h
-build/main.o: include/ilang/scope.h
+build/main.o: include/ilang/scope.h include/ilang/error.h
 build/parserTree.o: include/ilang/parserTree.h include/ilang/variable.h
 build/parserTree.o: include/ilang/scope.h include/ilang/import.h
 build/parserTree.o: include/debug.h include/ilang/parser.h
 build/parserTree.o: include/ilang/object.h include/ilang/function.h
+build/parserTree.o: include/ilang/error.h
 build/import.o: include/ilang/import.h include/debug.h include/ilang/variable.h
 build/import.o: include/ilang/scope.h include/ilang/object.h
 build/import.o: include/ilang/parserTree.h include/ilang/parser.h
@@ -155,3 +156,5 @@ build/modification.o: include/ilang/variable.h include/ilang/scope.h
 build/modification.o: include/ilang/import.h include/debug.h
 build/modification.o: include/ilang/ilang.h include/ilang/import.h
 build/modification.o: include/ilang/object.h include/ilang/function.h
+build/modification.o: include/ilang/error.h
+build/error.o: include/ilang/error.h
