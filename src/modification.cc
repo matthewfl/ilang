@@ -95,6 +95,29 @@ namespace ilang {
 using namespace ilang;
 
 namespace {
+  class Modification_manager : public ilang::C_Class { 
+  private:
+    // private variables
+    Modification *mod;
+  public:
+    ilang::ValuePass getType(Scope *scope, std::vector<ilang::ValuePass> &args) {
+      cout << "class type call\n";
+      return ValuePass(new ilang::Value(ModData(Modification::unknown_t)));
+    }
+  private:
+    void Init () {
+      reg("Type", &Modification_manager::getType);
+    }
+  public:
+    Modification_manager () {
+      Init();
+    }
+    Modification_manager(Modification *m) : mod(m) {
+      assert(m);
+      
+    }
+  };
+
 
   ValuePass FileTree(Scope *scope, std::vector<ValuePass> &args) {
     assert(args.size() == 1);
@@ -106,8 +129,11 @@ namespace {
       ModData dat = boost::any_cast<ModData>(args[0]->Get());
       cout << "special passed case: " << dat.string_data << endl;
       if(dat.string_data == "self_file") {
-	cout << "getting self\n";
+	cout << "getting self\n" << flush;
 	Modification::getFileScope(scope);
+	//Modification_manager m;
+	ilang::Value * val = new ilang::Value(new Object(new Modification_manager));
+	return ValuePass(val);
 	//Scope *looking = scope;
 	//while(looking->parent) looking = looking->parent;
 	// try and just get the
@@ -115,18 +141,7 @@ namespace {
     }
   }
 
-  class Modification_manager : public ilang::C_Class { 
-  private:
-    Modification *mod;
-    
-    void Init () {
-    }
-  public:
-    Modification_manager () {
-      
-    }
-  };
-
+  
 
 }
 

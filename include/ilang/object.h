@@ -29,7 +29,7 @@ namespace ilang {
     friend class ObjectScope;
     friend storedData *DB_createStoredData(const boost::any&);
     friend ValuePass DB_readStoredData(storedData*);
-    ValuePass baseClassValue;
+    ValuePass baseClassValue; // kept so the smart pointer to know that something is using it
     Class *baseClass;
     C_Class *C_baseClass;
     std::map<std::string, ilang::Variable*> members;

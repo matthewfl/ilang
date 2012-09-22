@@ -55,7 +55,7 @@ all: $(TARGET) $(MODULESD)
 release: CXXFLAGS= -ggdb -O2 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 release: CXXFLAGS_MODULES= -O2 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 release: LDFLAGS+= $(MODULESD)
-release: clean $(MODULESD) $(TARGET)
+release: submodule clean $(MODULESD) $(TARGET)
 
 submodule:
 	git submodule update --init --recursive 

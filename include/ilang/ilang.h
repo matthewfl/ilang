@@ -59,6 +59,19 @@ namespace ilang {
       var->Set(ValuePass(new ilang::Value(f)));
       m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
     }
+    template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, std::vector<ValuePass> &args) ) {
+      assert(m_members.find(name) == m_members.end());
+      cla *self = (cla*)this;
+      assert(self);
+      ilang::Function_ptr f = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+	*ret = (self ->* fun)(scope, args);
+	assert(*ret);
+      };
+      std::list<std::string> mod = {"Const"};
+      ilang::Variable *var = new ilang::Variable(name, mod);
+      var->Set(ValuePass(new ilang::Value(f)));
+      m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
+    }
     ilang::Variable* operator[](std::string name) {
       auto it = m_members.find(name);
       if(it != m_members.end()) return it->second;

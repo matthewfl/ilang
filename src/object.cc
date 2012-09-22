@@ -74,7 +74,9 @@ namespace ilang {
     this_var->Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
   }
-  Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {}
+  Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {
+    // 'this' is not being set in this case, might only be a problem if something out the classes needs something like c.this == c
+  }
   Object::Object(): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
@@ -107,10 +109,14 @@ namespace ilang {
   }
 
   Object::~Object () {
-    members.find("this")->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
+    auto tt = members.find("this");
+    if(tt != members.end())
+      tt->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
+
     for(auto it=members.begin(); it!=members.end(); it++) {
       delete it->second;
     }
+
     delete C_baseClass;
     delete DB_name;
   }

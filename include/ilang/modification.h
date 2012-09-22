@@ -60,7 +60,7 @@ namespace ilang {
     Modification(ilang::parserNode::Head*);
 
     // general helper functions that are used throughout
-    FileScope* getFileScope(Scope*);
+    static FileScope* getFileScope(Scope*);
   };
   
 
