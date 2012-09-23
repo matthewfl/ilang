@@ -23,12 +23,14 @@ namespace ilang {
   namespace parserNode {
     class Function;
   }
+  class Object;
 
   struct Function {
     bool native;
     Function_ptr ptr;
+    ValuePass object;
     ilang::parserNode::Function *func;
-    Function():native(false), func(NULL) {}
+    Function():native(false), object(), func(NULL) {}
   };
   /*
   class Function {

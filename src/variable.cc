@@ -1,5 +1,6 @@
 #include "variable.h"
 #include "debug.h"
+#include "error.h"
 
 // for the deconstructor of the Value
 // TODO: take this out when there is a better solution for dealing with the leaking of Object* and Class* values
@@ -16,8 +17,10 @@ namespace ilang {
   bool Variable::Check (boost::any &a) {
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       assert(*it);
-      if(!(*it)->Check(this, a))
+      if(!(*it)->Check(this, a)) {
+	error(0, "Check on variable \"" << Name << "\" failed for check \"" << (*it)->Name());
 	return false;
+      }
     }
     return true;
   }
@@ -48,7 +51,7 @@ namespace ilang {
       (*it)->Set(this, v->Get());
     }
   }
-  ValuePass Variable::Get () { // will need to be changed to ValuePass
+  ValuePass Variable::Get () {
     ValuePass ret = val;
     if(!ret) ret = ValuePass(new ilang::Value);
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
@@ -157,11 +160,11 @@ namespace {
   };
   ILANG_VARIABLE_MODIFIER(Float, Float_var_type)
 
-  class Const_var_type : public ilang::Variable_modifier {
+  template <char max> class Const_var_type : public ilang::Variable_modifier {
   private:
-    bool set;
+    char count;
   public:
-    Const_var_type() : set(false) {}
+    Const_var_type() : count(0) {}
     boost::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
       // this will leak when the variable goes out of scope
       // this should not leak now that shared pointer is being used to track this
@@ -169,10 +172,21 @@ namespace {
       return p;
     }
     bool Check(Variable *self, const boost::any &val) {
-      if(set) return false;
-      set = true;
+      if(count >= max) return false;
+      count++;
       return true;
     }
   };
-  ILANG_VARIABLE_MODIFIER(Const, Const_var_type)
+  ILANG_VARIABLE_MODIFIER(Const, Const_var_type<1>);
+  ILANG_VARIABLE_MODIFIER(Const1, Const_var_type<1>);
+  ILANG_VARIABLE_MODIFIER(Const2, Const_var_type<2>);
+  ILANG_VARIABLE_MODIFIER(Const3, Const_var_type<3>);
+  ILANG_VARIABLE_MODIFIER(Const4, Const_var_type<4>);
+  ILANG_VARIABLE_MODIFIER(Const5, Const_var_type<5>);
+  ILANG_VARIABLE_MODIFIER(Const6, Const_var_type<6>);
+  ILANG_VARIABLE_MODIFIER(Const7, Const_var_type<7>);
+  ILANG_VARIABLE_MODIFIER(Const8, Const_var_type<8>);
+  ILANG_VARIABLE_MODIFIER(Const9, Const_var_type<9>);
+
+
 }

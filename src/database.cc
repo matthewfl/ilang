@@ -1,5 +1,6 @@
 #include "database.h"
 #include "ilang/ilang.h"
+#include "error.h"
 
 #include <string.h>
 #include <iostream>
@@ -72,7 +73,7 @@ namespace ilang {
       }else if(a.type() == typeid(ilang::Class*)) {
 	assert(0);
 	// for the moment, classes will not be saveable in the db
-      }else if(a.type() == typeid(ilang::Function_ptr)) {
+      }else if(a.type() == typeid(ilang::Function)) {
 	assert(0);
 
       }else{
@@ -244,15 +245,15 @@ namespace ilang {
   // if programmers couldn't break it, what fun would there be
   namespace {
     ValuePass DB_metaSet(vector<ValuePass> &args) {
-      assert(args.size() == 2);
-      assert(args[0]->Get().type() == typeid(string));
-      assert(args[1]->Get().type() == typeid(string));
+      error(args.size() == 2, "db.metaSet takes 2 arguments");
+      error(args[0]->Get().type() == typeid(string), "First argument to db.metaSet should be a string");
+      error(args[1]->Get().type() == typeid(string), "Second argument to db.metaSet should be a string");
       System_Database->setMeta(boost::any_cast<string>(args[0]->Get()), boost::any_cast<string>(args[1]->Get()));
       return ValuePass(new ilang::Value);
     }
     ValuePass DB_metaGet(vector<ValuePass> &args) {
-      assert(args.size() == 1);
-      assert(args[0]->Get().type() == typeid(string));
+      error(args.size() == 1, "db.metaGet takes 1 argument");
+      error(args[0]->Get().type() == typeid(string), "First argument to db.metaGet must should be a string");
       return ValuePass(new ilang::Value( System_Database->getMeta(boost::any_cast<string>(args[0]->Get())) ));
     }
   }

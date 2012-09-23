@@ -49,8 +49,10 @@ namespace ilang {
     template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(std::vector<ValuePass> &args) ) {
       assert(m_members.find(name) == m_members.end());
       cla *self = (cla*)this;
-      assert(self);
-      ilang::Function_ptr f = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      //assert(self);
+      ilang::Function f;
+      f.native = true;
+      f.ptr = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
 	*ret = (self ->* fun)(args);
 	assert(*ret);
       };
@@ -62,8 +64,10 @@ namespace ilang {
     template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, std::vector<ValuePass> &args) ) {
       assert(m_members.find(name) == m_members.end());
       cla *self = (cla*)this;
-      assert(self);
-      ilang::Function_ptr f = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      //assert(self);
+      ilang::Function f;
+      f.native = true;
+      f.ptr = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
 	*ret = (self ->* fun)(scope, args);
 	assert(*ret);
       };
