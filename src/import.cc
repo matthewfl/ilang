@@ -266,14 +266,18 @@ namespace ilang {
 
 namespace ilang {
   ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
-    ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+    ilang::Function f;
+    f.native = true;
+    f.ptr = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
       *ret = (*fun)(args);
       assert(*ret);
     };
     return ValuePass(new ilang::Value(f));
   }
   ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
-    ilang::Function_ptr f = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+    ilang::Function f;
+    f.native = true;
+    f.ptr = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
       *ret = (*fun)(scope, args);
       assert(*ret);
     };
@@ -302,7 +306,7 @@ namespace {
       }*/
     fs::path p = GlobalImportScope.locateFile(name);
     GlobalImportScope.get(obj, p);
-    
+
     return ValuePass(new ilang::Value(obj));
   }
 

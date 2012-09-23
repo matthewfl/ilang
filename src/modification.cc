@@ -77,10 +77,15 @@ namespace ilang {
 
   void Modification::Init () {
     m_masterType = m_secondaryType = unknown_t;
-    
   }
+
+
+  bool Modification::isType(types t) {
+    return m_masterType == t || m_secondaryType == t;
+  }
+
   Modification::Modification(ModData dat) {
-    
+
   }
 
 
@@ -91,32 +96,37 @@ namespace ilang {
     while(s->parent) s = s->parent;
     return dynamic_cast<FileScope*>(s);
   }
-  
+
 }
 
 using namespace ilang;
 
 namespace {
-  class Modification_manager : public ilang::C_Class { 
+  class Modification_manager : public ilang::C_Class {
   private:
     // private variables
     Modification *mod;
   public:
-    ilang::ValuePass getType(Scope *scope, std::vector<ilang::ValuePass> &args) {
+    ilang::ValuePass isType(Scope *scope, std::vector<ilang::ValuePass> &args) {
       cout << "class type call\n";
-      return ValuePass(new ilang::Value(ModData(Modification::unknown_t)));
+      error(args.size() == 1, "mod.manager.type expectes 1 argument");
+      error(args[0]->Get().type() == typeid(ModData), "mod.manager.type expectes given type to be of mod.type.*");
+      ModData d = boost::any_cast<ModData>(args[0]->Get());
+      error(d.type == ModData::map_type_t, "mod.manager.type expectes given type to be of mod.type.*");
+      if(!mod) return ValuePass(new ilang::Value(bool( d.map_type == Modification::unknown_t )));
+      return ValuePass(new ilang::Value(bool( mod->isType(d.map_type) )));
     }
   private:
     void Init () {
-      reg("Type", &Modification_manager::getType);
+      reg("Type", &Modification_manager::isType);
     }
   public:
-    Modification_manager () {
+    Modification_manager (): mod(NULL) {
       Init();
     }
     Modification_manager(Modification *m) : mod(m) {
       assert(m);
-      
+
     }
   };
 
@@ -140,10 +150,10 @@ namespace {
 	//while(looking->parent) looking = looking->parent;
 	// try and just get the
       }
-    }
+    }else assert(0);
   }
 
-  
+
 
 }
 
@@ -152,13 +162,14 @@ ILANG_LIBRARY_NAME("i/mod",
 		   ILANG_FUNCTION("file", FileTree);
 		   import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
 		   Object * type_obj = new Object;
+		   type_obj->operator[]("Unknown")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
 		   type_obj->operator[]("Function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   type_obj->operator[]("Object")->Set(ValuePass(new ilang::Value(ModData(Modification::object_t))));
 		   type_obj->operator[]("Class")->Set(ValuePass(new ilang::Value(ModData(Modification::class_t))));
 		   type_obj->operator[]("Variable")->Set(ValuePass(new ilang::Value(ModData(Modification::variable_t))));
-		   type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
-		   type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
-		   type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
-		   
-		   import->Set("types", ValuePass(new ilang::Value(type_obj)));
+		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
+		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
+		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
+
+		   import->Set("type", ValuePass(new ilang::Value(type_obj)));
 		   )

@@ -58,11 +58,12 @@ namespace ilang {
     Modification(ModData);
     Modification(ilang::parserNode::Node*);
     Modification(ilang::parserNode::Head*);
+    bool isType(types t);
 
     // general helper functions that are used throughout
     static FileScope* getFileScope(Scope*);
   };
-  
+
 
   struct ModData {
     enum type_t {

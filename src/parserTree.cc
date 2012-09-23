@@ -307,7 +307,6 @@ namespace ilang {
 	ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
 	v = obj->operator[](identifier);
 	if(v->Get()->Get().type() == typeid(ilang::Function)) {
-	  // I don't think this will work
 	  boost::any_cast<ilang::Function>( &(v->Get()->Get()) )->object = obj_val;
 	}
       }else{
@@ -400,7 +399,7 @@ namespace ilang {
       ValuePass ret = ValuePass(new ilang::Value);
       ValuePass func = calling->GetValue(scope);
       boost::any &an = func->Get();
-      error(an.type() == typeid(ilang::Function), "Calling a non function");
+      error(an.type() == typeid(ilang::Function), "Calling a non function " << an.type().name());
       ilang::Function *function = boost::any_cast<ilang::Function>(&an);
       if(function->object) {
 	assert(function->object->Get().type() == typeid(ilang::Object*));
