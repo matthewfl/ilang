@@ -57,7 +57,7 @@ namespace ilang {
       dat->type = storedData::Object;
       dat->string_length = strlen(obj->DB_name) +1;
       memcpy( ((char*)(dat)) + sizeof(storedData), obj->DB_name, dat->string_length );
-      cout << "length: " << dat->string_length << " " << ((char*)(dat)) + sizeof(storedData) << endl; 
+      cout << "length: " << dat->string_length << " " << ((char*)(dat)) + sizeof(storedData) << endl;
     }else{
       dat = new storedData;
       if(a.type() == typeid(long)) {
@@ -74,7 +74,7 @@ namespace ilang {
 	// for the moment, classes will not be saveable in the db
       }else if(a.type() == typeid(ilang::Function_ptr)) {
 	assert(0);
-	
+
       }else{
 	assert(0);
       }
@@ -173,13 +173,18 @@ namespace ilang {
 
   class Database_variable : public Variable_modifier {
   private:
-    Variable *var;
+    //Variable *var;
+    bool recursion_block;
     std::string name;
     ValuePass toSet;
     bool hasRead;
   public:
-    bool Check(const boost::any &a) { return true; }
-    Database_variable(std::string _name, Variable *_var): var(_var), name(_name), hasRead(false) {
+    bool Check(Variable *self, const boost::any &a) {
+      // should block types that are not allowed in the database
+      // return a.type() != typeid(ilang::Class*) && a.type() != typeid(ilang::Function_ptr);
+      return true;
+    }
+    Database_variable(Variable *var, std::string _name): name(_name), hasRead(false), recursion_block(false) {
       //cout << "new database variable created " << name << endl;
       storedData *dat = System_Database->Get(name);
       if(dat) {
@@ -188,17 +193,19 @@ namespace ilang {
 	//_var->Set(toSet);
       }
     }
-    void Set(const boost::any &a) {
+    void Set(Variable *var, const boost::any &a) {
       //cout << "setting data for variable " << name << endl;
-      if(!var) return; // to pervent the system from recursion
+      if(recursion_block) return; // to pervent the system from recursion
       //if(!hasRead) return;
       if(toSet) { // replace the default value
 	//cout << "setting defualt value for " << name << endl;
 	if(!hasRead) {
-	  Variable *vvv = var;
-	  var = NULL;
-	  vvv->Set(toSet);
-	  var = vvv;
+	  //Variable *vvv = var;
+	  //var = NULL;
+	  recursion_block = true;
+	  var->Set(toSet);
+	  recursion_block = false;
+	  //var = vvv;
 	}
 	toSet = ValuePass();
 	if(!hasRead) return;
@@ -207,7 +214,7 @@ namespace ilang {
       System_Database->Set(name, dat);
       delete dat;
     }
-    void Read(ValuePass &val) {
+    void Read(Variable *var, ValuePass &val) {
       /*storedData *dat = System_Database->Get(name);
       if(dat) {
 	val = DB_readStoredData(dat);
@@ -221,10 +228,10 @@ namespace ilang {
 
   class Database_variable_wrap : public Variable_modifier {
   public:
-    bool Check(const boost::any &a) { return true; }
-    shared_ptr<Variable_modifier> new_variable(std::string name , Variable *var) {
+    bool Check(Variable *self, const boost::any &a) { return true; }
+    shared_ptr<Variable_modifier> new_variable(Variable *self, std::string name) {
       assert(System_Database);
-      boost::shared_ptr<Variable_modifier> p ( new Database_variable(name, var) );
+      boost::shared_ptr<Variable_modifier> p ( new Database_variable(self, name) );
       return p;
     }
   };
@@ -232,7 +239,7 @@ namespace ilang {
 
   ILANG_VARIABLE_MODIFIER(DB, Database_variable_wrap);
   ILANG_VARIABLE_MODIFIER(Db, Database_variable_wrap);
-  
+
   // I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
   // if programmers couldn't break it, what fun would there be
   namespace {
@@ -253,5 +260,5 @@ namespace ilang {
 		     ILANG_FUNCTION("metaSet", DB_metaSet)
 		     ILANG_FUNCTION("metaGet", DB_metaGet)
 		     );
-  
+
 }

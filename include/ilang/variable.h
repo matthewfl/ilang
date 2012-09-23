@@ -16,10 +16,10 @@ namespace ilang {
   //typedef ilang::Value* ValuePass;
   class Variable_modifier {
   public:
-    virtual bool Check(const boost::any&)=0;
-    virtual shared_ptr<Variable_modifier> new_variable(std::string, Variable*);
-    virtual void Set(const boost::any &a) {}
-    virtual void Read(ValuePass &val) {}
+    virtual bool Check(Variable *self, const boost::any&)=0;
+    virtual shared_ptr<Variable_modifier> new_variable(Variable *self, std::string);
+    virtual void Set(Variable *self, const boost::any &a) {}
+    virtual void Read(Variable *self, ValuePass &val) {}
   };
 
   extern std::map<std::string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
@@ -58,7 +58,7 @@ namespace ilang {
     Number(){type=null;}
     void Set();
     };*/
-  
+
   class Value {
   private:
     boost::any val;
@@ -71,7 +71,7 @@ namespace ilang {
     bool isTrue();
     boost::any & Get();
   };
-  
+
 
 }
 
@@ -83,5 +83,5 @@ namespace ilang {
   }} _ILANG_VAR_MOD_##name##_run;					\
   }
 
- 
+
 #endif // _ilang_variable

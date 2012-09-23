@@ -13,7 +13,7 @@ namespace ilang {
     assert(p);
     assert(obj);
     assert(scope);
-    
+
     for(auto it : *p) {
       assert(dynamic_cast<ilang::parserNode::Value*>(it));
       boost::any & a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(scope)->Get();
@@ -60,8 +60,8 @@ namespace ilang {
   ilang::Variable * Class::operator[](ValuePass val) {
     if(val->Get().type() == typeid(std::string))
       return operator[](boost::any_cast<std::string>(val->Get()));
-    assert(0); 
-    return NULL; // this most likely will get changed in the future 
+    assert(0);
+    return NULL; // this most likely will get changed in the future
   }
 
   Object::Object(ValuePass base): baseClassValue(base), C_baseClass(NULL), DB_name(NULL) {
@@ -72,7 +72,7 @@ namespace ilang {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
     this_var->Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
+    members.insert(pair<std::string, ilang::Variable*>("this", this_var));
   }
   Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {
     // 'this' is not being set in this case, might only be a problem if something out the classes needs something like c.this == c
@@ -81,17 +81,17 @@ namespace ilang {
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
     this_var->Set(ValuePass(new ilang::Value(this)));
-    members.insert(pair<std::string, ilang::Variable*>("this", this_var)); 
+    members.insert(pair<std::string, ilang::Variable*>("this", this_var));
   }
   Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
     assert(obj);
     assert(scope);
-    
+
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
     this_var->Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable*>("this", this_var));
-    
+
     for(auto it : *obj) {
       //assert(it.first->name);
       std::string name = it.first->GetFirstName();
@@ -120,7 +120,7 @@ namespace ilang {
     delete C_baseClass;
     delete DB_name;
   }
-  
+
   ilang::Variable * Object::operator [] (std::string name) {
     debug_num(5, Debug() );
     auto iter = members.find(name);
@@ -148,7 +148,7 @@ namespace ilang {
 	ilang::Variable *var = C_baseClass->operator[](name);
 	if(var)
 	  return var;
-      } 
+      }
       // if we don't find the variable then make a new one and return it
       debug(0, "Member "<< name << " not found in object");
       // I guess create a new one and insert it
@@ -156,9 +156,9 @@ namespace ilang {
       members.insert(pair<std::string, ilang::Variable*>(name, var = new Variable(name, list<string>())));
       return var;(members.find(name)->second);
       //assert(0);
-      
+
     }
-    
+
     return (iter->second);
   }
 
@@ -176,7 +176,7 @@ namespace ilang {
       s->Print();
     }
   }
-  
+
   Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod) {
     members.reserve(elements->size());
     for(auto it=elements->begin(); it!= elements->end(); it++) {
@@ -187,7 +187,7 @@ namespace ilang {
       members.push_back(var);
     }
   }
-  
+
   Array::~Array () {
     for(auto it=members.begin();it != members.end(); it++) {
       delete *it;
@@ -216,7 +216,7 @@ namespace ilang {
     // idk what else this can be/should be
     // maybe return functions such as push and pop etc
     assert(0);
-    
+
   }
 
   ScopeObject::ScopeObject (Scope *_scope, bool isolate) : scope(_scope), Isolate(isolate) {}
@@ -235,14 +235,14 @@ namespace ilang {
 namespace {
   class Class_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &val) {
+    bool Check (ilang::Variable *self, const boost::any &val) {
       return val.type() == typeid(ilang::Class);
     }
   };
   ILANG_VARIABLE_MODIFIER(Class, Class_var_type)
 
   class Object_var_type : public ilang::Variable_modifier {
-    bool Check (const boost::any &val) {
+    bool Check (ilang::Variable *self, const boost::any &val) {
       return val.type() == typeid(ilang::Object);
     }
   };

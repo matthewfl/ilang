@@ -16,15 +16,15 @@ namespace ilang {
   bool Variable::Check (boost::any &a) {
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       assert(*it);
-      if(!(*it)->Check(a))
+      if(!(*it)->Check(this, a))
 	return false;
     }
     return true;
   }
-  shared_ptr<Variable_modifier> Variable_modifier::new_variable(std::string name, Variable *v) {
-    return shared_ptr<Variable_modifier>( this );
+  shared_ptr<Variable_modifier> Variable_modifier::new_variable(Variable *self, std::string name) {
+    return shared_ptr<Variable_modifier>();
   }
- 
+
   Variable::Variable(string name, list<string> modifiers) {
     Name = name;
     //val = ValuePass(NULL);
@@ -32,8 +32,11 @@ namespace ilang {
       shared_ptr<Variable_modifier> m = ilang_Variable_modifier_list[*it];
       if(!m)
 	cerr << "Variable modifier "<<*it<<" not found\n";
-      else
-	Modifiers.push_back(m->new_variable(name, this));
+      else {
+	shared_ptr<Variable_modifier> vv = m->new_variable(this, name);
+	Modifiers.push_back(vv ? vv : m);
+
+      }
     }
   }
   void Variable::Set(ValuePass v) {
@@ -42,14 +45,14 @@ namespace ilang {
     val=v;
     debug(4, v << " " << val );
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
-      (*it)->Set(v->Get());
+      (*it)->Set(this, v->Get());
     }
   }
   ValuePass Variable::Get () { // will need to be changed to ValuePass
     ValuePass ret = val;
     if(!ret) ret = ValuePass(new ilang::Value);
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
-      (*it)->Read(ret);
+      (*it)->Read(this, ret);
     }
     return ret;
     //return val.get();
@@ -124,7 +127,7 @@ namespace {
   using namespace ilang;
   class Int_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &val) {
+    bool Check (Variable *self, const boost::any &val) {
       return typeid(int) == val.type() || typeid(long) == val.type();
     }
   };
@@ -132,7 +135,7 @@ namespace {
 
   class String_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &val) {
+    bool Check (Variable *self, const boost::any &val) {
       return typeid(std::string) == val.type();
     }
   };
@@ -140,15 +143,15 @@ namespace {
 
   class Bool_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &val) {
+    bool Check (Variable *self, const boost::any &val) {
       return typeid(bool) == val.type();
     }
   };
   ILANG_VARIABLE_MODIFIER(Bool, Bool_var_type)
-  
+
   class Float_var_type : public ilang::Variable_modifier {
   public:
-    bool Check (const boost::any &val) {
+    bool Check (Variable *self, const boost::any &val) {
       return typeid(double) == val.type();
     }
   };
@@ -159,13 +162,13 @@ namespace {
     bool set;
   public:
     Const_var_type() : set(false) {}
-    boost::shared_ptr<Variable_modifier> new_variable(std::string name, Variable *v) {
+    boost::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
       // this will leak when the variable goes out of scope
       // this should not leak now that shared pointer is being used to track this
       boost::shared_ptr<Variable_modifier> p ( new Const_var_type );
       return p;
     }
-    bool Check(const boost::any &val) {
+    bool Check(Variable *self, const boost::any &val) {
       if(set) return false;
       set = true;
       return true;
