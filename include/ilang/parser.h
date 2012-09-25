@@ -20,8 +20,9 @@ namespace ilang {
   struct parser_data {
     ilang::ImportScopeFile *import;
     ilang::parserNode::Head *head;
+    const char *fileName;
   };
-  ilang::parserNode::Head * parser (FILE *, ilang::ImportScopeFile *);
+  ilang::parserNode::Head * parser (FILE *, ilang::ImportScopeFile *, const char *);
 };
 
 

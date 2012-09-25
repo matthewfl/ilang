@@ -38,7 +38,7 @@ void segfault_singal(int signal, siginfo_t *si, void *arg) {
 
 int main (int argc, char **argv) {
   ilang::error_trace main_error("Calling int main, before code has even run");
-  
+
   // set up system to report error trace on seg fault
   {
     struct sigaction sa;
@@ -46,10 +46,10 @@ int main (int argc, char **argv) {
     sigemptyset(&sa.sa_mask);
     sa.sa_sigaction = segfault_singal;
     sa.sa_flags = SA_SIGINFO;
-    
+
     sigaction(SIGSEGV, &sa, NULL);
   }
-  
+
   if(argc < 2) {
     show_help_info(argv[0]);
     return 1;
@@ -86,17 +86,17 @@ int main (int argc, char **argv) {
 	main_file = argv[i];
     }
   }
-  
+
 
   ilang::System_Database = new ilang::DatabaseFile(db_path);
 
   // for setting up the import search path
   ilang::Init(argc, argv);
-  
+
   //  boost::filesystem::path a("/another");
   //cout << ilang::GlobalImportScope.locateFile(a) << endl;
-  
-  
+
+
   ilang::ImportScopeFile *mainImport = new ilang::ImportScopeFile(main_file);
 
   cout << "running file: "<<main_file<<endl;
@@ -105,7 +105,7 @@ int main (int argc, char **argv) {
     cout << "file \""<<main_file<<"\" not found"<<endl;
     return 1;
   }
-  ilang::parserNode::Head *base = ilang::parser(f, mainImport);
+  ilang::parserNode::Head *base = ilang::parser(f, mainImport, main_file);
   fclose(f);
   { ilang::error_trace ee("linking main file");
     base->Link();
@@ -115,7 +115,7 @@ int main (int argc, char **argv) {
   }
 
 
-  delete ilang::System_Database;  
-  
+  delete ilang::System_Database;
+
   return 0;
 }

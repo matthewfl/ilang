@@ -42,7 +42,7 @@ namespace ilang {
     };
 
 
-    
+
     class Value : public Node {
       friend class Modification;
     public:
@@ -55,7 +55,7 @@ namespace ilang {
       void Run(Scope*);
     };
 
-    
+
 
     // I guess we will leave this in, but most things are using Value, not expression
     class Expression : public Value {
@@ -162,21 +162,21 @@ namespace ilang {
       ReturnStmt(Node*);
       void Run(Scope*);
     };
-    
+
     class Function : public Value {
       friend class Modification;
     private:
       std::list<Node*> *body;
       std::list<Node*> *params;
     public:
-      Function(std::list<Node*> *p, std::list<Node*> *b); 
+      Function(std::list<Node*> *p, std::list<Node*> *b);
       void Run(Scope*);
       //void Call(std::vector<ilang::Value*>);
       void Call(Scope *_scope_made, Scope *_scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
     };
 
-    
+
 
     class Variable : public Value {
       friend class Modification;
@@ -253,10 +253,20 @@ namespace ilang {
       friend class Modification;
     public:
       NewCall(std::list<Node*> *args);
-      ValuePass GetValue(Scope*); 
+      ValuePass GetValue(Scope*);
     };
 
-    
+    class AssertCall : public Call {
+      friend class Modification;
+    private:
+      int lineN;
+      std::string fileName;
+    public:
+      AssertCall(int line, const char *name, std::list<Node*> *args);
+      ValuePass GetValue(Scope*);
+    };
+
+
     class AssignExpr : public Expression {
       friend class Modification;
     private:

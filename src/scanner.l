@@ -33,7 +33,7 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 <*>" "			{;}
 <*>\t			{;}
 <*>\r			{;}
-<*>\n			{;}
+<*>\n			{yylloc->first_line++;}
 
 "//"[^\n]* 		{;}
 "/*"			{BEGIN(COMMENT);}
@@ -52,6 +52,7 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "class"			{ return T_class; }
 "object"		{ return T_object; }
 "new"			{ return T_new; }
+"assert"		{ return T_assert; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }

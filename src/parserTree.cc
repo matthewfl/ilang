@@ -772,6 +772,22 @@ namespace ilang {
       return ValuePass(val);
     }
 
+    AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
+      for(auto it : *args) {
+	error(dynamic_cast<Value*>(it), "Arguments to assert need to have some value");
+      }
+    }
+    ValuePass AssertCall::GetValue(Scope *scope) {
+      for(auto it : *params) {
+	ValuePass val = dynamic_cast<Value*>(it)->GetValue(scope);
+	if(!val->isTrue()) {
+	  error_print_trace();
+	  cerr << "\n\nilang assert " << fileName << ":" << lineN << endl;
+	  exit(2);
+	}
+      }
+    }
+
 
   } // namespace parserTree
 } // namespace ilang

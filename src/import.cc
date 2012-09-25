@@ -190,7 +190,7 @@ namespace ilang {
 	}else{
 	  ilang::ImportScopeFile *imp = new ImportScopeFile(p);
 	  FILE *f = fopen(p.c_str(), "r");
-	  ilang::parserNode::Head *head = ilang::parser(f, imp);
+	  ilang::parserNode::Head *head = ilang::parser(f, imp, p.c_str());
 	  fclose(f);
 	  head->Link();
 	  ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
