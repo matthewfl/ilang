@@ -142,15 +142,20 @@ namespace ilang {
       if(baseClass) {
 	// need to make something if the variable is getting set so that it is save differently
 	ilang::Variable * var = baseClass->operator[](name);
-	if(var)
+	if(var) {
+	  // inserting copy of variable into this object
+	  // this way any modification will be keep local
+	  var = new ilang::Variable(*var);
+	  members.insert(pair<std::string, ilang::Variable*>(name, var));
 	  return var;
+	}
       }else if(C_baseClass) {
 	ilang::Variable *var = C_baseClass->operator[](name);
 	if(var)
 	  return var;
       }
       // if we don't find the variable then make a new one and return it
-      debug(0, "Member "<< name << " not found in object");
+      //debug(0, "Member "<< name << " not found in object");
       // I guess create a new one and insert it
       Variable *var;
       members.insert(pair<std::string, ilang::Variable*>(name, var = new Variable(name, list<string>())));

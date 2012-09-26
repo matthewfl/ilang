@@ -45,7 +45,7 @@ LIBS+=-lcurl
 
 
 
-.PHONY: all release test debug clean clean-all depend submodule
+.PHONY: all release test debug clean clean-all depend submodule check
 # start of commands
 all: $(TARGET) $(MODULESD)
 
@@ -96,6 +96,9 @@ test: $(TARGET)
 	./$(TARGET) test.i -v 10
 debug: $(TARGET)
 	gdb i "--eval-command=run test.i -v 10" --eval-command=bt
+
+check: $(TARGET)
+	cd checks && bash ./run
 
 # all the settings to build modules
 

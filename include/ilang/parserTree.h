@@ -11,6 +11,13 @@
 #include "scope.h"
 #include "import.h"
 
+/* Need to figure out deleting of these objects
+ * There are issues with things such as functions where the origional structure might be referenced
+ * Classes and objects return a new type that contains all the necessary information
+ * most likeley will need to create something similar for functions so that the parserTree can be deleted without the function getting messed up
+ * also, functions accessing the scope that they are created in could cause a problem
+ */
+
 namespace ilang {
   class Scope;
   class Object;

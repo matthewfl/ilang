@@ -47,8 +47,8 @@ namespace ilang {
     types m_masterType;
     types m_secondaryType;
     union {
-      ilang::parserNode::Head* file;
-      ilang::parserNode::Node* node;
+      ilang::parserNode::Head* m_file;
+      ilang::parserNode::Node* m_node;
     };
 
     // private functions
@@ -58,7 +58,8 @@ namespace ilang {
     Modification(ModData);
     Modification(ilang::parserNode::Node*);
     Modification(ilang::parserNode::Head*);
-    bool isType(types t);
+    Modification(ilang::FileScope*);
+    bool isType(types t) { return m_masterType == t || m_secondaryType == t; }
 
     // general helper functions that are used throughout
     static FileScope* getFileScope(Scope*);

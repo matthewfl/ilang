@@ -80,12 +80,13 @@ namespace ilang {
   }
 
 
-  bool Modification::isType(types t) {
-    return m_masterType == t || m_secondaryType == t;
-  }
+  /*Modification::Modification(ModData dat) {
 
-  Modification::Modification(ModData dat) {
+    }*/
 
+  Modification::Modification(FileScope *scope) {
+    m_file = scope->head;
+    m_masterType = m_secondaryType = file_t;
   }
 
 
@@ -142,9 +143,10 @@ namespace {
       cout << "special passed case: " << dat.string_data << endl;
       if(dat.string_data == "self_file") {
 	cout << "getting self\n" << flush;
-	Modification::getFileScope(scope);
+	FileScope *s = Modification::getFileScope(scope);
+	Modification *m = new Modification(s);
 	//Modification_manager m;
-	ilang::Value * val = new ilang::Value(new Object(new Modification_manager));
+	ilang::Value * val = new ilang::Value(new Object(new Modification_manager(m)));
 	return ValuePass(val);
 	//Scope *looking = scope;
 	//while(looking->parent) looking = looking->parent;
@@ -163,10 +165,35 @@ ILANG_LIBRARY_NAME("i/mod",
 		   import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
 		   Object * type_obj = new Object;
 		   type_obj->operator[]("Unknown")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
+		   type_obj->operator[]("File")->Set(ValuePass(new ilang::Value(ModData(Modification::file_t))));
+		   type_obj->operator[]("Value")->Set(ValuePass(new ilang::Value(ModData(Modification::value_t))));
+		   type_obj->operator[]("Expression")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
+		   type_obj->operator[]("Constant")->Set(ValuePass(new ilang::Value(ModData(Modification::constant_t))));
+
 		   type_obj->operator[]("Function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   type_obj->operator[]("Object")->Set(ValuePass(new ilang::Value(ModData(Modification::object_t))));
 		   type_obj->operator[]("Class")->Set(ValuePass(new ilang::Value(ModData(Modification::class_t))));
+		   type_obj->operator[]("Array")->Set(ValuePass(new ilang::Value(ModData(Modification::array_t))));
+		   type_obj->operator[]("StringConst")->Set(ValuePass(new ilang::Value(ModData(Modification::stringConst_t))));
+		   type_obj->operator[]("IntConst")->Set(ValuePass(new ilang::Value(ModData(Modification::intConst_t))));
+		   type_obj->operator[]("FloatConst")->Set(ValuePass(new ilang::Value(ModData(Modification::floatConst_t))));
+
+		   type_obj->operator[]("If")->Set(ValuePass(new ilang::Value(ModData(Modification::ifStmt_t))));
+		   type_obj->operator[]("For")->Set(ValuePass(new ilang::Value(ModData(Modification::forStmt_t))));
+		   type_obj->operator[]("While")->Set(ValuePass(new ilang::Value(ModData(Modification::whileStmt_t))));
+		   type_obj->operator[]("Return")->Set(ValuePass(new ilang::Value(ModData(Modification::returnStmt_t))));
+
 		   type_obj->operator[]("Variable")->Set(ValuePass(new ilang::Value(ModData(Modification::variable_t))));
+		   type_obj->operator[]("FieldAccess")->Set(ValuePass(new ilang::Value(ModData(Modification::fieldAccess_t))));
+		   type_obj->operator[]("ArrayAccess")->Set(ValuePass(new ilang::Value(ModData(Modification::arrayAccess_t))));
+
+		   type_obj->operator[]("Call")->Set(ValuePass(new ilang::Value(ModData(Modification::call_t))));
+		   type_obj->operator[]("NewCall")->Set(ValuePass(new ilang::Value(ModData(Modification::newCall_t))));
+		   type_obj->operator[]("PrintCall")->Set(ValuePass(new ilang::Value(ModData(Modification::printCall_t))));
+
+		   type_obj->operator[]("AssignExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::assignExpr_t))));
+		   type_obj->operator[]("MathExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::mathExpr_t))));
+		   type_obj->operator[]("LogicExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::logicExpr_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));

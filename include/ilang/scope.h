@@ -27,17 +27,21 @@ namespace ilang {
     Scope(Scope *parent);
     virtual ~Scope();
 
-    int Debug();    
+    int Debug();
   };
   class ImportScopeFile;
+  namespace parserNode {
+    class Head;
+  }
   class FileScope : public Scope {
   private:
     friend class ImportScopeFile;
     friend class Modification;
+    parserNode::Head *head;
   protected:
     virtual ilang::Variable * _lookup (std::string &name);
   public:
-    FileScope(): Scope((Scope *)NULL) {}
+    FileScope(parserNode::Head *h): Scope((Scope *)NULL), head(h) {}
   };
 
   template <typename ReturnHook> class FunctionScope : public Scope {
@@ -79,7 +83,7 @@ namespace ilang {
   public:
     ObjectScope(Object*); // TODO: fix this to have the valuePass
   };
-  
+
 }; // namespace ilang
 
 #endif // _ilang_scope

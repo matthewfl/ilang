@@ -21,7 +21,7 @@ namespace ilang {
     }
     void Head::Link () {
       if(scope) return;
-      scope = new FileScope;
+      scope = new FileScope(this);
       Import->resolve(scope);
 
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
