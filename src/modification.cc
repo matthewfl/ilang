@@ -127,7 +127,7 @@ namespace {
     }
     Modification_manager(Modification *m) : mod(m) {
       assert(m);
-
+      Init();
     }
   };
 
@@ -152,7 +152,9 @@ namespace {
 	//while(looking->parent) looking = looking->parent;
 	// try and just get the
       }
-    }else assert(0);
+    }else{
+      assert(0);
+    }
   }
 
 

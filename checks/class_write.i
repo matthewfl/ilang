@@ -23,5 +23,5 @@ main = {
 	c2.a = 44;
 	Print("\n", c2.a, " ", c1.a);
 	assert(c1.a == 23, c2.a == 44);
-	//assert(1 == 1 && 0 == 0); // noticed intresting problem in the way that this is parsed
+	assert(1 == 1 && 0 == 0); // noticed intresting problem in the way that this is parsed
 };

@@ -414,7 +414,9 @@ namespace ilang {
       boost::any &an = func->Get();
       error(an.type() == typeid(ilang::Function), "Calling a non function " << an.type().name());
       ilang::Function *function = boost::any_cast<ilang::Function>(&an);
-      if(function->object) {
+      if(function->native) {
+	function->ptr(scope, par, &ret);
+      }else if(function->object) {
 	assert(function->object->Get().type() == typeid(ilang::Object*));
 	ObjectScope obj_scope(boost::any_cast<ilang::Object*>(function->object->Get()));
 	function->ptr(&obj_scope, par, &ret);
@@ -490,23 +492,32 @@ namespace ilang {
     }
     MathEquation::MathEquation(Value *l, Value *r, action a) : left(l), right(r), Act(a) {
       assert(left);
-      assert(right);
+      if(a != uMinus) assert(right);
     }
     void MathEquation::Run(Scope *scope) {
       errorTrace("Running math equation w/o getting value");
       left->Run(scope);
-      right->Run(scope);
+      if(Act != uMinus) right->Run(scope);
       // we do not need the value so we should not request the vale from the nodes
     }
     ValuePass MathEquation::GetValue(Scope *scope) {
       errorTrace("Math equation");
       ValuePass left = this->left->GetValue(scope);
-      ValuePass right = this->right->GetValue(scope);
+      ValuePass right;
+      if(Act != uMinus) right = this->right->GetValue(scope);
       /* when trying for speed boost
 	auto left_type = left->Get().type();
 	auto right_type = right->Get().type();
        */
       switch(Act) {
+      case uMinus:
+	if(left->Get().type() == typeid(std::string)) {
+	  error(0, "can not uMinus a string type");
+	}else if(left->Get().type() == typeid(double)) {
+	  return ValuePass(new ilang::Value(- boost::any_cast<double>(left->Get())));
+	}else if(left->Get().type() == typeid(long)) {
+	  return ValuePass(new ilang::Value(- boost::any_cast<long>(left->Get())));
+	}
       case add:
 	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string)) {
 	  return ValuePass(new ilang::Value(std::string(boost::any_cast<std::string>(left->Get()) + boost::any_cast<std::string>(right->Get()))));

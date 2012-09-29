@@ -292,7 +292,8 @@ namespace ilang {
 	add,
 	subtract,
 	multiply,
-	devide
+	devide,
+	uMinus
       };
       MathEquation(Value *l, Value *r, action a);
       void Run(Scope *scope);

@@ -50,6 +50,16 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert
 %token T_eq T_ne T_le T_ge T_and T_or
 
+%right T_else
+%left '='
+%left T_and T_or
+%left T_eq T_ne T_le '<' '>'
+%left '+' '-'
+%left '*' '/'
+%left '!'
+%right uMinus
+%left '.' '['
+
 %token <Identifier> T_Identifier
 %token <count> T_break T_return T_continue
 %token <string> T_StringConst
@@ -186,6 +196,7 @@ Expr		:	Function			{}
 		|	'(' Expr ')'			{$$=$2;}
 		|	Expr '+' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::add); }
 		|	Expr '-' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::subtract); }
+		|	'-' Expr %prec uMinus		{ $$ = new MathEquation(dynamic_cast<Value*>($2), NULL, MathEquation::uMinus); }
 		|	Expr '*' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::multiply); }
 		| 	Expr '/' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::devide); }
 		|	Expr T_eq Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Equal); }
