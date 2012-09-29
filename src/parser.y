@@ -94,7 +94,7 @@ Variable	:	LValue				{ }
 
 LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
 		|	Expr '.' Identifier		{ $$ = new FieldAccess($1, $3); }
-		|	Expr '[' Expr ']'		{}
+		|	Expr '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
 ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($2); }

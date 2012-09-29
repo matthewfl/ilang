@@ -1,5 +1,6 @@
 #include "object.h"
 #include "debug.h"
+#include "error.h"
 
 // I do not like including this one here, but it is for C_Class->operator[]
 #include "ilang.h"
@@ -193,10 +194,22 @@ namespace ilang {
     }
   }
 
+  Array::Array(std::vector<ValuePass> &val) {
+    members.reserve(val.size());
+    modifiers = NULL;
+    std::list<std::string> mod;
+    for(auto it : val) {
+      ilang::Variable *var = new Variable("", mod);
+      var->Set(it);
+      members.push_back(var);
+    }
+  }
+
   Array::~Array () {
     for(auto it=members.begin();it != members.end(); it++) {
       delete *it;
     }
+    // modifiers is owned by another
   }
 
   ilang::Variable * Array::operator [] (ValuePass name) {
@@ -220,7 +233,7 @@ namespace ilang {
     }
     // idk what else this can be/should be
     // maybe return functions such as push and pop etc
-    assert(0);
+    error(0, "could not find \""<<name<<"\" in type array");
 
   }
 

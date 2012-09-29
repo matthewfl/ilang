@@ -1,9 +1,12 @@
-from i import mod
-
 main = {
-	assert(0);
-	Print(mod.self, "\n");
-	Print(mod.file,"\n");
-	Print(mod.file(mod.self), "\n");
-	Print(mod.file(mod.self).Type(mod.type.Unknown), "\n");
+	a = [1,2,3];
+	b = object {
+		a: 1,
+		c: 2,
+		d: {
+			Print(c, arguments.length);
+		}
+	};
+	
+	b["d"]("hello");
 };

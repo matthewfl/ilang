@@ -237,6 +237,7 @@ namespace ilang {
     public:
       ArrayAccess(Node*, Node*);
       ilang::Variable * Get(Scope*);
+      virtual std::string GetFirstName();
     };
 
     class Call : public Value {

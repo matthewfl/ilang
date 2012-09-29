@@ -178,6 +178,12 @@ namespace ilang {
 	  it++;
 	}
       }
+
+      std::list<std::string> arguments_mod;
+      ilang::Variable *args = scope.forceNew("arguments", arguments_mod);
+      ilang::Object *arguments_arr = new ilang::Array(p);
+      args->Set(ValuePass(new ilang::Value(arguments_arr)));
+
       if(body) { // body can be null if there is nothing
 	for(Node *n : *body) {
 	  if(returned) return;
@@ -242,7 +248,7 @@ namespace ilang {
       ilang::Variable *v = Get(scope);
       error(v, "Variable " << GetFirstName() << " Not found"); // maybe an assert, not an error?
       //assert(v);
-      auto p = v->Get();
+      ValuePass p = v->Get();
       // TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
       error(p, "Variable " << GetFirstName() << " Not found");
       return p;
@@ -363,12 +369,16 @@ namespace ilang {
 
     ilang::Variable * ArrayAccess::Get(Scope *scope) {
       errorTrace("Getting element using []: "<<GetFirstName());
-      boost::any & a = Obj->GetValue(scope)->Get();
+      ValuePass obj_val = Obj->GetValue(scope);
+      boost::any & a = obj_val->Get();
       error(a.type() == typeid(ilang::Object*), "Not of an object or array type");
       ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
       ValuePass val = Lookup->GetValue(scope);
-      return obj->operator[](val);
-
+      ilang::Variable *var = obj->operator[](val);
+      if(var->Get()->Get().type() == typeid(ilang::Function)) {
+	boost::any_cast<ilang::Function>( &(var->Get()->Get()) )->object = obj_val;
+      }
+      return var;
       /*if(val.type() == typeid(long)) {
 	assert(dynamic_cast<ilang::Array*>(obj));
 	return dynamic_cast<ilang::Array*>(obj)->operator[](boost::any_cast<long>(val));
@@ -378,6 +388,9 @@ namespace ilang {
 	}*/
     }
 
+    std::string ArrayAccess::GetFirstName() {
+      return "Array access name";
+    }
 
     Call::Call (Value *call, list<Node*> *args):
       calling(call), params(args) {
@@ -749,7 +762,7 @@ namespace ilang {
       }
       return ValuePass(new ilang::Value(ret));
       */
-      ilang::Array *arr = new ilang::Array(elements, modifiers, scope);
+      ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
       ilang::Value *val = new ilang::Value(arr);
       return ValuePass(val);
     }

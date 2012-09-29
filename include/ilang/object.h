@@ -49,6 +49,7 @@ namespace ilang {
     std::list<std::string> *modifiers;
   public:
     Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, Scope*);
+    Array(std::vector<ValuePass> &);
     ilang::Variable * operator[] (std::string name);
     ilang::Variable * operator[] (ValuePass);
     virtual ~Array();
