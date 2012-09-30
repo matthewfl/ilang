@@ -42,14 +42,25 @@ namespace ilang {
       assignExpr_t = 70,
       mathExpr_t,
       logicExpr_t
+      /*
+      // Values passed
+      valuep_t = 100,
+      functionp_t,
+      classp_t,
+      objectp_t,
+      arrayp_t
+      */
     };
   private:
     types m_masterType;
     types m_secondaryType;
+    ValuePass m_valuePassHold;
     union {
       ilang::parserNode::Head* m_file;
       ilang::parserNode::Node* m_node;
+      ilang::Value *m_value;
     };
+    std::string m_name;
 
     // private functions
     void FigureType(ilang::parserNode::Node*);
@@ -59,7 +70,10 @@ namespace ilang {
     Modification(ilang::parserNode::Node*);
     Modification(ilang::parserNode::Head*);
     Modification(ilang::FileScope*);
+    Modification(ilang::ValuePass);
+    Modification(ilang::Variable*);
     bool isType(types t) { return m_masterType == t || m_secondaryType == t; }
+    std::vector<Modification*> getList();
 
     // general helper functions that are used throughout
     static FileScope* getFileScope(Scope*);

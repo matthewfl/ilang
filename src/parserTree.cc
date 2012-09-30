@@ -46,6 +46,11 @@ namespace ilang {
       //boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
     }
 
+    static unsigned long _ilang_node_id;
+    Node::Node() {
+      _node_id = ++_ilang_node_id;
+    }
+
     // this does not need to have anything
     void Constant::Run(Scope *scope) {}
 

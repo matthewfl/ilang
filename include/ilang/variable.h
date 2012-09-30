@@ -10,6 +10,7 @@
 namespace ilang {
   using boost::shared_ptr;
 
+  class Modification;
   class Value;
   class Variable;
   typedef boost::shared_ptr<ilang::Value> ValuePass;
@@ -28,6 +29,7 @@ namespace ilang {
 
   class Variable {
   private:
+    friend class ilang::Modification;
     std::list<shared_ptr<Variable_modifier> > Modifiers;
     std::string Name;
     bool Check (boost::any&);

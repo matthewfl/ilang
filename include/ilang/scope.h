@@ -12,7 +12,7 @@ namespace ilang {
   class FileScope;
   class Modification;
   template <typename ReturnHook> class FunctionScope;
-  class Scope  : boost::noncopyable {
+  class Scope : boost::noncopyable {
     friend class Modification;
   protected:
     template <typename ReturnHook> friend class FunctionScope;

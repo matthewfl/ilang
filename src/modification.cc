@@ -88,7 +88,65 @@ namespace ilang {
     m_file = scope->head;
     m_masterType = m_secondaryType = file_t;
   }
+  Modification::Modification(ilang::parserNode::Head *head) {
+    m_file = head;
+    m_masterType = m_secondaryType = file_t;
+  }
+  Modification::Modification(ilang::parserNode::Node *node) {
+    m_node = node;
+    FigureType(node);
+  }
+  Modification::Modification(ilang::ValuePass val) {
+    m_valuePassHold = val;
+    cout << "Creating new modification with " << val->Get().type().name() << endl;
+    if(val->Get().type() == typeid(ilang::Function)) {
+      Function fun =  boost::any_cast<ilang::Function>(val->Get());
+      if(fun.native) {
+	error(0, "Can not perform modification of native function");
+      }
+      m_node = dynamic_cast<parserNode::Node*>(fun.func);
+      FigureType(m_node);
+    }else if(val->Get().type() == typeid(ilang::Class*)) {
+      ilang::Class *cla = boost::any_cast<ilang::Class*>(val->Get());
+      //assert(0); // not written yet
+    }else if(val->Get().type() == typeid(ilang::Object*)) {
+      ilang::Object *obj = boost::any_cast<ilang::Object*>(val->Get());
+      //assert(0); // not written yet
+    }else{
+      error(0, "parserNode not found from type");
+    }
+  }
+  Modification::Modification(ilang::Variable *var) :Modification(var->Get()) {
+    m_name = var->Name;
+  }
 
+  vector<ilang::Modification*> Modification::getList() {
+    vector<ilang::Modification*> ret;
+    if(isType(file_t)) {
+      // return everything that is assigned in the global scope
+      if(m_file->scope) {
+	// we might as well return from the global scope as this will hold more revelant data
+	for(auto it : m_file->scope->vars) {
+	  Modification *mod = new Modification(it.second);
+	  mod->m_name = it.first;
+	  ret.push_back(mod);
+	}
+      }else if(m_file->Declars) {
+	// if the declares are checked, then the system would be able to more easily modify the contents of the file however then changing what is currently set would be harder
+      }else{
+	assert(0); // there should be no way that this can ever happen
+      }
+    }else if(isType(function_t)) {
+      // return all the statements in the function
+    }else if(isType(class_t)) {
+      // return everything that is assigned in the class
+    }else if(isType(object_t)) {
+      // return everything that is assigned in the object
+
+    }
+
+    return ret;
+  }
 
 
   // static functions under modification
@@ -107,9 +165,8 @@ namespace {
   private:
     // private variables
     Modification *mod;
-  public:
     ilang::ValuePass isType(Scope *scope, std::vector<ilang::ValuePass> &args) {
-      cout << "class type call\n";
+      //cout << "class type call\n";
       error(args.size() == 1, "mod.manager.type expectes 1 argument");
       error(args[0]->Get().type() == typeid(ModData), "mod.manager.type expectes given type to be of mod.type.*");
       ModData d = boost::any_cast<ModData>(args[0]->Get());
@@ -117,9 +174,26 @@ namespace {
       if(!mod) return ValuePass(new ilang::Value(bool( d.map_type == Modification::unknown_t )));
       return ValuePass(new ilang::Value(bool( mod->isType(d.map_type) )));
     }
+    ilang::ValuePass scopeList(Scope *scope, std::vector<ilang::ValuePass> &args) {
+      error(args.size() == 0, "mod.manager.list does not take any arguments");
+      vector<ValuePass> ret;
+      error(mod, "mod.manager, no Modification set");
+      vector<Modification*> mods = mod->getList();
+      ret.reserve(mods.size());
+      for(auto it : mods) {
+	Modification *m = it;
+
+	ret.push_back(ValuePass(new ilang::Value(new Object(new Modification_manager(m)))));
+      }
+      //mod->get
+
+      ilang::Object *ret_arr = new ilang::Array(ret);
+      return ValuePass(new ilang::Value(ret_arr));
+    }
   private:
     void Init () {
-      reg("Type", &Modification_manager::isType);
+      reg("type", &Modification_manager::isType);
+      reg("list", &Modification_manager::scopeList);
     }
   public:
     Modification_manager (): mod(NULL) {

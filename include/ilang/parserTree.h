@@ -29,14 +29,18 @@ namespace ilang {
     //typedef boost::shared_ptr<ilang::Value> ValuePass;
     using ilang::ValuePass; // defined in variable.h
     class Node {
-      friend class Modification;
+      friend class ilang::Modification;
+    private:
+      unsigned long _node_id;
     public:
+      Node();
+      const unsigned long getID() { return _node_id; }
       virtual void Run(Scope*)=0;
       void randomsdafasdf(){} // take this out eventually
     };
 
     class Head {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       FileScope *scope;
       ImportScopeFile *Import;
@@ -51,13 +55,13 @@ namespace ilang {
 
 
     class Value : public Node {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       virtual ValuePass GetValue(Scope*)=0;
       virtual ValuePass CallFun(Scope*, std::vector<ValuePass> &par); // I feel a little funny about having this here, but this should be the right place
     };
     class Constant : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       void Run(Scope*);
     };
@@ -66,13 +70,13 @@ namespace ilang {
 
     // I guess we will leave this in, but most things are using Value, not expression
     class Expression : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     };
 
     class Variable;
 
     class Object : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
     public:
@@ -82,7 +86,7 @@ namespace ilang {
     };
 
     class Class : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       std::list<Node*> *parents;
       std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
@@ -93,7 +97,7 @@ namespace ilang {
     };
 
     class Array : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       std::list<Node*> *elements;
       std::list<std::string> *modifiers;
@@ -104,7 +108,7 @@ namespace ilang {
     };
 
     class StringConst : public Constant {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       //char *string;
       std::string string;
@@ -114,7 +118,7 @@ namespace ilang {
     };
 
     class IntConst : public Constant {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       long num;
     public:
@@ -122,7 +126,7 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
     class FloatConst : public Constant {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       double num;
     public:
@@ -132,7 +136,7 @@ namespace ilang {
 
 
     class IfStmt : public Node {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Value *test;
       Node *True, *False;
@@ -141,7 +145,7 @@ namespace ilang {
       void Run(Scope*);
     };
     class WhileStmt : public Node {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Value *test;
       Node *exe;
@@ -150,7 +154,7 @@ namespace ilang {
       void Run(Scope*);
     };
     class ForStmt : public Node {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Node *pre;
       Value *test;
@@ -162,7 +166,7 @@ namespace ilang {
     };
 
     class ReturnStmt : public Node {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Value *ret;
     public:
@@ -171,7 +175,7 @@ namespace ilang {
     };
 
     class Function : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       std::list<Node*> *body;
       std::list<Node*> *params;
@@ -184,9 +188,8 @@ namespace ilang {
     };
 
 
-
     class Variable : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       friend class Variable_compare;
       friend class ::ilang::Object;
@@ -215,7 +218,7 @@ namespace ilang {
 
 
     class FieldAccess : public Variable {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       std::string identifier;
       Value *Obj;
@@ -230,7 +233,7 @@ namespace ilang {
     };
 
     class ArrayAccess : public Variable {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Value *Obj;
       Value *Lookup;
@@ -241,7 +244,7 @@ namespace ilang {
     };
 
     class Call : public Value {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Value *calling;
     protected:
@@ -252,20 +255,20 @@ namespace ilang {
       ValuePass GetValue(Scope*);
     };
     class PrintCall : public Call {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       PrintCall(std::list<Node*> *args);
       ValuePass GetValue (Scope*); // returns null
     };
     class NewCall : public Call {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       NewCall(std::list<Node*> *args);
       ValuePass GetValue(Scope*);
     };
 
     class AssertCall : public Call {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       int lineN;
       std::string fileName;
@@ -276,7 +279,7 @@ namespace ilang {
 
 
     class AssignExpr : public Expression {
-      friend class Modification;
+      friend class ilang::Modification;
     private:
       Variable *target;
       Value *eval;
@@ -286,7 +289,7 @@ namespace ilang {
       ValuePass GetValue(Scope *scope);
     };
     class MathEquation : public Expression {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       enum action {
 	add,
@@ -303,7 +306,7 @@ namespace ilang {
       action Act;
     };
     class LogicExpression : public Expression {
-      friend class Modification;
+      friend class ilang::Modification;
     public:
       enum action {
 	Equal,
