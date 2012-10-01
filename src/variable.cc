@@ -18,7 +18,7 @@ namespace ilang {
     for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
       assert(*it);
       if(!(*it)->Check(this, a)) {
-	error(0, "Check on variable \"" << Name << "\" failed for check \"" << (*it)->Name());
+	error(0, "Check on variable \"" << Name << "\" failed for check \"" << (*it)->Name() << "\"");
 	return false;
       }
     }
@@ -130,6 +130,7 @@ namespace {
   using namespace ilang;
   class Int_var_type : public ilang::Variable_modifier {
   public:
+    char* Name() { return "Int"; }
     bool Check (Variable *self, const boost::any &val) {
       return typeid(int) == val.type() || typeid(long) == val.type();
     }
@@ -138,6 +139,7 @@ namespace {
 
   class String_var_type : public ilang::Variable_modifier {
   public:
+    char* Name() { return "String"; }
     bool Check (Variable *self, const boost::any &val) {
       return typeid(std::string) == val.type();
     }
@@ -146,6 +148,7 @@ namespace {
 
   class Bool_var_type : public ilang::Variable_modifier {
   public:
+    char* Name() { return "Bool"; }
     bool Check (Variable *self, const boost::any &val) {
       return typeid(bool) == val.type();
     }
@@ -154,7 +157,9 @@ namespace {
 
   class Float_var_type : public ilang::Variable_modifier {
   public:
+    char* Name() { return "Float"; }
     bool Check (Variable *self, const boost::any &val) {
+      // Should really make this able to promate the variable somehow
       return typeid(double) == val.type();
     }
   };
@@ -164,11 +169,12 @@ namespace {
   private:
     char count;
   public:
+    char* Name() { return "Const"; }
     Const_var_type() : count(0) {}
     boost::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
       // this will leak when the variable goes out of scope
       // this should not leak now that shared pointer is being used to track this
-      boost::shared_ptr<Variable_modifier> p ( new Const_var_type );
+      boost::shared_ptr<Variable_modifier> p ( new Const_var_type<max> );
       return p;
     }
     bool Check(Variable *self, const boost::any &val) {

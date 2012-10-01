@@ -13,7 +13,7 @@
  *  1 byte : type of value
  *           0: error
  *           1: reserved for the system to contain local meta data
- *           2: R/W all, contains data 
+ *           2: R/W all, contains data
  *  4 bytes: version of hash ring function
  *  8 bytes: value of hash ring
  *  N bytes: variable number of bytes representing the 'key'
@@ -24,13 +24,13 @@
  *           1: reserved for the system to contain local meta data
  *           2: R/W all, contains data
  *           3: R-all W-one, contains data (techincally all can read all the data, but when it is encrypted then only some will understand it)
- *           4: 10 bytes containing id of key, signature generated 
+ *           4: 10 bytes containing id of key, signature generated
  *           5: seperate secion that contains the public keys by id assigned, also signed using some global master-ish key to have this id and a date that it expires
  *  4 bytes: version of hash ring function
  *  8 bytes: value of hash ring
  *  N bytes: variable number of bytes representing the 'key'
- * 
- * 
+ *
+ *
  * When local:
  *  1 byte : type of value
  *           0: error
@@ -52,7 +52,8 @@ namespace ilang {
       FloatNumber = 2,
       Bool = 3,
       String = 4,
-      Object = 5
+      Object = 5,
+      Array = 6
     } type;
     union {
       long Int;
@@ -80,7 +81,7 @@ namespace ilang {
   public:
     virtual void Set(std::string, storedData*)=0;
     virtual storedData *Get(std::string)=0;
-    
+
     virtual void setMeta(std::string, std::string)=0;
     virtual std::string getMeta(std::string)=0;
 
@@ -94,7 +95,7 @@ namespace ilang {
     ~DatabaseFile();
     void Set(std::string name, storedData *data);
     storedData *Get(std::string name);
-    
+
     void setMeta(std::string name, std::string data);
     std::string getMeta(std::string name);
   };

@@ -39,7 +39,7 @@ namespace ilang {
       for(int i=0;i<indent;++i) cout << "\t";
       cout << i.first << "\t" << i.second->Get() << endl;
     }
-    
+
     return indent+1;
   }
 
@@ -56,7 +56,7 @@ namespace ilang {
     assert(dynamic_cast<FileScope*>(this));
     return dynamic_cast<FileScope*>(this);
   }
-  
+
   ilang::Variable * FileScope::_lookup (string &name) {
     //TODO: make this check to see if it can't find it
     return vars.find(name)->second; // there is nothing higher that can be looked at

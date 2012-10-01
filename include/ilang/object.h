@@ -45,8 +45,16 @@ namespace ilang {
     virtual ilang::Variable * operator [] (ValuePass);
   };
   class Array : public Object {
+    friend storedData *DB_createStoredData(const boost::any&);
+    friend ValuePass DB_readStoredData(storedData*);
     std::vector<ilang::Variable*> members;
     std::list<std::string> *modifiers;
+    ilang::Variable *mem_length;
+    ilang::Variable *mem_push;
+    ilang::Variable *mem_pop;
+    ilang::Variable *mem_insert;
+    ilang::Variable *mem_remove;
+    void Init();
   public:
     Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, Scope*);
     Array(std::vector<ValuePass> &);

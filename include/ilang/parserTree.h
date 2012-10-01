@@ -37,6 +37,7 @@ namespace ilang {
       const unsigned long getID() { return _node_id; }
       virtual void Run(Scope*)=0;
       void randomsdafasdf(){} // take this out eventually
+      virtual void Print(Print*) =0;
     };
 
     class Head {
@@ -50,6 +51,7 @@ namespace ilang {
       void Link();
       void Run();
       Scope *GetScope ();
+      void Print(Print*);
     };
 
 

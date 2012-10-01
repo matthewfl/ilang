@@ -56,17 +56,19 @@ namespace ilang {
   ImportScope::ImportScope() : parent(NULL) {}
   boost::filesystem::path ImportScope::locateFile(boost::filesystem::path search) {
     namespace fs = boost::filesystem;
-    cout << "search: " << search << endl;
+    //cout << "search: " << search << endl;
     auto it = ImportedFiles.find(search);
     if(it != ImportedFiles.end()) {
       return search;
     }
+    /*
     for(auto it : ImportedFiles) {
       cout << "maps: " << it.first << endl;
     }
     for(auto it2 : StaticImportedFiles()) {
       cout << "static map: " << it2.first << endl;
     }
+    */
     //cout << "aaa: " << search.generic_string() << endl;
     auto it2 = StaticImportedFiles().find((std::string)search.c_str());
     if(it2 != StaticImportedFiles().end()) {

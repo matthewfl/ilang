@@ -45,20 +45,26 @@ namespace ilang {
       memcpy( ((char*)(dat)) + sizeof(storedData), str.c_str(), str.size() );
     }else if(a.type() == typeid(ilang::Object*)) {
       Object *obj = boost::any_cast<ilang::Object*>(a);
-      // for the time being, we do not want to deal with base classes
-      assert(!obj->baseClass);
-      assert(!obj->C_baseClass);
-      if(!obj->DB_name) {
-	assert(obj->members.size() <= 1); // we will say that objs can't have default values for the time being, that will make it so that, the this variable will be ok for the time being
+      Array *arr;
+      // obj can be of an array type that we want to store differently
+      if(arr = dynamic_cast<ilang::Array*>(obj)) {
+
+      }else{
+	// for the time being, we do not want to deal with base classes
+	assert(!obj->baseClass);
+	assert(!obj->C_baseClass);
+	if(!obj->DB_name) {
+	  assert(obj->members.size() <= 1); // we will say that objs can't have default values for the time being, that will make it so that, the this variable will be ok for the time being
 	//obj->members.clear();
-	obj->DB_name = DB_createName();
-	//cout << "db name given " << obj->DB_name << endl;
+	  obj->DB_name = DB_createName();
+	  //cout << "db name given " << obj->DB_name << endl;
+	}
+	dat = (storedData*) new char[sizeof(storedData) + strlen(obj->DB_name)];
+	dat->type = storedData::Object;
+	dat->string_length = strlen(obj->DB_name) +1;
+	memcpy( ((char*)(dat)) + sizeof(storedData), obj->DB_name, dat->string_length );
+	cout << "length: " << dat->string_length << " " << ((char*)(dat)) + sizeof(storedData) << endl;
       }
-      dat = (storedData*) new char[sizeof(storedData) + strlen(obj->DB_name)];
-      dat->type = storedData::Object;
-      dat->string_length = strlen(obj->DB_name) +1;
-      memcpy( ((char*)(dat)) + sizeof(storedData), obj->DB_name, dat->string_length );
-      cout << "length: " << dat->string_length << " " << ((char*)(dat)) + sizeof(storedData) << endl;
     }else{
       dat = new storedData;
       if(a.type() == typeid(long)) {

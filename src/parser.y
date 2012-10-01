@@ -15,9 +15,13 @@ using namespace ilang::parserNode;
 #include <map>
 using namespace std;
 
+struct yyltype;
+struct yyltype yylloc;
+
 void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   using namespace std;
-  cout << "error: " << msg << endl;
+  cerr << "error: " << msg << endl << yylloc.first_line;
+
 }
 
 #define YYDEBUG 1
@@ -69,7 +73,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %type <string_list> ModifierList AccessList ImportLoc
 %type <Identifier> Identifier
 %type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt
-%type <node_list> Stmts ParamList DeclList ExprList 
+%type <node_list> Stmts ParamList DeclList ExprList ArgsList 
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
 
@@ -152,7 +156,7 @@ IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
 WhileStmt	:	T_while	'(' Expr ')' Stmt 	{ $$ = new WhileStmt ($3, $5); }
 		;
 
-ForStmt		:	T_for '(' Decl ';' Expr ';' Expr ')' Stmt	{ $$ = new ForStmt($3, $5, $7, $9); }
+ForStmt		:	T_for '(' Expr ';' Expr ';' Expr ')' Stmt	{ $$ = new ForStmt($3, $5, $7, $9); }
 		;
 
 ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
@@ -160,8 +164,12 @@ ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
 
 Function	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		|	'{' Stmts '}'			{ $$ = new Function(NULL, $2); }
-		|	'{' '|' ParamList '|' Stmts '}'	{ $$ = new Function($3, $5); }
+		|	'{' '|' ArgsList '|' Stmts '}'	{ $$ = new Function($3, $5); }
+		|	'{' '|' ArgsList '|' '}'	{ $$ = new Function($3, NULL); }	
 		;
+
+ArgsList	:	ArgsList ',' Variable		{ ($$=$1)->push_back($3); }
+		|	Variable			{ ($$ = new std::list<Node*>)->push_back($1); }
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
                 |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }

@@ -183,15 +183,74 @@ namespace ilang {
     }
   }
 
+  void Array::Init () {
+    Array *self = this;
+    std::list<std::string> internal_mods;
+    mem_length = new Variable("length", internal_mods);
+    mem_push = new Variable("push", internal_mods);
+    mem_pop = new Variable("pop", internal_mods);
+    mem_insert = new Variable("insert", internal_mods);
+    mem_remove = new Variable("remove", internal_mods);
+    ilang::Function push_fun;
+    push_fun.native = true;
+    push_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      error(args.size() == 1, "Array.push expects 1 argument");
+      ilang::Variable *var = new ilang::Variable("", *self->modifiers);
+      var->Set(args[0]);
+      self->members.push_back(var);
+    };
+    mem_push->Set(ValuePass(new ilang::Value(push_fun)));
+
+    ilang::Function pop_fun;
+    pop_fun.native = true;
+    pop_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      error(args.size() == 0, "Array.pop does not take any arguments");
+      ilang::Variable *var = self->members.back();
+      *ret = var->Get();
+      delete var;
+      self->members.pop_back();
+    };
+    mem_pop->Set(ValuePass(new ilang::Value(pop_fun)));
+
+    ilang::Function insert_fun;
+    insert_fun.native = true;
+    insert_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      error(args.size() == 2, "Array.insert expects 2 arguments");
+      error(args[0]->Get().type() == typeid(long), "Array.insert expects first argument to be a integer");
+      long n = boost::any_cast<long>(args[0]->Get());
+      ilang::Variable *var = new ilang::Variable("", *self->modifiers);
+      var->Set(args[1]);
+      auto it = self->members.begin();
+      self->members.insert(it + n, 1, var);
+    };
+    mem_insert->Set(ValuePass(new ilang::Value(insert_fun)));
+
+    ilang::Function remove_fun;
+    remove_fun.native = true;
+    remove_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      error(args.size() == 1, "Array.remove expects 1 argument");
+      error(args[0]->Get().type() == typeid(long), "Array.remove expect argument to be integer");
+      long n = boost::any_cast<long>(args[0]->Get());
+      auto it = self->members.begin() + n;
+      delete *it;
+      self->members.erase(it);
+    };
+    mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
+  }
+
   Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod) {
     members.reserve(elements->size());
+    unsigned int count=0;
     for(auto it=elements->begin(); it!= elements->end(); it++) {
       ilang::parserNode::Value *v = dynamic_cast<parserNode::Value*>(*it);
       assert(v);
-      ilang::Variable *var = new Variable("", *modifiers);
+      string name = "-ARRAY-";
+      name += count++;
+      ilang::Variable *var = new Variable(name, *modifiers);
       var->Set(v->GetValue(scope));
       members.push_back(var);
     }
+    Init();
   }
 
   Array::Array(std::vector<ValuePass> &val) {
@@ -203,6 +262,7 @@ namespace ilang {
       var->Set(it);
       members.push_back(var);
     }
+    Init();
   }
 
   Array::~Array () {
@@ -210,12 +270,18 @@ namespace ilang {
       delete *it;
     }
     // modifiers is owned by another
+    delete mem_length;
+    delete mem_push;
+    delete mem_pop;
   }
 
   ilang::Variable * Array::operator [] (ValuePass name) {
     boost::any & n = name->Get();
     if(n.type() == typeid(long)) { // look for the array number
       long place = boost::any_cast<long>(n);
+      if(members.size() < place) {
+
+      }
       return (members[place]);
     }else if(n.type() == typeid(std::string)) {
       return operator[](boost::any_cast<std::string>(n));
@@ -226,10 +292,14 @@ namespace ilang {
   ilang::Variable * Array::operator[] (std::string name) {
     if(name == "length") {
       ilang::Value *val = new ilang::Value((long)members.size());
-      list<string> bm;
-      ilang::Variable * v = new ilang::Variable("length", bm);
-      v->Set(ValuePass(val));
-      return v; // this is going to end up leaking, needs to get fixed etc
+      //list<string> bm;
+      //ilang::Variable * v = new ilang::Variable("length", bm);
+      mem_length->Set(ValuePass(val));
+      return mem_length; // this is going to end up leaking, needs to get fixed etc
+    }else if(name == "push") {
+      return mem_push;
+    }else if(name == "pop") {
+
     }
     // idk what else this can be/should be
     // maybe return functions such as push and pop etc
@@ -253,17 +323,31 @@ namespace ilang {
 namespace {
   class Class_var_type : public ilang::Variable_modifier {
   public:
+    char* Name() { return "Class"; }
     bool Check (ilang::Variable *self, const boost::any &val) {
-      return val.type() == typeid(ilang::Class);
+      return val.type() == typeid(ilang::Class*);
     }
   };
   ILANG_VARIABLE_MODIFIER(Class, Class_var_type)
 
   class Object_var_type : public ilang::Variable_modifier {
+  public:
+    char* Name() { return "Object"; }
     bool Check (ilang::Variable *self, const boost::any &val) {
-      return val.type() == typeid(ilang::Object);
+      return val.type() == typeid(ilang::Object*);
     }
   };
 
   ILANG_VARIABLE_MODIFIER(Object, Object_var_type)
+
+  class Array_var_type : public ilang::Variable_modifier {
+  public:
+    char* Name() { return "Array"; }
+    bool Check(ilang::Variable *self, const boost::any &val) {
+      return val.type() == typeid(ilang::Object*)
+	&& dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val));
+    }
+  };
+
+  ILANG_VARIABLE_MODIFIER(Array, Array_var_type);
 }

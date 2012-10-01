@@ -40,10 +40,17 @@ namespace ilang {
     void Head::Run() {
       vector<ValuePass> v;
       ValuePass ret;
+      scope->Debug();
       ilang::Variable * find = scope->lookup("main");
       error(find, "main function not found");
       boost::any_cast<ilang::Function>(find->Get()->Get()).ptr(scope, v, &ret);
       //boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
+    }
+
+    void Head::Print(int indent) {
+      for(auto it : *Declars) {
+	it->Print(indent+1);
+      }
     }
 
     static unsigned long _ilang_node_id;
