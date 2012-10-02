@@ -2,15 +2,21 @@
 #define _ilang_print
 
 #include <iostream>
+#include "debug.h"
 
 namespace ilang {
-  class Print {
+  class Printer {
   private:
-    ostream output;
+    std::ostream * output;
     int indent;
-
+    void tab();
   public:
-
+    std::ostream & line();
+    std::ostream & p(); // print
+    Printer();
+    Printer(std::ostream*);
+    void down();
+    void up();
   };
 }
 

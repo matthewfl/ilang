@@ -10,6 +10,7 @@
 #include "variable.h"
 #include "scope.h"
 #include "import.h"
+#include "print.h"
 
 /* Need to figure out deleting of these objects
  * There are issues with things such as functions where the origional structure might be referenced
@@ -37,7 +38,7 @@ namespace ilang {
       const unsigned long getID() { return _node_id; }
       virtual void Run(Scope*)=0;
       void randomsdafasdf(){} // take this out eventually
-      virtual void Print(Print*) =0;
+      virtual void Print(Printer*) =0;
     };
 
     class Head {
@@ -51,7 +52,7 @@ namespace ilang {
       void Link();
       void Run();
       Scope *GetScope ();
-      void Print(Print*);
+      void Print(Printer*);
     };
 
 
@@ -85,6 +86,7 @@ namespace ilang {
     Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
       void Run(Scope*);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
     class Class : public Value {
@@ -96,6 +98,7 @@ namespace ilang {
       Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
       void Run(Scope*);
       ValuePass GetValue(Scope*);
+      void Print(Printer *p);
     };
 
     class Array : public Value {
@@ -107,6 +110,7 @@ namespace ilang {
       Array(std::list<Node*> *e, std::list<std::string> *m);
       void Run(Scope*);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
     class StringConst : public Constant {
@@ -117,6 +121,7 @@ namespace ilang {
     public:
       StringConst(char *str);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
     class IntConst : public Constant {
@@ -126,6 +131,7 @@ namespace ilang {
     public:
       IntConst(long n);
       ValuePass GetValue(Scope*);
+      void Print(Printer *p);
     };
     class FloatConst : public Constant {
       friend class ilang::Modification;
@@ -134,6 +140,7 @@ namespace ilang {
     public:
       FloatConst(double d);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
 
@@ -145,6 +152,7 @@ namespace ilang {
     public:
       IfStmt(Node*, Node*, Node*);
       void Run(Scope*);
+      void Print(Printer*);
     };
     class WhileStmt : public Node {
       friend class ilang::Modification;
@@ -154,6 +162,7 @@ namespace ilang {
     public:
       WhileStmt(Node*, Node*);
       void Run(Scope*);
+      void Print(Printer*);
     };
     class ForStmt : public Node {
       friend class ilang::Modification;
@@ -165,6 +174,7 @@ namespace ilang {
     public:
       ForStmt(Node*, Node*, Node*, Node*);
       void Run(Scope*);
+      void Print(Printer*);
     };
 
     class ReturnStmt : public Node {
@@ -174,6 +184,7 @@ namespace ilang {
     public:
       ReturnStmt(Node*);
       void Run(Scope*);
+      void Print(Printer*);
     };
 
     class Function : public Value {
@@ -187,6 +198,7 @@ namespace ilang {
       //void Call(std::vector<ilang::Value*>);
       void Call(Scope *_scope_made, Scope *_scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
 
@@ -208,6 +220,7 @@ namespace ilang {
       ValuePass GetValue(Scope*);
       virtual std::string GetFirstName();
       //virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
+      void Print(Printer*);
     };
 
     // TODO: take this out
@@ -232,6 +245,7 @@ namespace ilang {
       //ValuePass GetValue(Scope*);
       virtual std::string GetFirstName();
       virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
+      void Print(Printer*);
     };
 
     class ArrayAccess : public Variable {
@@ -243,6 +257,7 @@ namespace ilang {
       ArrayAccess(Node*, Node*);
       ilang::Variable * Get(Scope*);
       virtual std::string GetFirstName();
+      void Print(Printer*);
     };
 
     class Call : public Value {
@@ -255,18 +270,21 @@ namespace ilang {
       Call(Value *call, std::list<Node*> *args);
       void Run(Scope*);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
     class PrintCall : public Call {
       friend class ilang::Modification;
     public:
       PrintCall(std::list<Node*> *args);
       ValuePass GetValue (Scope*); // returns null
+      void Print(Printer*);
     };
     class NewCall : public Call {
       friend class ilang::Modification;
     public:
       NewCall(std::list<Node*> *args);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
     class AssertCall : public Call {
@@ -277,6 +295,7 @@ namespace ilang {
     public:
       AssertCall(int line, const char *name, std::list<Node*> *args);
       ValuePass GetValue(Scope*);
+      void Print(Printer*);
     };
 
 
@@ -289,6 +308,7 @@ namespace ilang {
       AssignExpr (Variable *target, Value *value);
       void Run(Scope*);
       ValuePass GetValue(Scope *scope);
+      void Print(Printer*);
     };
     class MathEquation : public Expression {
       friend class ilang::Modification;
@@ -303,6 +323,7 @@ namespace ilang {
       MathEquation(Value *l, Value *r, action a);
       void Run(Scope *scope);
       ValuePass GetValue(Scope *scope);
+      void Print(Printer*);
     private:
       Value *left, *right;
       action Act;
@@ -323,6 +344,7 @@ namespace ilang {
       LogicExpression(Value *l, Value *r, action a);
       void Run(Scope *scope);
       ValuePass GetValue(Scope *scope);
+      void Print(Printer*);
     private:
       Value *left, *right;
       action Act;

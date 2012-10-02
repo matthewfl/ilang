@@ -8,7 +8,11 @@ main = {
 
 PrintArray = {|arr|
 	Array a = arr;
-	for(Int i = 0; i < arr.length; i = i + 1) {
-		
+	Int i = 0;
+	Print("[");
+	while(i < arr.length) {
+		Print(arr[i], " ");
+		i = i + 1;
 	}
+	Print("]");
 };

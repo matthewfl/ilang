@@ -1,6 +1,6 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
@@ -18,7 +18,7 @@ MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -Wall -std=c++11 -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++11 -Wall -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
 CXXFLAGS= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=

@@ -11,6 +11,8 @@
 #include "parserTree.h"
 #include "error.h"
 
+#include "print.h"
+
 
 //#include "version.h"
 
@@ -110,6 +112,12 @@ int main (int argc, char **argv) {
   { ilang::error_trace ee("linking main file");
     base->Link();
   }
+
+  { ilang::error_trace ee("Printing main parse");
+    ilang::Printer pp;
+    base->Print(&pp);
+  }
+
   { ilang::error_trace ee("running main file");
     base->Run();
   }

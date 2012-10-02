@@ -47,9 +47,10 @@ namespace ilang {
       //boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
     }
 
-    void Head::Print(int indent) {
+    void Head::Print(Printer *p) {
       for(auto it : *Declars) {
-	it->Print(indent+1);
+	it->Print(p);
+	p->p() << ";\n";
       }
     }
 
@@ -76,16 +77,33 @@ namespace ilang {
       return ValuePass(new ilang::Value(std::string(string)));
     }
 
+    void StringConst::Print(Printer *p) {
+      using boost::replace_all;
+      std::string result = string;
+      replace_all(result, "\n", "\\n");
+      replace_all(result, "\t", "\\t");
+      replace_all(result, "\\", "\\\\");
+      replace_all(result, "\"", "\\\"");
+      replace_all(result, "\'", "\\'");
+      p->p() << "\"" << result << "\"";
+    }
+
     IntConst::IntConst(long n) : num(n) {}
     ValuePass IntConst::GetValue (Scope *scope) {
       return ValuePass(new ilang::Value(num));
+    }
+
+    void IntConst::Print(Printer *p) {
+      p->p() << num;
     }
 
     FloatConst::FloatConst(double d) : num(d) {}
     ValuePass FloatConst::GetValue (Scope *scope) {
       return ValuePass(new ilang::Value(num));
     }
-
+    void FloatConst::Print(Printer *p) {
+      p->p() << num;
+    }
 
     IfStmt::IfStmt (Node *test_, Node* True_, Node* False_): True(True_), False(False_) {
       Value *t = dynamic_cast<Value*>(test_);
@@ -103,6 +121,22 @@ namespace ilang {
       }
     }
 
+    void IfStmt::Print(Printer *p) {
+      p->p() << "if(";
+      test->Print(p);
+      p->p() << ") ";
+      p->up();
+      if(True) True->Print(p);
+      else p->p() << ';';
+      if(False) {
+	p->down();
+	p->p() << "else";
+	p->up();
+	False->Print(p);
+	p->down();
+      }
+    }
+
     ForStmt::ForStmt (Node *pre_, Node *test_, Node *each_, Node *exe_) :pre(pre_), each(each_), exe(exe_) {
       Value *t = dynamic_cast<Value*>(test_);
       error(t, "Test in for statment is not a test");
@@ -112,6 +146,19 @@ namespace ilang {
     void ForStmt::Run(Scope *scope) {
       for( pre->Run(scope) ; test->GetValue(scope)->isTrue() ; each->Run(scope) )
 	exe->Run(scope);
+    }
+
+    void ForStmt::Print(Printer *p) {
+      p->p() << "for(";
+      pre->Print(p);
+      p->p() << ';';
+      test->Print(p);
+      p->p() << ';';
+      each->Print(p);
+      p->p() << ") ";
+      p->up();
+      exe->Print(p);
+      p->down();
     }
 
     WhileStmt::WhileStmt (Node *test_, Node *exe_): exe(exe_) {
@@ -128,6 +175,15 @@ namespace ilang {
       }
     }
 
+    void WhileStmt::Print(Printer *p) {
+      p->p() << "while(";
+      test->Print(p);
+      p->p() << ") ";
+      p->up();
+      exe->Print(p);
+      p->down();
+    }
+
     ReturnStmt::ReturnStmt (Node *r) {
       if(r) {
 	ret = dynamic_cast<Value*>(r);
@@ -140,6 +196,16 @@ namespace ilang {
       ValuePass v;
       if(ret) v = ret->GetValue(scope);
       scope->ParentReturn(&v); // this should avoid copying any smart pointers and run much faster
+    }
+
+    void ReturnStmt::Print(Printer *p) {
+      if(ret) {
+	p->p() << "return ";
+	ret->Print(p);
+	p->p() << ";\n";
+      }else{
+	p->p() << "return;\n";
+      }
     }
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
@@ -206,6 +272,36 @@ namespace ilang {
       }
     }
 
+    void Function::Print(Printer *p) {
+      if(!body && !params) {
+	p->p() << ";";
+	return;
+      }
+      p->p() << "{";
+      if(params && !params->empty()) {
+	p->p() << "|";
+	bool first=true;
+	for(Node *it : *params) {
+	  if(!first) p->p() << ", ";
+	  it->Print(p);
+	  first = false;
+	}
+	p->p() << "|";
+      }
+      if(body && !body->empty()) {
+	p->up();
+	bool first=true;
+	for(Node *it : *body) {
+	  p->line();
+	  it->Print(p);
+	  p->p() << ";";
+	}
+	p->down();
+	p->line();
+      }
+      p->p() << "}";
+    }
+
     Variable::Variable (list<string> *n, list<string> *mod):
       name(n), modifiers(mod) {
       if(!name) name = new list<string>;
@@ -267,6 +363,19 @@ namespace ilang {
     }
     std::string Variable::GetFirstName() {
       return name->front();
+    }
+
+    void Variable::Print(Printer *p) {
+      if(modifiers) {
+	for(std::string it : *modifiers) {
+	  p->p() << it << " ";
+	}
+      }
+      bool first=true;
+      for(std::string it : *name) {
+	p->p() << (first ? "" : ".") << it;
+	first = false;
+      }
     }
 
     /*
@@ -338,6 +447,14 @@ namespace ilang {
       return identifier;
     }
 
+    void FieldAccess::Print(Printer *p) {
+      if(Obj) {
+	Obj->Print(p);
+	p->p() << ".";
+      }
+      p->p() << identifier;
+    }
+
     ValuePass FieldAccess::CallFun(Scope *scope, vector<ValuePass> &par) {
       assert(0);
       /*
@@ -404,6 +521,13 @@ namespace ilang {
       return "Array access name";
     }
 
+    void ArrayAccess::Print(Printer *p) {
+      Obj->Print(p);
+      p->p() << "[";
+      Lookup->Print(p);
+      p->p() << "]";
+    }
+
     Call::Call (Value *call, list<Node*> *args):
       calling(call), params(args) {
       debug(4,"\t\t\tCalling function");
@@ -452,6 +576,19 @@ namespace ilang {
       return ret;
       */
     }
+
+    void Call::Print(Printer *p) {
+      calling->Print(p);
+      p->p() << "(";
+      bool first=true;
+      for(auto it : *params) {
+	if(!first) p->p() << ", ";
+	it->Print(p);
+	first = false;
+      }
+      p->p() << ")";
+    }
+
     PrintCall::PrintCall(list<Node*> *args):
       Call(NULL, args) {}
     ValuePass PrintCall::GetValue (Scope *scope) {
@@ -463,6 +600,17 @@ namespace ilang {
 	dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
       }
       debug(5,"made it out of print");
+    }
+
+    void PrintCall::Print (Printer *p) {
+      p->p() << "Print(";
+      bool first = true;
+      for(Node *it : *params) {
+	if(!first) p->p() << ", ";
+	it->Print(p);
+	first = false;
+      }
+      p->p() << ")";
     }
 
     ValuePass Value::CallFun(Scope *scope, std::vector<ValuePass> &par) {
@@ -502,6 +650,13 @@ namespace ilang {
       target->Set(scope, v);
       return v;
     }
+
+    void AssignExpr::Print(Printer *p) {
+      target->Print(p);
+      p->p() << " = ";
+      eval->Print(p);
+    }
+
     MathEquation::MathEquation(Value *l, Value *r, action a) : left(l), right(r), Act(a) {
       assert(left);
       if(a != uMinus) assert(right);
@@ -585,6 +740,29 @@ namespace ilang {
 	}
 	break;
       }
+    }
+
+    void MathEquation::Print(Printer *p) {
+      if(Act != uMinus) left->Print(p);
+      switch(Act) {
+      case add:
+	p->p() << " + ";
+	break;
+      case subtract:
+	p->p() << " - ";
+	break;
+      case multiply:
+	p->p() << " * ";
+	break;
+      case devide:
+	p->p() << " / ";
+	break;
+      case uMinus:
+	p->p() << "-";
+	break;
+      }
+      if(Act == uMinus) left->Print(p);
+      else right->Print(p);
     }
 
     LogicExpression::LogicExpression(Value *l, Value *r, action a): left(l), right(r), Act(a) {
@@ -730,6 +908,37 @@ namespace ilang {
       }
     }
 
+    void LogicExpression::Print(Printer *p) {
+      left->Print(p);
+      switch(Act) {
+      case Equal:
+	p->p() << " == ";
+	break;
+      case Not_Equal:
+	p->p() << " != ";
+	break;
+      case Less_Equal:
+	p->p() << " <= ";
+	break;
+      case Greater_Equal:
+	p->p() << " >= ";
+	break;
+      case Less:
+	p->p() << " < ";
+	break;
+      case Greater:
+	p->p() << " < ";
+	break;
+      case And:
+	p->p() << " && ";
+	break;
+      case Or:
+	p->p() << " || ";
+	break;
+      }
+      right->Print(p);
+    }
+
     Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj)
     {
       // object created later so we are just going to store the informationa atm
@@ -746,6 +955,22 @@ namespace ilang {
       return ValuePass(val);
     }
 
+    void Object::Print(Printer *p) {
+      p->p() << "object { ";
+      p->up();
+      bool first=true;
+      for(auto it : *objects) {
+	if(!first) p->p() << ", ";
+	p->line();
+	it.first->Print(p);
+	p->p() << ": ";
+	it.second->Print(p);
+	first = false;
+      }
+      p->down();
+      p->line() << "}";
+    }
+
     Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj): parents(p), objects(obj)
     {
       assert(p);
@@ -759,6 +984,33 @@ namespace ilang {
       ilang::Class *c = new ilang::Class(parents, objects, scope);
       ilang::Value *val = new ilang::Value(c);
       return ValuePass(val);
+    }
+
+    void Class::Print(Printer *p) {
+      p->p() << "class ";
+      if(parents && !parents->empty()) {
+	p->p() << "(";
+	bool first = true;
+	for(Node *it : *parents) {
+	  if(!first) p->p() << ", ";
+	  it->Print(p);
+	  first = false;
+	}
+	p->p() << ") ";
+      }
+      p->up();
+      p->p() << "{";
+      bool first=true;
+      for(auto it : *objects) {
+	if(!first) p->p() << ", ";
+	p->line();
+	it.first->Print(p);
+	p->p() << ": ";
+	it.second->Print(p);
+	first = false;
+      }
+      p->down();
+      p->line() << "}";
     }
 
     Array::Array (std::list<Node*> *e, std::list<string> *m) : elements(e), modifiers(m) {
@@ -790,6 +1042,26 @@ namespace ilang {
       return ValuePass(val);
     }
 
+    void Array::Print(Printer *p) {
+      p->p() << "[";
+      if(modifiers && !modifiers->empty()) {
+	bool first=true;
+	for(std::string it : *modifiers) {
+	  if(!first) p->p() << " ";
+	  p->p() << it;
+	  first = false;
+	}
+	p->p() << "| ";
+      }
+      bool first=true;
+      for(Node *it : *elements) {
+	if(!first) p->p() << ", ";
+	it->Print(p);
+	first = false;
+      }
+      p->p() << "]";
+    }
+
     NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
       // might change the grammer to reflect that this needs one element
       // might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
@@ -808,6 +1080,12 @@ namespace ilang {
       return ValuePass(val);
     }
 
+    void NewCall::Print (Printer *p) {
+      p->p() << "new(";
+      params->front()->Print(p);
+      p->p() << ")";
+    }
+
     AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
       for(auto it : *args) {
 	error(dynamic_cast<Value*>(it), "Arguments to assert need to have some value");
@@ -822,6 +1100,13 @@ namespace ilang {
 	  exit(2);
 	}
       }
+    }
+    void AssertCall::Print (Printer *p) {
+      p->p() << "assert(";
+      for(Node *it : *params) {
+	it->Print(p);
+      }
+      p->p() << ")";
     }
 
 
