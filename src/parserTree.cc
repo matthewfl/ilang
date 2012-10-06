@@ -767,7 +767,7 @@ namespace ilang {
 
     LogicExpression::LogicExpression(Value *l, Value *r, action a): left(l), right(r), Act(a) {
       assert(left);
-      assert(right);
+      if(a != Not) assert(right);
     }
     void LogicExpression::Run (Scope *scope) {
       errorTrace("Logic Expression w/o getting value");
@@ -780,6 +780,9 @@ namespace ilang {
 	if(!left->GetValue(scope)->isTrue())
 	  right->Run(scope);
 	break;
+      case Not:
+	left->Run(scope);
+	// no right
       default:
 	left->Run(scope);
 	right->Run(scope);
@@ -788,6 +791,8 @@ namespace ilang {
     ValuePass LogicExpression::GetValue(Scope *scope) {
       errorTrace("Logic Expression");
       ValuePass left = this->left->GetValue(scope);
+      if(Act == Not)
+	return ValuePass(new ilang::Value( ! left->isTrue()));
       ValuePass right = this->right->GetValue(scope);
       switch(Act) {
       case And:

@@ -1,3 +1,3 @@
 main = {
-	Print("hello world");
+	Print("Hello world");
 };

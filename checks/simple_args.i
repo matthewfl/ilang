@@ -1,5 +1,8 @@
-tt = {|Array what|
+tt = {|Int test, gg|
+	Print(test);
 
 };
 
-main = {};
+main = {
+	tt(5,4);
+};

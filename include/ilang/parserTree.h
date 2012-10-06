@@ -339,7 +339,8 @@ namespace ilang {
 	Less,
 	Greater,
 	And,
-	Or
+	Or,
+	Not
       };
       LogicExpression(Value *l, Value *r, action a);
       void Run(Scope *scope);

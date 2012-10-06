@@ -54,8 +54,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert
 %token T_eq T_ne T_le T_ge T_and T_or
 
-%left ';'
 %right T_else
+%left ';'
 %left '='
 %left T_and T_or
 %left T_eq T_ne T_le '<' '>'
@@ -73,14 +73,14 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> ModifierList AccessList ImportLoc
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt
-%type <node_list> Stmts ParamList DeclList ExprList ArgsList 
+%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
+%type <node_list> Stmts ParamList DeclList ExprList ArgsList ProgramList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
 
 
 %%
-Program		:	Imports DeclList		{ parser_handle->head = new ilang::parserNode::Head($2, parser_handle->import); }
+Program		:	Imports ProgramList		{ parser_handle->head = new ilang::parserNode::Head($2, parser_handle->import); }
 		;
 
 Imports		:	Imports Import			{ }
@@ -89,7 +89,7 @@ Imports		:	Imports Import			{ }
 
 Import		:	T_import ImportLoc			{ parser_handle->import->push(NULL, $2); }
 		|	T_from	ImportLoc T_import ImportLoc	{ parser_handle->import->push($2, $4); }
-		;	
+		;
 
 ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back($3); }
 		|	T_Identifier			{ ($$=new std::list<std::string>)->push_back($1); }
@@ -100,7 +100,10 @@ DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }
 		;
 
 Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
-		|	Variable ';'			{ $$ = $1; }
+		;
+
+ProgramList	:	ProgramList Expr ';'		{ ($$=$1)->push_back($2); }
+		|	Expr ';'			{ ($$=new list<Node*>)->push_back($1); }
 		;
 
 Variable	:	LValue				{ }
@@ -142,12 +145,12 @@ Object		:	T_object '{' ObjectList '}'	{ $$ = new Object($3); }
 		|	T_object '{' '}'		{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
 		;
 
-Class		:	T_class '{' ObjectList '}'	{ $$ = new Class(new std::list<Node*>, $3); } 
+Class		:	T_class '{' ObjectList '}'	{ $$ = new Class(new std::list<Node*>, $3); }
 		|	T_class	'(' ParamList ')' '{' ObjectList '}'	{ $$ = new Class($3, $6); }
 		;
 
-Array		:	'[' ParamList ']'		{ $$ = new Array($2, NULL); }
-		|	'[' ModifierList '|' ParamList ']' { $$ = new Array($4, $2); }
+Array		:	'[' ModifierList '|' ParamList ']' { $$ = new Array($4, $2); }
+		| 	'[' ParamList ']'		   { $$ = new Array($2, NULL); }
 		;
 
 IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
@@ -166,11 +169,15 @@ ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
 Function	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		|	'{' Stmts '}'			{ $$ = new Function(NULL, $2); }
 		|	'{' '|' ArgsList '|' Stmts '}'	{ $$ = new Function($3, $5); }
-		|	'{' '|' ArgsList '|' '}'	{ $$ = new Function($3, NULL); }	
+		|	'{' '|' ArgsList '|' '}'	{ $$ = new Function($3, NULL); }
 		;
 
-ArgsList	:	ArgsList ',' Variable		{ ($$=$1)->push_back($3); }
-		|	Variable			{ ($$ = new std::list<Node*>)->push_back($1); }
+ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
+		|	ArgsList ',' Args		{ ($$=$1)->push_back($3); }
+		;
+
+Args		:	ModifierList Identifier		{ list<string> *n = new list<string>; n->push_back($2); $$ = new Variable(n, $1); }
+		|	Identifier			{ $$ = new FieldAccess(NULL, $1); }
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
                 |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }
@@ -190,8 +197,8 @@ Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 
 ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
 		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
-		;	
-	
+		;
+
 Expr		:	Function			{}
 		|	Class
 		|	Object
@@ -202,7 +209,6 @@ Expr		:	Function			{}
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	T_IntConst			{ $$ = new IntConst($1); }
 		|	T_FloatConst			{ $$ = new FloatConst($1); }
-		|	LValue
 		|	'(' Expr ')'			{$$=$2;}
 		|	Expr '+' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::add); }
 		|	Expr '-' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::subtract); }
@@ -217,6 +223,7 @@ Expr		:	Function			{}
 		|	Expr '>' Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Greater); }
 		|	Expr T_and Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::And); }
 		|	Expr T_or Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Or); }
+		|	'!' Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($2), NULL, LogicExpression::Not); }
 		;
 
 Identifier	:	T_Identifier			{ }
