@@ -90,7 +90,8 @@ namespace ilang {
 
     IntConst::IntConst(long n) : num(n) {}
     ValuePass IntConst::GetValue (Scope *scope) {
-      return ValuePass(new ilang::Value(num));
+      ValuePass r = ValuePass(new ilang::Value(num));
+      return r;
     }
 
     void IntConst::Print(Printer *p) {
@@ -144,8 +145,16 @@ namespace ilang {
       test = t;
     }
     void ForStmt::Run(Scope *scope) {
-      for( pre->Run(scope) ; test->GetValue(scope)->isTrue() ; each->Run(scope) )
+      pre->Run(scope);
+      ValuePass t = test->GetValue(scope);
+      while(t->isTrue()) {
 	exe->Run(scope);
+	each->Run(scope);
+	ValuePass n = test->GetValue(scope);
+	t = n;
+      }
+      //for( pre->Run(scope) ; test->GetValue(scope)->isTrue() ; each->Run(scope) )
+      //	exe->Run(scope);
     }
 
     void ForStmt::Print(Printer *p) {
@@ -169,8 +178,11 @@ namespace ilang {
     }
     void WhileStmt::Run(Scope *scope) {
       // note to self: must recall GetValue each time as it is what is actually doing the updating
-      while(test->GetValue(scope)->isTrue()) {
+      ValuePass t = test->GetValue(scope);
+      while(t->isTrue()) {
 	exe->Run(scope);
+	ValuePass n = test->GetValue(scope);
+	t = n;
 	//test->GetValue(scope)->Print();
       }
     }
@@ -270,6 +282,8 @@ namespace ilang {
 	  n->Run(&scope);
 	}
       }
+
+      // scope deleted
     }
 
     void Function::Print(Printer *p) {
@@ -434,6 +448,7 @@ namespace ilang {
 	ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
 	v = obj->operator[](identifier);
 	if(v->Get()->Get().type() == typeid(ilang::Function)) {
+	  // so that the reference to the object is keep around
 	  boost::any_cast<ilang::Function>( &(v->Get()->Get()) )->object = obj_val;
 	}
       }else{
@@ -914,6 +929,11 @@ namespace ilang {
     }
 
     void LogicExpression::Print(Printer *p) {
+      if(Act == Not) {
+	p->p() << "!";
+	left->Print(p);
+	return;
+      }
       left->Print(p);
       switch(Act) {
       case Equal:

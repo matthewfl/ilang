@@ -7,7 +7,8 @@ add in single operators like += -= *= /= -- ++, unary -
 break, continue, not in there yet
 
 ~objects
-Arrays <---- really need to do this
+~arrays <---- really need to do this
+	need to make this save into database
 ~import
 ~classes
 ~fix functions to support classes and bindings
@@ -19,11 +20,14 @@ Arrays <---- really need to do this
 
 ~C++ bindings <------ only working when it is statically linked, there is some problem with dlopen in that symbols are not being taking from the main program
 modifying code
+	
 
 "unlimited" ram
 auto parallization
 distrubited process
 
+thread support, thinking function like go that returns a value that blocks when read but returns when the function returns
+Also thinking that the variable system could easily support a queue message system, if made thread safe then this could provide useful to cross process messaging
 
 Networking:
 To make the system able to work over the network I need to transisition it to use a callback like system, so that data can be delayed

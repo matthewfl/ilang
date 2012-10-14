@@ -186,6 +186,7 @@ namespace ilang {
   void Array::Init () {
     Array *self = this;
     std::list<std::string> internal_mods;
+    assert(!mem_length); // if the value was set before
     mem_length = new Variable("length", internal_mods);
     mem_push = new Variable("push", internal_mods);
     mem_pop = new Variable("pop", internal_mods);
@@ -238,7 +239,7 @@ namespace ilang {
     mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
   }
 
-  Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod) {
+  Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod), mem_length(NULL) {
     members.reserve(elements->size());
     unsigned int count=0;
     for(auto it=elements->begin(); it!= elements->end(); it++) {
@@ -253,7 +254,7 @@ namespace ilang {
     Init();
   }
 
-  Array::Array(std::vector<ValuePass> &val) {
+  Array::Array(std::vector<ValuePass> &val): mem_length(NULL) {
     members.reserve(val.size());
     modifiers = NULL;
     std::list<std::string> mod;
@@ -270,9 +271,13 @@ namespace ilang {
       delete *it;
     }
     // modifiers is owned by another
+
+    // according to val grind, this is still leaking somehow
     delete mem_length;
     delete mem_push;
     delete mem_pop;
+    delete mem_remove;
+    delete mem_insert;
   }
 
   ilang::Variable * Array::operator [] (ValuePass name) {
@@ -299,7 +304,11 @@ namespace ilang {
     }else if(name == "push") {
       return mem_push;
     }else if(name == "pop") {
-
+      return mem_pop;
+    }else if(name == "insert") {
+      return mem_insert;
+    }else if(name == "remove") {
+      return mem_remove;
     }
     // idk what else this can be/should be
     // maybe return functions such as push and pop etc
