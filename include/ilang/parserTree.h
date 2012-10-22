@@ -308,6 +308,14 @@ namespace ilang {
       void Print(Printer*);
     };
 
+    class ThreadGoCall : public Call {
+      friend class ilang::Modification;
+    public:
+      ThreadGoCall(std::list<Node*> *args);
+      ValuePass GetValue(Scope*);
+      void Print(Printer*);
+    };
+
 
     class AssignExpr : public Expression {
       friend class ilang::Modification;

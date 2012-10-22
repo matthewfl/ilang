@@ -1081,7 +1081,7 @@ namespace ilang {
     void AssertCall::Print (Printer *p) {
       p->p() << "assert(";
       for(Node *it : *params) {
-	it->Print(p);
+	it->Print(p); // problem with printing commas between
       }
       p->p() << ")";
     }
@@ -1108,6 +1108,24 @@ namespace ilang {
       params->front()->Print(p);
       p->p() << ")";
     }
+
+
+    ThreadGoCall::ThreadGoCall(list<Node*> *args) : Call(NULL, args) {
+      error(args->size() == 1, "go call expects 1 argument");
+    }
+
+    ValuePass ThreadGoCall::GetValue(Scope *scope) {
+      ValuePass calling = dynamic_cast<Value*>(params->front())->GetValue(scope);
+      error(calling->Get().type() == typeid(ilang::Function_ptr), "go expects argument to be a function");
+
+    }
+
+    void ThreadGoCall::Print(Printer *p) {
+      p->p() << "go(";
+      params->front()->Print(p);
+      p->p() << ")";
+    }
+
 
   } // namespace parserTree
 } // namespace ilang

@@ -51,7 +51,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   double floatNumber;
 }
 
-%token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert
+%token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go
 %token T_eq T_ne T_le T_ge T_and T_or
 
 %right T_else
@@ -194,6 +194,7 @@ Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_new '(' ParamList ')'		{ $$ = new NewCall($3); }
 		|	T_assert '(' ParamList ')'	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
 		|	T_import '(' ParamList ')'	{ $$ = new ImportCall($3); }
+		|	T_go '(' ParamList ')'		{ $$ = new ThreadGoCall($3); }	
 		;
 
 ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }

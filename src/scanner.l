@@ -53,6 +53,7 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "object"		{ return T_object; }
 "new"			{ return T_new; }
 "assert"		{ return T_assert; }
+"go"			{ return T_go; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }
