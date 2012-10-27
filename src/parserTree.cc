@@ -57,6 +57,12 @@ namespace ilang {
     static unsigned long _ilang_node_id;
     Node::Node() {
       _node_id = ++_ilang_node_id;
+      _parent = NULL;
+    }
+
+    void Node::_setParent(Node *n) {
+      assert(!_parent);
+      _parent = n;
     }
 
     // this does not need to have anything
@@ -1133,7 +1139,6 @@ namespace ilang {
       }
       p->p() << ")";
     }
-
 
   } // namespace parserTree
 } // namespace ilang

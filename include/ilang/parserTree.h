@@ -30,12 +30,17 @@ namespace ilang {
       friend class ilang::Modification;
     private:
       unsigned long _node_id;
+      Node *_parent;
+    protected:
+      void _setParent(Node*);
     public:
       Node();
       const unsigned long getID() { return _node_id; }
+      const Node * getParent() { return _parent; }
       virtual void Run(Scope*)=0;
-      void randomsdafasdf(){} // take this out eventually
+      void randomsdafasdf(){} // take this out eventually, fixed some random compiler bug or something
       virtual void Print(Printer*) =0;
+      //virtual void setParent(Node*) =0;
     };
 
     class Head {

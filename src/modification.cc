@@ -3,12 +3,15 @@
 #include "parserTree.h"
 #include "error.h"
 #include "debug.h"
+#include "print.h"
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 namespace ilang {
   void Modification::FigureType (ilang::parserNode::Node *node) {
+    errorTrace("Modification::FigureType");
     assert(node);
     using namespace ilang::parserNode;
     if(dynamic_cast<ilang::parserNode::Value*>(node)) {
@@ -76,6 +79,9 @@ namespace ilang {
   }
 
   void Modification::Init () {
+    m_file = NULL;
+    m_node = NULL;
+    m_value = NULL;
     m_masterType = m_secondaryType = unknown_t;
   }
 
@@ -85,18 +91,22 @@ namespace ilang {
     }*/
 
   Modification::Modification(FileScope *scope) {
+    Init();
     m_file = scope->head;
     m_masterType = m_secondaryType = file_t;
   }
   Modification::Modification(ilang::parserNode::Head *head) {
+    Init();
     m_file = head;
     m_masterType = m_secondaryType = file_t;
   }
   Modification::Modification(ilang::parserNode::Node *node) {
+    Init();
     m_node = node;
     FigureType(node);
   }
   Modification::Modification(ilang::ValuePass val) {
+    Init();
     m_valuePassHold = val;
     cout << "Creating new modification with " << val->Get().type().name() << endl;
     if(val->Get().type() == typeid(ilang::Function)) {
@@ -121,6 +131,7 @@ namespace ilang {
   }
 
   vector<ilang::Modification*> Modification::getList() {
+    errorTrace("Modification::getList");
     vector<ilang::Modification*> ret;
     if(isType(file_t)) {
       // return everything that is assigned in the global scope
@@ -146,6 +157,22 @@ namespace ilang {
     }
 
     return ret;
+  }
+
+  string Modification::print() {
+    errorTrace("Modification::print");
+    stringstream str;
+    Printer pp(&str);
+    if(isType(unknown_t)) {
+      return "-UNKNOWN TYPE-";
+    }else if(isType(file_t)) {
+      assert(m_file);
+      m_file->Print(&pp);
+    }else{
+      assert(m_node);
+      m_node->Print(&pp);
+    }
+    return str.str();
   }
 
 
@@ -190,10 +217,53 @@ namespace {
       ilang::Object *ret_arr = new ilang::Array(ret);
       return ValuePass(new ilang::Value(ret_arr));
     }
+
+    ilang::ValuePass each(Scope *scope, std::vector<ilang::ValuePass> &args) {
+      error(args.size() == 1, "mod.manager.each takes one argument");
+      error(args[0]->Get().type() == typeid(ilang::Function), "mod.manager.each takes a function for an argument");
+
+      ilang::Function *func = boost::any_cast<ilang::Function>(& args[0]->Get());
+
+      vector<Modification*> list = mod->getList();
+      ValuePass ret = ValuePass(new ilang::Value);
+
+      if(func->object) {
+	ValuePass ret = ValuePass(new ilang::Value);
+	assert(func->object->Get().type() == typeid(ilang::Object*));
+	ObjectScope obj_scope(boost::any_cast<ilang::Object*>(func->object->Get()));
+	for(Modification *it : list) {
+	  vector<ValuePass> param;
+	  ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
+	  param.push_back(ValuePass(val));
+	  func->ptr(&obj_scope, param, &ret);
+	  if(ret->isTrue()) break;
+	}
+      }else if(func->native) {
+	// why would we have a native function here
+	error(0, "Modification.each with a native function, not done stuff");
+      }else{
+	ValuePass ret = ValuePass(new ilang::Value);
+	for(Modification *it : list) {
+	  vector<ValuePass> param;
+	  ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
+	  param.push_back(ValuePass(val));
+	  func->ptr(NULL, param, &ret);
+	  if(ret->isTrue()) break;
+	}
+      }
+    }
+
+    ilang::ValuePass print(Scope *scope, std::vector<ilang::ValuePass> &args) {
+      error(args.size() == 0, "print does not take any arguments");
+      return ValuePass(new ilang::Value(std::string(mod->print())));
+    }
   private:
     void Init () {
       reg("type", &Modification_manager::isType);
+      reg("is", &Modification_manager::isType);
       reg("list", &Modification_manager::scopeList);
+      reg("each", &Modification_manager::each);
+      reg("print", &Modification_manager::print);
     }
   public:
     Modification_manager (): mod(NULL) {
@@ -232,6 +302,10 @@ namespace {
   }
 
 
+  ValuePass createNode(Scope *scope, std::vector<ValuePass> &args) {
+
+  }
+
 
 }
 
@@ -239,6 +313,7 @@ ILANG_LIBRARY_NAME("i/mod",
 		   //ILANG_CLASS("mod", Mod_class);
 		   ILANG_FUNCTION("file", FileTree);
 		   import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
+		   import->Set("stop", ValuePass(new ilang::Value(ModData("stop"))));
 		   Object * type_obj = new Object;
 		   type_obj->operator[]("Unknown")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
 		   type_obj->operator[]("File")->Set(ValuePass(new ilang::Value(ModData(Modification::file_t))));

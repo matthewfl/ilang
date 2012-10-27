@@ -122,31 +122,32 @@ build/main.o: deps/leveldb/include/leveldb/iterator.h
 build/main.o: deps/leveldb/include/leveldb/slice.h
 build/main.o: deps/leveldb/include/leveldb/status.h
 build/main.o: deps/leveldb/include/leveldb/options.h include/ilang/parserTree.h
-build/main.o: include/ilang/scope.h include/ilang/error.h
+build/main.o: include/ilang/scope.h include/ilang/print.h include/ilang/error.h
 build/parserTree.o: include/ilang/parserTree.h include/ilang/variable.h
 build/parserTree.o: include/ilang/scope.h include/ilang/import.h
-build/parserTree.o: include/debug.h include/ilang/parser.h
-build/parserTree.o: include/ilang/object.h include/ilang/function.h
-build/parserTree.o: include/ilang/error.h
+build/parserTree.o: include/debug.h include/ilang/print.h
+build/parserTree.o: include/ilang/parser.h include/ilang/object.h
+build/parserTree.o: include/ilang/function.h include/ilang/error.h
 build/import.o: include/ilang/import.h include/debug.h include/ilang/variable.h
 build/import.o: include/ilang/scope.h include/ilang/object.h
-build/import.o: include/ilang/parserTree.h include/ilang/parser.h
-build/import.o: include/ilang/function.h include/ilang/ilang.h
-build/import.o: include/ilang/import.h include/ilang/object.h
-build/import.o: include/ilang/function.h
+build/import.o: include/ilang/parserTree.h include/ilang/print.h
+build/import.o: include/ilang/parser.h include/ilang/function.h
+build/import.o: include/ilang/ilang.h include/ilang/import.h
+build/import.o: include/ilang/object.h include/ilang/function.h
 build/parser.o: include/ilang/parser.h
 build/variable.o: include/ilang/variable.h include/debug.h
 build/variable.o: include/ilang/error.h include/ilang/object.h
 build/variable.o: include/ilang/parserTree.h include/ilang/scope.h
-build/variable.o: include/ilang/import.h
+build/variable.o: include/ilang/import.h include/ilang/print.h
 build/scope.o: include/ilang/scope.h include/ilang/variable.h include/debug.h
 build/scope.o: include/ilang/object.h include/ilang/parserTree.h
-build/scope.o: include/ilang/import.h
+build/scope.o: include/ilang/import.h include/ilang/print.h
 build/object.o: include/ilang/object.h include/ilang/variable.h
 build/object.o: include/ilang/parserTree.h include/ilang/scope.h
-build/object.o: include/ilang/import.h include/debug.h include/ilang/error.h
-build/object.o: include/ilang/ilang.h include/ilang/import.h
-build/object.o: include/ilang/object.h include/ilang/function.h
+build/object.o: include/ilang/import.h include/debug.h include/ilang/print.h
+build/object.o: include/ilang/error.h include/ilang/ilang.h
+build/object.o: include/ilang/import.h include/ilang/object.h
+build/object.o: include/ilang/function.h
 build/database.o: include/ilang/database.h include/debug.h
 build/database.o: include/ilang/variable.h deps/leveldb/include/leveldb/db.h
 build/database.o: deps/leveldb/include/leveldb/iterator.h
@@ -158,8 +159,9 @@ build/database.o: include/ilang/function.h include/ilang/error.h
 build/modification.o: include/ilang/modification.h include/ilang/parserTree.h
 build/modification.o: include/ilang/variable.h include/ilang/scope.h
 build/modification.o: include/ilang/import.h include/debug.h
-build/modification.o: include/ilang/ilang.h include/ilang/import.h
-build/modification.o: include/ilang/object.h include/ilang/function.h
-build/modification.o: include/ilang/error.h
+build/modification.o: include/ilang/print.h include/ilang/ilang.h
+build/modification.o: include/ilang/import.h include/ilang/object.h
+build/modification.o: include/ilang/function.h include/ilang/error.h
 build/error.o: include/ilang/error.h
 build/network.o: include/ilang/network.h
+build/print.o: include/ilang/print.h include/debug.h

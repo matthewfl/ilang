@@ -72,8 +72,14 @@ namespace ilang {
     Modification(ilang::FileScope*);
     Modification(ilang::ValuePass);
     Modification(ilang::Variable*);
+
     bool isType(types t) { return m_masterType == t || m_secondaryType == t; }
     std::vector<Modification*> getList();
+    std::string print();
+
+    //bool canReplace(types t);
+    // replace this node with another node in the syntax tree
+    void replace(Modification *);
 
     // general helper functions that are used throughout
     static FileScope* getFileScope(Scope*);
