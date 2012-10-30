@@ -22,7 +22,7 @@ namespace ilang {
   std::map<std::string, ImportScope*> & StaticImportedFiles();
 
   void Init (int argc, char **argv);
-  
+
   class ImportScope {
   private:
     boost::filesystem::path file;
@@ -48,12 +48,12 @@ namespace ilang {
   public:
     ImportScopeFile(fs::path p);
     void push(std::list<std::string> *pre, std::list<std::string> *name);
-    void resolve(Scope*); 
-    
+    void resolve(Scope*);
+
     void load(Object*);
     //void provide(FileScope*);
   };
-  
+
   class ImportScopeC : public ImportScope {
     // for C++ files
   private:
@@ -65,6 +65,8 @@ namespace ilang {
     void Set(char *name, ValuePass val);
     void load(Object*);
   };
+
+  ilang::Object *ImportGetByName(std::string name);
 }
 
 #endif // _ilang_import

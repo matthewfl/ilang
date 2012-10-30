@@ -193,6 +193,7 @@ Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_print '(' ParamList ')'	{ $$ = new PrintCall($3); }
 		|	T_new '(' ParamList ')'		{ $$ = new NewCall($3); }
 		|	T_assert '(' ParamList ')'	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
+		|	T_import '(' ParamList ')'	{ $$ = new ImportCall($3); }
 		;
 
 ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }

@@ -45,6 +45,7 @@ namespace ilang {
 
     class Head {
       friend class ilang::Modification;
+      friend class ImportCall;
     private:
       FileScope *scope;
       ImportScopeFile *Import;
@@ -297,6 +298,14 @@ namespace ilang {
       std::string fileName;
     public:
       AssertCall(int line, const char *name, std::list<Node*> *args);
+      ValuePass GetValue(Scope*);
+      void Print(Printer*);
+    };
+
+    class ImportCall : public Call {
+      friend class ilang::Modification;
+    public:
+      ImportCall(std::list<Node*> *args);
       ValuePass GetValue(Scope*);
       void Print(Printer*);
     };

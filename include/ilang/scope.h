@@ -42,6 +42,7 @@ namespace ilang {
     virtual ilang::Variable * _lookup (std::string &name);
   public:
     FileScope(parserNode::Head *h): Scope((Scope *)NULL), head(h) {}
+    inline parserNode::Head *getHead() { return head; }
   };
 
   template <typename ReturnHook> class FunctionScope : public Scope {

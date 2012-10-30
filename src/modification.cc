@@ -135,15 +135,20 @@ namespace ilang {
     vector<ilang::Modification*> ret;
     if(isType(file_t)) {
       // return everything that is assigned in the global scope
-      if(m_file->scope) {
+      /*if(m_file->scope) {
 	// we might as well return from the global scope as this will hold more revelant data
 	for(auto it : m_file->scope->vars) {
 	  Modification *mod = new Modification(it.second);
 	  mod->m_name = it.first;
 	  ret.push_back(mod);
 	}
-      }else if(m_file->Declars) {
+	}else*/
+      if(m_file->Declars) {
 	// if the declares are checked, then the system would be able to more easily modify the contents of the file however then changing what is currently set would be harder
+	for(auto it : *m_file->Declars) {
+	  Modification *mod = new Modification(it);
+	  ret.push_back(mod);
+	}
       }else{
 	assert(0); // there should be no way that this can ever happen
       }

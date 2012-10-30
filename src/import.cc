@@ -265,6 +265,19 @@ namespace ilang {
       v->Set(it.second);
     }
   }
+
+
+
+  ilang::Object *ImportGetByName(std::string name) {
+
+    boost::replace_all(name, ".", "\/");
+    fs::path p = GlobalImportScope.locateFile(name);
+    if(p.empty()) return NULL;
+    Object *obj = new Object;
+    GlobalImportScope.get(obj, p);
+
+    return obj;
+  }
 }
 
 namespace ilang {
@@ -292,7 +305,6 @@ namespace ilang {
 namespace {
   using namespace ilang;
   ValuePass ilang_import_get(std::vector<ValuePass> &args) {
-    cout << "the ilang_import_get was called\n";
     Object *obj = new Object;
 
     error(args.size() == 1, "i.Import.check expects 1 argument");
@@ -322,7 +334,7 @@ namespace {
 
     fs::path p = GlobalImportScope.locateFile(name);
 
-    return ValuePass(new ilang::Value(! fs::is_empty(p)));
+    return ValuePass(new ilang::Value(! p.empty()));
   }
 
   ILANG_LIBRARY_NAME("i/Import",
