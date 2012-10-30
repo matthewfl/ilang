@@ -95,6 +95,7 @@ namespace ilang {
       friend class ilang::Modification;
     private:
       std::list<Node*> *parents;
+      // NOTE: only useful for iterating over, as pointer type for key
       std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
     public:
       Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);

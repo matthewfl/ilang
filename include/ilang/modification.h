@@ -55,11 +55,11 @@ namespace ilang {
     types m_masterType;
     types m_secondaryType;
     ValuePass m_valuePassHold;
-    union {
+    //union {
       ilang::parserNode::Head* m_file;
       ilang::parserNode::Node* m_node;
       ilang::Value *m_value;
-    };
+    //};
     std::string m_name;
 
     // private functions
@@ -76,6 +76,7 @@ namespace ilang {
     bool isType(types t) { return m_masterType == t || m_secondaryType == t; }
     std::vector<Modification*> getList();
     std::string print();
+    std::string getName() { return m_name; }
 
     //bool canReplace(types t);
     // replace this node with another node in the syntax tree

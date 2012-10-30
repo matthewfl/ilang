@@ -149,8 +149,23 @@ namespace ilang {
       }
     }else if(isType(function_t)) {
       // return all the statements in the function
+      // need to deal with the difference in working with it in the form of a value
+      // and
+      parserNode::Function *func = dynamic_cast<parserNode::Function*>(m_node);
+      assert(func);
+      for(auto it : *(func->body)) {
+	Modification *mod = new Modification(it);
+	ret.push_back(mod);
+      }
     }else if(isType(class_t)) {
       // return everything that is assigned in the class
+      parserNode::Class *cla = dynamic_cast<parserNode::Class*>(m_node);
+      assert(cla);
+      for(auto it : *cla->objects) {
+	Modification *mod = new Modification(it.second);
+	mod->m_name = it.first->GetFirstName();
+	ret.push_back(mod);
+      }
     }else if(isType(object_t)) {
       // return everything that is assigned in the object
 
@@ -257,6 +272,11 @@ namespace {
       error(args.size() == 0, "print does not take any arguments");
       return ValuePass(new ilang::Value(std::string(mod->print())));
     }
+
+    ilang::ValuePass getName(Scope *scope, std::vector<ilang::ValuePass> &args) {
+      error(args.size() == 0, "getName does not take arguments");
+      return ValuePass(new ilang::Value(mod->getName()));
+    }
   private:
     void Init () {
       reg("type", &Modification_manager::isType);
@@ -264,6 +284,7 @@ namespace {
       reg("list", &Modification_manager::scopeList);
       reg("each", &Modification_manager::each);
       reg("print", &Modification_manager::print);
+      reg("name", &Modification_manager::getName);
     }
   public:
     Modification_manager (): mod(NULL) {
@@ -277,8 +298,9 @@ namespace {
 
 
   ValuePass FileTree(Scope *scope, std::vector<ValuePass> &args) {
-    assert(args.size() == 1);
-    cout << "mod file called \n";
+    errorTrace("mod.file");
+    error(args.size() == 1, "mod.file expects 1 argument");
+    //cout << "mod file called \n";
     if(args[0]->Get().type() == typeid(std::string)) {
       // looking for some file by name
       cout << "mod by file name: " << boost::any_cast<std::string>(args[0]->Get()) << endl;
@@ -303,6 +325,11 @@ namespace {
 
 
   ValuePass createNode(Scope *scope, std::vector<ValuePass> &args) {
+    errorTrace("mod createNode");
+    error(args.size() == 1, "mod.node expects 1 argument");
+    Modification *m = new Modification(args[0]);
+    ilang::Value * val = new ilang::Value(new Object(new Modification_manager(m)));
+    return ValuePass(val);
 
   }
 
@@ -312,6 +339,7 @@ namespace {
 ILANG_LIBRARY_NAME("i/mod",
 		   //ILANG_CLASS("mod", Mod_class);
 		   ILANG_FUNCTION("file", FileTree);
+		   ILANG_FUNCTION("node", createNode);
 		   import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
 		   import->Set("stop", ValuePass(new ilang::Value(ModData("stop"))));
 		   Object * type_obj = new Object;

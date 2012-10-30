@@ -5,6 +5,7 @@
 #include "parserTree.h"
 #include "parser.h"
 #include "function.h"
+#include "error.h"
 
 #include <stdio.h>
 //#include <dlfcn.h>
@@ -294,8 +295,9 @@ namespace {
     cout << "the ilang_import_get was called\n";
     Object *obj = new Object;
 
-    assert(args.size() == 1);
-    assert(args[0]->Get().type() == typeid(std::string));
+    error(args.size() == 1, "i.Import.check expects 1 argument");
+    error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
+
     std::string name = boost::any_cast<std::string>(args[0]->Get());
     boost::replace_all(name, ".", "\/");
     /*auto it = ImportedFiles.find(name);
@@ -313,8 +315,14 @@ namespace {
   }
 
   ValuePass ilang_import_check(std::vector<ValuePass> &args) {
+    error(args.size() == 1, "i.Import.check expects 1 argument");
+    error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
+    std::string name = boost::any_cast<std::string>(args[0]->Get());
+    boost::replace_all(name, ".", "\/");
 
-    return ValuePass(new ilang::Value(false));
+    fs::path p = GlobalImportScope.locateFile(name);
+
+    return ValuePass(new ilang::Value(! fs::is_empty(p)));
   }
 
   ILANG_LIBRARY_NAME("i/Import",
