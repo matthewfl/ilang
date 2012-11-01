@@ -237,6 +237,7 @@ namespace ilang {
       self->members.erase(it);
     };
     mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
+    DB_name = NULL;
   }
 
   Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod), mem_length(NULL) {
@@ -266,6 +267,11 @@ namespace ilang {
     Init();
   }
 
+  Array::Array() {
+    modifiers = NULL;
+    Init();
+  }
+
   Array::~Array () {
     for(auto it=members.begin();it != members.end(); it++) {
       delete *it;
@@ -278,6 +284,7 @@ namespace ilang {
     delete mem_pop;
     delete mem_remove;
     delete mem_insert;
+    delete DB_name;
   }
 
   ilang::Variable * Array::operator [] (ValuePass name) {

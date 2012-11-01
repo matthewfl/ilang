@@ -347,6 +347,7 @@ ILANG_LIBRARY_NAME("i/mod",
 		   //ILANG_CLASS("mod", Mod_class);
 		   ILANG_FUNCTION("file", FileTree);
 		   ILANG_FUNCTION("node", createNode);
+		   ILANG_FUNCTION("of", createNode);
 		   import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
 		   import->Set("stop", ValuePass(new ilang::Value(ModData("stop"))));
 		   Object * type_obj = new Object;

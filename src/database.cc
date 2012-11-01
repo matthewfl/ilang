@@ -14,6 +14,7 @@ namespace ilang {
 
   ValuePass DB_readStoredData (storedData *dat) {
     ilang::Object *obj; // here to make the compiler happy
+    ilang::Array *arr;
     switch(dat->type) {
     case storedData::IntNumber:
       return ValuePass(new ilang::Value(dat->Int));
@@ -28,6 +29,15 @@ namespace ilang {
       obj->DB_name = new char[dat->string_length];
       memcpy(obj->DB_name, ((char*)(dat)) + sizeof(storedData), dat->string_length);
       return ValuePass(new ilang::Value(obj));
+    case storedData::Array:
+      assert(0);
+      arr = new ilang::Array;
+      arr->DB_name = new char[dat->string_length];
+      // the start and end places are going to have to be set up so they are kept in other variables so that they can be easily changed when the array is resized
+      //arr->DB_start_index = dat->Array_start;
+      //arr->DB_end_index = dat->Array_end;
+      memcpy(obj->DB_name, ((char*)(dat)) + sizeof(storedData), dat->string_length);
+
     default:
       assert(0);
     }
@@ -48,15 +58,28 @@ namespace ilang {
       Array *arr;
       // obj can be of an array type that we want to store differently
       if(arr = dynamic_cast<ilang::Array*>(obj)) {
+	assert(0);
+	// might change the array to to be unable to random inserts/removes in the middle when it is saved inside the database
+	// this way arrays will not become overly stressful on the database, as the way that I was thinking of implemting it
+	// it would require that the database change all the keys of the other elements when something is removed from the center
 
       }else{
 	// for the time being, we do not want to deal with base classes
 	assert(!obj->baseClass);
 	assert(!obj->C_baseClass);
 	if(!obj->DB_name) {
-	  assert(obj->members.size() <= 1); // we will say that objs can't have default values for the time being, that will make it so that, the this variable will be ok for the time being
-	//obj->members.clear();
 	  obj->DB_name = DB_createName();
+	  //assert(obj->members.size() <= 1); // we will say that objs can't have default values for the time being, that will make it so that, the this variable will be ok for the time being
+	  for(auto it : obj->members) {
+	    if(it.first == "this") continue;
+	    string use_name = obj->DB_name;
+	    use_name += it.first;
+	    ilang::Variable *v = new Variable(use_name, list<string>({"Db"}));
+	    v->Set(it.second->Get());
+	    delete it.second;
+	    it.second = v;
+	  }
+	  //obj->members.clear();
 	  //cout << "db name given " << obj->DB_name << endl;
 	}
 	dat = (storedData*) new char[sizeof(storedData) + strlen(obj->DB_name)];
