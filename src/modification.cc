@@ -56,6 +56,8 @@ namespace ilang {
 	  m_secondaryType = printCall_t;
 	}else if(dynamic_cast<NewCall*>(node)) {
 	  m_secondaryType = newCall_t;
+	}else if(dynamic_cast<ImportCall*>(node)) {
+	  m_secondaryType = importCall_t;
 	}else{
 	  m_secondaryType = call_t;
 	}
@@ -173,7 +175,7 @@ namespace ilang {
       }
     }else if(isType(object_t)) {
       // return everything that is assigned in the object
-
+      assert(0);
     }
 
     return ret;
@@ -288,7 +290,7 @@ namespace {
       reg("is", &Modification_manager::isType);
       reg("list", &Modification_manager::scopeList);
       reg("each", &Modification_manager::each);
-      reg("print", &Modification_manager::print);
+      reg("str", &Modification_manager::print);
       reg("name", &Modification_manager::getName);
     }
   public:

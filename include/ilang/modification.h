@@ -39,6 +39,7 @@ namespace ilang {
       call_t = 60,
       newCall_t,
       printCall_t,
+      importCall_t,
       assignExpr_t = 70,
       mathExpr_t,
       logicExpr_t
