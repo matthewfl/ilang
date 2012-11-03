@@ -46,6 +46,7 @@ namespace ilang {
     std::map<std::string, ilang::Variable*> m_members;
   public:
     C_Class() {}
+    virtual ~C_Class() {}
     template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(std::vector<ValuePass> &args) ) {
       assert(m_members.find(name) == m_members.end());
       cla *self = (cla*)this;

@@ -21,7 +21,7 @@ namespace ilang {
   extern std::map<fs::path, ImportScope*> ImportedFiles;
   std::map<std::string, ImportScope*> & StaticImportedFiles();
 
-  void Init (int argc, char **argv);
+  void Import_Init (int argc, char **argv);
 
   class ImportScope {
   private:

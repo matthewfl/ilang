@@ -7,6 +7,7 @@
 #include "object.h"
 
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 // TODO: make everything use a shared pointer or have some sort of memory heap managing thing to deal with variables going out of scope etc
@@ -107,6 +108,28 @@ namespace ilang {
     }
     cout <<  flush;
     //cout << "over the print\n";
+  }
+
+  std::string Value::str () {
+    stringstream ss;
+    if(val.empty()) {
+      ss << "--STR OF EMPTY VARIABLE--";
+    }else if(typeid(std::string) == val.type()) {
+      ss << boost::any_cast<std::string>(val);
+    }else if(typeid(long) == val.type()) {
+      ss << boost::any_cast<long>(val);
+    }else if(typeid(int) == val.type()) {
+      // this should not happen as all ints are currently long
+      ss << boost::any_cast<int>(val);
+    }else if(typeid(double) == val.type()) {
+      ss << boost::any_cast<double>(val);
+    }else if(typeid(bool) == val.type()) {
+      ss << boost::any_cast<bool>(val) ? "true" : "false" ;
+    }else{
+      ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
+    }
+    return ss.str();
+
   }
   bool Value::isTrue () {
     if(typeid(bool) == val.type()) {

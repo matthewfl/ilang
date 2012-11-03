@@ -13,6 +13,7 @@
 
 #include "print.h"
 
+namespace ilang { void Init(int, char**); }
 
 //#include "version.h"
 

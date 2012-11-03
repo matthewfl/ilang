@@ -71,6 +71,7 @@ namespace ilang {
     Value ();
     ~Value();
     void Print();
+    std::string str();
     bool isTrue();
     boost::any & Get();
   };

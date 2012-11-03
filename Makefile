@@ -1,10 +1,10 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc init.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
-MODULES= i/test.io net/curl.io
+MODULES= i/test.io net/curl.io net/httpd.io
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
@@ -34,8 +34,10 @@ glogLib=./deps/glog/.libs/libglog.a
 #LIBS+= $(glogLib)
 leveldb=./deps/leveldb/libleveldb.a
 LIBS+=$(leveldb)
+libuv=./deps/libuv/uv.a
+LIBS+=$(libuv) -lrt
 
-DEPS=$(leveldb)
+DEPS=$(leveldb) $(libuv)
 #$(glogLib)
 
 #libs for modules
@@ -85,6 +87,7 @@ clean:
 	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
 clean-all: clean
 	cd deps/leveldb && make clean
+	cd deps/libuv && make distclean
 	rm -rf DB/
 
 depend: submodule
@@ -112,6 +115,9 @@ $(glogLib): ./deps/glog/build/base/g.ogleinit.h
 
 $(leveldb): ./deps/leveldb/include/leveldb/db.h
 	cd deps/leveldb && make
+
+$(libuv): ./deps/libuv/include/uv.h
+	cd deps/libuv && make
 
 # DO NOT DELETE
 

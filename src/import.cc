@@ -28,7 +28,7 @@ namespace ilang {
     return *_StaticImportedFiles;
   }
 
-  void Init (int argc, char **argv) {
+  void Import_Init (int argc, char **argv) {
     //debug(0, "init import running");
     //namespace fs = boost::filesystem;
 
