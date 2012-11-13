@@ -707,8 +707,8 @@ namespace ilang {
 	  return ValuePass(new ilang::Value(- boost::any_cast<long>(left->Get())));
 	}
       case add:
-	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string)) {
-	  return ValuePass(new ilang::Value(std::string(boost::any_cast<std::string>(left->Get()) + boost::any_cast<std::string>(right->Get()))));
+	if(left->Get().type() == typeid(std::string) || right->Get().type() == typeid(std::string)) {
+	  return ValuePass(new ilang::Value(std::string(left->str() + right->str())));
 	}else if(left->Get().type() == typeid(double)) {
 	  if(right->Get().type() == typeid(double))
 	    return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) + boost::any_cast<double>(right->Get())));

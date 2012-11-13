@@ -31,6 +31,12 @@ namespace ilang {
     ValuePass object;
     ilang::parserNode::Function *func;
     Function():native(false), object(), func(NULL) {}
+    /*inline ValuePass Call (vector<ValuePass &args) {
+      ValuePass ret = ValuePass(new ilang::Value);
+      if(native)
+	ptr( some scope, args, &ret);
+else if(
+	}*/
   };
   /*
   class Function {

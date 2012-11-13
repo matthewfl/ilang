@@ -115,7 +115,8 @@ namespace ilang {
     if(val.empty()) {
       ss << "--STR OF EMPTY VARIABLE--";
     }else if(typeid(std::string) == val.type()) {
-      ss << boost::any_cast<std::string>(val);
+      //ss << boost::any_cast<std::string>(val);
+      return boost::any_cast<std::string>(val);
     }else if(typeid(long) == val.type()) {
       ss << boost::any_cast<long>(val);
     }else if(typeid(int) == val.type()) {
