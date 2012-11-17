@@ -3,7 +3,7 @@
 #include "function.h"
 #include "object.h"
 
-#include <boost/thread/shared_mutex.hpp>
+//#include <boost/thread/shared_mutex.hpp>
 
 #include "../../deps/libuv/include/uv.h"
 #include "../../deps/http-parser/http_parser.h"
@@ -16,6 +16,14 @@ extern "C" {
 
 #include <iostream>
 using namespace std;
+
+/**
+ * Need to make the Request::close non blocking
+ * best way would be to prob make Request into some type of wrapper class
+ * and then when Request is destroyed it can tell the wrapped class to closed
+ * and destroy itself.
+ */
+
 
 namespace {
   using namespace std;
@@ -40,7 +48,7 @@ namespace {
 
     uv_loop_t *loop;
     uv_tcp_t server;
-    static http_parser_settings parser_settings;
+    http_parser_settings parser_settings = {0,0,0,0,0,0,0};
 
     void setUpUV(int port);
     static void on_connection_cb(uv_stream_t *server, int status);
@@ -67,7 +75,7 @@ namespace {
     Server *parent;
     bool headWritten = false;
     bool reqOpen = true;
-    boost::shared_mutex close_mutex;
+    //boost::shared_mutex close_mutex;
 
     uv_tcp_t handle;
     http_parser parser;
@@ -92,7 +100,7 @@ namespace {
     ValuePass writeHead(vector<ValuePass> &args) {
       cerr << "in write head\n";
       // eg: writeHead(302, "Location: http://......", "Content-type: text/plain", .....);
-      close_mutex.lock_shared();
+      //close_mutex.lock_shared();
       int code = 200;
       if(args.size() >= 1) {
 	error(args[0]->Get().type() == typeid(long), "httpd.request.writeHead expects a responce code for the first argument");
@@ -119,7 +127,8 @@ namespace {
 
       int length = args.size();
       if(length == 0) length = 1;
-      uv_buf_t *buf = new uv_buf_t[length+1];
+      length++;
+      uv_buf_t *buf = new uv_buf_t[length];
       writereq->buf = buf;
       writereq->buf_size = length;
 
@@ -139,27 +148,32 @@ namespace {
 	buf[place].base = new char[str.length()];
 	str.copy(buf[place].base, str.length());
       }
-      buf[place].base = new char[4];
-      buf[place].len = 4;
-      buf[place].base[0] = buf[place].base[2] = '\r';
-      buf[place].base[1] = buf[place].base[3] = '\n';
+      buf[place].base = new char[2];
+      buf[place].len = 2;
+      buf[place].base[0] = '\r';
+      buf[place].base[1] = '\n';
 
       uv_write(&writereq->req, (uv_stream_t*)&handle, buf, length,
 	       [](uv_write_t* req, int status) -> void {
+		 cerr << "-----------------closing head write\n" << flush;
 		 headWriteReq *writereq = (headWriteReq*) req->data;
-		 writereq->parent->close_mutex.unlock_shared();
+		 assert(req == &writereq->req);
+		 //writereq->parent->close_mutex.unlock_shared();
 		 for(int i=0;i<writereq->buf_size;i++) {
 		   delete[] writereq->buf[i].base;
 		 }
+		 delete[] writereq->buf;
 		 delete writereq;
 	       });
+
+      cerr << "end of write head\n";
 
       return ValuePass(new ilang::Value);
     }
 
     ValuePass writeReq(vector<ValuePass> &args) {
       cerr << "in write req\n";
-      close_mutex.lock_shared();
+      //close_mutex.lock_shared();
       error(args.size() >= 1, "httpd.request.write expects at least one argument");
       if(headWritten == false) {
 	vector<ValuePass> headArgs;
@@ -184,24 +198,28 @@ namespace {
 	// create buffers for all the iterms
 	// send to libuv
 	string str = val->str();
+	cerr << "writing req with "<< str << endl;
 	buf[place].len = str.length();
 	buf[place].base = new char[str.length()];
 	str.copy(buf[place].base, str.length());
 	place++;
       }
-      buf[place].len=0;
-      buf[place].base = 0;
+      //buf[place].len=0;
+      //buf[place].base = 0;
       uv_write(&writereq->req, (uv_stream_t*)&handle, buf, args.size(),
 	       [](uv_write_t *req, int status) -> void {
+		 cerr << "closing write req\n" << flush;
 		 writeReq *writereq = (writeReq*) req->data;
-		 writereq->parent->close_mutex.unlock_shared();
+		 //writereq->parent->close_mutex.unlock_shared();
 		 for(int i=0;i < writereq->buf_size; i++) {
 		   delete[] writereq->buf[i].base;
 		 }
+		 delete[] writereq->buf;
 		 delete writereq;
 	       });
 
-      return ValuePass(new ilang::Value);
+      cerr << "end of write req\n";
+      return ValuePass(new ilang::Value(true));
     }
 
     ValuePass endReq(vector<ValuePass> &args) {
@@ -230,7 +248,18 @@ namespace {
 
     void close() {
       if(!reqOpen) return;
-      close_mutex.lock(); // needs to be exclusive lock
+      reqOpen = false;
+      cerr << "close req\n";
+      /*
+      cerr << "before mutex lock\n";
+       // needs to be exclusive lock
+      close_mutex.lock();
+      /*
+      while(!close_mutex.try_lock()) {
+	//close_mutex.unlock();
+	//uv_run_once(parent->loop);
+	}
+      cerr << "after mutex lock\n";
       // this does not check if there are pending write calls
       // and if they are they will end up getting canceled
       cerr << "closing request\n";
@@ -239,6 +268,29 @@ namespace {
 	  req->reqOpen = false;
 	  req->close_mutex.unlock();
 	});
+      */
+      struct closeReq {
+	Request *parent;
+	uv_write_t req;
+	uv_buf_t buf;
+	uv_tcp_t handle;
+      };
+      closeReq *req = new closeReq;
+      req->parent = this;
+      req->req.data = req;
+      req->buf.len = 0;
+      req->buf.base = "\0";
+      req->handle = handle; // in case the class is deleted
+      uv_write(&req->req, (uv_stream_t*)&handle, &req->buf, 1,
+	       [](uv_write_t *req, int status) -> void {
+		 // the writes are performed in order, so this will be called after the other writes have finished
+		 closeReq *closereq = (closeReq*) req->data;
+		 // apears that uv cares about the address of the handle
+		 uv_close((uv_handle_t*)&closereq->parent->handle, [](uv_handle_t *handle) {
+		     // do not think that I need anything when closing it as everything is cleaned up else where
+		   });
+		 delete closereq;
+	       });
     }
   public:
     Request(Server *p /* some data from the request */) {
@@ -248,6 +300,7 @@ namespace {
     }
 
     virtual ~Request() {
+      // need to think something up for dealing with the close case
       close();
 
       assert(0);
@@ -317,6 +370,7 @@ namespace {
     /*if(callback->native) {
       function->ptr(NULL, params, &ret);
       }else */
+    // need to create a thread here and execuit the code
     if(func.object) {
       assert(func.object->Get().type() == typeid(ilang::Object*));
       ObjectScope obj_scope(boost::any_cast<ilang::Object*>(func.object->Get()));
@@ -361,12 +415,12 @@ namespace {
     // fill in
     cerr << "starting listen\n";
     setUpUV(listenPort);
-    uv_listen((uv_stream_t*)&server,
+    int r = uv_listen((uv_stream_t*)&server,
 	      SERVER_QUEUE_BUFFER_SIZE,
 	      on_connection_cb);
     uv_run(loop);
-
-    return ValuePass(new ilang::Value);
+    if(r != 0) { cerr << "Problem opening up socket\n"; }
+    return ValuePass(new ilang::Value((bool)r == 0));
 
   }
   ValuePass Server::stopListen(Scope *scope, vector<ValuePass> &args) {

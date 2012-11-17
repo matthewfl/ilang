@@ -50,7 +50,7 @@ int main (int argc, char **argv) {
     sa.sa_sigaction = segfault_singal;
     sa.sa_flags = SA_SIGINFO;
 
-    sigaction(SIGSEGV, &sa, NULL);
+    //sigaction(SIGSEGV, &sa, NULL);
   }
 
   if(argc < 2) {
