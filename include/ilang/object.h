@@ -16,7 +16,7 @@ namespace ilang {
     std::map<std::string, ilang::Variable*> members;
   public:
     Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope*);
-    //virtual Object* NewClass();
+    virtual Object* NewClass(ValuePass self);
     ilang::Variable * operator[](std::string name);
     ilang::Variable * operator[](ValuePass);
     virtual ~Class();
@@ -36,7 +36,7 @@ namespace ilang {
     void Debug();
     char *DB_name;
   public:
-    Object(ValuePass);
+    Object(Class*, ValuePass);
     Object(C_Class *base);
     Object();
     virtual ~Object();

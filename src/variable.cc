@@ -78,7 +78,7 @@ namespace ilang {
   Value::Value(){}
   Value::~Value() {
     // TODO: fix this to not only work with these classes
-    //cout << "destroying Value " << val.type().name() << endl;
+    cout << "destroying Value " << val.type().name() << endl;
     if(val.type() == typeid(ilang::Class*))
       delete boost::any_cast<ilang::Class*>(val);
     else if(val.type() == typeid(ilang::Object*))

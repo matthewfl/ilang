@@ -9,5 +9,6 @@ main = {
 		req.writeHead(200, "Something random");
 		req.write("hello world");
 		req.end("Hello world");
+		req=0;
 	}).listen();
 };

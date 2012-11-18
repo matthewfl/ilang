@@ -2,6 +2,7 @@
 #include "error.h"
 #include "function.h"
 #include "object.h"
+#include "debug.h"
 
 //#include <boost/thread/shared_mutex.hpp>
 
@@ -23,7 +24,6 @@ using namespace std;
  * and then when Request is destroyed it can tell the wrapped class to closed
  * and destroy itself.
  */
-
 
 namespace {
   using namespace std;
@@ -75,6 +75,7 @@ namespace {
     Server *parent;
     bool headWritten = false;
     bool reqOpen = true;
+    string url;
     //boost::shared_mutex close_mutex;
 
     uv_tcp_t handle;
@@ -98,7 +99,7 @@ namespace {
     }
 
     ValuePass writeHead(vector<ValuePass> &args) {
-      cerr << "in write head\n";
+      debug(4, "in write head\n");
       // eg: writeHead(302, "Location: http://......", "Content-type: text/plain", .....);
       //close_mutex.lock_shared();
       int code = 200;
@@ -155,7 +156,7 @@ namespace {
 
       uv_write(&writereq->req, (uv_stream_t*)&handle, buf, length,
 	       [](uv_write_t* req, int status) -> void {
-		 cerr << "-----------------closing head write\n" << flush;
+		 debug(4, "-----------------closing head write\n" << flush );
 		 headWriteReq *writereq = (headWriteReq*) req->data;
 		 assert(req == &writereq->req);
 		 //writereq->parent->close_mutex.unlock_shared();
@@ -166,13 +167,13 @@ namespace {
 		 delete writereq;
 	       });
 
-      cerr << "end of write head\n";
+      debug(4, "end of write head\n") ;
 
       return ValuePass(new ilang::Value);
     }
 
     ValuePass writeReq(vector<ValuePass> &args) {
-      cerr << "in write req\n";
+      debug(4, "in write req\n")
       //close_mutex.lock_shared();
       error(args.size() >= 1, "httpd.request.write expects at least one argument");
       if(headWritten == false) {
@@ -198,7 +199,7 @@ namespace {
 	// create buffers for all the iterms
 	// send to libuv
 	string str = val->str();
-	cerr << "writing req with "<< str << endl;
+	debug(4, "writing req with "<< str );;
 	buf[place].len = str.length();
 	buf[place].base = new char[str.length()];
 	str.copy(buf[place].base, str.length());
@@ -208,7 +209,7 @@ namespace {
       //buf[place].base = 0;
       uv_write(&writereq->req, (uv_stream_t*)&handle, buf, args.size(),
 	       [](uv_write_t *req, int status) -> void {
-		 cerr << "closing write req\n" << flush;
+		 debug(4, "closing write req" << flush );
 		 writeReq *writereq = (writeReq*) req->data;
 		 //writereq->parent->close_mutex.unlock_shared();
 		 for(int i=0;i < writereq->buf_size; i++) {
@@ -218,7 +219,7 @@ namespace {
 		 delete writereq;
 	       });
 
-      cerr << "end of write req\n";
+      debug(4, "end of write req");
       return ValuePass(new ilang::Value(true));
     }
 
@@ -249,7 +250,7 @@ namespace {
     void close() {
       if(!reqOpen) return;
       reqOpen = false;
-      cerr << "close req\n";
+      debug(4,  "close req") ;
       /*
       cerr << "before mutex lock\n";
        // needs to be exclusive lock
@@ -323,7 +324,7 @@ namespace {
   }
 
   void Server::on_connection_cb (uv_stream_t *server, int status) {
-    cerr << "Server got a connection\n";
+    debug(4, "Server got a connection" );
     Server *ser = (Server*)server->data;
     assert(ser);
     assert((uv_tcp_t*)server == &ser->server);
@@ -335,7 +336,7 @@ namespace {
   }
 
   void Server::on_read_cb(uv_stream_t *stream, ssize_t nread, uv_buf_t buf) {
-    cerr << "Server got read data\n";
+    debug(4, "Server got read data" );
     Request *req = (Request*) stream->data;
     if(nread >= 0) {
       size_t parsed = http_parser_execute(&req->parser, &req->parent->parser_settings, buf.base, nread);
@@ -353,14 +354,14 @@ namespace {
   void Server::on_close(uv_handle_t *handle) {
     Request *req = (Request*) handle->data;
 
-    cerr << "request closed\n";
+    debug(4, "request closed" );
 
     // at this point we should set it to closed or something
   }
 
   int Server::header_complete_cb(http_parser *parser) {
     Request *req = (Request*) parser->data;
-    cerr << "got to point where headers are done\n";
+    debug(4, "got to point where headers are done" );
     // believe that request is ready at this point
     ValuePass rr = ValuePass(new ilang::Value(new ilang::Object(req)));
     // at this point Request will be deleted when rr is lost
@@ -378,6 +379,8 @@ namespace {
     }else{
       func.ptr(NULL, params, &ret);
     }
+
+    cout << "++++++++++++++++++++++ " << rr.use_count() << endl;
 
     // ignore the return type here
 
@@ -413,7 +416,7 @@ namespace {
     }
 
     // fill in
-    cerr << "starting listen\n";
+    debug(4, "starting listen" );
     setUpUV(listenPort);
     int r = uv_listen((uv_stream_t*)&server,
 	      SERVER_QUEUE_BUFFER_SIZE,
@@ -448,7 +451,7 @@ namespace {
 
     parser_settings.on_headers_complete = header_complete_cb;
 
-    cerr << "server created\n";
+    debug(4, "server created" );
   }
 
   Server::Server(ValuePass call, int port) {

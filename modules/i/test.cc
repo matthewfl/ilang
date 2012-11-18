@@ -29,7 +29,7 @@ public:
   ValuePass get(std::vector<ValuePass> &args) {
     return something;
   }
-  
+
   //wwww ();
 //};
   wwww ()  {
@@ -37,6 +37,12 @@ public:
     reg("set", &wwww::set);
     reg("get", &wwww::get);
     cout << "new class wwww created\n";
+    //assert(0);
+    //while(1);
+  }
+  virtual ~wwww () {
+    cout << "test class deleted\n";
+    //assert(0);
   }
 };
 

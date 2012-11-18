@@ -25,7 +25,9 @@ void show_help_info(char *name) {
        << "\t-f [file]\tthe start file\n"
        << "\t-v #\t\tdebug level\n"
        << "\t--version\tdispay version\n"
-       << "\t-d\t\tset location of database files\n";
+       << "\t-d\t\tset location of database files\n"
+       << "\n"
+       << "VERSION: " << ILANG_VERSION << "\n";
 }
 
 extern "C" int Debug_level=0;
@@ -50,7 +52,7 @@ int main (int argc, char **argv) {
     sa.sa_sigaction = segfault_singal;
     sa.sa_flags = SA_SIGINFO;
 
-    //sigaction(SIGSEGV, &sa, NULL);
+    sigaction(SIGSEGV, &sa, NULL);
   }
 
   if(argc < 2) {
@@ -90,6 +92,10 @@ int main (int argc, char **argv) {
     }
   }
 
+  if(!main_file) {
+    show_help_info(argv[0]);
+    return 1;
+  }
 
   ilang::System_Database = new ilang::DatabaseFile(db_path);
 

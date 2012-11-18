@@ -37,9 +37,9 @@ namespace ilang {
       members.insert(pair<std::string, ilang::Variable*>(name, var));
     }
   }
-  /*Object* Class::NewClass() {
-    return new Object(this);
-    }*/
+  Object* Class::NewClass(ValuePass self) {
+    return new Object(this, self);
+  }
   Class::~Class () {
     for(auto it = members.begin(); it!=members.end(); it++) {
       delete it->second;
@@ -65,11 +65,13 @@ namespace ilang {
     return NULL; // this most likely will get changed in the future
   }
 
-  Object::Object(ValuePass base): baseClassValue(base), C_baseClass(NULL), DB_name(NULL) {
+  Object::Object(Class *cla, ValuePass base): baseClassValue(base), baseClass(cla), C_baseClass(NULL), DB_name(NULL) {
     // pass the value as a ValuePass so that it keeps the pointer count that something is using the class incase it is use in an un-named fassion
     // I am not sure what this should look like, if it should check the base classes when accessing stuff or just copy it into a new object when one is created, if a new object is just copied then it would make it hard for the code modification to work
-    assert(base->Get().type() == typeid(Class*));
-    baseClass = boost::any_cast<Class*>(base->Get());
+
+    //assert(base->Get().type() == typeid(Class*));
+    //baseClass = boost::any_cast<Class*>(base->Get());
+
     std::list<std::string> this_mod = {"Const"};
     ilang::Variable *this_var = new Variable("this", this_mod);
     this_var->Set(ValuePass(new ilang::Value(this)));
@@ -114,12 +116,17 @@ namespace ilang {
     if(tt != members.end())
       tt->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
 
+    cout << "deleting obj\n";
     for(auto it=members.begin(); it!=members.end(); it++) {
+      cout << "\t" << it->first << endl;
       delete it->second;
     }
 
-    delete C_baseClass;
-    delete DB_name;
+    if(C_baseClass) {
+      cout << "deleting base class\n";
+      delete C_baseClass;
+    }
+    delete[] DB_name;
   }
 
   ilang::Variable * Object::operator [] (std::string name) {

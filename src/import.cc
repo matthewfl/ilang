@@ -299,6 +299,12 @@ namespace ilang {
     };
     return ValuePass(new ilang::Value(f));
   }
+  C_Class::~C_Class() {
+    std::cout << "---------------------deleting C_Class\n";
+    for(auto it : m_members) {
+      delete it.second;
+    }
+  }
 }
 
 
