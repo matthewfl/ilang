@@ -41,6 +41,7 @@ namespace ilang {
   // other helpers for wrappers in import.cc
   ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
   ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
+  ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) );
 
   class C_Class {
   private:
@@ -54,7 +55,7 @@ namespace ilang {
       //assert(self);
       ilang::Function f;
       f.native = true;
-      f.ptr = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 	*ret = (self ->* fun)(args);
 	assert(*ret);
       };
@@ -69,7 +70,22 @@ namespace ilang {
       //assert(self);
       ilang::Function f;
       f.native = true;
-      f.ptr = [fun, self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+      f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+	*ret = (self ->* fun)(scope.get(), args);
+	assert(*ret);
+      };
+      std::list<std::string> mod = {"Const"};
+      ilang::Variable *var = new ilang::Variable(name, mod);
+      var->Set(ValuePass(new ilang::Value(f)));
+      m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
+    }
+    template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, std::vector<ValuePass> &args) ) {
+      assert(m_members.find(name) == m_members.end());
+      cla *self = (cla*)this;
+      //assert(self);
+      ilang::Function f;
+      f.native = true;
+      f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 	*ret = (self ->* fun)(scope, args);
 	assert(*ret);
       };
@@ -87,7 +103,7 @@ namespace ilang {
 
   template<typename cc> class Class_Creater_class : public Class {
   public:
-    Class_Creater_class () : Class(NULL, NULL, NULL) {}
+    Class_Creater_class () : Class(NULL, NULL, ScopePass()) {}
     Object * NewClass (ValuePass self) {
       return new Object(new cc);
     }

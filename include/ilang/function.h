@@ -18,7 +18,7 @@ namespace ilang {
   // First, scope that is running in, arguments passed, return value
   //typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
   //typedef ValuePass* ValuePass_ptr;
-  typedef boost::function3<void, Scope*, std::vector<ValuePass>, ValuePass*> Function_ptr;
+  typedef boost::function3<void, ScopePass, std::vector<ValuePass>, ValuePass*> Function_ptr;
 
   namespace parserNode {
     class Function;

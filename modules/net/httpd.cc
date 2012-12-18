@@ -374,10 +374,10 @@ namespace {
     // need to create a thread here and execuit the code
     if(func.object) {
       assert(func.object->Get().type() == typeid(ilang::Object*));
-      ObjectScope obj_scope(boost::any_cast<ilang::Object*>(func.object->Get()));
-      func.ptr(&obj_scope, params, &ret);
+      ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
+      func.ptr(obj_scope, params, &ret);
     }else{
-      func.ptr(NULL, params, &ret);
+      func.ptr(ScopePass(), params, &ret);
     }
 
     cout << "++++++++++++++++++++++ " << rr.use_count() << endl;

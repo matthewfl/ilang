@@ -5,10 +5,17 @@
 #include <string>
 #include "variable.h"
 
+#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 
 
 namespace ilang {
+  using boost::shared_ptr;
+
+  class Scope;
+  typedef boost::shared_ptr<ilang::Scope> ScopePass;
+  //typedef Scope* ScopePass;
+
   class FileScope;
   class Modification;
   template <typename ReturnHook> class FunctionScope;
@@ -17,14 +24,14 @@ namespace ilang {
   protected:
     template <typename ReturnHook> friend class FunctionScope;
     std::map<std::string, ilang::Variable*> vars;
-    Scope *parent;
+    ScopePass parent;
     virtual ilang::Variable * _lookup (std::string &name);
   public:
     ilang::Variable * lookup (std::string name);
     ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
     ilang::FileScope * fileScope ();
     virtual void ParentReturn(ValuePass *val) { assert(parent); parent->ParentReturn(val); }
-    Scope(Scope *parent);
+    Scope(ScopePass parent);
     virtual ~Scope();
 
     int Debug();
@@ -41,18 +48,18 @@ namespace ilang {
   protected:
     virtual ilang::Variable * _lookup (std::string &name);
   public:
-    FileScope(parserNode::Head *h): Scope((Scope *)NULL), head(h) {}
+    FileScope(parserNode::Head *h): Scope(ScopePass()), head(h) {}
     inline parserNode::Head *getHead() { return head; }
   };
 
   template <typename ReturnHook> class FunctionScope : public Scope {
     friend class Modification;
   public:
-    FunctionScope(Scope *s, Scope *other, ReturnHook h) : Scope(s), hook(h), objs(other) {}
+    FunctionScope(ScopePass s, ScopePass other, ReturnHook h) : Scope(s), hook(h), objs(other) {}
     void ParentReturn(ValuePass *r) { hook(r); }
   private:
     ReturnHook hook;
-    Scope *objs;
+    ScopePass objs;
   protected:
     virtual ilang::Variable * _lookup(std::string &name) { // the joy of template programming
       auto it = vars.find(name);

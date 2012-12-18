@@ -284,7 +284,7 @@ namespace ilang {
   ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
     ilang::Function f;
     f.native = true;
-    f.ptr = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+    f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
       *ret = (*fun)(args);
       assert(*ret);
     };
@@ -293,7 +293,16 @@ namespace ilang {
   ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
     ilang::Function f;
     f.native = true;
-    f.ptr = [fun](Scope *scope, std::vector<ValuePass> & args, ValuePass *ret) {
+    f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+      *ret = (*fun)(scope.get(), args);
+      assert(*ret);
+    };
+    return ValuePass(new ilang::Value(f));
+  }
+  ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) ) {
+    ilang::Function f;
+    f.native = true;
+    f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
       *ret = (*fun)(scope, args);
       assert(*ret);
     };

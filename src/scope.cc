@@ -44,7 +44,7 @@ namespace ilang {
   }
 
 
-  Scope::Scope(Scope *p): parent(p) {}
+  Scope::Scope(ScopePass p): parent(p) {}
   Scope::~Scope() {
     for(auto it : vars) {
       delete it.second;
@@ -62,7 +62,7 @@ namespace ilang {
     return vars.find(name)->second; // there is nothing higher that can be looked at
   }
 
-  ObjectScope::ObjectScope (Object *o) : Scope(NULL), obj(o) {}
+  ObjectScope::ObjectScope (Object *o) : Scope(ScopePass()), obj(o) {}
   ilang::Variable * ObjectScope::_lookup(std::string &name) {
     auto it = obj->members.find(name);
     if(it == obj->members.end()) {

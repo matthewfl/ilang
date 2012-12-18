@@ -84,7 +84,7 @@ namespace ilang {
     void replace(Modification *);
 
     // general helper functions that are used throughout
-    static FileScope* getFileScope(Scope*);
+    static FileScope* getFileScope(ScopePass);
   };
 
 

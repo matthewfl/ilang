@@ -200,9 +200,9 @@ namespace ilang {
 
   // static functions under modification
   // modification is also viewed as a supper class that is allowed to touch everything
-  FileScope *Modification::getFileScope(Scope* s) {
+  FileScope *Modification::getFileScope(ScopePass s) {
     while(s->parent) s = s->parent;
-    return dynamic_cast<FileScope*>(s);
+    return dynamic_cast<FileScope*>(s.get());
   }
 
 }
@@ -252,12 +252,12 @@ namespace {
       if(func->object) {
 	ValuePass ret = ValuePass(new ilang::Value);
 	assert(func->object->Get().type() == typeid(ilang::Object*));
-	ObjectScope obj_scope(boost::any_cast<ilang::Object*>(func->object->Get()));
+	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func->object->Get())));
 	for(Modification *it : list) {
 	  vector<ValuePass> param;
 	  ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
 	  param.push_back(ValuePass(val));
-	  func->ptr(&obj_scope, param, &ret);
+	  func->ptr(obj_scope, param, &ret);
 	  if(ret->isTrue()) break;
 	}
       }else if(func->native) {
@@ -269,7 +269,7 @@ namespace {
 	  vector<ValuePass> param;
 	  ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
 	  param.push_back(ValuePass(val));
-	  func->ptr(NULL, param, &ret);
+	  func->ptr(ScopePass(), param, &ret);
 	  if(ret->isTrue()) break;
 	}
       }
@@ -304,7 +304,7 @@ namespace {
   };
 
 
-  ValuePass FileTree(Scope *scope, std::vector<ValuePass> &args) {
+  ValuePass FileTree(ScopePass scope, std::vector<ValuePass> &args) {
     errorTrace("mod.file");
     error(args.size() == 1, "mod.file expects 1 argument");
     //cout << "mod file called \n";

@@ -9,7 +9,7 @@
 using namespace std;
 
 namespace ilang {
-  Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope* scope) {
+  Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope) {
     if(!p && !obj && !scope) return;
     assert(p);
     assert(obj);
@@ -86,7 +86,7 @@ namespace ilang {
     this_var->Set(ValuePass(new ilang::Value(this)));
     members.insert(pair<std::string, ilang::Variable*>("this", this_var));
   }
-  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Scope *scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
+  Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
     assert(obj);
     assert(scope);
 
@@ -201,7 +201,7 @@ namespace ilang {
     mem_remove = new Variable("remove", internal_mods);
     ilang::Function push_fun;
     push_fun.native = true;
-    push_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+    push_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
       error(args.size() == 1, "Array.push expects 1 argument");
       ilang::Variable *var = new ilang::Variable("", *self->modifiers);
       var->Set(args[0]);
@@ -211,7 +211,7 @@ namespace ilang {
 
     ilang::Function pop_fun;
     pop_fun.native = true;
-    pop_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+    pop_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
       error(args.size() == 0, "Array.pop does not take any arguments");
       ilang::Variable *var = self->members.back();
       *ret = var->Get();
@@ -222,7 +222,7 @@ namespace ilang {
 
     ilang::Function insert_fun;
     insert_fun.native = true;
-    insert_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+    insert_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
       error(args.size() == 2, "Array.insert expects 2 arguments");
       error(args[0]->Get().type() == typeid(long), "Array.insert expects first argument to be a integer");
       long n = boost::any_cast<long>(args[0]->Get());
@@ -235,7 +235,7 @@ namespace ilang {
 
     ilang::Function remove_fun;
     remove_fun.native = true;
-    remove_fun.ptr = [self](Scope *scope, std::vector<ValuePass> &args, ValuePass *ret) {
+    remove_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
       error(args.size() == 1, "Array.remove expects 1 argument");
       error(args[0]->Get().type() == typeid(long), "Array.remove expect argument to be integer");
       long n = boost::any_cast<long>(args[0]->Get());
@@ -247,7 +247,7 @@ namespace ilang {
     DB_name = NULL;
   }
 
-  Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Scope *scope) :modifiers(mod), mem_length(NULL) {
+  Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, ScopePass scope) :modifiers(mod), mem_length(NULL) {
     members.reserve(elements->size());
     unsigned int count=0;
     for(auto it=elements->begin(); it!= elements->end(); it++) {
