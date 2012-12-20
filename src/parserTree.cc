@@ -31,10 +31,6 @@ namespace ilang {
 	//scope->Debug();
       }
 
-      //for(
-
-      //vector<ilang::Value*> v;
-      //boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, NULL);
 
     }
 
@@ -387,6 +383,8 @@ namespace ilang {
       }
     }
     ilang::Variable * FieldAccess::Get(ScopePass scope) {
+      // bug in this b/c of function pointer
+      assert(0);
       errorTrace("FieldAccess on " << GetFirstName());
       ilang::Variable *v;
       if(Obj) {
@@ -408,6 +406,55 @@ namespace ilang {
       }
       error(v, "Did not find " << GetFirstName());
       return v;
+    }
+
+    ValuePass FieldAccess::GetValue(ScopePass scope) {
+      errorTrace("FieldAccess on " << GetFirstName());
+      if(Obj) {
+	_errors.stream() << "\n\tLooking up FieldAccess where there is an object";
+	ValuePass obj_val = Obj->GetValue(scope);
+	assert(obj_val);
+	boost::any & a = obj_val->Get();
+	error(a.type() == typeid(ilang::Object*), "Trying to find field in value that does not contain field, essently not an object\n\tWas looking in: " << GetFirstName());
+	ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
+	ilang::Variable *v = obj->operator[](identifier);
+	ValuePass ret = v->Get();
+	if(ret->Get().type() == typeid(ilang::Function)) {
+	  // doing it this way creates a new pointer to the function and then sets the new function to point back to the object, otherwise the object can have smart pointers to itself which causes it to no be deleted from memory
+	  ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
+	  fun.object = obj_val;
+	  ret = ValuePass(new ilang::Value(fun));
+	}
+	return ret;
+      }else{
+	ilang::Variable *v = scope->lookup(identifier);
+	error(v, "Did not find " << GetFirstName());
+	ValuePass ret = v->Get();
+	return ret;
+      }
+    }
+
+    void FieldAccess::Set(ScopePass scope, ValuePass var, bool force) {
+      errorTrace("Setting value of variable : " << GetFirstName());
+      ilang::Variable *v;
+      if(Obj) {
+	_errors.stream() << "\n\tLooking up FieldAccess of object to set";
+	ValuePass obj_val = Obj->GetValue(scope);
+	assert(obj_val);
+	boost::any & a = obj_val->Get();
+	error(a.type() == typeid(ilang::Object*), "Trying to find field in value that does not contain field, essently not an object\n\tWas looking in: " << GetFirstName());
+	ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
+	v = obj->operator[](identifier);
+      }else{
+	if(force || !modifiers->empty()) {
+	  v = scope->forceNew(GetFirstName(), *modifiers);
+	}else{
+	  v = scope->lookup(identifier);
+	}
+      }
+      assert(v);
+      v->Set(var);
+
     }
 
     std::string FieldAccess::GetFirstName() {
@@ -432,6 +479,7 @@ namespace ilang {
     }
 
     ilang::Variable * ArrayAccess::Get(ScopePass scope) {
+      assert(0);
       errorTrace("Getting element using []: "<<GetFirstName());
       ValuePass obj_val = Obj->GetValue(scope);
       boost::any & a = obj_val->Get();
@@ -443,6 +491,35 @@ namespace ilang {
 	boost::any_cast<ilang::Function>( &(var->Get()->Get()) )->object = obj_val;
       }
       return var;
+    }
+
+    ValuePass ArrayAccess::GetValue(ScopePass scope) {
+      errorTrace("Getting element using []: "<<GetFirstName());
+      ValuePass obj_val = Obj->GetValue(scope);
+      boost::any & a = obj_val->Get();
+      error(a.type() == typeid(ilang::Object*), "Not of an object or array type");
+      ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
+      ValuePass val = Lookup->GetValue(scope);
+      ilang::Variable *var = obj->operator[](val);
+      ValuePass ret = var->Get();
+      if(ret->Get().type() == typeid(ilang::Function)) {
+	ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
+	fun.object = obj_val;
+	ret = ValuePass(new ilang::Value(fun));
+      }
+      return ret;
+    }
+
+    void ArrayAccess::Set(ScopePass scope, ValuePass var, bool force) {
+      assert(!force);
+      errorTrace("Setting element using []: " << GetFirstName());
+      ValuePass obj_val = Obj->GetValue(scope);
+      boost::any & a = obj_val->Get();
+      error(a.type() == typeid(ilang::Object*), "Not of an object or array type");
+      ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
+      ValuePass index = Lookup->GetValue(scope);
+      ilang::Variable *v = obj->operator[](index);
+      v->Set(var);
     }
 
     std::string ArrayAccess::GetFirstName() {

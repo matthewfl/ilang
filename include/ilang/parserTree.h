@@ -47,6 +47,7 @@ namespace ilang {
       friend class ilang::Modification;
       friend class ImportCall;
     private:
+      // also head by smart point so do not need to delete
       FileScope *scope;
       ScopePass passScope;
       ImportScopeFile *Import;
@@ -215,11 +216,12 @@ namespace ilang {
       friend class ::ilang::Class;
 
       std::list<std::string> *name;
+    protected:
       std::list<std::string> *modifiers;
     public:
       Variable (std::list<std::string> *n, std::list<std::string> *mod);
       void Run(ScopePass);
-      void Set(ScopePass, ValuePass var, bool force = false);
+      virtual void Set(ScopePass, ValuePass var, bool force = false);
       // not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
       virtual ilang::Variable * Get(ScopePass);
       ValuePass GetValue(ScopePass);
@@ -227,8 +229,6 @@ namespace ilang {
       //virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
       void Print(Printer*);
     };
-
-
 
 
     class FieldAccess : public Variable {
@@ -240,8 +240,9 @@ namespace ilang {
       FieldAccess(Node*, std::string);
       //void Run(Scope*);
       //void Set(Scope*, ValuePass var);
+      void Set(ScopePass, ValuePass var, bool force = false);
       ilang::Variable * Get(ScopePass);
-      //ValuePass GetValue(Scope*);
+      ValuePass GetValue(ScopePass);
       virtual std::string GetFirstName();
       //virtual ValuePass CallFun (ScopePass, std::vector<ValuePass> &par);
       void Print(Printer*);
@@ -255,6 +256,8 @@ namespace ilang {
     public:
       ArrayAccess(Node*, Node*);
       ilang::Variable * Get(ScopePass);
+      ValuePass GetValue(ScopePass);
+      void Set(ScopePass, ValuePass var, bool force = false); // forced is ignored as it makes no since
       virtual std::string GetFirstName();
       void Print(Printer*);
     };

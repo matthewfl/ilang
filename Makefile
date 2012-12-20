@@ -139,8 +139,9 @@ build/import.o: include/ilang/import.h include/debug.h include/ilang/variable.h
 build/import.o: include/ilang/scope.h include/ilang/object.h
 build/import.o: include/ilang/parserTree.h include/ilang/print.h
 build/import.o: include/ilang/parser.h include/ilang/function.h
-build/import.o: include/ilang/ilang.h include/ilang/import.h
-build/import.o: include/ilang/object.h include/ilang/function.h
+build/import.o: include/ilang/error.h include/ilang/ilang.h
+build/import.o: include/ilang/import.h include/ilang/object.h
+build/import.o: include/ilang/function.h
 build/parser.o: include/ilang/parser.h
 build/variable.o: include/ilang/variable.h include/debug.h
 build/variable.o: include/ilang/error.h include/ilang/object.h
@@ -172,3 +173,11 @@ build/modification.o: include/ilang/function.h include/ilang/error.h
 build/error.o: include/ilang/error.h
 build/network.o: include/ilang/network.h
 build/print.o: include/ilang/print.h include/debug.h
+build/init.o: include/ilang/ilang.h include/ilang/import.h
+build/init.o: include/ilang/object.h include/ilang/function.h
+build/init.o: include/ilang/import.h include/debug.h include/ilang/variable.h
+build/init.o: include/ilang/database.h deps/leveldb/include/leveldb/db.h
+build/init.o: deps/leveldb/include/leveldb/iterator.h
+build/init.o: deps/leveldb/include/leveldb/slice.h
+build/init.o: deps/leveldb/include/leveldb/status.h
+build/init.o: deps/leveldb/include/leveldb/options.h

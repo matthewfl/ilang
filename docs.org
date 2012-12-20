@@ -1,7 +1,7 @@
 #+TITLE:     ilang Documentaiton
 #+AUTHOR:    Matthew Francis-Landau
 #+EMAIL:     matthew@matthewfl.com
-#+DESCRIPTION:
+#+DESCRIPTION: Documentation for the ilang programming language
 #+KEYWORDS:
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
@@ -9,8 +9,8 @@
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
-#+LINK_UP:   
-#+LINK_HOME: 
+#+LINK_UP:
+#+LINK_HOME:
 #+XSLT:
 
 * Overview
@@ -31,19 +31,19 @@
    In this code, the class is created under the name /Name/.
 
    In ilang, the consepts are vastly different, class, objects, function, anything is created without a name.
-   The name/scope system is mearly provided to give a programmer a means of accessing something that was created else where.  
+   The name/scope system is mearly provided to give a programmer a means of accessing something that was created else where.
    In this since everything can be considered to be name-less and assigned to variables which function as pointers.
    #+BEGIN_EXAMPLE
    // Points_to_a_class points to a class, a new class can be created by using this class Pointer
    Points_to_a_class = class {
-   
+
    };
 
    // something would be an instance of an anonymous class
    // NOTE: running this multiple times would create a new instance of the anonymouse class and then create the object based off that new class
    //       The reason for this is because everytime that this is called, it _might_ depend on some local variables that have changed value
    something = new(class {
-   
+
    });
    #+END_EXAMPLE
 * Lanuage specifications
@@ -65,7 +65,7 @@ Function_name = {|argument1, argument2|
     #+BEGIN_EXAMPLE
 Function_name = {|Int int_type, String string_type|
     // int_type will throw an error if the argument is not of type int, same with String
-    
+
     // Return types are not checked/defined inside the function
     return string_type + "something more";
 };
@@ -77,7 +77,7 @@ main = {
     #+END_EXAMPLE
 ** Type system
    The type system is by default typeless allowing for any type like more standard scripting lanuages.
-   The system uses type 'qualifiers' to performe special actions on the variables.  Type qualifiers range from anything to Checking the type of variable to saving data into a persistent database. 
+   The system uses type 'qualifiers' to performe special actions on the variables.  Type qualifiers range from anything to Checking the type of variable to saving data into a persistent database.
 *** Type Less
     #+BEGIN_EXAMPLE
 Variable_name = 1;
@@ -117,7 +117,7 @@ Db Int counter = 0;
 ** Classes
    #+BEGIN_EXAMPLE
 Class_name = class {
-   
+
 };
    #+END_EXAMPLE
 *** Basic members
@@ -130,17 +130,17 @@ Class_name = class {
 *** inheritance
     #+BEGIN_EXAMPLE
     From_class = class {
-    
+
     };
 
     Class_name = class (From_class) {
-    
+
     };
     #+END_EXAMPLE
 ** Objects
    #+BEGIN_EXAMPLE
 Object_name = object {
-   
+
 };
    #+END_EXAMPLE
 ** Array
@@ -198,7 +198,7 @@ Class cat = class (animal) {
 main = {
    Cat = new(cat);
    Cow = new(cow);
-   
+
    Cat.say();
    Cow.say();
 };

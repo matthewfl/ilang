@@ -3,7 +3,7 @@
 ~variables
 better errors regarding programming
 ~make ValuePass a shared pointer
-add in single operators like += -= *= /= -- ++, unary -
+add in single operators like += -= *= /= -- ++
 break, continue, not in there yet
 
 ~objects
@@ -23,7 +23,7 @@ modifying code
 	
 
 "unlimited" ram
-auto parallization
+auto parallization (thinking of making threading easy like in golang)
 distrubited process
 
 thread support, thinking function like go that returns a value that blocks when read but returns when the function returns
