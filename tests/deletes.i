@@ -31,4 +31,13 @@ cc = {
 	Print(rr.get());
 };
 
-main = { cc(); };
+main3 = { cc(); };
+
+
+
+qq_test = {
+	g = new(qqq);
+	g.aaa();
+};
+
+main = { while(1) qq_test(); };
