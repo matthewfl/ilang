@@ -312,7 +312,7 @@ namespace ilang {
       friend class ilang::Modification;
     public:
       ThreadGoCall(std::list<Node*> *args);
-      ValuePass GetValue(Scope*);
+      ValuePass GetValue(ScopePass);
       void Print(Printer*);
     };
 

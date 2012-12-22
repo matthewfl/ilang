@@ -3,6 +3,7 @@
 #include "scope.h"
 #include "object.h"
 #include "function.h"
+#include "thread.h"
 #include "debug.h"
 #include "error.h"
 
@@ -1111,21 +1112,48 @@ namespace ilang {
 
 
     ThreadGoCall::ThreadGoCall(list<Node*> *args) : Call(NULL, args) {
-      error(args->size() == 1, "go call expects 1 argument");
+      // first argument is the function that will be called
+      // following arguments are values to be passed to the function, but they will be evaluated in the current thread
+      error(args->size() >= 1, "go call expects at least 1 argument " << args->size());
+      for(auto it : *args) {
+	assert(dynamic_cast<Value*>(it));
+      }
     }
 
-    ValuePass ThreadGoCall::GetValue(Scope *scope) {
-      ValuePass calling = dynamic_cast<Value*>(params->front())->GetValue(scope);
-      error(calling->Get().type() == typeid(ilang::Function_ptr), "go expects argument to be a function");
+    ValuePass ThreadGoCall::GetValue(ScopePass scope) {
+      ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(scope);
+      error(calling_val->Get().type() == typeid(ilang::Function), "go expects argument to be a function");
+      ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
+      std::vector<ValuePass> arguments(params->size() - 1);
+      auto it = params->begin();
+      it++;
+      while(it != params->end()) {
+	arguments.push_back(dynamic_cast<Value*>(*it)->GetValue(scope));
+      }
+      assert(ilang::global_EventPool());
+      Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
 
+	  ValuePass ret = ValuePass(new ilang::Value);
+	  if(calling.object) {
+	    assert(calling.object->Get().type() == typeid(ilang::Object*));
+	    ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(calling.object->Get())));
+	    calling.ptr(obj_scope, arguments, &ret);
+	  }else{
+	    calling.ptr(ScopePass(), arguments, &ret);
+	  }
+	  // return value is ignored
+	});
+      thread.Trigger(NULL);
     }
 
     void ThreadGoCall::Print(Printer *p) {
       p->p() << "go(";
-      params->front()->Print(p);
+      for(auto it : *params) {
+	it->Print(p);
+      }
       p->p() << ")";
     }
 
 
-  } // namespace parserTree
+    } // namespace parserTree
 } // namespace ilang

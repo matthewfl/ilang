@@ -116,14 +116,14 @@ namespace ilang {
     if(tt != members.end())
       tt->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
 
-    cout << "deleting obj\n";
+    //cout << "deleting obj\n";
     for(auto it=members.begin(); it!=members.end(); it++) {
-      cout << "\t" << it->first << endl;
+      //cout << "\t" << it->first << endl;
       delete it->second;
     }
 
     if(C_baseClass) {
-      cout << "deleting base class\n";
+      //  cout << "deleting base class\n";
       delete C_baseClass;
     }
     delete[] DB_name;
@@ -185,7 +185,7 @@ namespace ilang {
   void Object::Debug() {
     for(auto it : members) {
       auto s = it.second->Get();
-      cout << "\t\t" << it.first << "\t" << s->Get().type().name() << "\t" << endl;
+      //cout << "\t\t" << it.first << "\t" << s->Get().type().name() << "\t" << endl;
       s->Print();
     }
   }

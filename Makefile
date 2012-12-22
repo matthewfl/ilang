@@ -1,7 +1,7 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc init.cc
-LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltorrent-rasterbar
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc init.cc thread.cc
+LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
 MODULES= i/test.io net/curl.io net/httpd.io

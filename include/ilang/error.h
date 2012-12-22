@@ -7,6 +7,8 @@
 #include <sstream>
 #include <list>
 
+//#define ILANG_ERROR_TRACE_ENABLED
+
 namespace ilang {
 
   void error_print_trace();

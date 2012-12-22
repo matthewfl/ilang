@@ -10,8 +10,10 @@
 #include "database.h"
 #include "parserTree.h"
 #include "error.h"
+#include "thread.h"
 
 #include "print.h"
+
 
 namespace ilang { void Init(int, char**); }
 
@@ -125,11 +127,21 @@ int main (int argc, char **argv) {
     base->Print(&pp);
     }*/
 
-  { ilang::error_trace ee("running main file");
+  /*{ ilang::error_trace ee("running main file");
     base->Run();
-  }
+    }*/
 
+  //ilang::global_EventPool = new ilang::EventPool;
+  //ilang::ThreadPool threads(&events);
 
+  ilang::Event rootEvent = ilang::global_EventPool()->CreateEvent([base](void *data) {
+      base->Run();
+    });
+  rootEvent.Trigger(NULL);
+
+  ilang::global_EventPool()->Run();
+
+  //delete ilang::global_EventPool;
   delete ilang::System_Database;
 
   return 0;
