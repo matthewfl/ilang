@@ -1124,23 +1124,24 @@ namespace ilang {
       ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(scope);
       error(calling_val->Get().type() == typeid(ilang::Function), "go expects argument to be a function");
       ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
-      std::vector<ValuePass> arguments(params->size() - 1);
+      std::vector<ValuePass> *arguments = new std::vector<ValuePass>;//(params->size() - 1);
       auto it = params->begin();
       it++;
       while(it != params->end()) {
-	arguments.push_back(dynamic_cast<Value*>(*it)->GetValue(scope));
+	arguments->push_back(dynamic_cast<Value*>(*it)->GetValue(scope));
+	it++;
       }
       assert(ilang::global_EventPool());
       Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
-
 	  ValuePass ret = ValuePass(new ilang::Value);
 	  if(calling.object) {
 	    assert(calling.object->Get().type() == typeid(ilang::Object*));
 	    ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(calling.object->Get())));
-	    calling.ptr(obj_scope, arguments, &ret);
+	    calling.ptr(obj_scope, *arguments, &ret);
 	  }else{
-	    calling.ptr(ScopePass(), arguments, &ret);
+	    calling.ptr(ScopePass(), *arguments, &ret);
 	  }
+	  delete arguments;
 	  // return value is ignored
 	});
       thread.Trigger(NULL);

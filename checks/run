@@ -3,14 +3,17 @@
 code=0
 FILES=*.i
 
+
 for f in $FILES; do
 	echo "RUNNING $f"
+	echo "RUNNING $f" > .running
 	if ../i $f; then
 		echo -e "\e[00;32mOK $f\e[00m"
 	else
 		echo -e "\e[00;31mERROR $f\e[00m"
 		code=1
 	fi
+	rm .running
 done
 
 if [ $code -ne 0 ]; then

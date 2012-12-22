@@ -1,6 +1,9 @@
 #include "thread.h"
 #include "debug.h"
 
+#include <iostream>
+using namespace std;
+
 
 /** Threads are created at the start of the process
  *  Threads will keep asking the event loop for more work
@@ -31,29 +34,35 @@ namespace ilang {
   void EventPool::Run() {
     //std::thread th(stat_ThreadStart, this);
     //th.join();
-    int oldQueueSize = 1;
+    int oldQueueSize = 0;
     MoreThreads();
     while(true) {
-      if(m_eventsWaiting == 0 && m_threadCount == m_waitingThread) {
-	// there are no events that are currently being waited on and all the threads that are managed by this Event loop are dead
-	for(int i = m_threadCount; i > 0; i--) {
-	  // if the threads are waiting for an event, give them something so they can noticed that there is nothing left
-	  // should cause any possibly "stuck" threads to exit
-	  Event e = CreateEvent([](void *data) {});
-	  e.Trigger(NULL);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      if(m_eventsWaiting == 0) {
+	if(m_threadCount == m_waitingThread) {
+	  // there are no events that are currently being waited on and all the threads that are managed by this Event loop are dead
+	  for(int i = m_threadCount; i > 0; i--) {
+	    // if the threads are waiting for an event, give them something so they can noticed that there is nothing left
+	    // should cause any possibly "stuck" threads to exit
+	    Event e = CreateEvent([](void *data) {});
+	    e.Trigger(NULL);
+	  }
+	  return; // exit out of the eventLoop / program
 	}
-	return; // exit out of the eventLoop / program
+      }else{
+	int queueSize = m_queueEvents.size();
+	if(oldQueueSize > 5 && queueSize != 0 && queueSize >= oldQueueSize) {
+	  MoreThreads();
+	}
+	oldQueueSize = queueSize;
+	if(m_waitingThread == 0) {
+	  // having a thread waiting means that events should be cleared quickly
+	  MoreThreads();
+	}
       }
-      int queueSize = m_queueEvents.size();
-      if(oldQueueSize > 5 && queueSize >= oldQueueSize) {
-	MoreThreads();
-      }
-      oldQueueSize = queueSize;
-      if(m_waitingThread == 0) {
-	// having a thread waiting means that events should be cleared quickly
-	MoreThreads();
-      }
-      std::this_thread::yield();
+      //cout << "\t\t" << m_eventsWaiting << "\t" << m_threadCount << "\t" << m_waitingThread << endl;
+
+      //std::this_thread::yield();
     }
   }
 
@@ -69,14 +78,16 @@ namespace ilang {
   void EventPool::ThreadStart() {
     ++m_threadCount;
     while(true) {
+      //cout << "loop top\n";
       if(m_queueEvents.empty()) {
-	std::this_thread::yield();
+	//	std::this_thread::yield();
+	std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	// at most 10% of threads waiting for work
 	if(m_waitingThread * 10 > m_threadCount || m_eventsWaiting == 0) {
 	  // kill off thread if there is not another task waiting
 	  --m_threadCount;
 	  return;
-	} else {
+	}else{
 	  boost::function0<void> func;
 	  ++m_waitingThread;
 	  func = GetEventToRun();
@@ -88,6 +99,7 @@ namespace ilang {
 	//debug(0, "----Running event from pool");
 	GetEventToRun()();
       }
+      //cout << "loop bottom\n";
     }
   }
 
