@@ -1124,7 +1124,7 @@ namespace ilang {
       ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(scope);
       error(calling_val->Get().type() == typeid(ilang::Function), "go expects argument to be a function");
       ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
-      std::vector<ValuePass> *arguments = new std::vector<ValuePass>;//(params->size() - 1);
+      std::vector<ValuePass> *arguments = new std::vector<ValuePass>;
       auto it = params->begin();
       it++;
       while(it != params->end()) {

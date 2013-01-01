@@ -1,6 +1,7 @@
 #include "ilang/ilang.h"
 #include "ilang/variable.h"
 #include "ilang/error.h"
+#include "ilang/thread.h"
 
 #include <tbb/concurrent_queue.h>
 
@@ -10,15 +11,21 @@ namespace {
   class threadChannel : public ilang::C_Class {
   private:
     tbb::concurrent_bounded_queue<ValuePass> m_queue;
+    ilang::Event waiting;
     ValuePass push(vector<ValuePass> &args) {
       error(args.size() == 1, "channel.push expects one argument");
       m_queue.push(args[0]);
+      waiting.Trigger(NULL);
       return ValuePass(new ilang::Value);
     }
     ValuePass pop(vector<ValuePass> &args) {
       error(args.size() == 0, "channel.pop expects zero arguments");
       ValuePass ret;
-      m_queue.pop(ret);
+      m_queue.pop(ret); // blocks until there is something to pop
+      /*while(!m_queue.try_pop(ret)) {
+	// there was nothing to pop from the queue
+	ilang::global_EventPool().WaitEvent(waiting);
+	}*/
       return ret;
     }
     ValuePass size(vector<ValuePass> &args) {

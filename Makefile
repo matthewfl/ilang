@@ -130,11 +130,13 @@ build/main.o: deps/leveldb/include/leveldb/slice.h
 build/main.o: deps/leveldb/include/leveldb/status.h
 build/main.o: deps/leveldb/include/leveldb/options.h include/ilang/parserTree.h
 build/main.o: include/ilang/scope.h include/ilang/print.h include/ilang/error.h
+build/main.o: include/ilang/thread.h
 build/parserTree.o: include/ilang/parserTree.h include/ilang/variable.h
 build/parserTree.o: include/ilang/scope.h include/ilang/import.h
 build/parserTree.o: include/debug.h include/ilang/print.h
 build/parserTree.o: include/ilang/parser.h include/ilang/object.h
-build/parserTree.o: include/ilang/function.h include/ilang/error.h
+build/parserTree.o: include/ilang/function.h include/ilang/thread.h
+build/parserTree.o: include/ilang/error.h
 build/import.o: include/ilang/import.h include/debug.h include/ilang/variable.h
 build/import.o: include/ilang/scope.h include/ilang/object.h
 build/import.o: include/ilang/parserTree.h include/ilang/print.h
@@ -181,3 +183,4 @@ build/init.o: deps/leveldb/include/leveldb/iterator.h
 build/init.o: deps/leveldb/include/leveldb/slice.h
 build/init.o: deps/leveldb/include/leveldb/status.h
 build/init.o: deps/leveldb/include/leveldb/options.h
+build/thread.o: include/ilang/thread.h include/debug.h

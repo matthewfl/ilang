@@ -3,9 +3,12 @@
 
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/concurrent_queue.h>
-#include <thread>
+//#include <thread>
+#include <boost/thread.hpp>
 #include <atomic>
 #include <boost/function.hpp>
+#include <ucontext.h>
+
 
 namespace ilang {
   class ThreadPool;
@@ -14,6 +17,27 @@ namespace ilang {
   class Event;
 
   typedef boost::function1<void, void*> Event_Callback;
+
+
+  struct s_eventData {
+    //Event_Callback callback;
+    ucontext_t context;
+    ucontext_t back;
+    bool done = false;
+    unsigned long id;
+    void *data = NULL;
+    char stack[16384];
+    Event_Callback callback;
+    s_eventData() {
+      // move this into source file
+      getcontext(&context);
+      context.uc_stack.ss_sp = stack;
+      context.uc_stack.ss_size = sizeof(stack);
+      context.uc_link = &back;
+    }
+  };
+
+  //extern boost::thread_specific_ptr<s_eventData> Thread_current_event;
 
   class EventPool {
     friend class Event;
@@ -24,18 +48,21 @@ namespace ilang {
       void *data;
     };
 
+
     tbb::concurrent_bounded_queue<s_eventTrigger> m_queueEvents;
-    tbb::interface5::concurrent_hash_map<unsigned long, Event_Callback> m_eventList;
+    tbb::interface5::concurrent_hash_map<unsigned long, s_eventData*> m_eventList;
     std::atomic<unsigned long> m_eventsWaiting;//(0);
     std::atomic<unsigned long> m_eventIndex;//(1);
 
 
     void DeleteEvent(unsigned long id);
-    boost::function0<void> GetEventToRun(); // blocks until there is an event function
+    //boost::function0<void> GetEventToRun(); // blocks until there is an event function
+    void RunEvents();
   public:
     EventPool();
     Event CreateEvent(Event_Callback);
     void TriggerEvent(unsigned long id, void *data);
+    //void WaitEvent(Event &e);
     Event GetEvent(unsigned long id);
 
     void Run();
