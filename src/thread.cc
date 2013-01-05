@@ -64,7 +64,7 @@ namespace ilang {
 	  MoreThreads();
 	}
       }
-      cout << "\t\t" << m_eventsWaiting << "\t" << m_threadCount << "\t" << m_waitingThread << endl;
+      //cout << "\t\t" << m_eventsWaiting << "\t" << m_threadCount << "\t" << m_waitingThread << endl;
 
       //std::this_thread::yield();
     }
@@ -140,29 +140,30 @@ namespace ilang {
     return e;
   }
 
-  /*  void EventPool::WaitEvent(Event &e) {
-    Event origional_even = e;
-    ucontext_t context;// = new ucontext_t;
-    void *_data;
-    Event new_event = CreateEvent([context, &_data](void *data) {
-	//origional_even.Trigger(data);
-	_data = data;
-	setcontext(context);
-      });
-    getcontext(context);
-    if(new_event == e) {
-      e = origional_even;
-      e.Trigger(_data);
-      return;
-    }else{
-      e = new_event;
-    }
-    }*/
+  void* EventPool::WaitEvent(Event &e) {
+    m_eventsWaiting++;
+    unsigned long id = m_eventIndex++;
+    assert(id);
+    Event origional_event = e;
+    e = Event(this, id);
+    s_eventData *eve = Thread_current_event.get();
+    m_eventList.insert(std::pair<unsigned long, s_eventData*>(id, eve));
+    eve->done = false;
+    swapcontext(&eve->context, &eve->back);
+    e = origional_event;
+    return eve->data;
+  }
 
   void EventPool::DeleteEvent(unsigned long id) {
+
     // Want to make sure the event is actually in the map that we are deleting
-    assert(m_eventList.erase(id));
-    m_eventsWaiting--;
+    tbb::interface5::concurrent_hash_map<unsigned long, s_eventData*>::accessor access;
+    if(m_eventList.find(access, id)) {
+      delete access->second;
+      assert(m_eventList.erase(access));
+      m_eventsWaiting--;
+    }
+    else assert(0);
   }
 
   /*
@@ -193,13 +194,13 @@ namespace ilang {
       eve->data = event.data;
       Thread_current_event.reset(eve);
       swapcontext(&eve->back, &eve->context);
-      Thread_current_event.release();
+      eve = Thread_current_event.release();
       // might still want to remove from the hasmap
+      assert(m_eventList.erase(access));
+      m_eventsWaiting--;
       if(eve->done) {
 	// delete the even and the stack
-	assert(m_eventList.erase(access));
 	delete eve;
-	m_eventsWaiting--;
       }
     }
   }
@@ -208,10 +209,10 @@ namespace ilang {
   Event::Event(EventPool *pool,  unsigned long id) : m_pool(pool), m_id(id) {}
   Event::Event() : m_pool(NULL), m_id(0) {}
   void Event::Trigger(void *data) {
-    if(m_pool) m_pool->TriggerEvent(m_id, data);
+    if(m_pool && m_id) m_pool->TriggerEvent(m_id, data);
   }
   void Event::Cancel() {
-    if(m_pool) m_pool->DeleteEvent(m_id);
+    if(m_pool && m_id) m_pool->DeleteEvent(m_id);
   }
   void Event::SetCallback(Event_Callback back) {
     // first check that the event is actually still in the list

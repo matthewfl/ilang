@@ -26,8 +26,8 @@ namespace ilang {
     bool done = false;
     unsigned long id;
     void *data = NULL;
-    char stack[16384];
     Event_Callback callback;
+    char stack[16384];
     s_eventData() {
       // move this into source file
       getcontext(&context);
@@ -62,7 +62,7 @@ namespace ilang {
     EventPool();
     Event CreateEvent(Event_Callback);
     void TriggerEvent(unsigned long id, void *data);
-    //void WaitEvent(Event &e);
+    void* WaitEvent(Event &e);
     Event GetEvent(unsigned long id);
 
     void Run();

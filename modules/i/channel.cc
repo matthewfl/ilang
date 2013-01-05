@@ -21,11 +21,11 @@ namespace {
     ValuePass pop(vector<ValuePass> &args) {
       error(args.size() == 0, "channel.pop expects zero arguments");
       ValuePass ret;
-      m_queue.pop(ret); // blocks until there is something to pop
-      /*while(!m_queue.try_pop(ret)) {
+      //m_queue.pop(ret); // blocks until there is something to pop
+      while(!m_queue.try_pop(ret)) {
 	// there was nothing to pop from the queue
-	ilang::global_EventPool().WaitEvent(waiting);
-	}*/
+	ilang::global_EventPool()->WaitEvent(waiting);
+      }
       return ret;
     }
     ValuePass size(vector<ValuePass> &args) {
