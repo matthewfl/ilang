@@ -921,6 +921,140 @@ namespace ilang {
       right->Print(p);
     }
 
+    SingleExpression::SingleExpression(Variable *target, Value *value, action a) : m_target(target), m_value(value), Act(a) {
+      assert(target);
+      assert(value);
+    }
+
+    void SingleExpression::Run(ScopePass scope) {
+      ValuePass v = GetValue(scope);
+    }
+
+    ValuePass SingleExpression::GetValue(ScopePass scope) {
+      errorTrace("Single Expression");
+      ValuePass val = m_value->GetValue(scope);
+      ValuePass setTo = m_target->GetValue(scope);
+      ValuePass ret;
+      if(setTo->Get().type() == typeid(std::string)) {
+	error(Act == add, "Can only add to a string");
+	ret = ValuePass(new ilang::Value(boost::any_cast<std::string>(setTo->Get()) + val->str()));
+	m_target->Set(scope, ret);
+	return ret;
+      }
+      if(val->Get().type() == typeid(long)) {
+	long n = boost::any_cast<long>(val->Get());
+	switch(Act) {
+	case add:
+	  if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) + n));
+	  }else if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) + n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	case subtract:
+	  if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) - n));
+	  }else if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) - n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	case multiply:
+	  if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) * n));
+	  }else if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) * n));
+	  }
+	  break;
+	case divide:
+	  if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) / n));
+	  }else if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) / n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	default:
+	  assert(0);
+	}
+	m_target->Set(scope, ret);
+	return ret;
+      }else if(val->Get().type() == typeid(double)) {
+	double n = boost::any_cast<double>(val->Get());
+	switch(Act) {
+	case add:
+	  if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) + n));
+	  }else if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) + n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	case subtract:
+	  if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) - n));
+	  }else if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) -n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	case multiply:
+	  if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) * n));
+	  }else if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) * n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	case divide:
+	  if(setTo->Get().type() == typeid(double)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) / n));
+	  }else if(setTo->Get().type() == typeid(long)) {
+	    ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) / n));
+	  }else{
+	    error(0, "Can't perform math on non numbers");
+	  }
+	  break;
+	default:
+	  assert(0);
+	}
+	m_target->Set(scope, ret);
+	return ret;
+      }else{
+	error(0, "Did not have type of number");
+      }
+    }
+
+    void SingleExpression::Print(Printer *p) {
+      assert(0);
+      m_target->Print(p);
+      switch(Act) {
+      case add:
+	p->p() << " += ";
+	break;
+      case subtract:
+	p->p() << " -= ";
+	break;
+      case multiply:
+	p->p() << " *= ";
+	break;
+      case divide:
+	p->p() << " /= ";
+	break;
+      default:
+	assert(0);
+      }
+      m_value->Print(p);
+    }
+
+
     Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj)
     {
       // object created later so we are just going to store the informationa atm

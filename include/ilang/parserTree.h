@@ -368,8 +368,28 @@ namespace ilang {
       Value *left, *right;
       action Act;
     };
-  }
-}
+
+    class SingleExpression : public Expression{
+      friend class ilang::Modification;
+    public:
+      enum action {
+	add,
+	subtract,
+	multiply,
+	divide
+      };
+      SingleExpression(Variable *target, Value *value, action a);
+      void Run(ScopePass scope);
+      ValuePass GetValue(ScopePass scope);
+      void Print(Printer*);
+    private:
+      Variable *m_target;
+      Value *m_value;
+      action Act;
+    };
+
+  } // namespace parserNode
+} // namespace ilang
 
 
 #endif // _ilang_parserTree

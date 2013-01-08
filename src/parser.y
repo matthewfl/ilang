@@ -53,10 +53,12 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go
 %token T_eq T_ne T_le T_ge T_and T_or
+%token T_plusEqual T_subEqual T_mulEqual T_divEqual
 
 %right T_else
 %left ';'
 %left '='
+%left T_plusEqual T_subEqual T_mulEqual T_divEqual
 %left T_and T_or
 %left T_eq T_ne T_le '<' '>'
 %left '+' '-'
@@ -226,6 +228,10 @@ Expr		:	Function			{}
 		|	Expr T_and Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::And); }
 		|	Expr T_or Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Or); }
 		|	'!' Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($2), NULL, LogicExpression::Not); }
+		|	Variable T_plusEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::add); }
+		|	Variable T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
+		|	Variable T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
+		|	Variable T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
 		;
 
 Identifier	:	T_Identifier			{ }

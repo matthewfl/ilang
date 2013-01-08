@@ -69,6 +69,11 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "&&"			{ return T_and; }
 "||"			{ return T_or; }
 
+"+="			{ return T_plusEqual; }
+"-="			{ return T_subEqual; }
+"*="			{ return T_mulEqual; }
+"/="			{ return T_divEqual; }
+
 {OPERATOR}		{ return yytext[0]; }
 
 
