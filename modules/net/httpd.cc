@@ -5,6 +5,10 @@
 #include "debug.h"
 
 //#include <boost/thread/shared_mutex.hpp>
+#include <boost/algorithm/string.hpp>
+#include <map>
+#include <string>
+
 
 #include "../../deps/libuv/include/uv.h"
 #include "../../deps/http-parser/http_parser.h"
@@ -55,6 +59,10 @@ namespace {
     static void on_read_cb(uv_stream_t *stream, ssize_t nread, uv_buf_t buf);
     static void on_close(uv_handle_t *handle);
     static int header_complete_cb(http_parser *parser);
+    static int url_cb(http_parser *parser, const char *dat, size_t length);
+    static int header_field_cb(http_parser *parser, const char *dat, size_t length);
+    static int header_value_cb(http_parser *parser, const char *dat, size_t length);
+
 
     ValuePass isRunning(Scope *scope, vector<ValuePass> &args);
     ValuePass setListen(Scope *scope, vector<ValuePass> &args);
@@ -76,9 +84,12 @@ namespace {
     bool headWritten = false;
     bool reqOpen = true;
     string url;
+    string last_header;
+    map<string, string> headers;
+
     //boost::shared_mutex close_mutex;
 
-    uv_tcp_t handle;
+    uv_tcp_t *handle;
     http_parser parser;
     uv_write_t write_req;
 
@@ -86,16 +97,17 @@ namespace {
 
     ValuePass getUrl (vector<ValuePass> &args) {
       error(args.size() == 0, "httpd.request.url expects no arguments");
-
-      return ValuePass(new ilang::Value);
+      return ValuePass(new ilang::Value(url));
     }
 
     ValuePass getHeader (vector<ValuePass> &args) {
       error(args.size() == 1, "httpd.request.header expects 1 argument");
       error(args[0]->Get().type() == typeid(std::string), "httpd.request.header expects a string type");
+      string s = boost::any_cast<std::string>(args[0]->Get());
+      boost::algorithm::to_lower(s);
 
       // read data from the header and return it back
-      return ValuePass(new ilang::Value(std::string("")));
+      return ValuePass(new ilang::Value(headers[s]));
     }
 
     ValuePass writeHead(vector<ValuePass> &args) {
@@ -154,7 +166,7 @@ namespace {
       buf[place].base[0] = '\r';
       buf[place].base[1] = '\n';
 
-      uv_write(&writereq->req, (uv_stream_t*)&handle, buf, length,
+      uv_write(&writereq->req, (uv_stream_t*)handle, buf, length,
 	       [](uv_write_t* req, int status) -> void {
 		 debug(4, "-----------------closing head write\n" << flush );
 		 headWriteReq *writereq = (headWriteReq*) req->data;
@@ -199,7 +211,7 @@ namespace {
 	// create buffers for all the iterms
 	// send to libuv
 	string str = val->str();
-	debug(4, "writing req with "<< str );;
+	debug(4, "writing req with "<< str );
 	buf[place].len = str.length();
 	buf[place].base = new char[str.length()];
 	str.copy(buf[place].base, str.length());
@@ -207,7 +219,7 @@ namespace {
       }
       //buf[place].len=0;
       //buf[place].base = 0;
-      uv_write(&writereq->req, (uv_stream_t*)&handle, buf, args.size(),
+      uv_write(&writereq->req, (uv_stream_t*)handle, buf, args.size(),
 	       [](uv_write_t *req, int status) -> void {
 		 debug(4, "closing write req" << flush );
 		 writeReq *writereq = (writeReq*) req->data;
@@ -232,6 +244,7 @@ namespace {
     }
 
     void Init() {
+      handle = new uv_tcp_t;
       reg("url", &Request::getUrl);
       reg("headers", &Request::getHeader);
       //reg("type", &Request::reqType);
@@ -241,9 +254,9 @@ namespace {
       reg("write", &Request::writeReq);
       reg("end", &Request::endReq);
 
-      uv_tcp_init(parent->loop, &handle);
+      uv_tcp_init(parent->loop, handle);
       http_parser_init(&parser, HTTP_REQUEST);
-      handle.data = this;
+      handle->data = this;
       parser.data = this;
     }
 
@@ -274,7 +287,7 @@ namespace {
 	Request *parent;
 	uv_write_t req;
 	uv_buf_t buf;
-	uv_tcp_t handle;
+	uv_tcp_t* handle;
       };
       closeReq *req = new closeReq;
       req->parent = this;
@@ -282,14 +295,20 @@ namespace {
       req->buf.len = 0;
       req->buf.base = "\0";
       req->handle = handle; // in case the class is deleted
-      uv_write(&req->req, (uv_stream_t*)&handle, &req->buf, 1,
+      uv_write(&req->req, (uv_stream_t*)handle, &req->buf, 1,
 	       [](uv_write_t *req, int status) -> void {
 		 // the writes are performed in order, so this will be called after the other writes have finished
 		 closeReq *closereq = (closeReq*) req->data;
 		 // apears that uv cares about the address of the handle
-		 uv_close((uv_handle_t*)&closereq->parent->handle, [](uv_handle_t *handle) {
+		 uv_close((uv_handle_t*)closereq->handle, [](uv_handle_t *handle) {
+		     uv_tcp_t *hh = (uv_tcp_t*)handle;
+		     delete hh;
 		     // do not think that I need anything when closing it as everything is cleaned up else where
 		   });
+		 /*uv_close((uv_handle_t*)&closereq->parent->handle, [](uv_handle_t *handle) {
+		     // do not think that I need anything when closing it as everything is cleaned up else where
+		   });
+		 */
 		 delete closereq;
 	       });
     }
@@ -304,7 +323,7 @@ namespace {
       // need to think something up for dealing with the close case
       close();
 
-      assert(0);
+      //assert(0);
     }
   };
 
@@ -330,9 +349,9 @@ namespace {
     assert((uv_tcp_t*)server == &ser->server);
     //ser->on_connection(server, status);
     Request *req = new Request(ser);
-    int r = uv_accept(server, (uv_stream_t*)&req->handle);
+    int r = uv_accept(server, (uv_stream_t*)req->handle);
     assert(!r);
-    uv_read_start((uv_stream_t*)&req->handle, on_alloc, on_read_cb);
+    uv_read_start((uv_stream_t*)req->handle, on_alloc, on_read_cb);
   }
 
   void Server::on_read_cb(uv_stream_t *stream, ssize_t nread, uv_buf_t buf) {
@@ -380,11 +399,34 @@ namespace {
       func.ptr(ScopePass(), params, &ret);
     }
 
-    cout << "++++++++++++++++++++++ " << rr.use_count() << endl;
-
     // ignore the return type here
 
     return 1;
+  }
+
+  int Server::url_cb(http_parser *parser, const char *dat, size_t length) {
+    std::string url(dat, length);
+    Request *req = (Request*)parser->data;
+    req->url = url;
+    cout << "url: " << url << endl;
+    return 0;
+  }
+
+  int Server::header_field_cb(http_parser *parser, const char *dat, size_t length) {
+    std::string field(dat, length);
+    boost::algorithm::to_lower(field);
+    Request *req = (Request*) parser->data;
+    req->last_header = field;
+    cout << "field: " << field << endl;
+    return 0;
+  }
+
+  int Server::header_value_cb(http_parser *parser, const char *dat, size_t length) {
+    std::string value(dat, length);
+    cout << "header value: " << value << endl;
+    Request *req = (Request*) parser->data;
+    req->headers[req->last_header] = value;
+    return 0;
   }
 
   /*void on_connection (uv_stream_t *server, int status) {
@@ -437,7 +479,7 @@ namespace {
   }
 
   ValuePass Server::waitEnd(Scope *scope, vector<ValuePass> &args) {
-
+    assert(0);
   }
 
   void Server::Init() {
@@ -450,6 +492,9 @@ namespace {
     loop = uv_loop_new();
 
     parser_settings.on_headers_complete = header_complete_cb;
+    parser_settings.on_url = url_cb;
+    parser_settings.on_header_field = header_field_cb;
+    parser_settings.on_header_value = header_value_cb;
 
     debug(4, "server created" );
   }

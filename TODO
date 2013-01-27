@@ -13,7 +13,7 @@ break, continue, not in there yet
 ~classes
 ~fix functions to support classes and bindings
 ~database, need to still do for objects
-	need to remove limitation that objects need to be empty when inserted into database
+	~need to remove limitation that objects need to be empty when inserted into database
 	if an init function is added to classes, then classes could appear to have saved data by using objects as tempory forms
 	Make classes unable to have additional fields just added like objects can
 	Make classes savable into the database but only recored fields that are marked with Db, that way the problem of serializing functions will not become an issue
@@ -35,3 +35,5 @@ what will need to happen is that there is some even loop like system, and that i
 
 	I am thinking that for the first version I could use threads, there is a yeild system, then there could be a relativetly simple even system used for waking up the threads when something happends, that should keep the design simpler
 
+
+Switch the event system context switching to use the boost::context switching, as that should enable it to be more cross platform

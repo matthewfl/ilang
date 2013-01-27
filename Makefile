@@ -1,6 +1,7 @@
 TARGET= i
 
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc network.cc print.cc init.cc thread.cc
+# currently not in system: netowrk.cc
+SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc print.cc init.cc thread.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
@@ -19,8 +20,8 @@ INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
 CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++11 -Wall -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
-CXXFLAGS= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
-CXXFLAGS_MODULES= -ggdb -O0 -static -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
+CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
 ########### -rdynamic might enable the Linking to work with exporting symbols to be dynamically loaded by the dynamic modules
 LDFLAGS= -static-libgcc
@@ -95,6 +96,7 @@ depend: submodule
 	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD) 
 	# fixes the problem with the build dir being different from the src
 	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile 
+#eventually change this to use "g++ -MM" to generate the source files
 
 test: $(TARGET)
 	./$(TARGET) test.i -v 10
@@ -173,7 +175,6 @@ build/modification.o: include/ilang/print.h include/ilang/ilang.h
 build/modification.o: include/ilang/import.h include/ilang/object.h
 build/modification.o: include/ilang/function.h include/ilang/error.h
 build/error.o: include/ilang/error.h
-build/network.o: include/ilang/network.h
 build/print.o: include/ilang/print.h include/debug.h
 build/init.o: include/ilang/ilang.h include/ilang/import.h
 build/init.o: include/ilang/object.h include/ilang/function.h
