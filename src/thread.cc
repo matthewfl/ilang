@@ -6,6 +6,7 @@ using namespace std;
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "../deps/libuv/include/uv.h"
 
 /** Threads are created at the start of the process
  *  Threads will keep asking the event loop for more work
@@ -14,6 +15,14 @@ using namespace std;
  *
  *  The main thread will make sure that the queue is not becoming too full with work otherwise it can start more threads
  */
+
+
+
+/* to check if there is still stuff running on the UV loop do the following:
+     ngx_queue_empty(&loop->active_reqs) && loop->active_handles <= 0
+   This is most likely not going to be stable for future possible upgrades of libuv, however
+   it is what is contained in the private uv-common.h file, and seem unlikeley to change that much in the future
+*/
 
 namespace ilang {
   static EventPool _global_EventPool;
@@ -37,13 +46,16 @@ namespace ilang {
     //std::thread th(stat_ThreadStart, this);
     //th.join();
     int oldQueueSize = 0;
+    uv_loop_t *uv_loop = uv_default_loop();
+    boost::thread uv_thread(stat_ThreadUV, this);
+    uv_thread.detach();
     MoreThreads();
     while(true) {
       //boost::this_thread::sleep(10); //_for(std::chrono::milliseconds(10));
       //boost::this_thread::yield();
       boost::this_thread::sleep(boost::posix_time::millisec(10));
       if(m_eventsWaiting == 0) {
-	if(m_threadCount == m_waitingThread) {
+	if(m_threadCount == m_waitingThread && ngx_queue_empty(&uv_loop->active_reqs) && uv_loop->active_handles <= 0 ) {
 	  // there are no events that are currently being waited on and all the threads that are managed by this Event loop are dead
 	  for(int i = m_threadCount; i > 0; i--) {
 	    // if the threads are waiting for an event, give them something so they can noticed that there is nothing left
@@ -63,6 +75,7 @@ namespace ilang {
 	  // having a thread waiting means that events should be cleared quickly
 	  MoreThreads();
 	}
+	assert(m_uv_running);
       }
       //cout << "\t\t" << m_eventsWaiting << "\t" << m_threadCount << "\t" << m_waitingThread << endl;
 
@@ -79,6 +92,15 @@ namespace ilang {
 
   void EventPool::stat_ThreadStart(EventPool *self) {
     self->ThreadStart();
+  }
+
+  void EventPool::stat_ThreadUV(EventPool *self) {
+    uv_loop_t *loop = uv_default_loop();
+    self->m_uv_running = true;
+    do {
+      while(uv_run_once(loop));
+    } while(self->m_eventsWaiting != 0 && self->m_threadCount != self->m_waitingThread);
+    self->m_uv_running = false;
   }
 
   void EventPool::ThreadStart() {

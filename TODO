@@ -37,3 +37,10 @@ what will need to happen is that there is some even loop like system, and that i
 
 
 Switch the event system context switching to use the boost::context switching, as that should enable it to be more cross platform
+
+
+Currently possibly limiting cross platform:
+	The posix based context switching
+	C++11 compiler (not going to be fixed, but expect over time support will get better on other platforms)
+	How it find the location of the raw exe file to look for include files
+	

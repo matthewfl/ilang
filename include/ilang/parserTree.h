@@ -335,7 +335,7 @@ namespace ilang {
 	add,
 	subtract,
 	multiply,
-	devide,
+	divide,
 	uMinus
       };
       MathEquation(Value *l, Value *r, action a);
@@ -390,6 +390,5 @@ namespace ilang {
 
   } // namespace parserNode
 } // namespace ilang
-
 
 #endif // _ilang_parserTree

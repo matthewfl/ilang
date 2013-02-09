@@ -408,7 +408,7 @@ namespace {
     std::string url(dat, length);
     Request *req = (Request*)parser->data;
     req->url = url;
-    cout << "url: " << url << endl;
+    //cout << "url: " << url << endl;
     return 0;
   }
 
@@ -417,13 +417,13 @@ namespace {
     boost::algorithm::to_lower(field);
     Request *req = (Request*) parser->data;
     req->last_header = field;
-    cout << "field: " << field << endl;
+    //cout << "field: " << field << endl;
     return 0;
   }
 
   int Server::header_value_cb(http_parser *parser, const char *dat, size_t length) {
     std::string value(dat, length);
-    cout << "header value: " << value << endl;
+    //cout << "header value: " << value << endl;
     Request *req = (Request*) parser->data;
     req->headers[req->last_header] = value;
     return 0;

@@ -56,8 +56,6 @@ namespace ilang {
     ilang::Variable *mem_remove;
     void Init();
     char *DB_name;
-    unsigned int DB_start_index = 0x80000000;
-    unsigned int DB_end_index = 0x80000000;
   public:
     Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, ScopePass);
     Array(std::vector<ValuePass> &);

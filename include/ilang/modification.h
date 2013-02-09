@@ -42,7 +42,8 @@ namespace ilang {
       importCall_t,
       assignExpr_t = 70,
       mathExpr_t,
-      logicExpr_t
+      logicExpr_t,
+      singleExpr_t
       /*
       // Values passed
       valuep_t = 100,

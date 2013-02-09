@@ -697,7 +697,7 @@ namespace ilang {
 	    return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) * boost::any_cast<long>(right->Get())));
 	}
 	break;
-      case devide:
+      case divide:
 	if(left->Get().type() == typeid(double)) {
 	  if(right->Get().type() == typeid(double))
 	    return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) / boost::any_cast<double>(right->Get())));
@@ -726,7 +726,7 @@ namespace ilang {
       case multiply:
 	p->p() << " * ";
 	break;
-      case devide:
+      case divide:
 	p->p() << " / ";
 	break;
       case uMinus:

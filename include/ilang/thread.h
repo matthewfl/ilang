@@ -69,11 +69,12 @@ namespace ilang {
   private:
     std::atomic<unsigned long> m_threadCount;
     std::atomic<unsigned long> m_waitingThread;
+    bool m_uv_running = false;
 
     void MoreThreads();
     void ThreadStart();
     static void stat_ThreadStart(EventPool*);
-
+    static void stat_ThreadUV(EventPool*);
   };
 
   class Event {

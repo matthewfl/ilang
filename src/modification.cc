@@ -32,6 +32,8 @@ namespace ilang {
 	  m_secondaryType = mathExpr_t;
 	}else if(dynamic_cast<LogicExpression*>(node)) {
 	  m_secondaryType = logicExpr_t;
+	}else if(dynamic_cast<SingleExpression*>(node)) {
+	  m_secondaryType = singleExpr_t;
 	}
       }else if(dynamic_cast<ilang::parserNode::Object*>(node)) {
 	m_masterType = m_secondaryType = object_t; // TODO: change the master and secondary based off what is useful in working with them
@@ -381,6 +383,7 @@ ILANG_LIBRARY_NAME("i/mod",
 		   type_obj->operator[]("AssignExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::assignExpr_t))));
 		   type_obj->operator[]("MathExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::mathExpr_t))));
 		   type_obj->operator[]("LogicExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::logicExpr_t))));
+		   type_obj->operator[]("SingleExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::singleExpr_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 		   //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
