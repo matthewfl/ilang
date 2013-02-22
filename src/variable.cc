@@ -103,6 +103,18 @@ namespace ilang {
       cout << boost::any_cast<double>(val);
     }else if(typeid(bool) == val.type()) {
       cout << boost::any_cast<bool>(val) ? "true" : "false" ;
+    }else if(typeid(ilang::Object*) == val.type()) {
+      ilang::Array *arr;
+      if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
+	bool first = true; cout << "[";
+	for(ilang::Variable *vv : arr->members) {
+	  if(!first) cout << ", "; first = false;
+	  vv->Get()->Print();
+	}
+	cout << "]";
+      }else{
+	cout << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
+      }
     }else{
       cout << "could not figure out type: "<< val.type().name() << endl;
     }
@@ -126,6 +138,18 @@ namespace ilang {
       ss << boost::any_cast<double>(val);
     }else if(typeid(bool) == val.type()) {
       ss << boost::any_cast<bool>(val) ? "true" : "false" ;
+    }else if(typeid(ilang::Object*) == val.type()) {
+      ilang::Array *arr;
+      if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
+	bool first = true; ss << "[";
+	for(ilang::Variable *vv : arr->members) {
+	  if(!first) ss << ", "; first = false;
+	  ss << vv->Get()->str();
+	}
+	ss << "]";
+      }else{
+	ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
+      }
     }else{
       ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
     }

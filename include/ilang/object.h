@@ -47,6 +47,7 @@ namespace ilang {
   class Array : public Object {
     friend storedData *DB_createStoredData(const boost::any&);
     friend ValuePass DB_readStoredData(storedData*);
+    friend class Value;
     std::vector<ilang::Variable*> members;
     std::list<std::string> *modifiers;
     ilang::Variable *mem_length;

@@ -5,7 +5,7 @@ SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc d
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
-MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io
+MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))

@@ -46,6 +46,11 @@ namespace {
 	}
       }
     }
+
+    void Init() {
+      reg("stop", &timerManager::stopTimer);
+    }
+
   public:
     timerManager(long time, ValuePass func, bool interval = false) :
       m_timeout(time), m_interval(interval)
@@ -58,6 +63,8 @@ namespace {
       uv_timer_init(uv_default_loop(), &m_data->m_timer);
       m_data->m_timer.data = m_data;
       uv_timer_start(&m_data->m_timer, timer_callback, time, interval ? time : 0);
+
+      Init();
     }
     virtual ~timerManager() {
       if(m_data->doDelete) {
