@@ -209,11 +209,19 @@ namespace {
   public:
     char* Name() { return "Float"; }
     bool Check (Variable *self, const boost::any &val) {
-      // Should really make this able to promate the variable somehow
+      // Should really make this able to promote the variable somehow
       return typeid(double) == val.type();
     }
   };
   ILANG_VARIABLE_MODIFIER(Float, Float_var_type)
+
+  class Number_var_type : public ilang::Variable_modifier {
+    char *Name() { return "Number"; }
+    bool Check (Variable *self, const boost::any &val) {
+      return typeid(double) == val.type() || typeid(long) == val.type() || typeid(int) == val.type();
+    }
+  };
+  ILANG_VARIABLE_MODIFIER(Number, Number_var_type);
 
   template <char max> class Const_var_type : public ilang::Variable_modifier {
   private:

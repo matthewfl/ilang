@@ -17,4 +17,5 @@ main = {
 	assert(5 / 5 == 1);
 	assert(5 - 5 == 0);
 	equal_self();
+
 };

@@ -2,6 +2,8 @@
 
 code=0
 FILES=*.i
+BFILES=*.i.bad
+FAILED=""
 
 
 for f in $FILES; do
@@ -11,13 +13,28 @@ for f in $FILES; do
 		echo -e "\e[00;32mOK $f\e[00m"
 	else
 		echo -e "\e[00;31mERROR $f\e[00m"
-		code=1
+		code=$(( $code + 1 ))
+		FAILED="$FAILED\t$f\n"
+	fi
+	rm .running
+done
+
+for f in $BFILES; do
+	echo "RUNNING $f"
+	echo "RUNNING $f" > .running
+	if ../i $f; then
+		echo -e "\e[00;31mERROR $f\e[00m"
+		code=$(( $code + 1 ))
+		FAILED="$FAILED\t$f\n"
+	else
+		echo -e "\e[00;32mOK $f\e[00m"
 	fi
 	rm .running
 done
 
 if [ $code -ne 0 ]; then
 	echo -e "\e[00;31mOne or more tests have failed\e[00m"
+	echo -e "$FAILED"
 else
 	echo -e "\e[00;32mAll test have passed\e[00m"
 fi

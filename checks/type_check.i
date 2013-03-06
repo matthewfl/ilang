@@ -12,6 +12,10 @@ ff = 5.5;
 
 str = "hello world";
 
+func = { return 0; };
+
+
+
 main = {
 	Class c = cc;
 	Object o = obj;
@@ -19,4 +23,8 @@ main = {
 	Int i = ii;
 	Float f = ff;
 	String s = str;
+	Function fun = func;
+	Number i_ = ii;
+	Number f_ = ff;
+	
 };
