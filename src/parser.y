@@ -6,6 +6,7 @@
 #include "parserTree.h"
 #include "parser.tab.hh"
 #include "import.h"
+#include "debug.h"
 
 //using namespace ilang; // adding this in cause some conflicts with names
 using namespace ilang::parserNode;
@@ -89,8 +90,8 @@ Imports		:	Imports Import			{ }
 		|					{ }
 		;
 
-Import		:	T_import ImportLoc			{ parser_handle->import->push(NULL, $2); }
-		|	T_from	ImportLoc T_import ImportLoc	{ parser_handle->import->push($2, $4); }
+Import		:	T_import ImportLoc			{ assert(parser_handle->import); parser_handle->import->push(NULL, $2); }
+		|	T_from	ImportLoc T_import ImportLoc	{ assert(parser_handle->import); parser_handle->import->push($2, $4); }
 		;
 
 ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back($3); }

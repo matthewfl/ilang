@@ -24,7 +24,8 @@ namespace ilang {
       if(scope) return;
       scope = new FileScope(this);
       passScope = ScopePass(scope);
-      Import->resolve(scope);
+      if(Import) // when used with eval, there is no import handler
+	Import->resolve(scope);
 
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
 	debug(5, "calling run" )

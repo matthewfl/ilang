@@ -147,11 +147,13 @@ namespace ilang {
   Event EventPool::CreateEvent(Event_Callback back) {
     m_eventsWaiting++;
     unsigned long id = m_eventIndex++;
-    assert(id); // if zeon then this has looped arround
+    assert(id); // if zero then this has looped arround
     // for the time being, this will be an error, but in the future this should not cause a problem
     s_eventData *eve = new s_eventData;
     eve->id = id;
     eve->callback = back;
+
+
     makecontext(&eve->context, [](void) -> void {
 	Thread_current_event->callback(Thread_current_event->data);
 	Thread_current_event->done = true;
@@ -215,7 +217,11 @@ namespace ilang {
       s_eventData *eve = access->second;
       eve->data = event.data;
       Thread_current_event.reset(eve);
-      swapcontext(&eve->back, &eve->context);
+      if(!eve->functionCall) {
+	swapcontext(&eve->back, &eve->context);
+      }else{
+	eve->callback(eve->data);
+      }
       eve = Thread_current_event.release();
       // might still want to remove from the hasmap
       assert(m_eventList.erase(access));
@@ -235,6 +241,9 @@ namespace ilang {
   }
   void Event::Cancel() {
     if(m_pool && m_id) m_pool->DeleteEvent(m_id);
+  }
+  void Event::Wait() {
+    m_pool->WaitEvent(*this);
   }
   void Event::SetCallback(Event_Callback back) {
     // first check that the event is actually still in the list

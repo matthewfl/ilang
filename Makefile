@@ -5,7 +5,7 @@ SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc d
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
-MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io
+MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io i/eval.io
 
 BUILDDIR=build
 OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
@@ -184,4 +184,9 @@ build/init.o: deps/leveldb/include/leveldb/iterator.h
 build/init.o: deps/leveldb/include/leveldb/slice.h
 build/init.o: deps/leveldb/include/leveldb/status.h
 build/init.o: deps/leveldb/include/leveldb/options.h
-build/thread.o: include/ilang/thread.h include/debug.h
+build/thread.o: include/ilang/thread.h include/debug.h deps/libuv/include/uv.h
+build/thread.o: deps/libuv/include/ares.h deps/libuv/include/ares_version.h
+build/thread.o: deps/libuv/include/uv-private/uv-unix.h
+build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
+build/thread.o: deps/libuv/include/uv-private/ev.h
+build/thread.o: deps/libuv/include/uv-private/eio.h

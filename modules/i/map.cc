@@ -65,6 +65,7 @@ namespace {
       }else if(m_obj->DB_name) {
 	// then the object is located in the database are we are going to need to branch out and figure out where this
       }else{
+	// put in an if statement so if the object is large that it will use threads when dealing with the object
 	// this this is just a normal object with all the elements in the object
 	for(auto vals: m_obj->members) {
 	  if(vals.first == "this") continue;

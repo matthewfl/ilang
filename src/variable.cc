@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "error.h"
 
+#include "function.h" // for defining the Function type
+
 // for the deconstructor of the Value
 // TODO: take this out when there is a better solution for dealing with the leaking of Object* and Class* values
 #include "object.h"
@@ -241,6 +243,17 @@ namespace {
   ILANG_VARIABLE_MODIFIER(Const7, Const_var_type<7>);
   ILANG_VARIABLE_MODIFIER(Const8, Const_var_type<8>);
   ILANG_VARIABLE_MODIFIER(Const9, Const_var_type<9>);
+
+
+  class Function_var_type : public ilang::Variable_modifier {
+  public:
+    char *Name() { return "Function"; }
+    bool Check(Variable *self, const boost::any &val) {
+      return val.type() == typeid(ilang::Function);
+    }
+  };
+
+  ILANG_VARIABLE_MODIFIER(Function, Function_var_type);
 
 
 }

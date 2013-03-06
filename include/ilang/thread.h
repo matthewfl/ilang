@@ -27,6 +27,7 @@ namespace ilang {
     unsigned long id;
     void *data = NULL;
     Event_Callback callback;
+    bool functionCall = false;
     char stack[16384];
     s_eventData() {
       // move this into source file
@@ -88,6 +89,7 @@ namespace ilang {
     Event();
     void Trigger(void *data);
     void Cancel();
+    void Wait();
     void SetCallback(Event_Callback back);
     Event_Callback GetCallback();
     unsigned long GetId() { return m_id; }
