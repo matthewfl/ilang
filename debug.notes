@@ -1,0 +1,12 @@
+Notes on levels of debugging printing:
+	Using negative values in the code, added to a large positive number, can increase the places of the debugger by increaseing the overall value and then making a more negative number.
+
+	Default level: 
+	Overall debug level: 10
+	-10: (always print) NOTHING
+	-9:
+
+	
+	-7: modules
+	-6: Parse tree overall run
+	-5: Parser tree parse

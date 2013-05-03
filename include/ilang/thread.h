@@ -28,13 +28,23 @@ namespace ilang {
     void *data = NULL;
     Event_Callback callback;
     bool functionCall = false;
-    char stack[16384];
+    // variables that are check when the value is deleted to make sure that the stack does not write where it shouldn't and cause an error
+    int error_checker_TOP = 0xabfedd03; // some random value that is check
+    char stack[16384 * 2];
+    int error_checker_BOTTOM = 0xabfedd03;
     s_eventData() {
       // move this into source file
       getcontext(&context);
       context.uc_stack.ss_sp = stack;
       context.uc_stack.ss_size = sizeof(stack);
       context.uc_link = &back;
+      callback = NULL;
+    }
+    ~s_eventData() {
+      assert(error_checker_TOP == 0xabfedd03);
+      assert(error_checker_BOTTOM == 0xabfedd03);
+      //done = false;
+      //callback = NULL;
     }
   };
 

@@ -242,7 +242,7 @@ namespace {
       return ValuePass(new ilang::Value(ret_arr));
     }
 
-    ilang::ValuePass each(Scope *scope, std::vector<ilang::ValuePass> &args) {
+    ilang::ValuePass map(Scope *scope, std::vector<ilang::ValuePass> &args) {
       error(args.size() == 1, "mod.manager.each takes one argument");
       error(args[0]->Get().type() == typeid(ilang::Function), "mod.manager.each takes a function for an argument");
 
@@ -275,6 +275,7 @@ namespace {
 	  if(ret->isTrue()) break;
 	}
       }
+      return ValuePass(new ilang::Value);
     }
 
     ilang::ValuePass print(Scope *scope, std::vector<ilang::ValuePass> &args) {
@@ -291,7 +292,7 @@ namespace {
       reg("type", &Modification_manager::isType);
       reg("is", &Modification_manager::isType);
       reg("list", &Modification_manager::scopeList);
-      reg("each", &Modification_manager::each);
+      reg("map", &Modification_manager::map);
       reg("str", &Modification_manager::print);
       reg("name", &Modification_manager::getName);
     }

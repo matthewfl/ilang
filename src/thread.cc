@@ -75,7 +75,7 @@ namespace ilang {
 	  // having a thread waiting means that events should be cleared quickly
 	  MoreThreads();
 	}
-	assert(m_uv_running);
+	//	assert(m_uv_running);
       }
       //cout << "\t\t" << m_eventsWaiting << "\t" << m_threadCount << "\t" << m_waitingThread << endl;
 
@@ -226,7 +226,7 @@ namespace ilang {
       // might still want to remove from the hasmap
       assert(m_eventList.erase(access));
       m_eventsWaiting--;
-      if(eve->done) {
+      if(eve && eve->done) {
 	// delete the even and the stack
 	delete eve;
       }

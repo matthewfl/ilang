@@ -16,8 +16,8 @@ using namespace std;
 namespace ilang {
   namespace parserNode {
     Head::Head(list<Node*> *declars, ImportScopeFile *import): Import(import), Declars(declars) {
-      debug(4, "head " << declars->size() );
-      debug(4, "running ++++++++++++++++++++++++++++++++++++++++++++" );
+      debug(-5, "head " << declars->size() );
+      debug(-5, "running ++++++++++++++++++++++++++++++++++++++++++++" );
       scope=NULL;
     }
     void Head::Link () {
@@ -28,7 +28,7 @@ namespace ilang {
 	Import->resolve(scope);
 
       for(list<Node*>::iterator it = Declars->begin(); it !=  Declars->end(); it++) {
-	debug(5, "calling run" )
+	debug(-6, "calling run" )
 	  (*it)->Run(passScope);
 	//scope->Debug();
       }
@@ -78,7 +78,7 @@ namespace ilang {
 
     }
     ValuePass StringConst::GetValue (ScopePass scope) {
-      debug(5, "string get value" );
+      debug(-6, "string get value" );
       return ValuePass(new ilang::Value(std::string(string)));
     }
 
@@ -225,7 +225,7 @@ namespace ilang {
     }
 
     Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
-      debug(5, "\t\t\tfunction constructed" );
+      debug(-5, "\t\t\tfunction constructed" );
     }
     void Function::Run(ScopePass scope) {
       vector<ValuePass> p;
@@ -233,7 +233,7 @@ namespace ilang {
     }
     ValuePass Function::GetValue(ScopePass this_scope) {
       // this need to track the scope at this point so that it could be use later in the funciton
-      debug(5, "Function get value");
+      debug(-6, "Function get value");
       errorTrace("Getting value of a function");
       Function *self = this;
       ilang::Function fun;
@@ -252,11 +252,11 @@ namespace ilang {
       auto returnHandle = [&returned, _ret] (ValuePass *ret) {
 	returned=true;
 	if(_ret) *_ret = *ret;
-	debug(6, "return hook set");
+	debug(-6, "return hook set");
       };
       ScopePass scope = ScopePass(new FunctionScope<decltype(returnHandle)>(_scope_made, _scope_self, returnHandle));
 
-      debug(5,"function called");
+      debug(-6,"function called");
       if(params) { // the parser set params to NULL when there are non
 	list<Node*>::iterator it = params->begin();
 	for(ValuePass v : p) {
@@ -277,7 +277,7 @@ namespace ilang {
 	for(Node *n : *body) {
 	  if(returned) return;
 	  assert(n);
-	  debug(6,"function run");
+	  debug(-6,"function run");
 	  n->Run(scope);
 	}
       }
@@ -325,7 +325,7 @@ namespace ilang {
     void Variable::Run (ScopePass scope) {
       // iirc this does not happen as the syntax does not allow for variables to be created without a default value
       error(0, "Variables must always have some value set to them");
-      debug(4,"\t\t\tSetting variable: " << name->front());
+      debug(-6,"\t\t\tSetting variable: " << name->front());
       scope->forceNew(GetFirstName(), *modifiers);
     }
     void Variable::Set (ScopePass scope, ValuePass var, bool force) {
@@ -340,7 +340,7 @@ namespace ilang {
       }
       assert(v);
       v->Set(var);
-      debug(4,"Set: " << GetFirstName() << " " << var << " " << v->Get());
+      debug(-6,"Set: " << GetFirstName() << " " << var << " " << v->Get());
       scope->Debug();
     }
     ilang::Variable * Variable::Get(ScopePass scope) {
@@ -537,10 +537,10 @@ namespace ilang {
 
     Call::Call (Value *call, list<Node*> *args):
       calling(call), params(args) {
-      debug(4,"\t\t\tCalling function");
+      debug(-5,"\t\t\tCalling function");
     }
     void Call::Run(ScopePass scope) {
-      debug(4,"call run");
+      debug(-6,"call run");
       GetValue(scope);
     }
     ValuePass Call::GetValue (ScopePass scope) {
@@ -584,12 +584,12 @@ namespace ilang {
       Call(NULL, args) {}
     ValuePass PrintCall::GetValue (ScopePass scope) {
       errorTrace("Print call");
-      debug(5,"made into the print Call");
+      debug(-6,"made into the print Call");
       for(Node *it : *params) {
 	assert(dynamic_cast<parserNode::Value*>(it));
 	dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
       }
-      debug(5,"made it out of print");
+      debug(-5,"made it out of print");
     }
 
     void PrintCall::Print (Printer *p) {
@@ -1069,7 +1069,7 @@ namespace ilang {
     ValuePass Object::GetValue(ScopePass scope) {
       // will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
       errorTrace("Creating object");
-      debug(4, "Object getting value");
+      debug(-6, "Object getting value");
       // can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
       ilang::Object *obj = new ilang::Object(objects, scope);
       ilang::Value *val = new ilang::Value(obj);
