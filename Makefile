@@ -92,7 +92,7 @@ clean-all: clean
 	cd deps/libuv && make distclean
 	rm -rf DB/
 
-depend: submodule
+depend:
 	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD) 
 	# fixes the problem with the build dir being different from the src
 	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile 
@@ -148,9 +148,10 @@ build/import.o: include/ilang/import.h include/ilang/object.h
 build/import.o: include/ilang/function.h
 build/parser.o: include/ilang/parser.h
 build/variable.o: include/ilang/variable.h include/debug.h
-build/variable.o: include/ilang/error.h include/ilang/object.h
-build/variable.o: include/ilang/parserTree.h include/ilang/scope.h
+build/variable.o: include/ilang/error.h include/ilang/function.h
+build/variable.o: include/ilang/scope.h include/ilang/parserTree.h
 build/variable.o: include/ilang/import.h include/ilang/print.h
+build/variable.o: include/ilang/object.h
 build/scope.o: include/ilang/scope.h include/ilang/variable.h include/debug.h
 build/scope.o: include/ilang/object.h include/ilang/parserTree.h
 build/scope.o: include/ilang/import.h include/ilang/print.h

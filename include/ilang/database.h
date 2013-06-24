@@ -7,25 +7,26 @@
 #include "leveldb/db.h"
 
 #include <boost/filesystem.hpp>
+#include <stdio.h>
 
 /* notes on the database
  * When networked: (raw storage, trust all nodes)
  *  1 byte : type of value
- *           0: error
- *           1: reserved for the system to contain local meta data
- *           2: R/W all, contains data
+ *	     0: error
+ *	     1: reserved for the system to contain local meta data
+ *	     2: R/W all, contains data
  *  4 bytes: version of hash ring function
  *  8 bytes: value of hash ring
  *  N bytes: variable number of bytes representing the 'key'
  *
  * When networked: (raw storage, trust few nodes)
  *  1 byte : type of value
- *           0: error
- *           1: reserved for the system to contain local meta data
- *           2: R/W all, contains data
- *           3: R-all W-one, contains data (techincally all can read all the data, but when it is encrypted then only some will understand it)
- *           4: 10 bytes containing id of key, signature generated
- *           5: seperate secion that contains the public keys by id assigned, also signed using some global master-ish key to have this id and a date that it expires
+ *	     0: error
+ *	     1: reserved for the system to contain local meta data
+ *	     2: R/W all, contains data
+ *	     3: R-all W-one, contains data (techincally all can read all the data, but when it is encrypted then only some will understand it)
+ *	     4: 10 bytes containing id of key, signature generated
+ *	     5: seperate secion that contains the public keys by id assigned, also signed using some global master-ish key to have this id and a date that it expires
  *  4 bytes: version of hash ring function
  *  8 bytes: value of hash ring
  *  N bytes: variable number of bytes representing the 'key'
@@ -33,9 +34,9 @@
  *
  * When local:
  *  1 byte : type of value
- *           0: error
- *           1: reserved for system to contain local meta data
- *           2: R/W all, contains data
+ *	     0: error
+ *	     1: reserved for system to contain local meta data
+ *	     2: R/W all, contains data
  *  N bytes: variable number of bytes representing the 'key'
  *
  *
@@ -99,6 +100,8 @@ namespace ilang {
     void setMeta(std::string name, std::string data);
     std::string getMeta(std::string name);
   };
+  int DatabaseLoad(FILE*);
+  int DatabaseDump(FILE*);
   extern Database *System_Database;
 }
 

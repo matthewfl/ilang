@@ -4,6 +4,10 @@
 
 #include <string.h>
 #include <iostream>
+
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 using namespace std;
 
 
@@ -291,4 +295,26 @@ namespace ilang {
 		     ILANG_FUNCTION("metaGet", DB_metaGet)
 		     );
 
+}
+
+// for loading json data into and out of the database
+namespace ilang {
+  using namespace boost::property_tree;
+  int DatabaseLoad(FILE *file) {
+    char buffer[256];
+    //std::string str;
+    //boost::property_tree::basic
+    //basic_ptree tree;
+    stringstream str;
+    ptree tree;
+
+    while( fgets(buffer, 256, file) != NULL ) {
+      str << buffer;
+    }
+    read_json(str, tree);
+
+  }
+  int DatabaseDump(FILE *file) {
+
+  }
 }

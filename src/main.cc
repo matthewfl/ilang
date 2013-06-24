@@ -28,6 +28,8 @@ void show_help_info(char *name) {
        << "\t-v #\t\tdebug level\n"
        << "\t--version\tdispay version\n"
        << "\t-d\t\tset location of database files\n"
+       << "\t--load\t\t[Variable name]\n"
+       << "\t--dump\t\t[Variable name]\n"
        << "\n"
        << "VERSION: " << ILANG_VERSION << "\n";
 }
@@ -62,6 +64,9 @@ int main (int argc, char **argv) {
     return 1;
   }
 
+  char *DB_dump=NULL;
+  bool DB_doDump=false;
+
   char *main_file = NULL;
   boost::filesystem::path db_path = boost::filesystem::current_path();
   db_path += "/DB/";
@@ -86,6 +91,15 @@ int main (int argc, char **argv) {
 	if(s == "version") {
 	  cout << "ilang version: " <<  ILANG_VERSION << endl;
 	  return 1;
+	}else if(s == "load") {
+	  DB_dump = argv[++i];
+	  DB_doDump = false;
+	}else if(s == "dump") {
+	  cerr << "TO DO\n";
+	  return 1;
+	}else{
+	  cerr << "Argument " << s << " not found\n";
+	  return 1;
 	}
       }
     }else{
@@ -94,12 +108,22 @@ int main (int argc, char **argv) {
     }
   }
 
-  if(!main_file) {
+  if(!main_file && !DB_dump) {
     show_help_info(argv[0]);
     return 1;
   }
 
   ilang::System_Database = new ilang::DatabaseFile(db_path);
+
+  if(DB_dump) {
+    if(DB_doDump) {
+
+    }else{ // load
+      ilang::DatabaseLoad(stdin);
+    }
+    cerr << "DB action complete\n";
+    return 0;
+  }
 
   // for setting up the import search path
   ilang::Init(argc, argv);
