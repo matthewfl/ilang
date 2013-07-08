@@ -463,7 +463,7 @@ namespace {
     int r = uv_listen((uv_stream_t*)&server,
 	      SERVER_QUEUE_BUFFER_SIZE,
 	      on_connection_cb);
-    uv_run(loop);
+    uv_run(loop, UV_RUN_DEFAULT);
     if(r != 0) { cerr << "Problem opening up socket\n"; }
     return ValuePass(new ilang::Value((bool)r == 0));
 

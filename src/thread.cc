@@ -98,7 +98,8 @@ namespace ilang {
     uv_loop_t *loop = uv_default_loop();
     self->m_uv_running = true;
     do {
-      while(uv_run_once(loop));
+      //while(uv_run_once(loop));
+      uv_run(loop, UV_RUN_ONCE);
     } while(self->m_eventsWaiting != 0 && self->m_threadCount != self->m_waitingThread);
     self->m_uv_running = false;
   }

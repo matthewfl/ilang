@@ -36,7 +36,7 @@ glogLib=./deps/glog/.libs/libglog.a
 #LIBS+= $(glogLib)
 leveldb=./deps/leveldb/libleveldb.a
 LIBS+=$(leveldb)
-libuv=./deps/libuv/uv.a
+libuv=./deps/libuv/libuv.a
 LIBS+=$(libuv) -lrt
 
 DEPS=$(leveldb) $(libuv)
@@ -186,8 +186,5 @@ build/init.o: deps/leveldb/include/leveldb/slice.h
 build/init.o: deps/leveldb/include/leveldb/status.h
 build/init.o: deps/leveldb/include/leveldb/options.h
 build/thread.o: include/ilang/thread.h include/debug.h deps/libuv/include/uv.h
-build/thread.o: deps/libuv/include/ares.h deps/libuv/include/ares_version.h
 build/thread.o: deps/libuv/include/uv-private/uv-unix.h
 build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
-build/thread.o: deps/libuv/include/uv-private/ev.h
-build/thread.o: deps/libuv/include/uv-private/eio.h
