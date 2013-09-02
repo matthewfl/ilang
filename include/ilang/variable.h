@@ -72,6 +72,7 @@ namespace ilang {
     ~Value();
     void Print();
     std::string str();
+    void toJSON(std::stringstream&);
     bool isTrue();
     boost::any & Get();
   };

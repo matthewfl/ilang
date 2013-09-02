@@ -158,6 +158,39 @@ namespace ilang {
     return ss.str();
 
   }
+
+  void Value::toJSON(stringstream &ss) {
+    if(val.empty()) {
+      ss << "null";
+    }else if(typeid(std::string) == val.type()) {
+      //ss << boost::any_cast<std::string>(val);
+      ss << '"' <<  boost::any_cast<std::string>(val) << '"' ;
+    }else if(typeid(long) == val.type()) {
+      ss << boost::any_cast<long>(val);
+    }else if(typeid(int) == val.type()) {
+      // this should not happen as all ints are currently long
+      ss << boost::any_cast<int>(val);
+    }else if(typeid(double) == val.type()) {
+      ss << boost::any_cast<double>(val);
+    }else if(typeid(bool) == val.type()) {
+      ss << boost::any_cast<bool>(val) ? "true" : "false" ;
+    }else if(typeid(ilang::Object*) == val.type()) {
+      ilang::Array *arr;
+      if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
+	bool first = true; ss << "[";
+	for(ilang::Variable *vv : arr->members) {
+	  if(!first) ss << ", "; first = false;
+	  vv->Get()->toJSON(ss);
+	}
+	ss << "]";
+      }else{
+	ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
+      }
+    }else{
+      ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
+    }
+  }
+
   bool Value::isTrue () {
     if(typeid(bool) == val.type()) {
       return boost::any_cast<bool>(val);

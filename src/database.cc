@@ -300,7 +300,7 @@ namespace ilang {
 // for loading json data into and out of the database
 namespace ilang {
   using namespace boost::property_tree;
-  int DatabaseLoad(FILE *file) {
+  int DatabaseLoad(string name, FILE *file) {
     char buffer[256];
     //std::string str;
     //boost::property_tree::basic
@@ -314,7 +314,13 @@ namespace ilang {
     read_json(str, tree);
 
   }
-  int DatabaseDump(FILE *file) {
+  int DatabaseDump(string name, FILE *file) {
+    storedData *data = ilang::System_Database->Get(name);
+    assert(data);
+    ValuePass value = DB_readStoredData(data);
+    std::stringstream ss;
+    value->toJSON(ss);
+    cout << ss;
 
   }
 }

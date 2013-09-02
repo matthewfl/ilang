@@ -100,8 +100,8 @@ namespace ilang {
     void setMeta(std::string name, std::string data);
     std::string getMeta(std::string name);
   };
-  int DatabaseLoad(FILE*);
-  int DatabaseDump(FILE*);
+  int DatabaseLoad(std::string, FILE*);
+  int DatabaseDump(std::string, FILE*);
   extern Database *System_Database;
 }
 

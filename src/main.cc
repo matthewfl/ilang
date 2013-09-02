@@ -95,8 +95,8 @@ int main (int argc, char **argv) {
 	  DB_dump = argv[++i];
 	  DB_doDump = false;
 	}else if(s == "dump") {
-	  cerr << "TO DO\n";
-	  return 1;
+	  DB_dump = argv[++i];
+	  DB_doDump = true;
 	}else{
 	  cerr << "Argument " << s << " not found\n";
 	  return 1;
@@ -117,9 +117,9 @@ int main (int argc, char **argv) {
 
   if(DB_dump) {
     if(DB_doDump) {
-
+      ilang::DatabaseDump(DB_dump, stdout);
     }else{ // load
-      ilang::DatabaseLoad(stdin);
+      ilang::DatabaseLoad(DB_dump, stdin);
     }
     cerr << "DB action complete\n";
     return 0;
