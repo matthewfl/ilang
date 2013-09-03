@@ -47,23 +47,27 @@
 
 namespace ilang {
   namespace fs = boost::filesystem;
-  struct storedData {
-    enum {
-      IntNumber = 1,
-      FloatNumber = 2,
-      Bool = 3,
-      String = 4,
-      Object = 5,
-      Array = 6
-    } type;
-    union {
-      long Int;
-      double Float;
-      bool BoolDat;
-      size_t string_length;
-    };
-    // if the data is a string type, then just have the value follow this struct
-  };
+  // struct storedData {
+  //   enum {
+  //     IntNumber = 1,
+  //     FloatNumber = 2,
+  //     Bool = 3,
+  //     String = 4,
+  //     Object = 5,
+  //     Array = 6
+  //   } type;
+  //   union {
+  //     long Int;
+  //     double Float;
+  //     bool BoolDat;
+  //     size_t string_length;
+  //   };
+  //   // if the data is a string type, then just have the value follow this struct
+  // };
+
+  // using protobuf
+  typedef std::string storedData;
+
   struct storedNameRaw {
     enum {
       metaData = 1,
@@ -73,9 +77,11 @@ namespace ilang {
   };
   // creates a ValuePass with the correct value when given a poitner to a storedData
   // does not delete the storedData
-  ValuePass DB_readStoredData (storedData*);
+  //ValuePass DB_readStoredData (storedData*);
   // creats a storedData from a boost::any, returned value needs to be delete by calling function
-  storedData *DB_createStoredData (const boost::any&);
+  //storedData *DB_createStoredData (const boost::any&);
+  class DB_serializer;
+
   char *DB_createName();
 
   class Database {

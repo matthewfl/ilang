@@ -1,0 +1,20 @@
+package ilang_db;
+
+message Entry {
+  enum types {
+    Object = 0;
+    Array = 1;
+    Integer = 2;
+    Float = 3;
+    Bool = 4;
+    String = 5;
+  }
+
+  required types type = 1;
+  optional string Object_id = 2;
+  repeated Entry Array_dat = 3;
+  optional int64 Integer_dat = 4;
+  optional double Float_dat = 5;
+  optional bool Bool_dat = 6;
+  optional string String_dat = 7;
+}

@@ -16,13 +16,14 @@ using namespace ilang::parserNode;
 #include <map>
 using namespace std;
 
-struct yyltype;
-struct yyltype yylloc;
+//struct yyltype;
+//struct yyltype yylloc;
+
 
 void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
   using namespace std;
-  cerr << "error: " << msg << endl << yylloc.first_line;
-
+  //cerr << "error: " << msg << endl << yylloc.first_line;
+  cerr << "error: " << msg << endl << loc->first_line;
 }
 
 #define YYDEBUG 1
@@ -197,7 +198,7 @@ Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_new '(' ParamList ')'		{ $$ = new NewCall($3); }
 		|	T_assert '(' ParamList ')'	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
 		|	T_import '(' ParamList ')'	{ $$ = new ImportCall($3); }
-		|	T_go '(' ParamList ')'		{ $$ = new ThreadGoCall($3); }	
+		|	T_go '(' ParamList ')'		{ $$ = new ThreadGoCall($3); }
 		;
 
 ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }

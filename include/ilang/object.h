@@ -22,13 +22,15 @@ namespace ilang {
     virtual ~Class();
   };
   class ObjectScope;
-  struct storedData;
+  //typedef std::string storedData;
+  class DB_serializer;
   class C_Class;
   class Object {
   private:
     friend class ObjectScope;
-    friend storedData *DB_createStoredData(const boost::any&);
-    friend ValuePass DB_readStoredData(storedData*);
+    friend class DB_serializer;
+    //friend storedData *DB_createStoredData(const boost::any&);
+    //friend ValuePass DB_readStoredData(storedData*);
     ValuePass baseClassValue; // kept so the smart pointer to know that something is using it
     Class *baseClass;
     C_Class *C_baseClass;
@@ -45,8 +47,9 @@ namespace ilang {
     virtual ilang::Variable * operator [] (ValuePass);
   };
   class Array : public Object {
-    friend storedData *DB_createStoredData(const boost::any&);
-    friend ValuePass DB_readStoredData(storedData*);
+    //friend storedData *DB_createStoredData(const boost::any&);
+    //friend ValuePass DB_readStoredData(storedData*);
+    friend class DB_serializer;
     friend class Value;
     std::vector<ilang::Variable*> members;
     std::list<std::string> *modifiers;

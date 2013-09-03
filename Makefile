@@ -2,13 +2,13 @@ TARGET= i
 
 # currently not in system: netowrk.cc
 SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc print.cc init.cc thread.cc
-LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar
+LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar -lprotobuf
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
 MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io i/eval.io
 
 BUILDDIR=build
-OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
+OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/database.pb.cc $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
 
 SRCDIR=src
 SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
@@ -29,6 +29,7 @@ LDFLAGS= -static-libgcc #-Wl,-export-dynamic
 
 CXX= g++
 LD= g++ -L/usr/local/lib
+PROTOC= protoc
 
 
 # settings for building deps
@@ -62,7 +63,7 @@ release: LDFLAGS+= $(MODULESD)
 release: submodule clean $(MODULESD) $(TARGET)
 
 submodule:
-	git submodule update --init --recursive 
+	git submodule update --init --recursive
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
@@ -80,22 +81,28 @@ $(BUILDDIR)/lex.yy.cc: $(SRCDIR)/scanner.l $(BUILDDIR)/parser.tab.cc $(BUILDDIR)
 $(BUILDDIR)/lex.yy.o: $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/parser.tab.hh
 $(BUILDDIR)/parser.tab.o: $(BUILDDIR)/parser.tab.cc
 
-$(TARGET): $(DEPS) $(OBJS) $(MODULESD) 
+$(BUILDDIR)/%.pb.cc: $(SRCDIR)/%.proto
+	protoc $< --cpp_out=$(dir $@)
+	cp $(BUILDDIR)/src/* $(BUILDDIR)
+
+$(BUILDDIR)/database.pb.o: $(BUILDDIR)/database.pb.cc
+
+$(TARGET): $(DEPS) $(OBJS) $(MODULESD)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
 
 modules: $(MODULESD)
 
 clean:
-	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
+	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
 clean-all: clean
 	cd deps/leveldb && make clean
 	cd deps/libuv && make distclean
 	rm -rf DB/
 
 depend:
-	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD) 
+	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD)
 	# fixes the problem with the build dir being different from the src
-	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile 
+	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile
 #eventually change this to use "g++ -MM" to generate the source files
 
 test: $(TARGET)
