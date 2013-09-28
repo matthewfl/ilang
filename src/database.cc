@@ -28,6 +28,8 @@ namespace ilang {
     static ValuePass readStoredData(ilang_db::Entry *entry) {
       using namespace ilang_db;
       ilang::Object *obj;
+      ilang::Array *arr;
+      std::vector<ValuePass> arr_members;
       switch(entry->type()) {
       case Entry::Integer:
 	return ValuePass(new ilang::Value(entry->integer_dat()));
@@ -43,9 +45,14 @@ namespace ilang {
 	memcpy(obj->DB_name, entry->string_dat().c_str(), entry->string_dat().size()+1);
 	return ValuePass(new ilang::Value(obj));
       case Entry::Array:
-
-	assert(0);
-
+	//arr = new ilang::Array;
+	arr_members.reserve(entry->array_dat_size());
+	for(int i=0; i < entry->array_dat_size(); i++) {
+	  ValuePass gg =  readStoredData(System_Database->Get(entry->array_dat(i)));
+	  arr_members.push_back(gg);
+	}
+	arr = new ilang::Array(arr_members);
+	return ValuePass(new ilang::Value(static_cast<ilang::Object*>(arr)));
       default:
 	assert(0);
       }
@@ -70,8 +77,14 @@ namespace ilang {
 	  for(int i=0; i < arr->members.size(); i++) {
 	    //storedData *dat = DB_createStoredData(arr->members[i]->Get());
 	    //entry.
-	    Entry *arr_ent = entry->add_array_dat();
-	    createStoredData(arr->members[i]->Get(), arr_ent);
+
+	    // Entry *arr_ent = entry->add_array_dat();
+	    // createStoredData(arr->members[i]->Get(), arr_ent);
+
+	    char *name = DB_createName();
+	    entry->add_array_dat(name);
+	    System_Database->Set(name, createStoredData(arr->members[i]->Get()->Get()));
+
 	  }
 	}else{
 	  // need to inspect object and stuff
@@ -117,6 +130,7 @@ namespace ilang {
 	assert(0);
 	// no classes in the db
       }else{
+	cout << a.type().name() << endl;
 	assert(0);
 	// have no idea what this is
       }

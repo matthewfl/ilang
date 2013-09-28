@@ -8,7 +8,7 @@ LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy 
 MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io i/eval.io
 
 BUILDDIR=build
-OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/database.pb.cc $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
+OBJS= $(BUILDDIR)/lex.yy.o $(BUILDDIR)/parser.tab.o $(BUILDDIR)/database.pb.o $(addprefix $(BUILDDIR)/, $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS))))
 
 SRCDIR=src
 SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
