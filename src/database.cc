@@ -390,3 +390,25 @@ namespace ilang {
 
   }
 }
+
+
+namespace ilang {
+  void Array::RefreshDB() {
+    if(!DB_name) return;
+    //    cout << "in refresh db " << name << endl;
+
+    using namespace ilang_db;
+    Entry arr_contents;
+    arr_contents.set_type(Entry::Array_contents);
+    for(int i=0; i < members.size(); i++) {
+      char *name = DB_createName();
+      arr_contents.add_array_dat(name);
+      storedData *dat;
+      System_Database->Set(name, dat =  DB_serializer::createStoredData(members[i]->Get()->Get()));
+      delete dat;
+    }
+    std::string str_arr_contents;
+    arr_contents.SerializeToString(&str_arr_contents);
+    System_Database->Set(DB_name, &str_arr_contents);
+  }
+}

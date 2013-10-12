@@ -338,10 +338,7 @@ namespace ilang {
 
   }
 
-  void Array::RefreshDB() {
-    if(!DB_name) return;
 
-  }
 
   ScopeObject::ScopeObject (Scope *_scope, bool isolate) : scope(_scope), Isolate(isolate) {}
   ilang::Variable * ScopeObject::operator [] (std::string name) {
