@@ -203,9 +203,12 @@ namespace ilang {
     push_fun.native = true;
     push_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
       error(args.size() == 1, "Array.push expects 1 argument");
+      assert(self->modifiers);
       ilang::Variable *var = new ilang::Variable("", *self->modifiers);
       var->Set(args[0]);
       self->members.push_back(var);
+      self->RefreshDB();
+      *ret = ValuePass(new ilang::Value(self->members.size()));
     };
     mem_push->Set(ValuePass(new ilang::Value(push_fun)));
 
@@ -217,6 +220,7 @@ namespace ilang {
       *ret = var->Get();
       delete var;
       self->members.pop_back();
+      self->RefreshDB();
     };
     mem_pop->Set(ValuePass(new ilang::Value(pop_fun)));
 
@@ -230,6 +234,8 @@ namespace ilang {
       var->Set(args[1]);
       auto it = self->members.begin();
       self->members.insert(it + n, 1, var);
+      self->RefreshDB();
+      *ret = ValuePass(new ilang::Value(self->members.size()));
     };
     mem_insert->Set(ValuePass(new ilang::Value(insert_fun)));
 
@@ -240,8 +246,10 @@ namespace ilang {
       error(args[0]->Get().type() == typeid(long), "Array.remove expect argument to be integer");
       long n = boost::any_cast<long>(args[0]->Get());
       auto it = self->members.begin() + n;
+      *ret = (*it)->Get();
       delete *it;
       self->members.erase(it);
+      self->RefreshDB();
     };
     mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
     DB_name = NULL;
@@ -264,7 +272,7 @@ namespace ilang {
 
   Array::Array(std::vector<ValuePass> &val): mem_length(NULL) {
     members.reserve(val.size());
-    modifiers = NULL;
+    modifiers = new std::list<std::string>;
     std::list<std::string> mod;
     for(auto it : val) {
       ilang::Variable *var = new Variable("", mod);
@@ -327,6 +335,11 @@ namespace ilang {
     // idk what else this can be/should be
     // maybe return functions such as push and pop etc
     error(0, "could not find \""<<name<<"\" in type array");
+
+  }
+
+  void Array::RefreshDB() {
+    if(!DB_name) return;
 
   }
 

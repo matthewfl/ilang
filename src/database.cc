@@ -27,32 +27,38 @@ namespace ilang {
 
     static ValuePass readStoredData(ilang_db::Entry *entry) {
       using namespace ilang_db;
-      ilang::Object *obj;
-      ilang::Array *arr;
-      std::vector<ValuePass> arr_members;
       switch(entry->type()) {
       case Entry::Integer:
 	return ValuePass(new ilang::Value(entry->integer_dat()));
       case Entry::Float:
 	return ValuePass(new ilang::Value(entry->float_dat()));
       case Entry::Bool:
-	return  ValuePass(new ilang::Value(entry->bool_dat()));
+	return ValuePass(new ilang::Value(entry->bool_dat()));
       case Entry::String:
 	return ValuePass(new ilang::Value(entry->string_dat()));
-      case Entry::Object:
-	obj = new ilang::Object;
-	obj->DB_name = new char[entry->string_dat().size()+1];
-	memcpy(obj->DB_name, entry->string_dat().c_str(), entry->string_dat().size()+1);
+      case Entry::Object: {
+	ilang::Object *obj = new ilang::Object;
+	obj->DB_name = new char[entry->object_id().size()+1];
+	memcpy(obj->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
 	return ValuePass(new ilang::Value(obj));
-      case Entry::Array:
-	//arr = new ilang::Array;
+      }
+      case Entry::Array: {
+	ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
+	ilang::Array *a = static_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(arr->Get()));
+	a->DB_name = new char[entry->object_id().size()+1];
+	memcpy(a->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
+	return arr;
+      }
+      case Entry::Array_contents: {
+	std::vector<ValuePass> arr_members;
 	arr_members.reserve(entry->array_dat_size());
 	for(int i=0; i < entry->array_dat_size(); i++) {
-	  ValuePass gg =  readStoredData(System_Database->Get(entry->array_dat(i)));
+	  ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
 	  arr_members.push_back(gg);
 	}
-	arr = new ilang::Array(arr_members);
+	ilang::Array *arr = new ilang::Array(arr_members);
 	return ValuePass(new ilang::Value(static_cast<ilang::Object*>(arr)));
+      }
       default:
 	assert(0);
       }
@@ -74,18 +80,29 @@ namespace ilang {
 	if(arr = dynamic_cast<ilang::Array*>(obj)) {
 	  //assert(0);
 	  entry->set_type(ilang_db::Entry::Array);
-	  for(int i=0; i < arr->members.size(); i++) {
-	    //storedData *dat = DB_createStoredData(arr->members[i]->Get());
-	    //entry.
+	  if(!arr->DB_name) {
+	    Entry arr_contents;
+	    arr_contents.set_type(Entry::Array_contents);
+	    arr->DB_name = DB_createName();
+	    for(int i=0; i < arr->members.size(); i++) {
+	      //storedData *dat = DB_createStoredData(arr->members[i]->Get());
+	      //entry.
 
-	    // Entry *arr_ent = entry->add_array_dat();
-	    // createStoredData(arr->members[i]->Get(), arr_ent);
+	      // Entry *arr_ent = entry->add_array_dat();
+	      // createStoredData(arr->members[i]->Get(), arr_ent);
 
-	    char *name = DB_createName();
-	    entry->add_array_dat(name);
-	    System_Database->Set(name, createStoredData(arr->members[i]->Get()->Get()));
-
+	      char *name = DB_createName();
+	      arr_contents.add_array_dat(name);
+	      storedData *dat;
+	      System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()->Get()));
+	      delete dat;
+	    }
+	    std::string str_arr_contents;
+	    arr_contents.SerializeToString(&str_arr_contents);
+	    System_Database->Set(arr->DB_name, &str_arr_contents);
 	  }
+	  entry->set_type(Entry::Array);
+	  entry->set_object_id(arr->DB_name);
 	}else{
 	  // need to inspect object and stuff
 	  // for the time being, we do not want to deal with base classes
@@ -143,6 +160,31 @@ namespace ilang {
       entry.SerializeToString(ret);
       return ret;
     }
+
+    static void refreshStoredData(const boost::any &a) {
+      using namespace ilang_db;
+      if(a.type() == typeid(ilang::Array*)) {
+	// TODO: fix to reuse names
+	ilang::Array *arr = boost::any_cast<ilang::Array*>(a);
+	assert(arr->DB_name);
+	Entry arr_contents;
+	arr_contents.set_type(Entry::Array_contents);
+
+	for(int i=0; i < arr->members.size(); i++) {
+	  char *name = DB_createName();
+	  arr_contents.add_array_dat(name);
+	  storedData *dat;
+	  System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()->Get()));
+	  delete dat;
+	}
+	std::string str_arr_contents;
+	arr_contents.SerializeToString(&str_arr_contents);
+	System_Database->Set(arr->DB_name, &str_arr_contents);
+      }else{
+	// nothing else should use this at this time
+	assert(0);
+      }
+    }
   };
 
   char * DB_createName () {
@@ -194,7 +236,7 @@ namespace ilang {
   }
 
   void DatabaseFile::Set(std::string name, storedData *data) {
-    size_t storedSize = sizeof(storedData);
+    //size_t storedSize = sizeof(storedData);
     //if(data->type == storedData::String || data->type == storedData::Object) storedSize = sizeof(storedData) + data->string_length;
     leveldb::Slice s_data(*data);
     storedNameRaw NameStr;

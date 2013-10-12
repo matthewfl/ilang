@@ -59,6 +59,7 @@ namespace ilang {
     ilang::Variable *mem_insert;
     ilang::Variable *mem_remove;
     void Init();
+    void RefreshDB();
     char *DB_name;
   public:
     Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, ScopePass);

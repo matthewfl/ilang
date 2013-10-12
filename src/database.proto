@@ -4,10 +4,11 @@ message Entry {
   enum types {
     Object = 0;
     Array = 1;
-    Integer = 2;
-    Float = 3;
-    Bool = 4;
-    String = 5;
+    Array_contents = 2;
+    Integer = 3;
+    Float = 4;
+    Bool = 5;
+    String = 6;
   }
 
   required types type = 1;

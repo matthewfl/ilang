@@ -47,25 +47,8 @@
 
 namespace ilang {
   namespace fs = boost::filesystem;
-  // struct storedData {
-  //   enum {
-  //     IntNumber = 1,
-  //     FloatNumber = 2,
-  //     Bool = 3,
-  //     String = 4,
-  //     Object = 5,
-  //     Array = 6
-  //   } type;
-  //   union {
-  //     long Int;
-  //     double Float;
-  //     bool BoolDat;
-  //     size_t string_length;
-  //   };
-  //   // if the data is a string type, then just have the value follow this struct
-  // };
 
-  // using protobuf
+  // using protobuf for storage format, see database.proto
   typedef std::string storedData;
 
   struct storedNameRaw {
