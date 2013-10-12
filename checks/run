@@ -5,6 +5,7 @@ FILES=*.i
 BFILES=*.i.bad
 FAILED=""
 
+rm -rfv DB/
 
 for f in $FILES; do
 	echo "RUNNING $f"

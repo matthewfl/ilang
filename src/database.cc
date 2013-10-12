@@ -395,7 +395,6 @@ namespace ilang {
 namespace ilang {
   void Array::RefreshDB() {
     if(!DB_name) return;
-    //    cout << "in refresh db " << name << endl;
 
     using namespace ilang_db;
     Entry arr_contents;
