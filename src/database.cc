@@ -366,6 +366,103 @@ namespace ilang {
 // for loading json data into and out of the database
 namespace ilang {
   using namespace boost::property_tree;
+  /*
+  void createStoredDataFromJSON(ptree tree, ilang_db::Entry &entry) {
+    cout << 'z' << tree.size();
+    if(tree.get_value_optional<int>() != boost::optional<int>()) {
+      cout << 'a';
+    }else if(tree.get_value_optional<long>() != boost::optional<long>()) {
+      cout << 'b';
+    }else if(tree.get_value_optional<double>() != boost::optional<double>()) {
+      cout << 'c';
+    }else if(tree.get_value_optional<float>() != boost::optional<float>()) {
+      cout << 'd';
+    }
+    // else if(tree.get_value_optional<std::string>() != boost::optional<std::string>()) {
+    //	 cout << 'e';
+    //	 cout << tree.get_value_optional<std::string>() << endl;
+    // }
+    else{
+      cout << 'f';
+
+      for(auto it : tree) {
+	cout << it.first << typeid(it.first).name() << it.first.empty() << endl ;
+	createStoredDataFromJSON(it.second, entry);
+	//createStoredDataFromJSON
+      }
+    }
+
+  }
+  */
+
+  void loadTree (ptree &pt, ilang_db::Entry &entry) {
+    if (pt.empty()) {
+#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
+      cerr << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
+      cerr << "\""<< pt.data()<< "\"";
+      if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
+	entry.set_type(ilang_db::Entry::Bool);
+	entry.set_bool_dat(pt.get_value<bool>());
+      } else if(pt.get_value_optional<long>() != boost::optional<long>()) {
+	entry.set_type(ilang_db::Entry::Integer);
+	entry.set_integer_dat(pt.get_value<long>());
+      }else if(pt.get_value_optional<double>() != boost::optional<double>()) {
+	entry.set_type(ilang_db::Entry::Float);
+	entry.set_float_dat(pt.get_value<double>());
+      }else if(pt.get_value_optional<std::string>() != boost::optional<std::string>()) {
+	entry.set_type(ilang_db::Entry::String);
+	entry.set_string_dat(pt.get_value<std::string>());
+      }else{
+	assert(0); // wtf
+      }
+    } else {
+      //if (level) cerr << endl;
+      bool arr = pt.begin()->first.empty();
+      entry.set_type(arr ? ilang_db::Entry::Array : ilang_db::Entry::Object);
+      char *name = DB_createName();
+      entry.set_object_id(name);
+      ilang_db::Entry arr_contents;
+      // if there is no first element, then what? that makes this an empty object? as we don't have null
+      //cerr << arr << "{" << endl;
+      for (ptree::iterator pos = pt.begin(); pos != pt.end(); pos++) {
+	ilang_db::Entry sub_entry;
+	if(arr) {
+	  // TODO: check that this only happens for arrays
+	  char *sub_name = DB_createName();
+	  arr_contents.add_array_dat(name);
+	  loadTree(pos->second, sub_entry);
+	  std::string dat;
+	  sub_entry.SerializeToString(&dat);
+	  System_Database->Set(sub_name, &dat);
+	  delete sub_name;
+	}else{
+	  string sub_name = name;
+	  sub_name += pos->first;
+	  loadTree(pos->second, sub_entry);
+	  std::string dat;
+	  sub_entry.SerializeToString(&dat);
+	  System_Database->Set(sub_name, &dat);
+	}
+	//cerr << "\"" << pos->first << "\": ";
+	//loadTree(pos->second, sub_entry);//, level + 1);
+	// ++pos;
+	// if (pos != pt.end()) {
+	//   cerr << ",";
+	// }
+	//cerr << endl;
+      }
+      if(arr) {
+	std::string dat;
+	arr_contents.SerializeToString(&dat);
+	System_Database->Set(name, &dat);
+      }
+
+      //cerr << " }";
+      delete name; // should change to std::string ?
+    }
+  }
+
+
   int DatabaseLoad(string name, FILE *file) {
     char buffer[256];
     //std::string str;
@@ -379,7 +476,19 @@ namespace ilang {
     }
     read_json(str, tree);
 
+    // for(auto it : tree) {
+    //	 cout << it.first << ' ' << it.second.data() << endl;
+    // }
+
+    ilang_db::Entry entry;
+
+    loadTree(tree, entry);
+    // ilang_db::Entry entry;
+    // createStoredDataFromJSON(tree, entry);
+
+
   }
+
   int DatabaseDump(string name, FILE *file) {
     storedData *data = ilang::System_Database->Get(name);
     assert(data);
@@ -403,7 +512,7 @@ namespace ilang {
       char *name = DB_createName();
       arr_contents.add_array_dat(name);
       storedData *dat;
-      System_Database->Set(name, dat =  DB_serializer::createStoredData(members[i]->Get()->Get()));
+      System_Database->Set(name, dat =	DB_serializer::createStoredData(members[i]->Get()->Get()));
       delete dat;
     }
     std::string str_arr_contents;

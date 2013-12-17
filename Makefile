@@ -19,7 +19,7 @@ MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++11 -Wall -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
 CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
@@ -176,6 +176,7 @@ build/database.o: deps/leveldb/include/leveldb/status.h
 build/database.o: deps/leveldb/include/leveldb/options.h include/ilang/ilang.h
 build/database.o: include/ilang/import.h include/ilang/object.h
 build/database.o: include/ilang/function.h include/ilang/error.h
+build/database.o: build/database.pb.h
 build/modification.o: include/ilang/modification.h include/ilang/parserTree.h
 build/modification.o: include/ilang/variable.h include/ilang/scope.h
 build/modification.o: include/ilang/import.h include/debug.h
