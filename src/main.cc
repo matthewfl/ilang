@@ -79,7 +79,7 @@ int main (int argc, char **argv) {
 	break;
       case 'h':
 	show_help_info(argv[0]);
-	return 0;
+	return 1;
       case 'f':
 	main_file = argv[++i];
 	break;
@@ -89,7 +89,9 @@ int main (int argc, char **argv) {
       case '-':
 	string s(argv[i]+2);
 	if(s == "version") {
-	  cout << "ilang version: " <<  ILANG_VERSION << endl;
+	  cerr << "ilang version: ";
+	  cout << ILANG_VERSION ;
+	  cerr << endl;
 	  return 1;
 	}else if(s == "load") {
 	  DB_dump = argv[++i];
@@ -97,6 +99,9 @@ int main (int argc, char **argv) {
 	}else if(s == "dump") {
 	  DB_dump = argv[++i];
 	  DB_doDump = true;
+	}else if(s == "help") {
+	  show_help_info(argv[0]);
+	  return 1;
 	}else{
 	  cerr << "Argument " << s << " not found\n";
 	  return 1;

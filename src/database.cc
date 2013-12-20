@@ -397,9 +397,9 @@ namespace ilang {
 
   void loadTree (ptree &pt, ilang_db::Entry &entry) {
     if (pt.empty()) {
-#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
-      cerr << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
-      cerr << "\""<< pt.data()<< "\"";
+      //#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
+      //cerr << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
+      //cerr << "\""<< pt.data()<< "\"";
       if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
 	entry.set_type(ilang_db::Entry::Bool);
 	entry.set_bool_dat(pt.get_value<bool>());
@@ -483,6 +483,10 @@ namespace ilang {
     ilang_db::Entry entry;
 
     loadTree(tree, entry);
+
+    std::string dat;
+    entry.SerializeToString(&dat);
+    System_Database->Set(name, &dat);
     // ilang_db::Entry entry;
     // createStoredDataFromJSON(tree, entry);
 
