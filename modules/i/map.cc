@@ -67,7 +67,7 @@ namespace {
       }else{
 	// put in an if statement so if the object is large that it will use threads when dealing with the object
 	// this this is just a normal object with all the elements in the object
-	for(auto vals: m_obj->members) {
+	for(auto vals : m_obj->members) {
 	  if(vals.first == "this") continue;
 	  ilang::Variable *var = vals.second;
 	  CALL_WITH(vals.first, var->Get());
@@ -87,9 +87,48 @@ namespace {
       return ValuePass(new ilang::Value((ilang::Object*) new ilang::Array(m_emitted[boost::any_cast<std::string>(args[0]->Get())])));
     }
 
+    ValuePass Reduce(std::vector<ValuePass> &args) {
+      error(args.size() == 1, "map.reduce expects 1 argument");
+      error(args[0]->Get().type() == typeid(ilang::Function), "map.reduce expects a function");
+      error(!m_obj, "can not reduce directly on an object"); // TODO: remove this constrain
+
+      ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
+
+      ScopePass obj_scope = ScopePass();
+      if(funct.object) {
+	obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
+      }
+
+      Mapper *returnMapper = new Mapper();
+      ilang::Function emitFunct;
+      emitFunct.native = true;
+      emitFunct.ptr = [returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+	*ret = returnMapper->EmitFunct(args);
+	assert(*ret);
+      };
+      ValuePass emitFunctVal = ValuePass(new ilang::Value(emitFunct));
+
+#define CALL_WITH(_key, _value)						\
+      {									\
+	std::vector<ValuePass> params =					\
+	  {ValuePass(new ilang::Value( _key )), _value , emitFunctVal};	\
+	funct.ptr(obj_scope, params, &ret);				\
+      }
+
+      ValuePass ret = ValuePass(new ilang::Value);
+
+      for(auto vals : m_emitted) {
+	ValuePass arr = ValuePass(new ilang::Value((ilang::Object*) new ilang::Array(vals.second)));
+	CALL_WITH(vals.first, arr);
+      }
+
+#undef CALL_WITH
+    }
+
     void Init() {
       reg("map", &Mapper::MapAction);
       reg("get", &Mapper::Get);
+      reg("reduce", &Mapper::Reduce);
     }
 
   public:
@@ -99,7 +138,7 @@ namespace {
       assert(m_obj);
       Init();
     }
-    Mapper() {
+    Mapper() : m_obj(NULL) {
       Init();
     }
   };

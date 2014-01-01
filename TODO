@@ -20,7 +20,7 @@ break, continue, not in there yet
 
 ~C++ bindings <------ only working when it is statically linked, there is some problem with dlopen in that symbols are not being taking from the main program
 modifying code
-	
+
 
 "unlimited" ram
 auto parallization (thinking of making threading easy like in golang)
@@ -44,3 +44,19 @@ Currently possibly limiting cross platform:
 	C++11 compiler (not going to be fixed, but expect over time support will get better on other platforms)
 	How it find the location of the raw exe file to look for include files
 
+
+
+1/1/2014
+abstract away all of the base classes, eg should have a class for passing arguments to functions
+also clean up the variable system, make it smarter as being able to take more values and automatically create a new value if needed
+     eg:
+	class ValuePass : boost::shared_ptr<ilang::Value> {
+	public:
+		template<typename T> ValuePass (T &t) :boost::shared_ptr<ilang::Value>(new ilang::Value(t)) {}
+		ValuePass ...
+	};
+
+
+JIT engine using tinycc, possibly have some meta language so that it can easily generate code on the fly
+need to get modifications working better first
+how would this work with threading if the code was changing and it was compiled, where would it know to change the code if it was creating new code instead of modifying the syntax tree
