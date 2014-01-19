@@ -553,6 +553,7 @@ namespace ilang {
       ValuePass ret = ValuePass(new ilang::Value);
       ValuePass func = calling->GetValue(scope);
       boost::any &an = func->Get();
+      // TODO: this error is overly cryptic
       error(an.type() == typeid(ilang::Function), "Calling a non function " << an.type().name());
       ilang::Function *function = boost::any_cast<ilang::Function>(&an);
       if(function->native) {
@@ -767,6 +768,9 @@ namespace ilang {
       if(Act == Not)
 	return ValuePass(new ilang::Value( ! left->isTrue()));
       ValuePass right = this->right->GetValue(scope);
+      // cout << "logic check " << left->Get().type().name() << " " << right->Get().type().name() << endl;
+      // cout << left->str() << " " << right->str() << endl
+      // 	   << (left->Get().type() == typeid(bool)) << " " << (right->Get().type() == typeid(long)) << endl;
       switch(Act) {
       case And:
 	if(left->isTrue())
@@ -884,6 +888,7 @@ namespace ilang {
 	}
 	break;
       }
+      return ValuePass(new ilang::Value(false));
     }
 
     void LogicExpression::Print(Printer *p) {

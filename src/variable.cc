@@ -139,7 +139,7 @@ namespace ilang {
     }else if(typeid(double) == val.type()) {
       ss << boost::any_cast<double>(val);
     }else if(typeid(bool) == val.type()) {
-      ss << boost::any_cast<bool>(val) ? "true" : "false" ;
+      ss << (boost::any_cast<bool>(val) ? "true" : "false") ;
     }else if(typeid(ilang::Object*) == val.type()) {
       ilang::Array *arr;
       if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {

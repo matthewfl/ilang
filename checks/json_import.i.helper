@@ -1,7 +1,12 @@
 DB j = {};
 
 main = {
-//     assert(j.test.length == 3);
-//     assert(j.test[0] == 1);
-//     assert(j.test[2].a == 3);
+     assert(j.test.length == 3);
+     a = [1,2,3];
+     assert(a[0] == 1);
+     Print(a);
+     Print(j.test);
+     assert(j.test[1] == 2);
+     assert(j.test[0] == 1);
+     assert(j.test[2].a == 3);
 };

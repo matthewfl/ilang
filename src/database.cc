@@ -9,6 +9,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/exceptions.hpp>
 
 using namespace std;
 
@@ -397,24 +398,45 @@ namespace ilang {
 
   void loadTree (ptree &pt, ilang_db::Entry &entry) {
     if (pt.empty()) {
-      //#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
-      //cerr << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
-      //cerr << "\""<< pt.data()<< "\"";
-      if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
-	entry.set_type(ilang_db::Entry::Bool);
-	entry.set_bool_dat(pt.get_value<bool>());
-      } else if(pt.get_value_optional<long>() != boost::optional<long>()) {
-	entry.set_type(ilang_db::Entry::Integer);
-	entry.set_integer_dat(pt.get_value<long>());
-      }else if(pt.get_value_optional<double>() != boost::optional<double>()) {
-	entry.set_type(ilang_db::Entry::Float);
-	entry.set_float_dat(pt.get_value<double>());
-      }else if(pt.get_value_optional<std::string>() != boost::optional<std::string>()) {
-	entry.set_type(ilang_db::Entry::String);
-	entry.set_string_dat(pt.get_value<std::string>());
-      }else{
-	assert(0); // wtf
+      #define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
+      cerr << ggg(bool) << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
+      cerr << "\""<< pt.data()<< "\"";
+#define load_type(type, db_name, db_type)			\
+      try {							\
+        entry.set_##db_name##_dat(pt.get_value< type >());	\
+	entry.set_type( ilang_db::Entry::db_type );		\
+	return;							\
+    } catch (boost::property_tree::ptree_bad_data e) {		\
+								\
       }
+
+
+      // TODO: something better, as atm the int 1 is parsed as a bool
+      // this means that bools will become ints as either 0 or 1
+      //load_type(bool, bool, Bool);
+
+      load_type(long, integer, Integer);
+      load_type(int, integer, Integer);
+      load_type(double, float, Float);
+      load_type(float, float, Float);
+      load_type(std::string, string, String);
+      assert(0); // wtf
+#undef load_type
+      // if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
+      // 	entry.set_type(ilang_db::Entry::Bool);
+      // 	entry.set_bool_dat(pt.get_value<bool>());
+      // } else if(pt.get_value_optional<long>() != boost::optional<long>()) {
+      // 	entry.set_type(ilang_db::Entry::Integer);
+      // 	entry.set_integer_dat(pt.get_value<long>());
+      // }else if(pt.get_value_optional<double>() != boost::optional<double>()) {
+      // 	entry.set_type(ilang_db::Entry::Float);
+      // 	entry.set_float_dat(pt.get_value<double>());
+      // }else if(pt.get_value_optional<std::string>() != boost::optional<std::string>()) {
+      // 	entry.set_type(ilang_db::Entry::String);
+      // 	entry.set_string_dat(pt.get_value<std::string>());
+      // }else{
+      // 	assert(0); // wtf
+      // }
     } else {
       //if (level) cerr << endl;
       bool arr = pt.begin()->first.empty();
