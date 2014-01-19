@@ -1,8 +1,8 @@
-#include "ilang/ilang.h"
-#include "ilang/import.h"
-#include "ilang/parser.h"
+#include "ilang.h"
+#include "import.h"
+#include "parser.h"
 #include "error.h"
-#include "ilang/parserTree.h"
+#include "parserTree.h"
 
 #include <stdio.h>
 #include <string.h>

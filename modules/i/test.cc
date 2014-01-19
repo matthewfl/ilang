@@ -1,6 +1,6 @@
-#include "ilang/ilang.h"
-#include "ilang/import.h"
-#include "ilang/variable.h"
+#include "ilang.h"
+#include "import.h"
+#include "variable.h"
 
 #include <iostream>
 using namespace std;

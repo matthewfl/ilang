@@ -19,7 +19,7 @@ MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(INCLUDEDIR)/ -I$(INCLUDEDIR)/ilang -I$(BUILDDIR)/ -Ideps/leveldb/include
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(SRCDIR)/ -I$(BUILDDIR)/ -Ideps/leveldb/include
 CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
@@ -68,7 +68,7 @@ submodule:
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $<
 
-$(BUILDDIR)/$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc include/ilang/ilang.h
+$(BUILDDIR)/$(MODULESDIR)/%.io: $(MODULESDIR)/%.cc src/ilang.h
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS_MODULES) $(MINCLUDE) -o $@ -c $<
 
@@ -128,71 +128,3 @@ $(leveldb): ./deps/leveldb/include/leveldb/db.h
 
 $(libuv): ./deps/libuv/include/uv.h
 	cd deps/libuv && make
-
-# DO NOT DELETE
-
-build/main.o: include/ilang/parser.h include/debug.h include/ilang/import.h
-build/main.o: include/ilang/variable.h include/ilang/database.h
-build/main.o: deps/leveldb/include/leveldb/db.h
-build/main.o: deps/leveldb/include/leveldb/iterator.h
-build/main.o: deps/leveldb/include/leveldb/slice.h
-build/main.o: deps/leveldb/include/leveldb/status.h
-build/main.o: deps/leveldb/include/leveldb/options.h include/ilang/parserTree.h
-build/main.o: include/ilang/scope.h include/ilang/print.h include/ilang/error.h
-build/main.o: include/ilang/thread.h
-build/parserTree.o: include/ilang/parserTree.h include/ilang/variable.h
-build/parserTree.o: include/ilang/scope.h include/ilang/import.h
-build/parserTree.o: include/debug.h include/ilang/print.h
-build/parserTree.o: include/ilang/parser.h include/ilang/object.h
-build/parserTree.o: include/ilang/function.h include/ilang/thread.h
-build/parserTree.o: include/ilang/error.h
-build/import.o: include/ilang/import.h include/debug.h include/ilang/variable.h
-build/import.o: include/ilang/scope.h include/ilang/object.h
-build/import.o: include/ilang/parserTree.h include/ilang/print.h
-build/import.o: include/ilang/parser.h include/ilang/function.h
-build/import.o: include/ilang/error.h include/ilang/ilang.h
-build/import.o: include/ilang/import.h include/ilang/object.h
-build/import.o: include/ilang/function.h
-build/parser.o: include/ilang/parser.h
-build/variable.o: include/ilang/variable.h include/debug.h
-build/variable.o: include/ilang/error.h include/ilang/function.h
-build/variable.o: include/ilang/scope.h include/ilang/parserTree.h
-build/variable.o: include/ilang/import.h include/ilang/print.h
-build/variable.o: include/ilang/object.h
-build/scope.o: include/ilang/scope.h include/ilang/variable.h include/debug.h
-build/scope.o: include/ilang/object.h include/ilang/parserTree.h
-build/scope.o: include/ilang/import.h include/ilang/print.h
-build/object.o: include/ilang/object.h include/ilang/variable.h
-build/object.o: include/ilang/parserTree.h include/ilang/scope.h
-build/object.o: include/ilang/import.h include/debug.h include/ilang/print.h
-build/object.o: include/ilang/error.h include/ilang/ilang.h
-build/object.o: include/ilang/import.h include/ilang/object.h
-build/object.o: include/ilang/function.h
-build/database.o: include/ilang/database.h include/debug.h
-build/database.o: include/ilang/variable.h deps/leveldb/include/leveldb/db.h
-build/database.o: deps/leveldb/include/leveldb/iterator.h
-build/database.o: deps/leveldb/include/leveldb/slice.h
-build/database.o: deps/leveldb/include/leveldb/status.h
-build/database.o: deps/leveldb/include/leveldb/options.h include/ilang/ilang.h
-build/database.o: include/ilang/import.h include/ilang/object.h
-build/database.o: include/ilang/function.h include/ilang/error.h
-build/database.o: build/database.pb.h
-build/modification.o: include/ilang/modification.h include/ilang/parserTree.h
-build/modification.o: include/ilang/variable.h include/ilang/scope.h
-build/modification.o: include/ilang/import.h include/debug.h
-build/modification.o: include/ilang/print.h include/ilang/ilang.h
-build/modification.o: include/ilang/import.h include/ilang/object.h
-build/modification.o: include/ilang/function.h include/ilang/error.h
-build/error.o: include/ilang/error.h
-build/print.o: include/ilang/print.h include/debug.h
-build/init.o: include/ilang/ilang.h include/ilang/import.h
-build/init.o: include/ilang/object.h include/ilang/function.h
-build/init.o: include/ilang/import.h include/debug.h include/ilang/variable.h
-build/init.o: include/ilang/database.h deps/leveldb/include/leveldb/db.h
-build/init.o: deps/leveldb/include/leveldb/iterator.h
-build/init.o: deps/leveldb/include/leveldb/slice.h
-build/init.o: deps/leveldb/include/leveldb/status.h
-build/init.o: deps/leveldb/include/leveldb/options.h
-build/thread.o: include/ilang/thread.h include/debug.h deps/libuv/include/uv.h
-build/thread.o: deps/libuv/include/uv-private/uv-unix.h
-build/thread.o: deps/libuv/include/uv-private/ngx-queue.h

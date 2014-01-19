@@ -1,7 +1,7 @@
-#include "ilang/ilang.h"
-#include "ilang/variable.h"
-#include "ilang/error.h"
-#include "ilang/thread.h"
+#include "ilang.h"
+#include "variable.h"
+#include "error.h"
+#include "thread.h"
 
 #include <tbb/concurrent_queue.h>
 

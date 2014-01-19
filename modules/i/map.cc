@@ -1,11 +1,11 @@
 // this is a very bad hack to make this work, in the future I would like to be able to have some sort of visitor system that allows for this to be done in a clean way.
 
 #define private public
-#include "ilang/object.h"
+#include "object.h"
 #undef private
 
-#include "ilang/ilang.h"
-#include "ilang/error.h"
+#include "ilang.h"
+#include "error.h"
 
 #include <map>
 #include <string>

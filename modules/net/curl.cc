@@ -1,4 +1,4 @@
-#include "ilang/ilang.h"
+#include "ilang.h"
 
 #include <curl/curl.h>
 
@@ -20,7 +20,7 @@ namespace {
 
     assert(args.size() == 1);
     assert(args[0]->Get().type() == typeid(std::string));
-    
+
     curl = curl_easy_init();
     assert(curl);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, bufferError);
@@ -29,10 +29,10 @@ namespace {
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&ret);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
-    //curl_easy_setopt(curl, CURLOPT_USERAGENT, 
+    //curl_easy_setopt(curl, CURLOPT_USERAGENT,
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
-    
+
     if(res == CURLE_OK) {
       return ValuePass(new ilang::Value(ret));
     }else{

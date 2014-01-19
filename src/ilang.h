@@ -3,9 +3,9 @@
 
 // the interface for modules that are compiled
 
-#include "ilang/import.h"
-#include "ilang/object.h"
-#include "ilang/function.h"
+#include "import.h"
+#include "object.h"
+#include "function.h"
 #include <string>
 
 #include <iostream>

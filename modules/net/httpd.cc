@@ -1,4 +1,4 @@
-#include "ilang/ilang.h"
+#include "ilang.h"
 #include "error.h"
 #include "function.h"
 #include "object.h"

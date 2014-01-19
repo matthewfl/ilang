@@ -1,5 +1,5 @@
-#include "ilang/ilang.h"
-#include "ilang/error.h"
+#include "ilang.h"
+#include "error.h"
 
 #include "../../deps/libuv/include/uv.h"
 

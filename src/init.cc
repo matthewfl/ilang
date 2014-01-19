@@ -1,4 +1,4 @@
-#include "ilang/ilang.h"
+#include "ilang.h"
 #include "import.h"
 #include "database.h"
 #include "event.h"
