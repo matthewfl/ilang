@@ -12,8 +12,8 @@ message Entry {
   }
 
   required types type = 1;
-  optional string Object_id = 2;
-  repeated string Array_dat = 3;
+  optional bytes Object_id = 2;
+  repeated bytes Array_dat = 3;
   optional int64 Integer_dat = 4;
   optional double Float_dat = 5;
   optional bool Bool_dat = 6;

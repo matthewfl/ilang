@@ -422,16 +422,17 @@ namespace ilang {
       char *name = DB_createName();
       entry.set_object_id(name);
       ilang_db::Entry arr_contents;
+      arr_contents.set_type(ilang_db::Entry::Array_contents);
       // if there is no first element, then what? that makes this an empty object? as we don't have null
       //cerr << arr << "{" << endl;
       for (ptree::iterator pos = pt.begin(); pos != pt.end(); pos++) {
 	ilang_db::Entry sub_entry;
+	std::string dat;
 	if(arr) {
 	  // TODO: check that this only happens for arrays
 	  char *sub_name = DB_createName();
-	  arr_contents.add_array_dat(name);
+	  arr_contents.add_array_dat(sub_name);
 	  loadTree(pos->second, sub_entry);
-	  std::string dat;
 	  sub_entry.SerializeToString(&dat);
 	  System_Database->Set(sub_name, &dat);
 	  delete sub_name;
@@ -439,7 +440,6 @@ namespace ilang {
 	  string sub_name = name;
 	  sub_name += pos->first;
 	  loadTree(pos->second, sub_entry);
-	  std::string dat;
 	  sub_entry.SerializeToString(&dat);
 	  System_Database->Set(sub_name, &dat);
 	}

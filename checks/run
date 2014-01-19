@@ -3,9 +3,10 @@
 code=0
 FILES=*.i
 BFILES=*.i.bad
+SHFILES=*.sh
 FAILED=""
 
-rm -rfv DB/
+rm -rf DB/
 
 for f in $FILES; do
 	echo "RUNNING $f"
@@ -17,7 +18,6 @@ for f in $FILES; do
 		code=$(( $code + 1 ))
 		FAILED="$FAILED\t$f\n"
 	fi
-	rm .running
 done
 
 for f in $BFILES; do
@@ -30,8 +30,23 @@ for f in $BFILES; do
 	else
 		echo -e "\e[00;32mOK $f\e[00m"
 	fi
-	rm .running
 done
+
+alias i='../i'
+
+for f in $SHFILES; do
+	echo "RUNNING $f"
+	echo "RUNNING $f" > .running
+	if bash ./$f; then
+	    echo -e "\e[00;32mOK $f\e[00m"
+	else
+	    echo -e "\e[00;31mERROR $f\e[00m"
+	    code=$(( $code + 1 ))
+	    FAILED="$FAILED\t$f\n"
+	fi
+done
+
+rm .running
 
 if [ $code -ne 0 ]; then
 	echo -e "\e[00;31mOne or more tests have failed\e[00m"
