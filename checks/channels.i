@@ -4,14 +4,16 @@ global_count = 0;
 
 ret_ch = channel.create(0);
 
-runner1 = {|ch|
+runner1 = {
+	|ch|
 	assert(ch.pop() == 123);
 	assert(global_count == 0);
 	global_count = 1;
 	ret_ch.push(333);
 };
 
-runner2 = {|ch|
+runner2 = {
+	|ch|
 	assert(ch.pop() == 567);
 	assert(global_count == 2);
 	global_count = 3;

@@ -11,6 +11,6 @@ main = {
 
 	code = "return x * x;";
 	f = i.eval.eval("x", code);
-	
+
 	assert(f(.5) == .25);
 };

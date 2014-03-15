@@ -1,17 +1,17 @@
 cc = class {
-	a: 1,
-	b: {|gg|
-		a = gg;
+ a: 1,
+ b: {|gg|
+		 a = gg;
 	},
-	c: {
-		return a;
-	}
+ c: {
+	 return a;
+ }
 };
 
 main = {
 	c1 = new(cc);
 	c2 = new(cc);
-	Print(c1, c1.a);	
+	Print(c1, c1.a);
 	assert(c1.a == 1);
 	c1.b(23);
 	Print("\n", c1.a);

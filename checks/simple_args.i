@@ -1,5 +1,5 @@
 tt = {|Int test, gg|
-	Print(test);
+			Print(test);
 
 };
 
