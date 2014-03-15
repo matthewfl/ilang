@@ -8,36 +8,36 @@
 using namespace std;
 
 namespace ilang {
-  std::list<error_trace*> ILANG_ERRORS_TRACE;
+	std::list<error_trace*> ILANG_ERRORS_TRACE;
 
-  void error_print_trace() {
-    cerr << "\33[0;31milang internal trace:\n";
+	void error_print_trace() {
+		cerr << "\33[0;31milang internal trace:\n";
 #ifdef ILANG_ERROR_TRACE_ENABLED
-    for(auto it : ILANG_ERRORS_TRACE) {
-      cerr << it->message.str() << endl;
-    }
+		for(auto it : ILANG_ERRORS_TRACE) {
+			cerr << it->message.str() << endl;
+		}
 #else
-    cerr << "Error trace not enabled\n";
+		cerr << "Error trace not enabled\n";
 #endif
-    cerr << "\33[0m";
-  }
-  error_trace::error_trace() {
+		cerr << "\33[0m";
+	}
+	error_trace::error_trace() {
 #ifdef ILANG_ERROR_TRACE_ENABLED
-    ILANG_ERRORS_TRACE.push_back(this);
+		ILANG_ERRORS_TRACE.push_back(this);
 #endif
-  }
-  error_trace::error_trace(std::string ss) {
+	}
+	error_trace::error_trace(std::string ss) {
 #ifdef ILANG_ERROR_TRACE_ENABLED
-    ILANG_ERRORS_TRACE.push_back(this);
-    message << ss;
+		ILANG_ERRORS_TRACE.push_back(this);
+		message << ss;
 #endif
-  }
-  error_trace::~error_trace() {
+	}
+	error_trace::~error_trace() {
 #ifdef ILANG_ERROR_TRACE_ENABLED
-    error(ILANG_ERRORS_TRACE.back() == this,
-	  "Poping of error_taces not coming off in the same order");
+		error(ILANG_ERRORS_TRACE.back() == this,
+					"Poping of error_taces not coming off in the same order");
 
-    ILANG_ERRORS_TRACE.pop_back();
+		ILANG_ERRORS_TRACE.pop_back();
 #endif
-  }
+	}
 }

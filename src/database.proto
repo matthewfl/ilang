@@ -1,21 +1,21 @@
 package ilang_db;
 
 message Entry {
-  enum types {
-    Object = 0;
-    Array = 1;
-    Array_contents = 2;
-    Integer = 3;
-    Float = 4;
-    Bool = 5;
-    String = 6;
-  }
+	enum types {
+		Object = 0;
+		Array = 1;
+		Array_contents = 2;
+		Integer = 3;
+		Float = 4;
+		Bool = 5;
+		String = 6;
+	}
 
-  required types type = 1;
-  optional bytes Object_id = 2;
-  repeated bytes Array_dat = 3;
-  optional int64 Integer_dat = 4;
-  optional double Float_dat = 5;
-  optional bool Bool_dat = 6;
-  optional string String_dat = 7;
+	required types type = 1;
+	optional bytes Object_id = 2;
+	repeated bytes Array_dat = 3;
+	optional int64 Integer_dat = 4;
+	optional double Float_dat = 5;
+	optional bool Bool_dat = 6;
+	optional string String_dat = 7;
 }

@@ -10,11 +10,11 @@ FILE *yyget_in ( yyscan_t scanner );
 FILE *yyget_out ( yyscan_t scanner );
 int yyget_lineno ( yyscan_t scanner );
 //YY_EXTRA_TYPE yyget_extra ( yyscan_t scanner );
-int  yyget_debug ( yyscan_t scanner );
+int	 yyget_debug ( yyscan_t scanner );
 
 void yyset_debug ( int flag, yyscan_t scanner );
-void yyset_in  ( FILE * in_str , yyscan_t scanner );
-void yyset_out  ( FILE * out_str , yyscan_t scanner );
+void yyset_in	 ( FILE * in_str , yyscan_t scanner );
+void yyset_out	( FILE * out_str , yyscan_t scanner );
 void yyset_lineno ( int line_number , yyscan_t scanner );
 //void yyset_extra ( YY_EXTRA_TYPE user_defined , yyscan_t scanner );
 
@@ -26,16 +26,16 @@ int yyparse (void * yyscanner, ilang::parser_data * parser_handle);
 extern int yydebug;
 
 namespace ilang {
-  ilang::parserNode::Head * parser (FILE *file, ilang::ImportScopeFile *import, const char *name) {
-    yydebug =0;
-    yyscan_t scanner;
-    ilang::parser_data data;
-    data.import = import;
-    data.fileName = name;
-    yylex_init(&scanner);
-    yyset_in(file, scanner);
-    yyparse(scanner, &data);
-    yylex_destroy(scanner);
-    return data.head;
-  }
+	ilang::parserNode::Head * parser (FILE *file, ilang::ImportScopeFile *import, const char *name) {
+		yydebug =0;
+		yyscan_t scanner;
+		ilang::parser_data data;
+		data.import = import;
+		data.fileName = name;
+		yylex_init(&scanner);
+		yyset_in(file, scanner);
+		yyparse(scanner, &data);
+		yylex_destroy(scanner);
+		return data.head;
+	}
 } // namespace ilang
