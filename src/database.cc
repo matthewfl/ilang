@@ -275,6 +275,27 @@ namespace ilang {
 		return ret;
 	}
 
+	void DatabaseDummy::Set(std::string name, storedData *dat) {
+		// storedData is typedef to a string type
+		_dat[name] = *dat;
+
+	}
+	storedData* DatabaseDummy::Get(std::string name) {
+		auto it = _dat.find(name);
+		if(it == _dat.end())
+			return NULL;
+		std::string *ret = new std::string;
+		*ret = it->second;
+		return ret;
+	}
+	void DatabaseDummy::setMeta(std::string name, std::string dat) {
+		_meta[name] = dat;
+	}
+	std::string DatabaseDummy::getMeta(std::string name) {
+		return _meta[name];
+	}
+
+
 	class Database_variable : public Variable_modifier {
 	private:
 		//Variable *var;

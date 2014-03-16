@@ -1,8 +1,10 @@
 TARGET= i
 
 # currently not in system: netowrk.cc
-SRCS= main.cc parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc print.cc init.cc thread.cc
+# main.cc added in manually so it isn't included when unit testing
+SRCS= parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc modification.cc error.cc print.cc init.cc thread.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar -lprotobuf
+UNIT_TESTS=$(wildcard unit_tests/*.cc)
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
 MODULES= i/channel.io i/test.io net/curl.io net/httpd.io i/timer.io i/map.io i/eval.io
@@ -19,7 +21,7 @@ MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(SRCDIR)/ -I$(BUILDDIR)/ -Ideps/leveldb/include
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(SRCDIR)/ -I$(BUILDDIR)/ -Ideps/leveldb/include -Ideps/catch
 CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
@@ -87,8 +89,8 @@ $(BUILDDIR)/%.pb.cc: $(SRCDIR)/%.proto
 
 $(BUILDDIR)/database.pb.o: $(BUILDDIR)/database.pb.cc
 
-$(TARGET): $(DEPS) $(OBJS) $(MODULESD)
-	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
+$(TARGET): $(DEPS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD)
+	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD) $(LIBS)
 
 modules: $(MODULESD)
 
@@ -112,6 +114,13 @@ debug: $(TARGET)
 
 check: $(TARGET)
 	cd checks && bash ./run
+
+unit: $(BUILDDIR)/unit
+	./$(BUILDDIR)/unit
+
+$(BUILDDIR)/unit: $(UNIT_TESTS) $(OBJS) $(MODULESD)
+	$(CXX) $(CXXFLAGS) -o $(BUILDDIR)/unit $(UNIT_TESTS) $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
+
 
 # all the settings to build modules
 

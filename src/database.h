@@ -89,6 +89,15 @@ namespace ilang {
 		void setMeta(std::string name, std::string data);
 		std::string getMeta(std::string name);
 	};
+	class DatabaseDummy : public Database {
+	public:
+		std::map<std::string, std::string> _dat;
+		std::map<std::string, std::string> _meta;
+		void Set(std::string, storedData*);
+		storedData *Get(std::string);
+		void setMeta(std::string, std::string);
+		std::string getMeta(std::string);
+	};
 	int DatabaseLoad(std::string, FILE*);
 	int DatabaseDump(std::string, FILE*);
 	extern Database *System_Database;
