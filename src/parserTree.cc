@@ -13,6 +13,8 @@
 #include <iostream>
 using namespace std;
 
+extern "C" int ilang_Assert_fails;
+
 namespace ilang {
 	namespace parserNode {
 		Head::Head(list<Node*> *declars, ImportScopeFile *import): Import(import), Declars(declars) {
@@ -1213,8 +1215,12 @@ namespace ilang {
 			for(auto it : *params) {
 				ValuePass val = dynamic_cast<Value*>(it)->GetValue(scope);
 				if(!val->isTrue()) {
+					if(ilang_Assert_fails) {
+						ilang_Assert_fails++;
+						return ValuePass();
+					}
 					error_print_trace();
-					cerr << "\n\nilang assert " << fileName << ":" << lineN << endl;
+					cerr << "\n\nfailang assert " << fileName << ":" << lineN << endl;
 					exit(2);
 				}
 			}

@@ -34,6 +34,7 @@ void show_help_info(char *name) {
 			 << "VERSION: " << ILANG_VERSION << "\n";
 }
 
+extern "C" int ilang_Assert_fails = 0;
 extern "C" int Debug_level=0;
 extern "C" int get_Debug_level() {
 	return Debug_level;

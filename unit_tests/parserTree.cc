@@ -4,24 +4,19 @@
 
 using namespace ilang;
 
-TEST_CASE( "Simple execute", "[parserTree]" ) {
+TEST_CASE( "Run empty function", "[parserTree]" ) {
 	using namespace ilang::parserNode;
 	init();
-	ilang::ImportScopeFile scope("test");
-	std::list<parserNode::Node*> nodes;
-	auto main_name = new std::list<std::string>;
-	main_name->push_back("main");
+	std::list<parserNode::Node*> nodes;;
 
 	// all of this is going to leak, yay
 	nodes.push_back(
 									new AssignExpr(
-																 new parserNode::Variable(main_name,
-																													new std::list<std::string> // modifier list
-																							),
+																 new parserNode::FieldAccess(NULL, "main"),
 																 new Function(NULL, NULL)
 																 ));
 
-	auto head = new Head(&nodes, &scope);
+	auto head = new Head(&nodes, NULL);//&scope);
 	head->Link();
 
 	head->Run();
@@ -33,5 +28,32 @@ TEST_CASE( "Simple execute", "[parserTree]" ) {
 		ilang::global_eventPool()->Run();
 	*/
 
+	reset();
+}
+
+TEST_CASE("Basic assert fail", "[parserTree]") {
+	auto head = PARSE_TREE(
+												 main = {
+													 assert(0);
+												 };
+												 );
+	head->Link();
+	head->Run();
+
+	REQUIRE(asserted == 1);
+	reset();
+}
+
+
+TEST_CASE("Basic assert passed", "[parserTree]") {
+	auto head = PARSE_TREE(
+												 main = {
+													 assert(1);
+												 };
+												 );
+	head->Link();
+	head->Run();
+
+	REQUIRE(asserted == 0);
 	reset();
 }

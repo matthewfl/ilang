@@ -102,9 +102,9 @@ clean-all: clean
 	rm -rf DB/
 
 depend:
-	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD)
+	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD) src/main.cc
 	# fixes the problem with the build dir being different from the src
-	sed -i 's/src\/\([^\.]*\).o/build\/\1.o/g' Makefile
+	sed -i 's/src\/\([^\.]*\).o:/build\/\1.o:/g' Makefile
 #eventually change this to use "g++ -MM" to generate the source files
 
 test: $(TARGET)
@@ -137,3 +137,52 @@ $(leveldb): ./deps/leveldb/include/leveldb/db.h
 
 $(libuv): ./deps/libuv/include/uv.h
 	cd deps/libuv && make
+
+
+# DO NOT DELETE
+
+build/parserTree.o: src/parserTree.h src/variable.h src/scope.h src/import.h
+build/parserTree.o: src/debug.h src/print.h src/parser.h src/object.h
+build/parserTree.o: src/function.h src/thread.h src/error.h
+build/import.o: src/import.h src/debug.h src/variable.h src/scope.h
+build/import.o: src/object.h src/parserTree.h src/print.h src/parser.h
+build/import.o: src/function.h src/error.h src/ilang.h
+build/parser.o: src/parser.h
+build/variable.o: src/variable.h src/debug.h src/error.h src/function.h
+build/variable.o: src/scope.h src/parserTree.h src/import.h src/print.h
+build/variable.o: src/object.h
+build/scope.o: src/scope.h src/variable.h src/debug.h src/object.h
+build/scope.o: src/parserTree.h src/import.h src/print.h
+build/object.o: src/object.h src/variable.h src/parserTree.h src/scope.h
+build/object.o: src/import.h src/debug.h src/print.h src/error.h src/ilang.h
+build/object.o: src/function.h
+build/database.o: src/database.h src/debug.h src/variable.h
+build/database.o: deps/leveldb/include/leveldb/db.h
+build/database.o: deps/leveldb/include/leveldb/iterator.h
+build/database.o: deps/leveldb/include/leveldb/slice.h
+build/database.o: deps/leveldb/include/leveldb/status.h
+build/database.o: deps/leveldb/include/leveldb/options.h src/ilang.h
+build/database.o: src/import.h src/object.h src/parserTree.h src/scope.h
+build/database.o: src/print.h src/function.h src/error.h build/database.pb.h
+build/modification.o: src/modification.h src/parserTree.h src/variable.h
+build/modification.o: src/scope.h src/import.h src/debug.h src/print.h
+build/modification.o: src/ilang.h src/object.h src/function.h src/error.h
+build/error.o: src/error.h
+build/print.o: src/print.h src/debug.h
+build/init.o: src/ilang.h src/import.h src/debug.h src/variable.h src/object.h
+build/init.o: src/parserTree.h src/scope.h src/print.h src/function.h
+build/init.o: src/database.h deps/leveldb/include/leveldb/db.h
+build/init.o: deps/leveldb/include/leveldb/iterator.h
+build/init.o: deps/leveldb/include/leveldb/slice.h
+build/init.o: deps/leveldb/include/leveldb/status.h
+build/init.o: deps/leveldb/include/leveldb/options.h
+build/thread.o: src/thread.h src/debug.h deps/libuv/include/uv.h
+build/thread.o: deps/libuv/include/uv-private/uv-unix.h
+build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
+build/main.o: src/parser.h src/debug.h src/import.h src/variable.h
+build/main.o: src/database.h deps/leveldb/include/leveldb/db.h
+build/main.o: deps/leveldb/include/leveldb/iterator.h
+build/main.o: deps/leveldb/include/leveldb/slice.h
+build/main.o: deps/leveldb/include/leveldb/status.h
+build/main.o: deps/leveldb/include/leveldb/options.h src/parserTree.h
+build/main.o: src/scope.h src/print.h src/error.h src/thread.h
