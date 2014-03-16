@@ -62,4 +62,9 @@ need to get modifications working better first
 how would this work with threading if the code was changing and it was compiled, where would it know to change the code if it was creating new code instead of modifying the syntax tree
 
 
+3/15/2014
+Latest:
 keywork arguments
+Change the type checking system to not use keyworks, and instead of some identifer with a class, eg: have a class with some validate method and then call it when preforming the type validation
+
+The system needs to be cleaned up internally, since it is becoming difficult to work with.  The jit engine is not necessary in the sort term and might not be required since the theme should be mostly calling out to C++ functions that are doing the heavy lifting computationally, and then just stringing together the components.  Thinking that the system could use some unit tests are there are starting to get a number of interal components.  Then there needs to be cleaning relating to the abstracting of working with functions, classes and objects as the current interface is "leaking" all over the code base.
