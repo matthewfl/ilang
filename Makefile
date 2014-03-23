@@ -26,7 +26,7 @@ CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
 ########### -rdynamic might enable the Linking to work with exporting symbols to be dynamically loaded by the dynamic modules
-LDFLAGS= -static-libgcc #-Wl,-export-dynamic
+LDFLAGS= #-Wl,-export-dynamic
 # -Ideps/glog/src
 
 CXX= g++

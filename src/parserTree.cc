@@ -55,6 +55,10 @@ namespace ilang {
 			}
 		}
 
+		Scope *Head::GetScope() {
+			return scope;
+		}
+
 		static unsigned long _ilang_node_id;
 		Node::Node() {
 			_node_id = ++_ilang_node_id;

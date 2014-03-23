@@ -13,7 +13,9 @@ static void init_db() {
 	ilang::System_Database = new ilang::DatabaseDummy;
 }
 
+static void reset();
 static void init() {
+	reset();
 	init_db();
 	Import_Init(0, NULL);
 	//ilang::Init(0, NULL);
@@ -29,6 +31,13 @@ static ilang::parserNode::Head *_build_tree(std::string code) {
 
 #define PARSE_TREE(X)														\
 	_build_tree( #X )
+
+#define RUN_CODE(X)																\
+	do {																						\
+	ilang::parserNode::Head *c = _build_tree( #X ); \
+	c->Link();																			\
+	c->Run();																				\
+	} while(0);
 
 extern "C" int ilang_Assert_fails;
 #define asserted (ilang_Assert_fails - 1)
