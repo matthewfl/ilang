@@ -38,6 +38,32 @@ namespace ilang {
 			else if(
 			}*/
 	};
+
+	/* FUTURE INTERFACE
+	class Function {
+	private:
+		// this shiuldn't be here, instead put this into an argument constructor
+		template<typename T> inline void build_arguments(ilang::Arguments &a, T t) {
+			a.append(t);
+		}
+		template<typename T, typename... Arguments> inline void build_arguments (ilang::Arguments &a, T t, Arguments... args) {
+			a.append(t);
+			build_arguments(a, args);
+		}
+	public:
+		template<typename... Arguments> ilang::Value operator() (Arguments... _args) {
+			//ilang::Arguments a;
+			//build_arguments(a, args);
+			ilang::Arguments args(_args);
+			return call(args);
+		}
+		ilang::Value operator() (ilang::Arguments args) { return call(args); }
+		ilang::Value call(ilang::Arguments args) {}
+		Function bind(Scope &scope) {}
+		Function bindThis(Value) {}
+	};
+*/
+
 	/*
 		class Function {
 		Scope *bound_scope;
