@@ -95,7 +95,7 @@ $(TARGET): $(DEPS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD)
 modules: $(MODULESD)
 
 clean:
-	rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR)
+	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda
 clean-all: clean
 	cd deps/leveldb && make clean
 	cd deps/libuv && make distclean
@@ -118,8 +118,18 @@ check: $(TARGET)
 unit: $(BUILDDIR)/unit
 	./$(BUILDDIR)/unit
 
-$(BUILDDIR)/unit: $(UNIT_TESTS) $(OBJS) $(MODULESD)
+$(BUILDDIR)/unit: $(UNIT_TESTS) $(TARGET) $(MODULESD)
 	$(CXX) $(CXXFLAGS) -o $(BUILDDIR)/unit $(UNIT_TESTS) $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
+
+.PHONY: coverage _coverage-core
+coverage:
+	make clean-all
+	make _coverage-core
+
+_coverage-core: CXXFLAGS+=--coverage -fprofile-arcs -ftest-coverage
+_coverage-core: LDFLAGS+= -fprofile-arcs
+_coverage-core: all unit
+
 
 
 # all the settings to build modules
