@@ -25,12 +25,12 @@ namespace ilang {
 	}
 	class Object;
 
-	struct Function {
+	struct Function_old {
 		bool native;
 		Function_ptr ptr;
 		ValuePass object;
 		ilang::parserNode::Function *func;
-		Function():native(false), object(), func(NULL) {}
+		Function_old():native(false), object(), func(NULL) {}
 		/*inline ValuePass Call (vector<ValuePass &args) {
 			ValuePass ret = ValuePass(new ilang::Value);
 			if(native)
@@ -38,6 +38,56 @@ namespace ilang {
 			else if(
 			}*/
 	};
+
+	class Function;
+
+	class Arguments {
+		friend class Funciton;
+		std::vector<ilang::ValuePass> pargs;
+		std::map<std::string, ilang::ValuePass> kwargs;
+
+		template<typename T> void unwrap(T t) {
+			push(ilang::ValuePass(new ilang::Value(t)));
+		}
+
+		template<typename T, typename... types> void unwrap(T t, types... values) {
+			unwrap(t);
+			unwrap(values...);
+		}
+		void populate(ScopePass, Function*);
+	public:
+		void push(ilang::ValuePass);
+		void set(std::string, ilang::ValuePass);
+		Arguments();
+		// TODO: use the new type system to make this easy to work with
+		Arguments(std::vector<ValuePass> pargs);
+		template<typename... types> Arguments(types... values) : Arguments() {
+			unwrap(values...);
+		}
+	};
+
+
+	class Function {
+	private:
+		bool native;
+		Function_ptr ptr;
+		ScopePass contained_scope;
+		ValuePass object_scope;
+		ilang::parserNode::Function *func;
+	public:
+		template <typename... types> ilang::ValuePass operator() (types... values) {
+			Arguments args(values...);
+			return call(args);
+		}
+		ilang::ValuePass operator() (ilang::Arguments &args) { return call(args); }
+		ilang::ValuePass call(ilang::Arguments&);
+		Function bind(ilang::ValuePass); // bind to an object
+
+		Function(const Function&);
+		Function(ilang::parserNode::Function *f, ScopePass scope, Function_ptr _ptr);
+		Function(Function_ptr _ptr);
+	};
+
 
 	/* FUTURE INTERFACE
 	class Function {

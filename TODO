@@ -68,3 +68,14 @@ keywork arguments
 Change the type checking system to not use keyworks, and instead of some identifer with a class, eg: have a class with some validate method and then call it when preforming the type validation
 
 The system needs to be cleaned up internally, since it is becoming difficult to work with.  The jit engine is not necessary in the sort term and might not be required since the theme should be mostly calling out to C++ functions that are doing the heavy lifting computationally, and then just stringing together the components.  Thinking that the system could use some unit tests are there are starting to get a number of interal components.  Then there needs to be cleaning relating to the abstracting of working with functions, classes and objects as the current interface is "leaking" all over the code base.
+
+5/13/2013 (Refactor)
+1) Functions need to be more abstracted.
+	 * Abstract the calling mechanism
+	 	 context of function created, this parameter, C++ vs ilang functions
+	 * better support for passing arguments
+	 	 this will allow for kwargs to be also passed
+2) variables/scope overall
+	 * make the variables hold the value themselves rather than being pointers
+	 * the system will use more oop and no more boost::any
+3) Using make_ptr to make std::smart_ptr

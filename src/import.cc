@@ -282,31 +282,28 @@ namespace ilang {
 
 namespace ilang {
 	ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
 			*ret = (*fun)(args);
 			assert(*ret);
 		};
+		ilang::Function f(fptr);
 		return ValuePass(new ilang::Value(f));
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
 			*ret = (*fun)(scope.get(), args);
 			assert(*ret);
 		};
+		ilang::Function f(fptr);
 		return ValuePass(new ilang::Value(f));
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
 			*ret = (*fun)(scope, args);
 			assert(*ret);
 		};
-		return ValuePass(new ilang::Value(f));
+		ilang::Function f(fptr);
+ 		return ValuePass(new ilang::Value(f));
 	}
 	C_Class::~C_Class() {
 		//std::cout << "---------------------deleting C_Class\n";

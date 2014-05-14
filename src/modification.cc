@@ -115,11 +115,12 @@ namespace ilang {
 		cout << "Creating new modification with " << val->Get().type().name() << endl;
 		if(val->Get().type() == typeid(ilang::Function)) {
 			Function fun =	boost::any_cast<ilang::Function>(val->Get());
-			if(fun.native) {
+			// TODO: omg
+			//			if(fun.native) {
 				error(0, "Can not perform modification of native function");
-			}
-			m_node = dynamic_cast<parserNode::Node*>(fun.func);
-			FigureType(m_node);
+				//}
+				//m_node = dynamic_cast<parserNode::Node*>(fun.func);
+				//FigureType(m_node);
 		}else if(val->Get().type() == typeid(ilang::Class*)) {
 			ilang::Class *cla = boost::any_cast<ilang::Class*>(val->Get());
 			//assert(0); // not written yet
@@ -251,7 +252,7 @@ namespace {
 			vector<Modification*> list = mod->getList();
 			ValuePass ret = ValuePass(new ilang::Value);
 
-			if(func->object) {
+			/*if(func->object) {
 				ValuePass ret = ValuePass(new ilang::Value);
 				assert(func->object->Get().type() == typeid(ilang::Object*));
 				ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func->object->Get())));
@@ -261,7 +262,7 @@ namespace {
 					param.push_back(ValuePass(val));
 					func->ptr(obj_scope, param, &ret);
 					if(ret->isTrue()) break;
-				}
+					}*/
 			}else if(func->native) {
 				// why would we have a native function here
 				error(0, "Modification.each with a native function, not done stuff");

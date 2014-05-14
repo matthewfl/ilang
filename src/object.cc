@@ -199,9 +199,7 @@ namespace ilang {
 		mem_pop = new Variable("pop", internal_mods);
 		mem_insert = new Variable("insert", internal_mods);
 		mem_remove = new Variable("remove", internal_mods);
-		ilang::Function push_fun;
-		push_fun.native = true;
-		push_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+		ilang::Function push_fun([self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.push expects 1 argument");
 			assert(self->modifiers);
 			ilang::Variable *var = new ilang::Variable("", *self->modifiers);
@@ -209,24 +207,20 @@ namespace ilang {
 			self->members.push_back(var);
 			self->RefreshDB();
 			*ret = ValuePass(new ilang::Value(self->members.size()));
-		};
+			});
 		mem_push->Set(ValuePass(new ilang::Value(push_fun)));
 
-		ilang::Function pop_fun;
-		pop_fun.native = true;
-		pop_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+		ilang::Function pop_fun([self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 			error(args.size() == 0, "Array.pop does not take any arguments");
 			ilang::Variable *var = self->members.back();
 			*ret = var->Get();
 			delete var;
 			self->members.pop_back();
 			self->RefreshDB();
-		};
+			});
 		mem_pop->Set(ValuePass(new ilang::Value(pop_fun)));
 
-		ilang::Function insert_fun;
-		insert_fun.native = true;
-		insert_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+		ilang::Function insert_fun([self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 			error(args.size() == 2, "Array.insert expects 2 arguments");
 			error(args[0]->Get().type() == typeid(long), "Array.insert expects first argument to be a integer");
 			long n = boost::any_cast<long>(args[0]->Get());
@@ -236,12 +230,10 @@ namespace ilang {
 			self->members.insert(it + n, 1, var);
 			self->RefreshDB();
 			*ret = ValuePass(new ilang::Value(self->members.size()));
-		};
+			});
 		mem_insert->Set(ValuePass(new ilang::Value(insert_fun)));
 
-		ilang::Function remove_fun;
-		remove_fun.native = true;
-		remove_fun.ptr = [self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+		ilang::Function remove_fun([self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.remove expects 1 argument");
 			error(args[0]->Get().type() == typeid(long), "Array.remove expect argument to be integer");
 			long n = boost::any_cast<long>(args[0]->Get());
@@ -250,7 +242,7 @@ namespace ilang {
 			delete *it;
 			self->members.erase(it);
 			self->RefreshDB();
-		};
+			});
 		mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
 		DB_name = NULL;
 	}

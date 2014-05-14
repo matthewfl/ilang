@@ -44,7 +44,10 @@ namespace ilang {
 			scope->Debug();
 			ilang::Variable * find = scope->lookup("main");
 			error(find, "main function not found");
-			boost::any_cast<ilang::Function>(find->Get()->Get()).ptr(passScope, v, &ret);
+			auto main = boost::any_cast<ilang::Function>(find->Get()->Get());
+			main(); // call the main function
+
+			//.ptr(passScope, v, &ret);
 			//boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
 		}
 
@@ -242,11 +245,15 @@ namespace ilang {
 			debug(-6, "Function get value");
 			errorTrace("Getting value of a function");
 			Function *self = this;
-			ilang::Function fun;
-			fun.func = this;
-			fun.ptr = [self, this_scope](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+			auto fptr = [self, this_scope](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
 				self->Call(ScopePass(this_scope), scope, args, ret);
 			};
+
+			ilang::Function fun(this, this_scope, fptr);
+
+			// ilang::Function fun;
+			// fun.func = this;
+			// fun.ptr =
 
 			return ValuePass(new ilang::Value(fun));
 		}
@@ -407,7 +414,9 @@ namespace ilang {
 				if(v->Get()->Get().type() == typeid(ilang::Function)) {
 					// so that the reference to the object is keep around
 					// Need to fix this so that clean up works
-					boost::any_cast<ilang::Function>( &(v->Get()->Get()) )->object = obj_val;
+					// TODO: make this work with this new function system
+
+					// boost::any_cast<ilang::Function>( &(v->Get()->Get()) )->object = obj_val;
 				}
 			}else{
 				v = scope->lookup(identifier);
@@ -429,9 +438,10 @@ namespace ilang {
 				ValuePass ret = v->Get();
 				if(ret->Get().type() == typeid(ilang::Function)) {
 					// doing it this way creates a new pointer to the function and then sets the new function to point back to the object, otherwise the object can have smart pointers to itself which causes it to no be deleted from memory
+
 					ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
-					fun.object = obj_val;
-					ret = ValuePass(new ilang::Value(fun));
+					ilang::Function fun_new = fun.bind(obj_val);
+					ret = ValuePass(new ilang::Value(fun_new));
 				}
 				return ret;
 			}else{
@@ -496,7 +506,9 @@ namespace ilang {
 			ValuePass val = Lookup->GetValue(scope);
 			ilang::Variable *var = obj->operator[](val);
 			if(var->Get()->Get().type() == typeid(ilang::Function)) {
-				boost::any_cast<ilang::Function>( &(var->Get()->Get()) )->object = obj_val;
+				// TODO: fix to use new function interface
+
+				//boost::any_cast<ilang::Function>( &(var->Get()->Get()) )->object = obj_val;
 			}
 			return var;
 		}
@@ -511,9 +523,10 @@ namespace ilang {
 			ilang::Variable *var = obj->operator[](val);
 			ValuePass ret = var->Get();
 			if(ret->Get().type() == typeid(ilang::Function)) {
+				// TODO: fix to use new function interface
 				ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
-				fun.object = obj_val;
-				ret = ValuePass(new ilang::Value(fun));
+				ilang::Function fun_new = fun.bind(obj_val);
+				ret = ValuePass(new ilang::Value(fun_new));
 			}
 			return ret;
 		}
@@ -551,27 +564,52 @@ namespace ilang {
 		}
 		ValuePass Call::GetValue (ScopePass scope) {
 			errorTrace("Calling function");
-			std::vector<ValuePass> par;
-			for(Node * n : *params) {
-				assert(dynamic_cast<parserNode::Value*>(n));
-				par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
-			}
-			ValuePass ret = ValuePass(new ilang::Value);
+			// new stuff
+
 			ValuePass func = calling->GetValue(scope);
 			boost::any &an = func->Get();
-			// TODO: this error is overly cryptic
-			error(an.type() == typeid(ilang::Function), "Calling a non function " << an.type().name());
+			error(an.type() == typeid(ilang::Function),
+						"Calling a non function " << an.type().name());
 			ilang::Function *function = boost::any_cast<ilang::Function>(&an);
-			if(function->native) {
-				function->ptr(scope, par, &ret);
-			}else if(function->object) {
-				assert(function->object->Get().type() == typeid(ilang::Object*));
-				ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(function->object->Get())));
-				function->ptr(obj_scope, par, &ret);
-			}else{
-				function->ptr(ScopePass(), par, &ret);
+
+			ilang::Arguments args;
+			for(Node *n : *params) {
+				// so nasty
+				// TODO: support for kwargs
+				assert(dynamic_cast<parserNode::Value*>(n));
+				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
 			}
+
+			ValuePass ret = function->call(args);
 			return ret;
+
+
+
+
+
+
+			// old
+			// std::vector<ValuePass> par;
+			// for(Node * n : *params) {
+			// 	assert(dynamic_cast<parserNode::Value*>(n));
+			// 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
+			// }
+			// ValuePass ret = ValuePass(new ilang::Value);
+			// ValuePass func = calling->GetValue(scope);
+			// boost::any &an = func->Get();
+			// // TODO: this error is overly cryptic
+			// error(an.type() == typeid(ilang::Function), "Calling a non function " << an.type().name());
+			// ilang::Function *function = boost::any_cast<ilang::Function>(&an);
+			// if(function->native) {
+			// 	function->ptr(scope, par, &ret);
+			// }else if(function->object) {
+			// 	assert(function->object->Get().type() == typeid(ilang::Object*));
+			// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(function->object->Get())));
+			// 	function->ptr(obj_scope, par, &ret);
+			// }else{
+			// 	function->ptr(ScopePass(), par, &ret);
+			// }
+			// return ret;
 
 		}
 
@@ -1283,15 +1321,25 @@ namespace ilang {
 			}
 			assert(ilang::global_EventPool());
 			Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
-					ValuePass ret = ValuePass(new ilang::Value);
-					if(calling.object) {
-						assert(calling.object->Get().type() == typeid(ilang::Object*));
-						ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(calling.object->Get())));
-						calling.ptr(obj_scope, *arguments, &ret);
-					}else{
-						calling.ptr(ScopePass(), *arguments, &ret);
-					}
+					ilang::Arguments args (*arguments);
+
+					const_cast<ilang::Function*>(&calling)->call(args);
+
 					delete arguments;
+
+
+					// ValuePass ret = ValuePass(new ilang::Value);
+
+					// if(calling.object) {
+					// 	assert(calling.object->Get().type() == typeid(ilang::Object*));
+
+					// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(calling.object->Get())));
+					// 	calling.ptr(obj_scope, *arguments, &ret);
+					// }else{
+					// 	calling.ptr(ScopePass(), *arguments, &ret);
+					// }
+					// delete arguments;
+
 					// return value is ignored
 				});
 			thread.Trigger(NULL);
