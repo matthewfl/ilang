@@ -2,6 +2,11 @@
 #define _ilang_unit_base
 #include "catch.hpp"
 
+
+// todo or not to do?? that is the question
+//#define private public
+//#define protected public
+
 #include "database.h"
 #include "import.h"
 #include "parserTree.h"

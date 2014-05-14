@@ -259,27 +259,27 @@ namespace ilang {
 		}
 
 		void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
-			bool returned=false;
-			errorTrace("Function called");
-			// could clean this up to use boost::function and then would not have to template the whole class
-			auto returnHandle = [&returned, _ret] (ValuePass *ret) {
-				returned=true;
-				if(_ret) *_ret = *ret;
-				debug(-6, "return hook set");
-			};
-			ScopePass scope = ScopePass(new FunctionScope<decltype(returnHandle)>(_scope_made, _scope_self, returnHandle));
+			// bool returned=false;
+			// errorTrace("Function called");
+			// // could clean this up to use boost::function and then would not have to template the whole class
+			// auto returnHandle = [&returned, _ret] (ValuePass *ret) {
+			// 	returned=true;
+			// 	if(_ret) *_ret = *ret;
+			// 	debug(-6, "return hook set");
+			// };
+			// ScopePass scope = ScopePass(new FunctionScope<decltype(returnHandle)>(_scope_made, _scope_self, returnHandle));
 
-			debug(-6,"function called");
-			if(params) { // the parser set params to NULL when there are non
-				list<Node*>::iterator it = params->begin();
-				for(ValuePass v : p) {
-					if(it==params->end()) break;
-					error(dynamic_cast<parserNode::Variable*>(*it), "Argument to function is not variable name");
-					assert(v);
-					dynamic_cast<parserNode::Variable*>(*it)->Set(scope, ValuePass(v), true);
-					it++;
-				}
-			}
+			// debug(-6,"function called");
+			// if(params) { // the parser set params to NULL when there are non
+			// 	list<Node*>::iterator it = params->begin();
+			// 	for(ValuePass v : p) {
+			// 		if(it==params->end()) break;
+			// 		error(dynamic_cast<parserNode::Variable*>(*it), "Argument to function is not variable name");
+			// 		assert(v);
+			// 		dynamic_cast<parserNode::Variable*>(*it)->Set(scope, ValuePass(v), true);
+			// 		it++;
+			// 	}
+			// }
 
 			std::list<std::string> arguments_mod;
 			ilang::Variable *args = scope->forceNew("arguments", arguments_mod);
@@ -288,7 +288,7 @@ namespace ilang {
 
 			if(body) { // body can be null if there is nothing
 				for(Node *n : *body) {
-					if(returned) return;
+					//if(returned) return;
 					assert(n);
 					debug(-6,"function run");
 					n->Run(scope);
@@ -580,7 +580,7 @@ namespace ilang {
 				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
 			}
 
-			ValuePass ret = function->call(args);
+			ValuePass ret = function->call(scope, args);
 			return ret;
 
 
@@ -1323,7 +1323,7 @@ namespace ilang {
 			Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
 					ilang::Arguments args (*arguments);
 
-					const_cast<ilang::Function*>(&calling)->call(args);
+					const_cast<ilang::Function*>(&calling)->call(ScopePass(), args);
 
 					delete arguments;
 

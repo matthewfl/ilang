@@ -3,7 +3,7 @@
 
 using namespace ilang;
 
-
+/*
 TEST_CASE("Basic function calling", "[function]") {
 	auto tree = PARSE_TREE(
 												 ga = 1;
@@ -25,4 +25,17 @@ TEST_CASE("Basic function calling", "[function]") {
 	std::vector<ValuePass> params;
 	fun.ptr(obj_scope, params, &ret);
 	REQUIRE(asserted == 1);
+}
+*/
+
+TEST_CASE("basic native function", "[function]") {
+	bool called = false;
+	auto fptr = [&called] (ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+		called = true;
+	};
+
+	ilang::Function f(fptr);
+	ValuePass ret = f();
+
+	REQUIRE(called);
 }

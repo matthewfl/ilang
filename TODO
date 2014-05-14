@@ -78,4 +78,5 @@ The system needs to be cleaned up internally, since it is becoming difficult to 
 2) variables/scope overall
 	 * make the variables hold the value themselves rather than being pointers
 	 * the system will use more oop and no more boost::any
+	 * this needs to have the support for there names and modifiers built in, since we should be relying on the parserNodes for that
 3) Using make_ptr to make std::smart_ptr

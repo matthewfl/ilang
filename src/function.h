@@ -18,12 +18,16 @@ namespace ilang {
 	// First, scope that is running in, arguments passed, return value
 	//typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
 	//typedef ValuePass* ValuePass_ptr;
-	typedef boost::function3<void, ScopePass, std::vector<ValuePass>, ValuePass*> Function_ptr;
+	class Function;
+	class Arguments;
+	class Object;
+
 
 	namespace parserNode {
 		class Function;
 	}
-	class Object;
+
+	typedef boost::function3<void, ScopePass, std::vector<ValuePass>, ValuePass*> Function_ptr;
 
 	struct Function_old {
 		bool native;
@@ -39,10 +43,8 @@ namespace ilang {
 			}*/
 	};
 
-	class Function;
-
 	class Arguments {
-		friend class Funciton;
+
 		std::vector<ilang::ValuePass> pargs;
 		std::map<std::string, ilang::ValuePass> kwargs;
 
@@ -58,30 +60,37 @@ namespace ilang {
 	public:
 		void push(ilang::ValuePass);
 		void set(std::string, ilang::ValuePass);
+		ValuePass get(std::string);
+		ValuePass get(int);
+		ValuePass operator[](std::string s) { return get(s); }
+		ValuePass operator[](int i) { return get(i); }
 		Arguments();
 		// TODO: use the new type system to make this easy to work with
 		Arguments(std::vector<ValuePass> pargs);
 		template<typename... types> Arguments(types... values) : Arguments() {
 			unwrap(values...);
 		}
+
+		friend class Function;
 	};
 
 
 	class Function {
 	private:
-		bool native;
+		bool native = false;
 		Function_ptr ptr;
-		ScopePass contained_scope;
-		ValuePass object_scope;
-		ilang::parserNode::Function *func;
+		ScopePass contained_scope = ScopePass();
+		ValuePass object_scope = ValuePass();
+		ilang::parserNode::Function *func = NULL;
 	public:
 		template <typename... types> ilang::ValuePass operator() (types... values) {
 			Arguments args(values...);
-			return call(args);
+			return call(ScopePass(), args);
 		}
-		ilang::ValuePass operator() (ilang::Arguments &args) { return call(args); }
-		ilang::ValuePass call(ilang::Arguments&);
+		ilang::ValuePass operator() (ilang::Arguments &args) { return call(ScopePass(), args); }
+		ilang::ValuePass call(ScopePass, ilang::Arguments&);
 		Function bind(ilang::ValuePass); // bind to an object
+		Function capture(ScopePass);
 
 		Function(const Function&);
 		Function(ilang::parserNode::Function *f, ScopePass scope, Function_ptr _ptr);
