@@ -280,6 +280,8 @@ namespace ilang {
 			// 		it++;
 			// 	}
 			// }
+			assert(0);
+			/*
 
 			std::list<std::string> arguments_mod;
 			ilang::Variable *args = scope->forceNew("arguments", arguments_mod);
@@ -293,7 +295,7 @@ namespace ilang {
 					debug(-6,"function run");
 					n->Run(scope);
 				}
-			}
+				}*/
 
 			// scope deleted
 			//delete scope; // not going to be needed when smart pointer

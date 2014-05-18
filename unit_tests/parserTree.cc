@@ -13,7 +13,7 @@ TEST_CASE( "Run empty function", "[parserTree]" ) {
 	nodes.push_back(
 									new AssignExpr(
 																 new parserNode::FieldAccess(NULL, "main"),
-																 new Function(NULL, NULL)
+																 new parserNode::Function(NULL, NULL)
 																 ));
 
 	auto head = new Head(&nodes, NULL);//&scope);

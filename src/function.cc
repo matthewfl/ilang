@@ -28,8 +28,9 @@ void Arguments::populate(ScopePass scope, Function *func) {
 			if(it == func->func->params->end()) break;
 
 			// this needs better abstraction, as we shouldn't have this parserNode stuff here
-			dynamic_cast<parserNode::Variable*>(*it)->Set(scope, ValuePass(v), true);
+			dynamic_cast<parserNode::Variable*>(*it)->Set(scope, v, true);
 		}
+	}
 }
 
 ValuePass Arguments::get(int i) {
@@ -38,14 +39,14 @@ ValuePass Arguments::get(int i) {
 
 ValuePass Arguments::get(std::string s) {
 	auto f = kwargs.find(s);
-	return s != kwargs.end() ? f.second : ValuePass();
+	return f != kwargs.end() ? f->second : ValuePass();
 }
 
 
 
 ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 	bool returned = false;
-	ValuePass _ret = ValuePass();
+	ValuePass _ret = ValuePass(new ilang::Value);
 	auto returnHandle = [&returned, &_ret] (ValuePass *ret) {
 		returned = true;
 		_ret = *ret;
@@ -63,7 +64,14 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 		ScopePass obj_scope = ScopePass();
 		if(object_scope)
 			obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(object_scope->Get())));
-		ptr(scopep, args.pargs, &ret);
+		if(func->body) {
+			for(auto n : *func->body) {
+				if(returned) break;
+				assert(n);
+				n->Run(scope);
+			}
+		}
+		//ptr(scopep, args.pargs, &ret);
 	}
 	return ret;
 }

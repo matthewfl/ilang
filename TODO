@@ -80,3 +80,5 @@ The system needs to be cleaned up internally, since it is becoming difficult to 
 	 * the system will use more oop and no more boost::any
 	 * this needs to have the support for there names and modifiers built in, since we should be relying on the parserNodes for that
 3) Using make_ptr to make std::smart_ptr
+4) There should be some common hash mapping representation.
+	 * this should be used to back objects and classes

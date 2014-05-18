@@ -21,6 +21,8 @@ namespace ilang {
 	class Object;
 	class Class;
 	class Modification;
+	class Function;
+	class Arguments;
 	namespace parserNode {
 		using std::list;
 		using boost::shared_ptr;
@@ -195,6 +197,8 @@ namespace ilang {
 
 		class Function : public Value {
 			friend class ilang::Modification;
+			friend class ilang::Function;
+			friend class ilang::Arguments;
 		private:
 			std::list<Node*> *body;
 			std::list<Node*> *params;

@@ -57,6 +57,8 @@ namespace ilang {
 			unwrap(values...);
 		}
 		void populate(ScopePass, Function*);
+
+		friend class Function;
 	public:
 		void push(ilang::ValuePass);
 		void set(std::string, ilang::ValuePass);
@@ -71,7 +73,6 @@ namespace ilang {
 			unwrap(values...);
 		}
 
-		friend class Function;
 	};
 
 
@@ -82,6 +83,7 @@ namespace ilang {
 		ScopePass contained_scope = ScopePass();
 		ValuePass object_scope = ValuePass();
 		ilang::parserNode::Function *func = NULL;
+		friend class Arguments;
 	public:
 		template <typename... types> ilang::ValuePass operator() (types... values) {
 			Arguments args(values...);
