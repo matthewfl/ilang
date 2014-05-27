@@ -28,14 +28,15 @@ namespace {
 		static void timer_callback(uv_timer_t *handle, int status) {
 			timerData *data = (timerData*)handle->data;
 			ilang::Function func = boost::any_cast<ilang::Function>(data->m_function->Get());
-			vector<ValuePass> params;
-			ValuePass ret = ValuePass(new ilang::Value);
-			if(func.object) {
-				ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
-				func.ptr(obj_scope, params, &ret);
-			}else{
-				func.ptr(ScopePass(), params, &ret);
-			}
+			//vector<ValuePass> params;
+			ValuePass ret = func();
+			// ValuePass ret = ValuePass(new ilang::Value);
+			// if(func.object) {
+			// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
+			// 	func.ptr(obj_scope, params, &ret);
+			// }else{
+			// 	func.ptr(ScopePass(), params, &ret);
+			// }
 			// ignore the return type
 
 			if(!uv_timer_get_repeat(&data->m_timer)) {

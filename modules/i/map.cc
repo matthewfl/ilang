@@ -35,23 +35,30 @@ namespace {
 
 			ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
 
-			ScopePass obj_scope = ScopePass();
-			if(funct.object) {
-				obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
-			}
+			//ScopePass obj_scope = ScopePass();
+			// if(funct.object) {
+			// 	obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
+			// }
 
 			ValuePass ret = ValuePass(new ilang::Value);
 
 			Mapper *returnMapper = new Mapper();
-			ilang::Function emitFunct;
-			emitFunct.native = true;
-			emitFunct.ptr = [returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = returnMapper->EmitFunct(args);
-				assert(*ret);
-			};
-			ValuePass emitFunctVal = ValuePass(new ilang::Value(emitFunct));
+			// ilang::Function emitFunct;
+			// emitFunct.native = true;
+			ilang::Function emit_fun([returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+					*ret = returnMapper->EmitFunct(args);
+					assert(*ret);
+				});
+			ValuePass emitFunctVal = ValuePass(new ilang::Value(emit_fun));
 
-#define CALL_WITH(_key, _value)																					\
+			for(auto vals : m_obj->members) {
+				if(vals.first == "this") continue;
+				ilang::Variable *var = vals.second;
+				ValuePass ret = funct(ValuePass(new ilang::Value(vals.first)), var->Get(), emitFunctVal);
+			}
+
+			/*
+#define CALL_WITH(_key, _value)																	\
 			{																																	\
 				std::vector<ValuePass> params =																	\
 					{ValuePass(new ilang::Value( _key )), _value , emitFunctVal};	\
@@ -75,7 +82,7 @@ namespace {
 			}
 
 #undef CALL_WITH
-
+			*/
 
 			return ValuePass(new ilang::Value(new ilang::Object(returnMapper)));
 		}
@@ -94,25 +101,21 @@ namespace {
 
 			ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
 
-			ScopePass obj_scope = ScopePass();
-			if(funct.object) {
-				obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
-			}
+			// ScopePass obj_scope = ScopePass();
+			// if(funct.object) {
+			// 	obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
+			// }
 
 			Mapper *returnMapper = new Mapper();
-			ilang::Function emitFunct;
-			emitFunct.native = true;
-			emitFunct.ptr = [returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = returnMapper->EmitFunct(args);
-				assert(*ret);
-			};
+			ilang::Function emitFunct([returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+					*ret = returnMapper->EmitFunct(args);
+					assert(*ret);
+				});
 			ValuePass emitFunctVal = ValuePass(new ilang::Value(emitFunct));
 
 #define CALL_WITH(_key, _value)																					\
 			{																																	\
-				std::vector<ValuePass> params =																	\
-					{ValuePass(new ilang::Value( _key )), _value , emitFunctVal};	\
-				funct.ptr(obj_scope, params, &ret);															\
+				ValuePass ret = funct(ValuePass(new ilang::Value( _key )), _value, emitFunctVal); \
 			}
 
 			ValuePass ret = ValuePass(new ilang::Value);

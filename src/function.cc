@@ -26,9 +26,9 @@ void Arguments::populate(ScopePass scope, Function *func) {
 		auto it = func->func->params->begin(); // wtf was I thinking
 		for(ValuePass v : pargs) {
 			if(it == func->func->params->end()) break;
-
 			// this needs better abstraction, as we shouldn't have this parserNode stuff here
 			dynamic_cast<parserNode::Variable*>(*it)->Set(scope, v, true);
+			it++;
 		}
 	}
 }
@@ -51,24 +51,27 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 		returned = true;
 		_ret = *ret;
 	};
+
+	ScopePass obj_scope = ScopePass();
+	if(object_scope)
+		obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(object_scope->Get())));
+
+
 	ValuePass ret = ValuePass(new ilang::Value);
 	//FunctionScope<decltype(returnHandle)> scope(_scope_made, _scope_self, returnHandle);
 	// TODO: make this be on the stack instead of using new here
-	auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, scope, returnHandle);
-	ScopePass scopep = ScopePass(fscope);
-	args.populate(scope, this);
+	auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, obj_scope, returnHandle);
+	ScopePass scopep(fscope);
+	args.populate(scopep, this);
 
 	if(native) {
 		ptr(scopep, args.pargs, &ret);
 	}else{
-		ScopePass obj_scope = ScopePass();
-		if(object_scope)
-			obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(object_scope->Get())));
 		if(func->body) {
 			for(auto n : *func->body) {
 				if(returned) break;
 				assert(n);
-				n->Run(scope);
+				n->Run(scopep);
 			}
 		}
 		//ptr(scopep, args.pargs, &ret);
@@ -99,4 +102,8 @@ Function::Function(parserNode::Function *f, ScopePass scope, Function_ptr _ptr) 
 Function::Function(Function_ptr _ptr) {
 	ptr = _ptr;
 	native = true;
+}
+
+Function::Function () {
+	// idk
 }

@@ -52,6 +52,10 @@ namespace ilang {
 			push(ilang::ValuePass(new ilang::Value(t)));
 		}
 
+		void unwrap(ilang::ValuePass t) {
+			push(t);
+		}
+
 		template<typename T, typename... types> void unwrap(T t, types... values) {
 			unwrap(t);
 			unwrap(values...);
@@ -97,6 +101,7 @@ namespace ilang {
 		Function(const Function&);
 		Function(ilang::parserNode::Function *f, ScopePass scope, Function_ptr _ptr);
 		Function(Function_ptr _ptr);
+		Function();
 	};
 
 

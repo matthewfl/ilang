@@ -237,8 +237,18 @@ namespace ilang {
 			debug(-5, "\t\t\tfunction constructed" );
 		}
 		void Function::Run(ScopePass scope) {
-			vector<ValuePass> p;
-			Call(scope, ScopePass(), p);
+			ScopePass local_scope(new Scope(scope));
+			// TODO: what happens to the arguments when it is used as a block instead of called
+			if(body) {
+				for (Node *n : *body) {
+					// TODO: returning block break statement
+					n->Run(local_scope);
+				}
+			}
+
+
+			//vector<ValuePass> p;
+			//Call(scope, ScopePass(), p);
 		}
 		ValuePass Function::GetValue(ScopePass this_scope) {
 			// this need to track the scope at this point so that it could be use later in the funciton

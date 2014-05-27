@@ -385,19 +385,21 @@ namespace {
 		ValuePass rr = ValuePass(new ilang::Value(new ilang::Object(req)));
 		// at this point Request will be deleted when rr is lost
 		vector<ValuePass> params = {rr};
-		ValuePass ret = ValuePass(new ilang::Value);
+		//ValuePass ret = ValuePass(new ilang::Value);
 		Function & func = req->parent->callback;
 		/*if(callback->native) {
 			function->ptr(NULL, params, &ret);
 			}else */
 		// need to create a thread here and execuit the code
-		if(func.object) {
-			assert(func.object->Get().type() == typeid(ilang::Object*));
-			ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
-			func.ptr(obj_scope, params, &ret);
-		}else{
-			func.ptr(ScopePass(), params, &ret);
-		}
+
+		ValuePass ret = func(params);
+		// if(func.object) {
+		// 	assert(func.object->Get().type() == typeid(ilang::Object*));
+		// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
+		// 	func.ptr(obj_scope, params, &ret);
+		// }else{
+		// 	func.ptr(ScopePass(), params, &ret);
+		// }
 
 		// ignore the return type here
 

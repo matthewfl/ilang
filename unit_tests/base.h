@@ -34,8 +34,10 @@ static ilang::parserNode::Head *_build_tree(std::string code) {
 	return content;
 }
 
-#define PARSE_TREE(X)														\
-	_build_tree( #X )
+
+
+#define PARSE_TREE(...)														\
+	_build_tree( #__VA_ARGS__ )
 
 #define RUN_CODE(X)																\
 	do {																						\

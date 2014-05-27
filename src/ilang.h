@@ -53,12 +53,10 @@ namespace ilang {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(args);
-				assert(*ret);
-			};
+			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+					*ret = (self ->* fun)(args);
+					assert(*ret);
+				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
 			var->Set(ValuePass(new ilang::Value(f)));
@@ -68,12 +66,10 @@ namespace ilang {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(scope.get(), args);
-				assert(*ret);
-			};
+			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+					*ret = (self ->* fun)(scope.get(), args);
+					assert(*ret);
+				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
 			var->Set(ValuePass(new ilang::Value(f)));
@@ -83,12 +79,10 @@ namespace ilang {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(scope, args);
-				assert(*ret);
-			};
+			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+					*ret = (self ->* fun)(scope, args);
+					assert(*ret);
+				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
 			var->Set(ValuePass(new ilang::Value(f)));
