@@ -145,16 +145,16 @@ ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
 		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
 		;
 
-Object		:	T_object '{' ObjectList '}'	{ $$ = new Object($3); }
+Object		:	T_object '{' ObjectList OptComma '}'	{ $$ = new Object($3); }
 		|	T_object '{' '}'		{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
 		;
 
-Class		:	T_class '{' ObjectList '}'	{ $$ = new Class(new std::list<Node*>, $3); }
-		|	T_class	'(' ParamList ')' '{' ObjectList '}'	{ $$ = new Class($3, $6); }
+Class		:	T_class '{' ObjectList OptComma '}'	{ $$ = new Class(new std::list<Node*>, $3); }
+		|	T_class	'(' ParamList OptComma ')' '{' ObjectList OptComma '}'	{ $$ = new Class($3, $7); }
 		;
 
-Array		:	'[' ModifierList '|' ParamList ']' { $$ = new Array($4, $2); }
-		| 	'[' ParamList ']'		   { $$ = new Array($2, NULL); }
+Array		:	'[' ModifierList OptComma '|' ParamList OptComma ']' { $$ = new Array($5, $2); }
+		| 	'[' ParamList OptComma ']'		   { $$ = new Array($2, NULL); }
 		;
 
 IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
@@ -172,8 +172,8 @@ ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
 
 Function	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		|	'{' Stmts '}'			{ $$ = new Function(NULL, $2); }
-		|	'{' '|' ArgsList '|' Stmts '}'	{ $$ = new Function($3, $5); }
-		|	'{' '|' ArgsList '|' '}'	{ $$ = new Function($3, NULL); }
+		|	'{' '|' ArgsList OptComma '|' Stmts '}'	{ $$ = new Function($3, $6); }
+		|	'{' '|' ArgsList OptComma '|' '}'	{ $$ = new Function($3, NULL); }
 		;
 
 ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
@@ -193,12 +193,12 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	Expr '(' ParamList ')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
-		|	T_print '(' ParamList ')'	{ $$ = new PrintCall($3); }
-		|	T_new '(' ParamList ')'		{ $$ = new NewCall($3); }
-		|	T_assert '(' ParamList ')'	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
-		|	T_import '(' ParamList ')'	{ $$ = new ImportCall($3); }
-		|	T_go '(' ParamList ')'		{ $$ = new ThreadGoCall($3); }
+Call		:	Expr '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
+		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
+		|	T_new '(' ParamList OptComma')'		{ $$ = new NewCall($3); }
+		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
+		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
+		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
 ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
@@ -215,7 +215,7 @@ Expr		:	Function			{}
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	T_IntConst			{ $$ = new IntConst($1); }
 		|	T_FloatConst			{ $$ = new FloatConst($1); }
-		|	'(' Expr ')'			{$$=$2;}
+		|	'(' Expr ')'			{ $$ = $2; }
 		|	Expr '+' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::add); }
 		|	Expr '-' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::subtract); }
 		|	'-' Expr %prec uMinus		{ $$ = new MathEquation(dynamic_cast<Value*>($2), NULL, MathEquation::uMinus); }
@@ -238,4 +238,9 @@ Expr		:	Function			{}
 
 Identifier	:	T_Identifier			{ }
 		;
+
+OptComma	:	','
+		|
+		;
+
 %%
