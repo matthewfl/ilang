@@ -31,7 +31,7 @@ TEST_CASE("Basic function calling", "[function]") {
 
 TEST_CASE("basic native function", "[function]") {
 	bool called = false;
-	auto fptr = [&called] (ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+	auto fptr = [&called] (ScopePass scope,  Arguments &args, ValuePass *ret) {
 		called = true;
 	};
 

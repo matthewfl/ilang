@@ -19,7 +19,7 @@ namespace {
 		timerData *m_data;
 		long m_timeout;
 		bool m_interval;
-		ValuePass stopTimer(std::vector<ValuePass> &args) {
+		ValuePass stopTimer(Arguments &args) {
 			uv_timer_stop(&m_data->m_timer);
 			m_data->doDelete = true;
 			return ValuePass(new ilang::Value(true));
@@ -78,7 +78,7 @@ namespace {
 		}
 	};
 
-	ValuePass setTimer(std::vector<ValuePass> &args) {
+	ValuePass setTimer(Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
 		error(args[0]->Get().type() == typeid(long), "first argument to setTimeout should be a time in ms");
 		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
@@ -87,7 +87,7 @@ namespace {
 		return ValuePass(new ilang::Value(new ilang::Object(time)));
 	}
 
-	ValuePass setInterval(std::vector<ValuePass> &args) {
+	ValuePass setInterval(Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
 		error(args[0]->Get().type() == typeid(long), "first argument to setInterval should be a time in ms");
 		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setInterval should be a function");

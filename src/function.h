@@ -27,7 +27,7 @@ namespace ilang {
 		class Function;
 	}
 
-	typedef boost::function3<void, ScopePass, std::vector<ValuePass>, ValuePass*> Function_ptr;
+	typedef boost::function3<void, ScopePass, ilang::Arguments&, ValuePass*> Function_ptr;
 
 	struct Function_old {
 		bool native;
@@ -43,6 +43,7 @@ namespace ilang {
 			}*/
 	};
 
+	// TODO: use the new type system to make this easy to work with
 	class Arguments {
 
 		std::vector<ilang::ValuePass> pargs;
@@ -66,12 +67,21 @@ namespace ilang {
 	public:
 		void push(ilang::ValuePass);
 		void set(std::string, ilang::ValuePass);
+
 		ValuePass get(std::string);
 		ValuePass get(int);
 		ValuePass operator[](std::string s) { return get(s); }
 		ValuePass operator[](int i) { return get(i); }
+
+		std::vector<ilang::ValuePass>::iterator begin() { return pargs.begin(); }
+		std::vector<ilang::ValuePass>::iterator end() { return pargs.end(); }
+
+
+		size_t size();
+		//template<typename... types> void inject(types... &values) {}
+		// long a; std::string b; args.inject(a, b);
+
 		Arguments();
-		// TODO: use the new type system to make this easy to work with
 		Arguments(std::vector<ValuePass> pargs);
 		template<typename... types> Arguments(types... values) : Arguments() {
 			unwrap(values...);
@@ -99,7 +109,7 @@ namespace ilang {
 		Function capture(ScopePass);
 
 		Function(const Function&);
-		Function(ilang::parserNode::Function *f, ScopePass scope, Function_ptr _ptr);
+		Function(ilang::parserNode::Function *f, ScopePass scope); //, Function_ptr _ptr);
 		Function(Function_ptr _ptr);
 		Function();
 	};

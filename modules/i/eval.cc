@@ -17,7 +17,7 @@ namespace {
 	boost::mutex Eval_mutex;
 	ValuePass Eval_FunctionPass;
 
-	ValuePass evalFunction(std::vector<ValuePass> &args) {
+	ValuePass evalFunction(Arguments &args) {
 		// arguments: ([optional args string], code string)
 		// return function with code as body
 		error(args.size() != 0, "eval requires at least 1 argument");
@@ -63,7 +63,7 @@ namespace {
 
 	}
 
-	ValuePass evalLoader(std::vector<ValuePass> &args) {
+	ValuePass evalLoader(Arguments &args) {
 		error(args.size() == 1, "eval loader not ment to be called directly");
 		//error(args[0]->Get().type() == typeid(long), "eval loader not ment to be called directly");
 

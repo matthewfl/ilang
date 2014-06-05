@@ -4,9 +4,10 @@
 
 #include <iostream>
 using namespace std;
+using namespace ilang;
 
 namespace {
-	ilang::ValuePass ttt (std::vector<ilang::ValuePass> &args) {
+	ilang::ValuePass ttt (Arguments &args) {
 		cout << "ttt function called" << endl;
 		debug(5, "what");
 	}
@@ -17,16 +18,16 @@ namespace {
 	private:
 		ValuePass something;
 	public:
-		ilang::ValuePass eeee(std::vector<ilang::ValuePass> &args) {
+		ilang::ValuePass eeee(Arguments &args) {
 			cout << "calling the eeee function";
 		}
 
-		ValuePass set(std::vector<ValuePass> &args) {
+		ValuePass set(Arguments &args) {
 			assert(args.size() == 1);
 			something = args[0];
 			return ValuePass(new ilang::Value);
 		}
-		ValuePass get(std::vector<ValuePass> &args) {
+		ValuePass get(Arguments &args) {
 			return something;
 		}
 

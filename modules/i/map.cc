@@ -20,7 +20,7 @@ namespace {
 		ilang::Object *m_obj;
 		std::map<std::string, std::vector<ValuePass> > m_emitted;
 
-		ValuePass EmitFunct(std::vector<ValuePass> &args) {
+		ValuePass EmitFunct(Arguments &args) {
 			error(args.size() == 2, "map.emit expects 2 arguments");
 			error(args[0]->Get().type() == typeid(std::string), "map.emit expects the first argument to be a string");
 
@@ -29,7 +29,7 @@ namespace {
 			return ValuePass(new ilang::Value(true));
 		}
 
-		ValuePass MapAction(std::vector<ValuePass> &args) {
+		ValuePass MapAction(Arguments &args) {
 			error(args.size() == 1, "map.map expects 1 argument");
 			error(args[0]->Get().type() == typeid(ilang::Function), "map.map expects a function");
 
@@ -45,12 +45,13 @@ namespace {
 			Mapper *returnMapper = new Mapper();
 			// ilang::Function emitFunct;
 			// emitFunct.native = true;
-			ilang::Function emit_fun([returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+			ilang::Function emit_fun([returnMapper](ScopePass scope, Arguments &args, ValuePass *ret) {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});
 			ValuePass emitFunctVal = ValuePass(new ilang::Value(emit_fun));
 
+			assert(m_obj);
 			for(auto vals : m_obj->members) {
 				if(vals.first == "this") continue;
 				ilang::Variable *var = vals.second;
@@ -58,43 +59,43 @@ namespace {
 			}
 
 			/*
-#define CALL_WITH(_key, _value)																	\
-			{																																	\
+				#define CALL_WITH(_key, _value)																	\
+				{																																	\
 				std::vector<ValuePass> params =																	\
-					{ValuePass(new ilang::Value( _key )), _value , emitFunctVal};	\
+				{ValuePass(new ilang::Value( _key )), _value , emitFunctVal};	\
 				funct.ptr(obj_scope, params, &ret);															\
-			}
+				}
 
-			if(m_obj->baseClass) {
+				if(m_obj->baseClass) {
 				// this object was constructed off some ilang base class
-			}else if(m_obj->C_baseClass) {
+				}else if(m_obj->C_baseClass) {
 				// this object was constructed off some C++ base class
-			}else if(m_obj->DB_name) {
+				}else if(m_obj->DB_name) {
 				// then the object is located in the database are we are going to need to branch out and figure out where this
-			}else{
+				}else{
 				// put in an if statement so if the object is large that it will use threads when dealing with the object
 				// this this is just a normal object with all the elements in the object
 				for(auto vals : m_obj->members) {
-					if(vals.first == "this") continue;
-					ilang::Variable *var = vals.second;
-					CALL_WITH(vals.first, var->Get());
+				if(vals.first == "this") continue;
+				ilang::Variable *var = vals.second;
+				CALL_WITH(vals.first, var->Get());
 				}
-			}
+				}
 
-#undef CALL_WITH
+				#undef CALL_WITH
 			*/
 
 			return ValuePass(new ilang::Value(new ilang::Object(returnMapper)));
 		}
 
-		ValuePass Get(std::vector<ValuePass> &args) {
+		ValuePass Get(Arguments &args) {
 			error(args.size() == 1, "map.get expects 1 arugment");
 			error(args[0]->Get().type() == typeid(std::string), "map.get expects a string");
 
 			return ValuePass(new ilang::Value((ilang::Object*) new ilang::Array(m_emitted[boost::any_cast<std::string>(args[0]->Get())])));
 		}
 
-		ValuePass Reduce(std::vector<ValuePass> &args) {
+		ValuePass Reduce(Arguments &args) {
 			error(args.size() == 1, "map.reduce expects 1 argument");
 			error(args[0]->Get().type() == typeid(ilang::Function), "map.reduce expects a function");
 			error(!m_obj, "can not reduce directly on an object"); // TODO: remove this constrain
@@ -107,7 +108,7 @@ namespace {
 			// }
 
 			Mapper *returnMapper = new Mapper();
-			ilang::Function emitFunct([returnMapper](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+			ilang::Function emitFunct([returnMapper](ScopePass scope, Arguments &args, ValuePass *ret) {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});
@@ -146,7 +147,7 @@ namespace {
 		}
 	};
 
-	ValuePass createMapper(std::vector<ValuePass> &args) {
+	ValuePass createMapper(Arguments &args) {
 		// when the argument is of a class that has not been constructed, then the type is ilang::Class*, after the obhject is constructed then the type is ilang::Object* with a pointer to class
 		error(args.size() == 1, "map.create expects 1 argument");
 		error(args[0]->Get().type() == typeid(ilang::Object*), "map.create expects type of object");

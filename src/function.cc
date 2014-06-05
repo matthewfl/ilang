@@ -42,6 +42,10 @@ ValuePass Arguments::get(std::string s) {
 	return f != kwargs.end() ? f->second : ValuePass();
 }
 
+size_t Arguments::size() {
+	return pargs.size() + kwargs.size();
+}
+
 
 
 ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
@@ -65,7 +69,7 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 	args.populate(scopep, this);
 
 	if(native) {
-		ptr(scopep, args.pargs, &ret);
+		ptr(scopep, args, &ret);
 	}else{
 		if(func->body) {
 			for(auto n : *func->body) {
@@ -92,9 +96,10 @@ Function::Function(const Function &func) {
 	this->func = func.func;
 }
 
-Function::Function(parserNode::Function *f, ScopePass scope, Function_ptr _ptr) {
+Function::Function(parserNode::Function *f, ScopePass scope) { //, Function_ptr _ptr) {
 	func = f;
-	ptr = _ptr;
+	ptr = NULL;
+	//ptr = _ptr;
 	contained_scope = scope;
 	native = false;
 }

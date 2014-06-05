@@ -281,24 +281,24 @@ namespace ilang {
 }
 
 namespace ilang {
-	ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
-		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) ) {
+		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
 			*ret = (*fun)(args);
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
 		return ValuePass(new ilang::Value(f));
 	}
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
-		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) ) {
+		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
 			*ret = (*fun)(scope.get(), args);
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
 		return ValuePass(new ilang::Value(f));
 	}
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) ) {
-		auto fptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
+	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
+		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
 			*ret = (*fun)(scope, args);
 			assert(*ret);
 		};
@@ -316,7 +316,7 @@ namespace ilang {
 
 namespace {
 	using namespace ilang;
-	ValuePass ilang_import_get(std::vector<ValuePass> &args) {
+	ValuePass ilang_import_get(Arguments &args) {
 		Object *obj = new Object;
 
 		error(args.size() == 1, "i.Import.check expects 1 argument");
@@ -338,7 +338,7 @@ namespace {
 		return ValuePass(new ilang::Value(obj));
 	}
 
-	ValuePass ilang_import_check(std::vector<ValuePass> &args) {
+	ValuePass ilang_import_check(Arguments &args) {
 		error(args.size() == 1, "i.Import.check expects 1 argument");
 		error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
 		std::string name = boost::any_cast<std::string>(args[0]->Get());

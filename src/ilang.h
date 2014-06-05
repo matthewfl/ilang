@@ -39,9 +39,9 @@
 namespace ilang {
 	// used to create wrapper for C++ classes
 	// other helpers for wrappers in import.cc
-	ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) );
+	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) );
+	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) );
+	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) );
 
 	class C_Class {
 	private:
@@ -49,11 +49,11 @@ namespace ilang {
 	public:
 		C_Class() {}
 		virtual ~C_Class();
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(std::vector<ValuePass> &args) ) {
+		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ilang::Arguments &args) ) {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
 					*ret = (self ->* fun)(args);
 					assert(*ret);
 				});
@@ -62,11 +62,11 @@ namespace ilang {
 			var->Set(ValuePass(new ilang::Value(f)));
 			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, std::vector<ValuePass> &args) ) {
+		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, ilang::Arguments &args) ) {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
 					*ret = (self ->* fun)(scope.get(), args);
 					assert(*ret);
 				});
@@ -75,11 +75,11 @@ namespace ilang {
 			var->Set(ValuePass(new ilang::Value(f)));
 			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, std::vector<ValuePass> &args) ) {
+		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, ilang::Arguments &args) ) {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
+			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
 					*ret = (self ->* fun)(scope, args);
 					assert(*ret);
 				});

@@ -12,13 +12,13 @@ namespace {
 	private:
 		tbb::concurrent_bounded_queue<ValuePass> m_queue;
 		ilang::Event waiting;
-		ValuePass push(vector<ValuePass> &args) {
+		ValuePass push(Arguments &args) {
 			error(args.size() == 1, "channel.push expects one argument");
 			m_queue.push(args[0]);
 			waiting.Trigger(NULL);
 			return ValuePass(new ilang::Value);
 		}
-		ValuePass pop(vector<ValuePass> &args) {
+		ValuePass pop(Arguments &args) {
 			error(args.size() == 0, "channel.pop expects zero arguments");
 			ValuePass ret;
 			//m_queue.pop(ret); // blocks until there is something to pop
@@ -28,12 +28,12 @@ namespace {
 			}
 			return ret;
 		}
-		ValuePass size(vector<ValuePass> &args) {
+		ValuePass size(Arguments &args) {
 			error(args.size() == 0, "channel.size expects zero arguments");
 			long size = m_queue.size();
 			return ValuePass(new ilang::Value(size));
 		}
-		ValuePass setLimit(vector<ValuePass> &args) {
+		ValuePass setLimit(Arguments &args) {
 			error(args.size() == 1, "channel.setLimit expects one argument");
 			error(args[0]->Get().type() == typeid(long), "channel.setLimit expects a number");
 			m_queue.set_capacity(boost::any_cast<long>(args[0]->Get()));
@@ -56,7 +56,7 @@ namespace {
 		}
 	};
 
-	ValuePass createChannel(std::vector<ValuePass> &args) {
+	ValuePass createChannel(Arguments &args) {
 		error(args.size() <= 1, "channel.create expects 1 or no arguments");
 		int channelLength = 10;
 		if(args.size()) {

@@ -365,14 +365,14 @@ namespace ilang {
 	// I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
 	// if programmers couldn't break it, what fun would there be
 	namespace {
-		ValuePass DB_metaSet(vector<ValuePass> &args) {
+		ValuePass DB_metaSet(Arguments &args) {
 			error(args.size() == 2, "db.metaSet takes 2 arguments");
 			error(args[0]->Get().type() == typeid(string), "First argument to db.metaSet should be a string");
 			error(args[1]->Get().type() == typeid(string), "Second argument to db.metaSet should be a string");
 			System_Database->setMeta(boost::any_cast<string>(args[0]->Get()), boost::any_cast<string>(args[1]->Get()));
 			return ValuePass(new ilang::Value);
 		}
-		ValuePass DB_metaGet(vector<ValuePass> &args) {
+		ValuePass DB_metaGet(Arguments &args) {
 			error(args.size() == 1, "db.metaGet takes 1 argument");
 			error(args[0]->Get().type() == typeid(string), "First argument to db.metaGet must should be a string");
 			return ValuePass(new ilang::Value( System_Database->getMeta(boost::any_cast<string>(args[0]->Get())) ));

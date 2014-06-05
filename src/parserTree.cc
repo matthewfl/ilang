@@ -254,12 +254,12 @@ namespace ilang {
 			// this need to track the scope at this point so that it could be use later in the funciton
 			debug(-6, "Function get value");
 			errorTrace("Getting value of a function");
-			Function *self = this;
-			auto fptr = [self, this_scope](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
-				self->Call(ScopePass(this_scope), scope, args, ret);
-			};
+			// Function *self = this;
+			// auto fptr = [self, this_scope](ScopePass scope, Arguments& args, ValuePass *ret) {
+			// 	self->Call(ScopePass(this_scope), scope, args, ret);
+			// };
 
-			ilang::Function fun(this, this_scope, fptr);
+			ilang::Function fun(this, this_scope);//, fptr);
 
 			// ilang::Function fun;
 			// fun.func = this;
