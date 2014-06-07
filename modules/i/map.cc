@@ -32,6 +32,7 @@ namespace {
 		ValuePass MapAction(Arguments &args) {
 			error(args.size() == 1, "map.map expects 1 argument");
 			error(args[0]->Get().type() == typeid(ilang::Function), "map.map expects a function");
+			error(m_obj, "There is no object to map on");
 
 			ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
 
@@ -41,8 +42,9 @@ namespace {
 			// }
 
 			ValuePass ret = ValuePass(new ilang::Value);
-
 			Mapper *returnMapper = new Mapper();
+			assert(returnMapper != this); // fcking free bugs
+			returnMapper->m_obj = (ilang::Object*)0x2;
 			// ilang::Function emitFunct;
 			// emitFunct.native = true;
 			ilang::Function emit_fun([returnMapper](ScopePass scope, Arguments &args, ValuePass *ret) {
@@ -80,6 +82,10 @@ namespace {
 				ilang::Variable *var = vals.second;
 				CALL_WITH(vals.first, var->Get());
 				}
+		Mapper() : m_obj(NULL) {
+			m_obj = (ilang::Object*)1;
+			Init();
+		}
 				}
 
 				#undef CALL_WITH
@@ -135,6 +141,10 @@ namespace {
 			reg("reduce", &Mapper::Reduce);
 		}
 
+		Mapper() : m_obj(NULL) {
+			m_obj = (ilang::Object*)1;
+			Init();
+		}
 	public:
 		Mapper(ValuePass _hold, ilang::Object *_obj) :
 			m_objectHold(_hold), m_obj(_obj)
@@ -142,8 +152,8 @@ namespace {
 			assert(m_obj);
 			Init();
 		}
-		Mapper() : m_obj(NULL) {
-			Init();
+		~Mapper() {
+
 		}
 	};
 
@@ -153,7 +163,7 @@ namespace {
 		error(args[0]->Get().type() == typeid(ilang::Object*), "map.create expects type of object");
 		ilang::Object *obj = boost::any_cast<ilang::Object*>(args[0]->Get());
 		assert(obj);
-		error(dynamic_cast<ilang::Array*>(obj) == 0, "map.create does not work on arrays");
+		error(dynamic_cast<ilang::Array*>(obj) == NULL, "map.create does not work on arrays");
 
 		Mapper *map = new Mapper(args[0], obj);
 
