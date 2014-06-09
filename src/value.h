@@ -6,7 +6,7 @@
 
 namespace ilang {
 
-  class Value  {
+  class Value_new  {
 	public:  // yolo
     union {
       long m_int;
@@ -14,51 +14,51 @@ namespace ilang {
     };
 
   public:
-    Value() {
+    Value_new() {
     }
-		virtual ~Value() {}
+		virtual ~Value_new() {}
 
 		// operations
-		virtual Value && operator + (Value &v) {}
-		virtual Value && operator - (Value &v) {}
-		virtual Value && operator * (Value &v) {}
-		virtual Value && operator / (Value &v) {}
+		virtual Value_new && operator + (Value_new &v) {}
+		virtual Value_new && operator - (Value_new &v) {}
+		virtual Value_new && operator * (Value_new &v) {}
+		virtual Value_new && operator / (Value_new &v) {}
   };
 
   class ValuePass_new {
   private:
-    char m_data[sizeof(Value)];
+    char m_data[sizeof(Value_new)];
   public:
-    Value &Get() {
-      return *(Value*)m_data;
+    Value_new *Get() {
+      return (Value_new*)m_data;
     }
-    operator Value() {
-      return Get();
+    operator Value_new() {
+      return *Get();
     }
-    Value *operator->() {
-      return (Value*)m_data;
+    Value_new *operator->() {
+      return (Value_new*)m_data;
     }
 
     ValuePass_new() {
-      new (m_data) Value;
+      new (m_data) Value_new;
     }
-		ValuePass_new (const Value &v) {
-			new (m_data) Value;
-			*(Value*)m_data = v;
+		ValuePass_new (const Value_new &v) {
+			new (m_data) Value_new;
+			*(Value_new*)m_data = v;
 		}
 		template <typename T>ValuePass_new (T t) {
-			assert(sizeof(T) == sizeof(Value));
+			assert(sizeof(T) == sizeof(Value_new));
 			//assert(dynamic_cast<Value*>(&t));
 			new (m_data) T(t);
 			//*(Value*)m_data = t;
 		}
 		ValuePass_new (const ValuePass_new &v) {
-			new (m_data) Value;
-			*(Value*)m_data = *(Value*)v.m_data;
+			new (m_data) Value_new;
+			*(Value_new*)m_data = *(Value_new*)v.m_data;
 		}
 
 		~ValuePass_new() {
-			((Value*)m_data)->~Value();
+			((Value_new*)m_data)->~Value_new();
 		}
   };
 
@@ -120,20 +120,20 @@ namespace ilang {
 	// 	}
 	// };
 
-	class IntType : protected Value {
+	class IntType : protected Value_new {
 	public:
 		IntType(int i) { m_int = i; }
 		IntType(long i) { m_int = i; }
-		Value && operator + (Value &v) {
+		Value_new && operator + (Value_new &v) {
 			return IntType(m_int + v.m_int);
 		}
 		~IntType() {}
 	};
 
-	class FloatType : protected Value {
+	class FloatType : protected Value_new {
 	public:
 		FloatType(double f) { m_float = f; }
-		Value && operator + (Value &v) {
+		Value_new && operator + (Value_new &v) {
 			return FloatType(m_float + v.m_float);
 		}
 	};
@@ -144,6 +144,7 @@ namespace ilang {
 		long, IntType,
 		double, FloatType,
 		float, FloatType
+
 		// bool, BoolType,
 		// char*, StringType,
 		// std::string, StringType

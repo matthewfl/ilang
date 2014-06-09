@@ -6,6 +6,6 @@ using namespace ilang;
 
 TEST_CASE("basic value", "[value]") {
 	int c = 4;
-	ValuePass_new a(valueMaker(c));
+	auto a = valueMaker(c);
 
 }
