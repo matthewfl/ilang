@@ -2,7 +2,7 @@ TARGET= i
 
 # currently not in system: netowrk.cc modification.cc
 # main.cc added in manually so it isn't included when unit testing
-SRCS= parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc error.cc print.cc init.cc thread.cc function.cc
+SRCS= parserTree.cc import.cc parser.cc variable.cc scope.cc object.cc database.cc error.cc print.cc init.cc thread.cc function.cc value.cc
 LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar -lprotobuf
 UNIT_TESTS=$(wildcard unit_tests/*.cc)
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
@@ -174,9 +174,6 @@ build/database.o: deps/leveldb/include/leveldb/status.h
 build/database.o: deps/leveldb/include/leveldb/options.h src/ilang.h
 build/database.o: src/import.h src/object.h src/parserTree.h src/scope.h
 build/database.o: src/print.h src/function.h src/error.h build/database.pb.h
-build/modification.o: src/modification.h src/parserTree.h src/variable.h
-build/modification.o: src/scope.h src/import.h src/debug.h src/print.h
-build/modification.o: src/ilang.h src/object.h src/function.h src/error.h
 build/error.o: src/error.h
 build/print.o: src/print.h src/debug.h
 build/init.o: src/ilang.h src/import.h src/debug.h src/variable.h src/object.h
@@ -189,6 +186,9 @@ build/init.o: deps/leveldb/include/leveldb/options.h
 build/thread.o: src/thread.h src/debug.h deps/libuv/include/uv.h
 build/thread.o: deps/libuv/include/uv-private/uv-unix.h
 build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
+build/function.o: src/function.h src/variable.h src/scope.h src/parserTree.h
+build/function.o: src/import.h src/debug.h src/print.h
+build/value.o: src/value.h src/debug.h
 build/main.o: src/parser.h src/debug.h src/import.h src/variable.h
 build/main.o: src/database.h deps/leveldb/include/leveldb/db.h
 build/main.o: deps/leveldb/include/leveldb/iterator.h
