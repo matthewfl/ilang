@@ -8,4 +8,7 @@ TEST_CASE("basic value", "[value]") {
 	int c = 4;
 	auto a = valueMaker(c);
 
+
+	//a.cast<int>(c);
+
 }
