@@ -78,7 +78,7 @@ namespace ilang {
     }
 		virtual ~Value_new() {}
 
-		virtual const std::type_info &type() { return typeid(void); }
+		virtual const std::type_info &type()=0;// { return typeid(void); }
   };
 
   class ValuePass_new {
@@ -89,15 +89,15 @@ namespace ilang {
 		// {
     //   return (Value_new*)m_data;
     // }
-    operator Value_new() {
-      return *Get();
-    }
+    //operator Value_new() {
+    //  return *Get();
+    //}
     Value_new *operator->() {
       return Get(); //(Value_new*)m_data;
     }
 
     ValuePass_new() {
-			new (m_data) Value_new;
+			//new (m_data) Value_new;
     }
 		// ValuePass_new (const Value_new &v) {
 		// 	new (m_data) Value_new;
@@ -118,7 +118,7 @@ namespace ilang {
 		//}
 
 		~ValuePass_new() {
-			((Value_new*)m_data)->~Value_new();
+			Get()->~Value_new();
 		}
   };
 
@@ -250,6 +250,7 @@ namespace ilang {
 		void cast(double &f) {
 			f = m_float;
 		}
+		virtual const std::type_info &type() { return typeid(double); }
 	};
 
 	class BoolType : protected Value_new {
@@ -264,6 +265,8 @@ namespace ilang {
 	public:
 		StringType(char *str) {}
 		StringType(std::string str) {}
+
+		virtual const std::type_info &type() { return typeid(std::string); }
 	};
 
 
