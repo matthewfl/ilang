@@ -87,6 +87,10 @@ namespace ilang {
 			unwrap(values...);
 		}
 
+		template <typename... types> void inject(types & ... values) {
+		}
+		// int a; std::stinrg b; args.inject(a, b);
+
 	};
 
 

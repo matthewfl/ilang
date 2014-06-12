@@ -1,9 +1,13 @@
 #ifndef _ilang_value
 #define _ilang_value
 
+#include <typeinfo>
 #include <type_traits>
 #include <string>
 #include "debug.h"
+
+#include <iostream>
+using namespace std;
 
 namespace ilang {
 
@@ -39,8 +43,27 @@ namespace ilang {
 		virtual void set(ilang::Identifier &i, ValuePass_new &v) RAISE_ERROR;
 	};
 
+	template <typename T> class cast_mixin_base {
+	public:
+		//virtual void cast(T &t) RAISE_ERROR;
+	};
 
-  class Value_new : public math_virtuals_mixin {
+	class cast_mixin :
+		public cast_mixin_base<int>,
+		public cast_mixin_base<long>,
+		public cast_mixin_base<float>,
+		public cast_mixin_base<double>//,
+		//public cast_mixin_base<bool>
+	{
+	public:
+		virtual void cast(int &i) RAISE_ERROR;
+	};
+
+
+  class Value_new :
+		public math_virtuals_mixin,
+		public cast_mixin
+	{
 	public:  // yolo
     union {
       long m_int;
@@ -55,40 +78,44 @@ namespace ilang {
     }
 		virtual ~Value_new() {}
 
-
+		virtual const std::type_info &type() { return typeid(void); }
   };
 
   class ValuePass_new {
   private:
     char m_data[sizeof(Value_new)];
   public:
-    Value_new *Get() {
-      return (Value_new*)m_data;
-    }
+    Value_new *Get();
+		// {
+    //   return (Value_new*)m_data;
+    // }
     operator Value_new() {
       return *Get();
     }
     Value_new *operator->() {
-      return (Value_new*)m_data;
+      return Get(); //(Value_new*)m_data;
     }
 
     ValuePass_new() {
-      new (m_data) Value_new;
-    }
-		ValuePass_new (const Value_new &v) {
 			new (m_data) Value_new;
-			*(Value_new*)m_data = v;
-		}
+    }
+		// ValuePass_new (const Value_new &v) {
+		// 	new (m_data) Value_new;
+		// 	*(Value_new*)m_data = v;
+		// }
 		template <typename T>ValuePass_new (T t) {
 			assert(sizeof(T) == sizeof(Value_new));
 			//assert(dynamic_cast<Value*>(&t));
+			cout << "here\n";
 			new (m_data) T(t);
 			//*(Value*)m_data = t;
 		}
-		ValuePass_new (const ValuePass_new &v) {
-			new (m_data) Value_new;
-			*(Value_new*)m_data = *(Value_new*)v.m_data;
-		}
+		// TODO: going to need support to tracking with something is coppied
+		//ValuePass_new (const ValuePass_new &v) {
+			//			new (m_data) Value_new;
+		//	struct a { char a[sizeof(Value_new)]; };
+		//	(a)m_data = (a)v.m_data;
+		//}
 
 		~ValuePass_new() {
 			((Value_new*)m_data)->~Value_new();
@@ -178,6 +205,7 @@ namespace ilang {
 			return _valueMaker<Others...>::create(t);
 		}
 		static ValuePass_new && create(Of t) {
+			cout << "creating new " << typeid(To).name() << endl;
 			return ValuePass_new(To(t));
 		}
 		template <typename T> inline ValuePass_new && operator () (T t) {
@@ -199,6 +227,15 @@ namespace ilang {
 			return IntType(m_int + v->m_int);
 		}
 		~IntType() {}
+		virtual void cast(int &i) {
+			i = m_int;
+		}
+		virtual void cast(long &i) {
+			i = m_int;
+		}
+
+		//virtual const std::type_info &type() { return typeid(void); }
+		virtual const std::type_info &type() { return typeid(long); }
 	};
 
 	class FloatType : protected Value_new {
@@ -207,11 +244,20 @@ namespace ilang {
 		ValuePass_new && operator + (ValuePass_new &v) {
 			return FloatType(m_float + v->m_float);
 		}
+		void cast(float &f) {
+			f = m_float;
+		}
+		void cast(double &f) {
+			f = m_float;
+		}
 	};
 
 	class BoolType : protected Value_new {
 	public:
 		BoolType(bool b) { m_bool = b; }
+		void cast(bool &b) {
+			b = m_bool;
+		}
 	};
 
 	class StringType : protected Value_new {
