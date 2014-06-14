@@ -3,5 +3,6 @@
 using namespace ilang;
 
 Value_new *ValuePass_new::Get() {
-	(Value_new*)m_data;
+	return (Value_new*)m_data;
+	//return m_ptr;
 }

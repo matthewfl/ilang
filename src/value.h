@@ -60,9 +60,9 @@ namespace ilang {
 	};
 
 
-  class Value_new :
-		public math_virtuals_mixin,
-		public cast_mixin
+  class Value_new //:
+	//		public math_virtuals_mixin//,
+		//		public cast_mixin
 	{
 	public:  // yolo
     union {
@@ -81,9 +81,15 @@ namespace ilang {
 		virtual const std::type_info &type()=0;// { return typeid(void); }
   };
 
+	class asdfasdf : public Value_new {
+	public:
+		const std::type_info &type() { return typeid(long); }
+	};
+
   class ValuePass_new {
   private:
     char m_data[sizeof(Value_new)];
+		Value_new *m_ptr;
   public:
     Value_new *Get();
 		// {
@@ -107,7 +113,10 @@ namespace ilang {
 			assert(sizeof(T) == sizeof(Value_new));
 			//assert(dynamic_cast<Value*>(&t));
 			cout << "here\n";
-			new (m_data) T(t);
+			m_ptr = new asdfasdf;
+			new (m_data) asdfasdf;
+			//m_ptr = new T(t);
+			//new (m_data) T(t);
 			//*(Value*)m_data = t;
 		}
 		// TODO: going to need support to tracking with something is coppied
@@ -154,53 +163,14 @@ namespace ilang {
 		protected math_core_mixin<Self, double> {
 	public:
 
-		virtual ValuePass_new && operator + (ValuePass_new &v) {
-			return v->preform_math_op(OP_add, GetRaw(Self()));
-		}
+		//virtual ValuePass_new && operator + (ValuePass_new &v) {
+			//return v->preform_math_op(OP_add, GetRaw(Self()));
+		//}
 		//virtual preform_math_op(math_ops op,
 
 	};
 
-  // template <typename Of, typename To, typename... Others> struct _valueMaker {
-	// 	// template <int same> struct create {
-	// 	// 	template <typename T> Value &&c(T t) {}
-	// 	// };
-	// 	// template <> struct create <true> {
-	// 	// 	template <typename T> Value &&c(T t) {
-	// 	// 		return To(t);
-	// 	// 	}
-	// 	// };
-	// 	// template <> struct create<false> {
-	// 	// 	template <typename T> Value &&c(T t) {
-	// 	// 		return _valueMaker<Others...>::operator()(t);
-	// 	// 	}
-	// 	// };
-  //   // template <bool same, typename T> Value &&create(T t) {};
-	// 	// template <typename T> Value &&create<true, T>(T t) {
-	// 	// 	return To(t);
-	// 	// }
-	// 	// template<typename T> Value &&create<false, T>(T t) {
-	// 	// 	return _valueMaker<Others...>::operator() (t);
-	// 	// }
-	// 	template<typename T, bool asdf> Value &&create(T t) {
-
-	// 	}
-
-	// 	template <typename T> static Value && c (T t) {
-	// 		return create<T, std::is_same<Of, T>::value>(t);
-	// 		//return create<std::is_same<Of, T>::value, T>(t);
-	// 	}
-  // };
-
-  // template <> struct _valueMaker<void, void> {
-	// 	Value &&create
-  //   template <typename T> static Value && operator () (T t) {
-  //     // base case, should have an assert here or something
-	// 		assert(0);
-  //   }
-  // };
-
-	template<typename Of, typename To, typename... Others> struct _valueMaker {
+	template<typename Of, typename To, typename... Others> struct _valueMaker { //: _valueMaker<Others...> {
 		template <typename T> static ValuePass_new && create(T t) {
 			return _valueMaker<Others...>::create(t);
 		}
@@ -212,14 +182,9 @@ namespace ilang {
 			return create(t);
 		}
 	};
-	// template<> struct _valueMaker <void, void> {
-	// 	template <typename T, bool same> static Value &&creater(T t) {}
-	// 	template <typename T> static Value &&create(T t) {
-	// 		assert(0);
-	// 	}
-	// };
+	//	template <> struct _valueMaker {};
 
-	class IntType : protected Value_new {
+	class IntType : public Value_new {
 	public:
 		IntType(int i) { m_int = i; }
 		IntType(long i) { m_int = i; }
@@ -238,48 +203,47 @@ namespace ilang {
 		virtual const std::type_info &type() { return typeid(long); }
 	};
 
-	class FloatType : protected Value_new {
-	public:
-		FloatType(double f) { m_float = f; }
-		ValuePass_new && operator + (ValuePass_new &v) {
-			return FloatType(m_float + v->m_float);
-		}
-		void cast(float &f) {
-			f = m_float;
-		}
-		void cast(double &f) {
-			f = m_float;
-		}
-		virtual const std::type_info &type() { return typeid(double); }
-	};
+	// class FloatType : public Value_new {
+	// public:
+	// 	FloatType(double f) { m_float = f; }
+	// 	ValuePass_new && operator + (ValuePass_new &v) {
+	// 		return FloatType(m_float + v->m_float);
+	// 	}
+	// 	void cast(float &f) {
+	// 		f = m_float;
+	// 	}
+	// 	void cast(double &f) {
+	// 		f = m_float;
+	// 	}
+	// 	virtual const std::type_info &type() { return typeid(double); }
+	// };
 
-	class BoolType : protected Value_new {
-	public:
-		BoolType(bool b) { m_bool = b; }
-		void cast(bool &b) {
-			b = m_bool;
-		}
-	};
+	// class BoolType : public Value_new {
+	// public:
+	// 	BoolType(bool b) { m_bool = b; }
+	// 	void cast(bool &b) {
+	// 		b = m_bool;
+	// 	}
+	// };
 
-	class StringType : protected Value_new {
-	public:
-		StringType(char *str) {}
-		StringType(std::string str) {}
+	// class StringType : public Value_new {
+	// public:
+	// 	StringType(char *str) {}
+	// 	StringType(std::string str) {}
 
-		virtual const std::type_info &type() { return typeid(std::string); }
-	};
-
+	// 	virtual const std::type_info &type() { return typeid(std::string); }
+	// };
 
 	// I suppose there is no need for this as there could just be a single function
 	// with overloaded parameters
 	static auto valueMaker = _valueMaker<
-		int, IntType,
-		long, IntType,
-		double, FloatType,
-		float, FloatType,
-		bool, BoolType,
-		char*, StringType,
-		std::string, StringType
+		int, IntType//,
+		// long, IntType,
+		// double, FloatType,
+		// float, FloatType,
+		// bool, BoolType,
+		// char*, StringType,
+		// std::string, StringType
 		>();
 
 }
