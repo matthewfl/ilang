@@ -19,7 +19,7 @@ TEST_CASE("basic value", "[value]") {
 	//a.cast<int>(c);
 }
 
-TEST_CASE("basic type", "[value]") {
+/*TEST_CASE("basic type", "[value]") {
 	IntType a(5);
 	REQUIRE(a.type() == typeid(long));
 	int b;
@@ -28,7 +28,7 @@ TEST_CASE("basic type", "[value]") {
 	long c;
 	a.cast(c);
 	REQUIRE(c == 5);
-}
+	}*/
 
 TEST_CASE("basic vtable", "[value]") {
 	Value_new *v = new IntType(4);
@@ -39,4 +39,20 @@ TEST_CASE("basic vtable", "[value]") {
 TEST_CASE("basic value pass", "[value]") {
 	ValuePass_new v(IntType(4));
 	REQUIRE(v.Get() == v.operator->());
+}
+
+TEST_CASE("basic cast", "[value]") {
+	ValuePass_new v = valueMaker(5);
+
+	int a = v->cast<int>();
+
+	REQUIRE(a == 5);
+
+	// int a;
+	// v->cast(a);
+	// REQUIRE(a == 5);
+	// long b;
+	// v->cast(b);
+	// REQUIRE(b == 5);
+
 }

@@ -17,7 +17,7 @@ namespace ilang {
 
 	class ValuePass_new {
   private:
-    char m_data[16]; // TODO: don't hard code the size // sizeof(Value_new)
+    char m_data[32]; // TODO: don't hard code the size // sizeof(Value_new), should be 16
 	public:
 		inline Value_new *Get() const { return (Value_new*)m_data; }
     inline Value_new *operator->() const { return Get(); }
@@ -41,7 +41,15 @@ namespace ilang {
 	// 	void cast(T &v) { get(); }
 	// };
 
+	// TODO: change to raise an exception that is caught
 #define RAISE_ERROR {assert(0);}
+
+	enum math_ops {
+		OP_add,
+		OP_substract,
+		OP_multiply,
+		OP_devide
+	};
 
 	class math_virtuals_mixin {
 	public:
@@ -66,26 +74,15 @@ namespace ilang {
 		virtual void set(ilang::Identifier &i, ValuePass_new &v) RAISE_ERROR;
 	};
 
-	template <typename T> class cast_mixin_base {
-	public:
-		//virtual void cast(T &t) RAISE_ERROR;
-	};
-
-	class cast_mixin :
-		public cast_mixin_base<int>,
-		public cast_mixin_base<long>,
-		public cast_mixin_base<float>,
-		public cast_mixin_base<double>//,
-		//public cast_mixin_base<bool>
-	{
-	public:
-		virtual void cast(int &i) RAISE_ERROR;
+	template <typename T> class cast_chooser {
+		friend class Value_new;
+		explicit cast_chooser() {};
 	};
 
 
   class Value_new :
-	 public math_virtuals_mixin//,
-		//		public cast_mixin
+	 public math_virtuals_mixin,
+	 public cast_mixin
 	{
 	public:  // yolo
     union {
@@ -100,25 +97,34 @@ namespace ilang {
 		virtual ~Value_new() {}
 		virtual const std::type_info &type()=0;
 		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value_new)); }
-  };
 
-	class asdfasdf : public Value_new {
-	public:
-		const std::type_info &type2() { return typeid(long); }
+		// cast mixins
+		virtual int cast(cast_chooser<int> c) RAISE_ERROR;
+		virtual long cast(cast_chooser<long> c) RAISE_ERROR;
+		virtual float cast(cast_chooser<float> c) RAISE_ERROR;
+		virtual double cast(cast_chooser<double> c) RAISE_ERROR;
+
+		template <typename T> T cast() {
+			//cast_helper<T> help;
+			cast_chooser<int> c;
+			return cast(c);
+		}
+
 	};
 
+	// class asdfasdf : public Value_new {
+	// public:
+	// 	const std::type_info &type2() { return typeid(long); }
+	// };
 
-	enum math_ops {
-		OP_add,
-		OP_substract,
-		OP_multiply,
-		OP_devide
-	};
+
+
+
 
 	template <typename Self, typename Other> class math_core_mixin {
 	protected:
 		virtual Self GetRaw(Self)=0;
-		virtual ValuePass_new && preform_math_op(math_ops op, Other val) {
+		virtual ValuePass_new preform_math_op(math_ops op, Other val) {
 			switch(op) {
 			case OP_add:
 				return valueMaker(GetRaw(Self()) + val);
@@ -155,6 +161,11 @@ namespace ilang {
 		}
 
 		virtual const std::type_info &type() { return typeid(long); }
+
+		virtual int cast(cast_chooser<int> c) { return m_int; }
+		virtual long cast(cast_chooser<long> c) { return m_int; }
+		virtual double cast(cast_chooser<double> c) { return m_int; }
+		virtual float cast(cast_chooser<float> c) { return m_int; }
 	};
 
 	class FloatType : public Value_new {
@@ -170,6 +181,11 @@ namespace ilang {
 			f = m_float;
 		}
 		virtual const std::type_info &type() { return typeid(double); }
+
+		virtual int cast(cast_chooser<int> c) { return m_float; }
+		virtual long cast(cast_chooser<long> c) { return m_float; }
+		virtual double cast(cast_chooser<double> c) { return m_float; }
+		virtual float cast(cast_chooser<float> c) { return m_float; }
 	};
 
 	class BoolType : public Value_new {
