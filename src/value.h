@@ -80,10 +80,11 @@ namespace ilang {
 	};
 
 
-  class Value_new :
-	 public math_virtuals_mixin,
-	 public cast_mixin
+  class Value_new// :
+		//public math_virtuals_mixin//,
+	 //public cast_mixin
 	{
+		friend class ValuePass_new;
 	public:  // yolo
     union {
       long m_int;
@@ -96,26 +97,23 @@ namespace ilang {
   public:
 		virtual ~Value_new() {}
 		virtual const std::type_info &type()=0;
+
+	protected:
 		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value_new)); }
 
 		// cast mixins
-		virtual int cast(cast_chooser<int> c) RAISE_ERROR;
-		virtual long cast(cast_chooser<long> c) RAISE_ERROR;
-		virtual float cast(cast_chooser<float> c) RAISE_ERROR;
-		virtual double cast(cast_chooser<double> c) RAISE_ERROR;
+		virtual int Cast(cast_chooser<int> c) RAISE_ERROR;
+		virtual long Cast(cast_chooser<long> c) RAISE_ERROR;
+		virtual float Cast(cast_chooser<float> c) RAISE_ERROR;
+		virtual double Cast(cast_chooser<double> c) RAISE_ERROR;
 
+	public:
 		template <typename T> T cast() {
-			//cast_helper<T> help;
-			cast_chooser<int> c;
-			return cast(c);
+			cast_chooser<T> c;
+			return Cast(c);
 		}
 
 	};
-
-	// class asdfasdf : public Value_new {
-	// public:
-	// 	const std::type_info &type2() { return typeid(long); }
-	// };
 
 
 
@@ -153,19 +151,13 @@ namespace ilang {
 			return IntType(m_int + v->m_int);
 		}
 		~IntType() {}
-		virtual void cast(int &i) {
-			i = m_int;
-		}
-		virtual void cast(long &i) {
-			i = m_int;
-		}
-
 		virtual const std::type_info &type() { return typeid(long); }
 
-		virtual int cast(cast_chooser<int> c) { return m_int; }
-		virtual long cast(cast_chooser<long> c) { return m_int; }
-		virtual double cast(cast_chooser<double> c) { return m_int; }
-		virtual float cast(cast_chooser<float> c) { return m_int; }
+	protected:
+		virtual int Cast(cast_chooser<int> c) { return m_int; }
+		virtual long Cast(cast_chooser<long> c) { return m_int; }
+		virtual float Cast(cast_chooser<float> c) { return m_int; }
+		virtual double Cast(cast_chooser<double> c) { return m_int; }
 	};
 
 	class FloatType : public Value_new {
@@ -174,18 +166,13 @@ namespace ilang {
 		ValuePass_new operator + (ValuePass_new &v) {
 			return FloatType(m_float + 2);//v->m_float);
 		}
-		void cast(float &f) {
-			f = m_float;
-		}
-		void cast(double &f) {
-			f = m_float;
-		}
 		virtual const std::type_info &type() { return typeid(double); }
 
-		virtual int cast(cast_chooser<int> c) { return m_float; }
-		virtual long cast(cast_chooser<long> c) { return m_float; }
-		virtual double cast(cast_chooser<double> c) { return m_float; }
-		virtual float cast(cast_chooser<float> c) { return m_float; }
+	protected:
+		virtual int Cast(cast_chooser<int> c) { return m_float; }
+		virtual long Cast(cast_chooser<long> c) { return m_float; }
+		virtual float Cast(cast_chooser<float> c) { return m_float; }
+		virtual double Cast(cast_chooser<double> c) { return m_float; }
 	};
 
 	class BoolType : public Value_new {

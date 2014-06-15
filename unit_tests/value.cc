@@ -19,16 +19,28 @@ TEST_CASE("basic value", "[value]") {
 	//a.cast<int>(c);
 }
 
-/*TEST_CASE("basic type", "[value]") {
+TEST_CASE("basic type", "[value]") {
 	IntType a(5);
 	REQUIRE(a.type() == typeid(long));
 	int b;
-	a.cast(b);
+	b = a.cast<int>();
 	REQUIRE(b == 5);
 	long c;
-	a.cast(c);
+	c = a.cast<long>();
 	REQUIRE(c == 5);
-	}*/
+
+	FloatType f(1.2);
+	REQUIRE(f.type() == typeid(double));
+	float ff = f.cast<float>() - 1.2;
+	REQUIRE(ff < .0001);  // yay floating point math
+	REQUIRE(ff > -.0001);
+	double dd = f.cast<double>();
+	REQUIRE(dd == 1.2);
+	int i = f.cast<int>();
+	REQUIRE(i == 1);
+	//REQUIRE(f.cast<double>() == 1.2);
+	//REQUIRE(f.cast<int>() == 1);
+}
 
 TEST_CASE("basic vtable", "[value]") {
 	Value_new *v = new IntType(4);
@@ -45,14 +57,7 @@ TEST_CASE("basic cast", "[value]") {
 	ValuePass_new v = valueMaker(5);
 
 	int a = v->cast<int>();
-
 	REQUIRE(a == 5);
-
-	// int a;
-	// v->cast(a);
-	// REQUIRE(a == 5);
-	// long b;
-	// v->cast(b);
-	// REQUIRE(b == 5);
+	REQUIRE(v->cast<long>() == 5);
 
 }
