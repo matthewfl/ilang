@@ -4,6 +4,8 @@
 #include <typeinfo>
 #include <type_traits>
 #include <string>
+#include <string.h>
+
 #include "debug.h"
 
 #include <iostream>
@@ -78,12 +80,14 @@ namespace ilang {
     }
 		virtual ~Value_new() {}
 
-		virtual const std::type_info &type()=0;// { return typeid(void); }
+		virtual const std::type_info &type2()=0;// { return typeid(void); }
+
+		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value_new)); }
   };
 
 	class asdfasdf : public Value_new {
 	public:
-		const std::type_info &type() { return typeid(long); }
+		const std::type_info &type2() { return typeid(long); }
 	};
 
   class ValuePass_new {
@@ -91,14 +95,14 @@ namespace ilang {
     char m_data[sizeof(Value_new)];
 		Value_new *m_ptr;
   public:
-    Value_new *Get();
+		Value_new *Get() const { return (Value_new*)m_data; }
 		// {
     //   return (Value_new*)m_data;
     // }
     //operator Value_new() {
     //  return *Get();
     //}
-    Value_new *operator->() {
+    Value_new *operator->() const {
       return Get(); //(Value_new*)m_data;
     }
 
@@ -112,12 +116,26 @@ namespace ilang {
 		template <typename T>ValuePass_new (T t) {
 			assert(sizeof(T) == sizeof(Value_new));
 			//assert(dynamic_cast<Value*>(&t));
-			cout << "here\n";
-			m_ptr = new asdfasdf;
-			new (m_data) asdfasdf;
+			//cout << "here\n";
+			//m_ptr = new asdfasdf;
+			//new (m_data) asdfasdf;
 			//m_ptr = new T(t);
-			//new (m_data) T(t);
+			new (m_data) T(t);
+			Get()->type2();
 			//*(Value*)m_data = t;
+		}
+		// ValuePass_new(ValuePass_new &&x) {
+		// 	x->type2();
+		// 	x->copyTo(m_data);
+		// 	Get()->type2();
+		// 	//memcpy(m_data, x.m_data, sizeof(Value_new));
+		// 	//assert(0);
+		// }
+		ValuePass_new(const ValuePass_new &x) {
+			x->type2();
+			x->copyTo(m_data);
+			Get()->type2();
+			//assert(0);
 		}
 		// TODO: going to need support to tracking with something is coppied
 		//ValuePass_new (const ValuePass_new &v) {
@@ -171,14 +189,14 @@ namespace ilang {
 	};
 
 	template<typename Of, typename To, typename... Others> struct _valueMaker { //: _valueMaker<Others...> {
-		template <typename T> static ValuePass_new && create(T t) {
+		template <typename T> static ValuePass_new create(T t) {
 			return _valueMaker<Others...>::create(t);
 		}
-		static ValuePass_new && create(Of t) {
+		static ValuePass_new create(Of t) {
 			cout << "creating new " << typeid(To).name() << endl;
 			return ValuePass_new(To(t));
 		}
-		template <typename T> inline ValuePass_new && operator () (T t) {
+		template <typename T> inline ValuePass_new operator () (T t) {
 			return create(t);
 		}
 	};
@@ -200,7 +218,9 @@ namespace ilang {
 		}
 
 		//virtual const std::type_info &type() { return typeid(void); }
-		virtual const std::type_info &type() { return typeid(long); }
+		virtual const std::type_info &type2() { return typeid(long); }
+
+		void copyTo(void *d) { new (d) IntType(*this); }
 	};
 
 	// class FloatType : public Value_new {
