@@ -9,10 +9,10 @@ using namespace ilang;
 
 TEST_CASE("basic value", "[value]") {
 	int c = 4;
-	ValuePass_new a = ValuePass_new(IntType(c)); //valueMaker(c);
+	ValuePass_new a = valueMaker(c);
 
-	REQUIRE(a.Get()->type2() == typeid(long));
-	cout << a->type2().name() << endl;
+	REQUIRE(a.Get()->type() == typeid(long));
+	cout << a->type().name() << endl;
 	int b;
 	//	a->cast(b);
 	//REQUIRE(b == 4);
@@ -21,7 +21,7 @@ TEST_CASE("basic value", "[value]") {
 
 TEST_CASE("basic type", "[value]") {
 	IntType a(5);
-	REQUIRE(a.type2() == typeid(long));
+	REQUIRE(a.type() == typeid(long));
 	int b;
 	a.cast(b);
 	REQUIRE(b == 5);
@@ -32,7 +32,8 @@ TEST_CASE("basic type", "[value]") {
 
 TEST_CASE("basic vtable", "[value]") {
 	Value_new *v = new IntType(4);
-	REQUIRE(v->type2() == typeid(long));
+	REQUIRE(v->type() == typeid(long));
+	delete v;
 }
 
 TEST_CASE("basic value pass", "[value]") {
