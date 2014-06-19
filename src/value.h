@@ -23,23 +23,23 @@ namespace ilang {
     inline Value_new *operator->() const { return Get(); }
 
     ValuePass_new() {
+			// TODO: should have something here to make sure there are no problems
 			//new (m_data) Value_new;
     }
 		template <typename T>ValuePass_new (T t) {
-			//cout << sizeof(t) << " " << sizeof(m_data) << endl ;
-			// TODO: make this a static assert
 			assert(sizeof(T) <= sizeof(m_data));
 			new (m_data) T(t);
 		}
 		ValuePass_new(const ValuePass_new &x);
 		~ValuePass_new();
+
+		// proxy functions
+		ValuePass_new operator + (ValuePass_new v); // { return *Get() + v; }
+		ValuePass_new operator - (ValuePass_new v); // { return *Get() - v; }
+		ValuePass_new operator * (ValuePass_new v); // { return *Get() * v; }
+		ValuePass_new operator / (ValuePass_new v); // { return *Get() / v; }
   };
 
-
-	// template <typename T> class convert_to_mixin {
-	// public:
-	// 	void cast(T &v) { get(); }
-	// };
 
 	// TODO: change to raise an exception that is caught
 #define RAISE_ERROR {assert(0);}
@@ -50,16 +50,6 @@ namespace ilang {
 		OP_multiply,
 		OP_devide
 	};
-
-	class math_virtuals_mixin {
-	public:
-		virtual ValuePass_new operator + (ValuePass_new &v) RAISE_ERROR;
-		virtual ValuePass_new operator - (ValuePass_new &v) RAISE_ERROR;
-		virtual ValuePass_new operator * (ValuePass_new &v) RAISE_ERROR;
-		virtual ValuePass_new operator / (ValuePass_new &v) RAISE_ERROR;
-		virtual ValuePass_new preform_math_op(ValuePass_new &v) RAISE_ERROR;
-	};
-
 
 	class Arguments;
 	class callable_virtals_mixin {
@@ -106,6 +96,7 @@ namespace ilang {
 		virtual long Cast(cast_chooser<long> c) RAISE_ERROR;
 		virtual float Cast(cast_chooser<float> c) RAISE_ERROR;
 		virtual double Cast(cast_chooser<double> c) RAISE_ERROR;
+		virtual bool Cast(cast_chooser<bool> C) RAISE_ERROR;
 
 	public:
 		template <typename T> T cast() {
@@ -113,35 +104,28 @@ namespace ilang {
 			return Cast(c);
 		}
 
+		// math mixins
+	public:
+		virtual ValuePass_new operator + (ValuePass_new v) RAISE_ERROR;
+		virtual ValuePass_new operator - (ValuePass_new v) RAISE_ERROR;
+		virtual ValuePass_new operator * (ValuePass_new v) RAISE_ERROR;
+		virtual ValuePass_new operator / (ValuePass_new v) RAISE_ERROR;
+		virtual ValuePass_new preform_math_op(math_ops op, long v) RAISE_ERROR;
+		virtual ValuePass_new preform_math_op(math_ops op, double v) RAISE_ERROR;
+		//virtual ValuePass_new preform_math_op(math_ops op, bool v) RAISE_ERROR;
+
 	};
 
 
+#define VALUE_MATH_CLS_MIXIN(self)																			\
+	virtual ValuePass_new operator + (ValuePass_new v) { return v->preform_math_op(OP_add, self); } \
+	virtual ValuePass_new operator - (ValuePass_new v) { return v->preform_math_op(OP_substract, self); } \
+	virtual ValuePass_new operator * (ValuePass_new v) { return v->preform_math_op(OP_multiply, self); } \
+	virtual ValuePass_new operator / (ValuePass_new v) { return v->preform_math_op(OP_devide, self); } \
+	virtual ValuePass_new preform_math_op(math_ops op, long v);						\
+	virtual ValuePass_new preform_math_op(math_ops op, double v);
+	//	virtual ValuePass_new preform_math_op(math_ops op, std::string v);
 
-
-
-	template <typename Self, typename Other> class math_core_mixin {
-	protected:
-		virtual Self GetRaw(Self)=0;
-		virtual ValuePass_new preform_math_op(math_ops op, Other val) {
-			switch(op) {
-			case OP_add:
-				return valueMaker(GetRaw(Self()) + val);
-			case OP_substract:
-				return valueMaker(GetRaw(Self()) - val);
-			case OP_multiply:
-				return valueMaker(GetRaw(Self()) * val);
-			case OP_devide:
-				return valueMaker(GetRaw(Self()) / val);
-			}
-		}
-	};
-
-
-	template <typename Self> class math_mixins :
-		public math_core_mixin<Self, int>,
-		public math_core_mixin<Self, long>,
-		public math_core_mixin<Self, float>,
-		public math_core_mixin<Self, double> {};
 
 	class IntType : public Value_new {
 	public:
@@ -158,6 +142,11 @@ namespace ilang {
 		virtual long Cast(cast_chooser<long> c) { return m_int; }
 		virtual float Cast(cast_chooser<float> c) { return m_int; }
 		virtual double Cast(cast_chooser<double> c) { return m_int; }
+		virtual bool Cast(cast_chooser<bool> c) { return m_int != 0; }
+
+
+	public:
+		VALUE_MATH_CLS_MIXIN(m_int);
 	};
 
 	class FloatType : public Value_new {
@@ -173,15 +162,22 @@ namespace ilang {
 		virtual long Cast(cast_chooser<long> c) { return m_float; }
 		virtual float Cast(cast_chooser<float> c) { return m_float; }
 		virtual double Cast(cast_chooser<double> c) { return m_float; }
+		virtual bool Cast(cast_chooser<bool> c) { return m_float != 0; }
+
+	public:
+		VALUE_MATH_CLS_MIXIN(m_float);
 	};
 
 	class BoolType : public Value_new {
 	public:
 		BoolType(bool b) { m_bool = b; }
-		void cast(bool &b) {
-			b = m_bool;
-		}
 		const std::type_info &type() { return typeid(bool); }
+	protected:
+		virtual int Cast(cast_chooser<int> c) { return m_bool; }
+		virtual long Cast(cast_chooser<long> c) { return m_bool; }
+		virtual float Cast(cast_chooser<float> c) { return m_bool; }
+		virtual double Cast(cast_chooser<double> c) { return m_bool; }
+		virtual bool Cast(cast_chooser<bool> c) { return m_bool; }
 	};
 
 	// class StringType : public Value_new {
@@ -200,7 +196,7 @@ namespace ilang {
 			return _valueMaker<Others...>::create(t);
 		}
 		static inline ValuePass_new create(Of t) {
-			cout << "creating new " << typeid(To).name() << endl;
+			//cout << "creating new " << typeid(To).name() << endl;
 			return ValuePass_new(To(t));
 		}
 		template <typename T> inline ValuePass_new operator () (T t) {
