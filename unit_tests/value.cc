@@ -84,3 +84,14 @@ TEST_CASE("math promote", "[value]") {
 	double a = g->cast<double>();
 	REQUIRE(a == 11.5);
 }
+
+TEST_CASE("string type", "[value]") {
+	auto v = valueMaker("hello ");
+	auto w = valueMaker("world");
+
+	auto g = v + w;
+	REQUIRE(g->type() == typeid(std::string));
+	std::string a = g->cast<std::string>();
+	REQUIRE(a == "hello world");
+
+}

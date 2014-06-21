@@ -39,10 +39,47 @@ ValuePass_new ValuePass_new::operator / (ValuePass_new v) {
 
 #define VALUE_MATH_ALL_OPS(cls, self)						\
 	VALUE_MATH_OPS(cls, self, long)								\
-	VALUE_MATH_OPS(cls, self, double)
+	VALUE_MATH_OPS(cls, self, double)							\
+	ValuePass_new cls::preform_math_op(math_ops op, std::string v) {			\
+	  switch(op) {																												\
+		case OP_add: {																											\
+		  stringstream ss;																									\
+			ss << v;																													\
+			ss << self;																												\
+			return valueMaker(ss.str());																			\
+		}																																		\
+		default: assert(0);																									\
+	  }																																	 \
+	}
 
 VALUE_MATH_ALL_OPS(IntType, m_int)
 VALUE_MATH_ALL_OPS(FloatType, m_float)
+
+ValuePass_new StringType::preform_math_op(math_ops op, std::string v) {
+	assert(op == OP_add);
+	return valueMaker(v + GetSelf());
+}
+ValuePass_new StringType::preform_math_op(math_ops op, double v) {
+	assert(op == OP_add);
+	stringstream ss;
+	ss << v;
+	ss << GetSelf();
+	return valueMaker(ss.str());
+}
+ValuePass_new StringType::preform_math_op(math_ops op, long v) {
+	assert(op == OP_add);
+	stringstream ss;
+	ss << v;
+	ss << GetSelf();
+	return valueMaker(ss.str());
+}
+
+
+
+
+StringType::~StringType() {
+	delete (std::string*)m_ptr;
+}
 
 
 // ValuePass_new StringType::preform_math_op(math_ops op, external_type v) {

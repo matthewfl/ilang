@@ -29,19 +29,19 @@ namespace ilang {
 
 	typedef boost::function3<void, ScopePass, ilang::Arguments&, ValuePass*> Function_ptr;
 
-	struct Function_old {
-		bool native;
-		Function_ptr ptr;
-		ValuePass object;
-		ilang::parserNode::Function *func;
-		Function_old():native(false), object(), func(NULL) {}
-		/*inline ValuePass Call (vector<ValuePass &args) {
-			ValuePass ret = ValuePass(new ilang::Value);
-			if(native)
-			ptr( some scope, args, &ret);
-			else if(
-			}*/
-	};
+	// struct Function_old {
+	// 	bool native;
+	// 	Function_ptr ptr;
+	// 	ValuePass object;
+	// 	ilang::parserNode::Function *func;
+	// 	Function_old():native(false), object(), func(NULL) {}
+	// 	/*inline ValuePass Call (vector<ValuePass &args) {
+	// 		ValuePass ret = ValuePass(new ilang::Value);
+	// 		if(native)
+	// 		ptr( some scope, args, &ret);
+	// 		else if(
+	// 		}*/
+	// };
 
 	// TODO: use the new type system to make this easy to work with
 	class Arguments {
