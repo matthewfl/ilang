@@ -127,6 +127,10 @@ namespace ilang {
 		virtual ValuePass_new preform_math_op(math_ops op, std::string v) RAISE_ERROR;
 		//virtual ValuePass_new preform_math_op(math_ops op, bool v) RAISE_ERROR;
 
+		// callable mixins
+	public:
+		virtual ValuePass_new call(ilang::Arguments &args) RAISE_ERROR;
+
 	};
 
 #define VALUE_CAST_CLS_MIXIN(self)																		\
@@ -195,11 +199,11 @@ namespace ilang {
 		std::string Cast(cast_chooser<std::string> c) {
 			return GetSelf();
 		}
-
 	public:
 		VALUE_MATH_CLS_MIXIN(GetSelf());
-
 	};
+
+
 
 	// I suppose there is no need for this as there could just be a single function
 	// with overloaded parameters
@@ -217,17 +221,7 @@ namespace ilang {
 		}
 	};
 
-	static auto valueMaker = _valueMaker<
-		int, IntType,
-		long, IntType,
-		double, FloatType,
-		float, FloatType,
-		bool, BoolType,
-		const char*, StringType,
-		char*, StringType,
-		std::string, StringType//,
-		//std::stringstream, StringType
-		>();
+
 
 }
 

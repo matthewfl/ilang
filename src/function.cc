@@ -111,4 +111,6 @@ Function::Function(Function_ptr _ptr) {
 
 Function::Function () {
 	// idk
+	native = false;
+	func = NULL;
 }

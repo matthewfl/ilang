@@ -1,4 +1,6 @@
 #include "value.h"
+#include "value_types.h"
+#include "function.h"
 
 using namespace ilang;
 
@@ -73,16 +75,29 @@ ValuePass_new StringType::preform_math_op(math_ops op, long v) {
 	ss << GetSelf();
 	return valueMaker(ss.str());
 }
-
-
-
-
 StringType::~StringType() {
 	delete (std::string*)m_ptr;
 }
 
-
-// ValuePass_new StringType::preform_math_op(math_ops op, external_type v) {
-// 	if(op != OP_add) RAISE_ERROR;
-// 	return valueMaker(v + m_string);
+const std::type_info &FunctionType::type() { return typeid(ilang::Function); }
+FunctionType::FunctionType(const ilang::Function &f) {
+	m_ptr = new ilang::Function(f);
+}
+FunctionType::FunctionType(const FunctionType &f) {
+	m_ptr = new ilang::Function(*(ilang::Function*)f.m_ptr);
+}
+// FunctionType::FunctionType(FunctionType &&f) {
+// 	m_ptr = f.m_ptr;
+// 	f.m_ptr = NULL;
 // }
+FunctionType::~FunctionType() {
+	delete (ilang::Function*)m_ptr;
+}
+void FunctionType::copyTo(void *d) {
+	new (d) FunctionType(*this);
+}
+ValuePass_new FunctionType::call(ilang::Arguments &args) {
+	// TODO:
+	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ScopePass(), args);
+	return valueMaker(1);
+}

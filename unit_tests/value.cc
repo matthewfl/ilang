@@ -1,6 +1,8 @@
 //#include "base.h"
 #include "catch.hpp"
 #include "value.h"
+#include "value_types.h"
+#include "function.h"
 
 #include <iostream>
 using namespace std;
@@ -93,5 +95,16 @@ TEST_CASE("string type", "[value]") {
 	REQUIRE(g->type() == typeid(std::string));
 	std::string a = g->cast<std::string>();
 	REQUIRE(a == "hello world");
+}
 
+TEST_CASE("function type", "[value]") {
+	bool called = false;
+	ilang::Function f([&called](ScopePass scope, Arguments &args, ValuePass *ret) {
+			called = true;
+		});
+	auto v = valueMaker(f);
+
+	ilang::Arguments args;
+	v->call(args);
+	REQUIRE(called);
 }

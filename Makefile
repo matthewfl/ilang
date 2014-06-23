@@ -188,7 +188,9 @@ build/thread.o: deps/libuv/include/uv-private/uv-unix.h
 build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
 build/function.o: src/function.h src/variable.h src/scope.h src/parserTree.h
 build/function.o: src/import.h src/debug.h src/print.h
-build/value.o: src/value.h src/debug.h
+build/value.o: src/value.h src/debug.h src/value_types.h src/function.h
+build/value.o: src/variable.h src/scope.h src/parserTree.h src/import.h
+build/value.o: src/print.h
 build/main.o: src/parser.h src/debug.h src/import.h src/variable.h
 build/main.o: src/database.h deps/leveldb/include/leveldb/db.h
 build/main.o: deps/leveldb/include/leveldb/iterator.h
