@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <string>
 #include <sstream>
+#include <memory>
 #include <string.h>
 
 #include "debug.h"
@@ -44,8 +45,8 @@ namespace ilang {
 		ValuePass_new operator / (ValuePass_new v); // { return *Get() / v; }
 
 		ValuePass_new call(ilang::Arguments &a); // { return Get()->call(a); }
-		ValuePass_new operator () (ilang::Arguments &a) { return call(a); }
-		template<typename... types> ValuePass_new operator() (types... values);
+		//ValuePass_new operator () (ilang::Arguments &a) { return call(a); }
+		//template<typename... types> ValuePass_new operator() (types... values);
 
 	};
 
@@ -61,17 +62,18 @@ namespace ilang {
 	};
 
 
-	class callable_virtals_mixin {
-	public:
-		virtual ValuePass_new call(ilang::Arguments &a) RAISE_ERROR;
-		//ValuePass_new call(std::vector<ValuePass_new> &a); // TODO:
-	};
+	// class callable_virtals_mixin {
+	// public:
+	// 	virtual ValuePass_new call(ilang::Arguments &a) RAISE_ERROR;
+	// 	//ValuePass_new call(std::vector<ValuePass_new> &a); // TODO:
+	// };
 
 
 	class hashable_virtuals_mixin {
 	public:
 		virtual ValuePass_new get(ilang::Identifier &i) RAISE_ERROR;
 		virtual void set(ilang::Identifier &i, ValuePass_new &v) RAISE_ERROR;
+
 	};
 
 	template <typename T> class cast_chooser {
@@ -93,6 +95,7 @@ namespace ilang {
 			char *m_str;
 			long m_identifier;
 			void *m_ptr;
+			char m_sptr[sizeof(std::shared_ptr<void>)];
 		};
 
   public:
@@ -130,6 +133,11 @@ namespace ilang {
 		// callable mixins
 	public:
 		virtual ValuePass_new call(ilang::Arguments &args) RAISE_ERROR;
+
+		// hashable/array mixin
+	public:
+		virtual ValuePass_new get(ValuePass_new key) RAISE_ERROR;
+		virtual void set(ValuePass_new key, ValuePass_new value) RAISE_ERROR;
 
 	};
 

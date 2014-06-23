@@ -1,6 +1,7 @@
 #include "value.h"
 #include "value_types.h"
 #include "function.h"
+#include "hashable.h"
 
 using namespace ilang;
 
@@ -101,3 +102,6 @@ ValuePass_new FunctionType::call(ilang::Arguments &args) {
 	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ScopePass(), args);
 	return valueMaker(1);
 }
+
+
+const std::type_info &type() { return typeid(Hashable*); }

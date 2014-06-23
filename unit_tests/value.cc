@@ -105,6 +105,11 @@ TEST_CASE("function type", "[value]") {
 	auto v = valueMaker(f);
 
 	ilang::Arguments args;
-	v->call(args);
+	ValuePass_new ret = v->call(args);
 	REQUIRE(called);
+}
+
+
+TEST_CASE("hashable type", "[value]") {
+	//	auto v = valueMaker(
 }

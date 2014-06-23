@@ -1,8 +1,11 @@
 #ifndef _ilang_value_types
 #define _ilang_value_types
 
+#include <memory>
+
 #include "value.h"
 
+#include "hashable.h"
 
 namespace ilang {
 
@@ -19,6 +22,14 @@ namespace ilang {
 		virtual ValuePass_new call(ilang::Arguments &args);
 	};
 
+	class Hashable;
+	class HashableType {
+	public:
+		HashableType(std::shared_ptr<Hashable>);
+
+		virtual const std::type_info &type();
+	};
+
 	static auto valueMaker = _valueMaker<
 		int, IntType,
 		long, IntType,
@@ -33,4 +44,4 @@ namespace ilang {
 		>();
 }
 
-#endif
+#endif // _ilang_value_type
