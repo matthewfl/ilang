@@ -2,6 +2,8 @@
 #define _ilang_hashable
 
 #include "identifier.h"
+#include "value.h"
+
 
 namespace ilang {
 	class Hashable {
