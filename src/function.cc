@@ -50,7 +50,7 @@ size_t Arguments::size() {
 
 ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 	bool returned = false;
-	ValuePass _ret = ValuePass(new ilang::Value);
+	ValuePass _ret = ValuePass(new ilang::Value_Old);
 	auto returnHandle = [&returned, &_ret] (ValuePass *ret) {
 		returned = true;
 		_ret = *ret;
@@ -61,7 +61,7 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 		obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(object_scope->Get())));
 
 
-	ValuePass ret = ValuePass(new ilang::Value);
+	ValuePass ret = ValuePass(new ilang::Value_Old);
 	//FunctionScope<decltype(returnHandle)> scope(_scope_made, _scope_self, returnHandle);
 	// TODO: make this be on the stack instead of using new here
 	auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, obj_scope, returnHandle);

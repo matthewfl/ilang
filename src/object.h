@@ -50,7 +50,7 @@ namespace ilang {
 		//friend storedData *DB_createStoredData(const boost::any&);
 		//friend ValuePass DB_readStoredData(storedData*);
 		friend class DB_serializer;
-		friend class Value;
+		friend class Value_Old;
 		std::vector<ilang::Variable*> members;
 		std::list<std::string> *modifiers;
 		ilang::Variable *mem_length;

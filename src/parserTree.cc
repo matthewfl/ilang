@@ -88,7 +88,7 @@ namespace ilang {
 		}
 		ValuePass StringConst::GetValue (ScopePass scope) {
 			debug(-6, "string get value" );
-			return ValuePass(new ilang::Value(std::string(string)));
+			return ValuePass(new ilang::Value_Old(std::string(string)));
 		}
 
 		void StringConst::Print(Printer *p) {
@@ -104,7 +104,7 @@ namespace ilang {
 
 		IntConst::IntConst(long n) : num(n) {}
 		ValuePass IntConst::GetValue (ScopePass scope) {
-			ValuePass r = ValuePass(new ilang::Value(num));
+			ValuePass r = ValuePass(new ilang::Value_Old(num));
 			return r;
 		}
 
@@ -114,7 +114,7 @@ namespace ilang {
 
 		FloatConst::FloatConst(double d) : num(d) {}
 		ValuePass FloatConst::GetValue (ScopePass scope) {
-			ValuePass r = ValuePass(new ilang::Value(num));
+			ValuePass r = ValuePass(new ilang::Value_Old(num));
 			return r;
 		}
 		void FloatConst::Print(Printer *p) {
@@ -265,7 +265,7 @@ namespace ilang {
 			// fun.func = this;
 			// fun.ptr =
 
-			return ValuePass(new ilang::Value(fun));
+			return ValuePass(new ilang::Value_Old(fun));
 		}
 
 		void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
@@ -296,7 +296,7 @@ namespace ilang {
 			std::list<std::string> arguments_mod;
 			ilang::Variable *args = scope->forceNew("arguments", arguments_mod);
 			ilang::Object *arguments_arr = new ilang::Array(p);
-			args->Set(ValuePass(new ilang::Value(arguments_arr)));
+			args->Set(ValuePass(new ilang::Value_Old(arguments_arr)));
 
 			if(body) { // body can be null if there is nothing
 				for(Node *n : *body) {
@@ -453,7 +453,7 @@ namespace ilang {
 
 					ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
 					ilang::Function fun_new = fun.bind(obj_val);
-					ret = ValuePass(new ilang::Value(fun_new));
+					ret = ValuePass(new ilang::Value_Old(fun_new));
 				}
 				return ret;
 			}else{
@@ -538,7 +538,7 @@ namespace ilang {
 				// TODO: fix to use new function interface
 				ilang::Function fun = boost::any_cast<ilang::Function>(ret->Get());
 				ilang::Function fun_new = fun.bind(obj_val);
-				ret = ValuePass(new ilang::Value(fun_new));
+				ret = ValuePass(new ilang::Value_Old(fun_new));
 			}
 			return ret;
 		}
@@ -603,10 +603,10 @@ namespace ilang {
 			// old
 			// std::vector<ValuePass> par;
 			// for(Node * n : *params) {
-			// 	assert(dynamic_cast<parserNode::Value*>(n));
-			// 	par.push_back(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
+			// 	assert(dynamic_cast<parserNode::Value_Old*>(n));
+			// 	par.push_back(dynamic_cast<parserNode::Value_Old*>(n)->GetValue_Old(scope));
 			// }
-			// ValuePass ret = ValuePass(new ilang::Value);
+			// ValuePass ret = ValuePass(new ilang::Value_Old);
 			// ValuePass func = calling->GetValue(scope);
 			// boost::any &an = func->Get();
 			// // TODO: this error is overly cryptic
@@ -696,80 +696,81 @@ namespace ilang {
 			// we do not need the value so we should not request the vale from the nodes
 		}
 		ValuePass MathEquation::GetValue(ScopePass scope) {
-			errorTrace("Math equation");
+			/*			errorTrace("Math equation");
 			ValuePass left = this->left->GetValue(scope);
 			ValuePass right;
 			if(Act != uMinus) right = this->right->GetValue(scope);
 			/* when trying for speed boost
 				 auto left_type = left->Get().type();
 				 auto right_type = right->Get().type();
-			*/
+			/ /
 			switch(Act) {
 			case uMinus:
 				if(left->Get().type() == typeid(std::string)) {
 					error(0, "can not uMinus a string type");
 				}else if(left->Get().type() == typeid(double)) {
-					return ValuePass(new ilang::Value(- boost::any_cast<double>(left->Get())));
+					return ValuePass(new ilang::Value_Old(- boost::any_cast<double>(left->Get())));
 				}else if(left->Get().type() == typeid(long)) {
-					return ValuePass(new ilang::Value(- boost::any_cast<long>(left->Get())));
+					return ValuePass(new ilang::Value_Old(- boost::any_cast<long>(left->Get())));
 				}
 				break;
 			case add:
 				if(left->Get().type() == typeid(std::string) || right->Get().type() == typeid(std::string)) {
-					return ValuePass(new ilang::Value(std::string(left->str() + right->str())));
+					return ValuePass(new ilang::Value_Old(std::string(left->str() + right->str())));
 				}else if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) + boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) + boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) + boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) + boost::any_cast<long>(right->Get())));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) + boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) + boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) + boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) + boost::any_cast<long>(right->Get())));
 				}
 				break;
 			case subtract:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) - boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) - boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) - boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) - boost::any_cast<long>(right->Get())));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) - boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) - boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) - boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) - boost::any_cast<long>(right->Get())));
 				}
 				break;
 			case multiply:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) * boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) * boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) * boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) * boost::any_cast<long>(right->Get())));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) * boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) * boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) * boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) * boost::any_cast<long>(right->Get())));
 				}
 				break;
 			case divide:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) / boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) / boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) / boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) / boost::any_cast<long>(right->Get())));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) / boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) / boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) / boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) / boost::any_cast<long>(right->Get())));
 				}
 				break;
 			}
 			error(0, "Problem with math equation");
+*/
 		}
 
 		void MathEquation::Print(Printer *p) {
@@ -822,7 +823,7 @@ namespace ilang {
 			errorTrace("Logic Expression");
 			ValuePass left = this->left->GetValue(scope);
 			if(Act == Not)
-				return ValuePass(new ilang::Value( ! left->isTrue()));
+				return ValuePass(new ilang::Value_Old( ! left->isTrue()));
 			ValuePass right = this->right->GetValue(scope);
 			// cout << "logic check " << left->Get().type().name() << " " << right->Get().type().name() << endl;
 			// cout << left->str() << " " << right->str() << endl
@@ -831,120 +832,120 @@ namespace ilang {
 			case And:
 				if(left->isTrue())
 					if(right->isTrue())
-						return ValuePass(new ilang::Value(true));
-				return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(true));
+				return ValuePass(new ilang::Value_Old(false));
 				break;
 			case Or:
-				if(left->isTrue() || right->isTrue()) return ValuePass(new ilang::Value(true));
-				return ValuePass(new ilang::Value(false));
+				if(left->isTrue() || right->isTrue()) return ValuePass(new ilang::Value_Old(true));
+				return ValuePass(new ilang::Value_Old(false));
 			case Equal:
 				if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string))
-					return ValuePass(new ilang::Value(boost::any_cast<std::string>(left->Get()) == boost::any_cast<std::string>(right->Get())));
+					return ValuePass(new ilang::Value_Old(boost::any_cast<std::string>(left->Get()) == boost::any_cast<std::string>(right->Get())));
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) == boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) == boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) == boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) == boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) == boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) == boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) == boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) == boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			case Not_Equal:
 				if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string))
-					return ValuePass(new ilang::Value(boost::any_cast<std::string>(left->Get()) != boost::any_cast<std::string>(right->Get())));
+					return ValuePass(new ilang::Value_Old(boost::any_cast<std::string>(left->Get()) != boost::any_cast<std::string>(right->Get())));
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) != boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) != boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) != boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) != boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) != boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) != boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) != boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) != boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			case Less_Equal:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) <= boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) <= boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) <= boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) <= boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) <= boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) <= boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) <= boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) <= boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			case Greater_Equal:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) >= boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) >= boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) >= boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) >= boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) >= boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) >= boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) >= boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) >= boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			case Less:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) < boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) < boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) < boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) < boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) < boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) < boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) < boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) < boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			case Greater:
 				if(left->Get().type() == typeid(double)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) > boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) > boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<double>(left->Get()) > boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<double>(left->Get()) > boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}else if(left->Get().type() == typeid(long)) {
 					if(right->Get().type() == typeid(double))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) > boost::any_cast<double>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) > boost::any_cast<double>(right->Get())));
 					else if(right->Get().type() == typeid(long))
-						return ValuePass(new ilang::Value(boost::any_cast<long>(left->Get()) > boost::any_cast<long>(right->Get())));
+						return ValuePass(new ilang::Value_Old(boost::any_cast<long>(left->Get()) > boost::any_cast<long>(right->Get())));
 					else
-						return ValuePass(new ilang::Value(false));
+						return ValuePass(new ilang::Value_Old(false));
 				}
 				break;
 			}
-			return ValuePass(new ilang::Value(false));
+			return ValuePass(new ilang::Value_Old(false));
 		}
 
 		void LogicExpression::Print(Printer *p) {
@@ -999,7 +1000,7 @@ namespace ilang {
 			ValuePass ret;
 			if(setTo->Get().type() == typeid(std::string)) {
 				error(Act == add, "Can only add to a string");
-				ret = ValuePass(new ilang::Value(boost::any_cast<std::string>(setTo->Get()) + val->str()));
+				ret = ValuePass(new ilang::Value_Old(boost::any_cast<std::string>(setTo->Get()) + val->str()));
 				m_target->Set(scope, ret);
 				return ret;
 			}
@@ -1008,34 +1009,34 @@ namespace ilang {
 				switch(Act) {
 				case add:
 					if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) + n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) + n));
 					}else if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) + n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) + n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
 					break;
 				case subtract:
 					if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) - n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) - n));
 					}else if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) - n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) - n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
 					break;
 				case multiply:
 					if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) * n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) * n));
 					}else if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) * n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) * n));
 					}
 					break;
 				case divide:
 					if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) / n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) / n));
 					}else if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) / n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) / n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
@@ -1050,36 +1051,36 @@ namespace ilang {
 				switch(Act) {
 				case add:
 					if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) + n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) + n));
 					}else if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) + n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) + n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
 					break;
 				case subtract:
 					if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) - n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) - n));
 					}else if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) -n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) -n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
 					break;
 				case multiply:
 					if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) * n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) * n));
 					}else if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) * n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) * n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
 					break;
 				case divide:
 					if(setTo->Get().type() == typeid(double)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<double>(setTo->Get()) / n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<double>(setTo->Get()) / n));
 					}else if(setTo->Get().type() == typeid(long)) {
-						ret = ValuePass(new ilang::Value(boost::any_cast<long>(setTo->Get()) / n));
+						ret = ValuePass(new ilang::Value_Old(boost::any_cast<long>(setTo->Get()) / n));
 					}else{
 						error(0, "Can't perform math on non numbers");
 					}
@@ -1133,7 +1134,7 @@ namespace ilang {
 			debug(-6, "Object getting value");
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
 			ilang::Object *obj = new ilang::Object(objects, scope);
-			ilang::Value *val = new ilang::Value(obj);
+			ilang::Value_Old *val = new ilang::Value_Old(obj);
 			return ValuePass(val);
 		}
 
@@ -1166,7 +1167,7 @@ namespace ilang {
 		ValuePass Class::GetValue(ScopePass scope) {
 			errorTrace("Creating class");
 			ilang::Class *c = new ilang::Class(parents, objects, scope);
-			ilang::Value *val = new ilang::Value(c);
+			ilang::Value_Old *val = new ilang::Value_Old(c);
 			return ValuePass(val);
 		}
 
@@ -1212,7 +1213,7 @@ namespace ilang {
 		ValuePass Array::GetValue(ScopePass scope) {
 			errorTrace("Creating Array");
 			ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
-			ilang::Value *val = new ilang::Value(arr);
+			ilang::Value_Old *val = new ilang::Value_Old(arr);
 			return ValuePass(val);
 		}
 
@@ -1241,14 +1242,14 @@ namespace ilang {
 			// might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
 
 			error(args->size() == 1, "New only takes one argument");
-			error(dynamic_cast<Value*>(args->front()), "First argument to New needs to be a value");
+			error(dynamic_cast<Value_Old*>(args->front()), "First argument to New needs to be a Value_old");
 		}
 		ValuePass NewCall::GetValue(ScopePass scope) {
 			errorTrace("New Call");
 			ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
 			error(a->Get().type() == typeid(ilang::Class*), "Can not create something with new that is not a class");
-			ilang::Value *val = new ilang::Value( boost::any_cast<ilang::Class*>(a->Get())->NewClass(a) ); // returns an Object*
-			//ilang::Value *val = new ilang::Value( new ilang::Object(a) );
+			ilang::Value_Old *val = new ilang::Value_Old( boost::any_cast<ilang::Class*>(a->Get())->NewClass(a) ); // returns an Object*
+			//ilang::Value_Old *val = new ilang::Value_Old( new ilang::Object(a) );
 			// TODO: make this call an init function that is defined in the class
 			// does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
 			return ValuePass(val);
@@ -1262,7 +1263,7 @@ namespace ilang {
 
 		AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
 			for(auto it : *args) {
-				error(dynamic_cast<Value*>(it), "Arguments to assert need to have some value");
+				error(dynamic_cast<Value*>(it), "Arguments to assert need to have some Value");
 			}
 		}
 		ValuePass AssertCall::GetValue(ScopePass scope) {
@@ -1289,7 +1290,7 @@ namespace ilang {
 
 		ImportCall::ImportCall(list<Node*> *args) : Call(NULL, args) {
 			error(args->size() == 1, "import() expects 1 argument");
-			error(dynamic_cast<Value*>(args->front()), "import() expects a value");
+			error(dynamic_cast<Value_Old*>(args->front()), "import() expects a Value_old");
 		}
 
 		ValuePass ImportCall::GetValue(ScopePass scope) {
@@ -1298,9 +1299,9 @@ namespace ilang {
 			std::string name = boost::any_cast<std::string>(val->Get());
 
 			ilang::Object *obj = ImportGetByName(name);
-			if(obj == NULL) return ValuePass(new ilang::Value(false));
+			if(obj == NULL) return ValuePass(new ilang::Value_Old(false));
 
-			return ValuePass(new ilang::Value(obj));
+			return ValuePass(new ilang::Value_Old(obj));
 
 		}
 
@@ -1316,7 +1317,7 @@ namespace ilang {
 			// following arguments are values to be passed to the function, but they will be evaluated in the current thread
 			error(args->size() >= 1, "go call expects at least 1 argument " << args->size());
 			for(auto it : *args) {
-				assert(dynamic_cast<Value*>(it));
+				assert(dynamic_cast<Value_Old*>(it));
 			}
 		}
 
@@ -1340,7 +1341,7 @@ namespace ilang {
 					delete arguments;
 
 
-					// ValuePass ret = ValuePass(new ilang::Value);
+					// ValuePass ret = ValuePass(new ilang::Value_Old);
 
 					// if(calling.object) {
 					// 	assert(calling.object->Get().type() == typeid(ilang::Object*));

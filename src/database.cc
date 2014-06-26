@@ -30,18 +30,18 @@ namespace ilang {
 			using namespace ilang_db;
 			switch(entry->type()) {
 			case Entry::Integer:
-				return ValuePass(new ilang::Value(entry->integer_dat()));
+				return ValuePass(new ilang::Value_Old(entry->integer_dat()));
 			case Entry::Float:
-				return ValuePass(new ilang::Value(entry->float_dat()));
+				return ValuePass(new ilang::Value_Old(entry->float_dat()));
 			case Entry::Bool:
-				return ValuePass(new ilang::Value(entry->bool_dat()));
+				return ValuePass(new ilang::Value_Old(entry->bool_dat()));
 			case Entry::String:
-				return ValuePass(new ilang::Value(entry->string_dat()));
+				return ValuePass(new ilang::Value_Old(entry->string_dat()));
 			case Entry::Object: {
 				ilang::Object *obj = new ilang::Object;
 				obj->DB_name = new char[entry->object_id().size()+1];
 				memcpy(obj->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
-				return ValuePass(new ilang::Value(obj));
+				return ValuePass(new ilang::Value_Old(obj));
 			}
 			case Entry::Array: {
 				ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
@@ -58,7 +58,7 @@ namespace ilang {
 					arr_members.push_back(gg);
 				}
 				ilang::Array *arr = new ilang::Array(arr_members);
-				return ValuePass(new ilang::Value(static_cast<ilang::Object*>(arr)));
+				return ValuePass(new ilang::Value_Old(static_cast<ilang::Object*>(arr)));
 			}
 			default:
 				assert(0);
@@ -370,12 +370,12 @@ namespace ilang {
 			error(args[0]->Get().type() == typeid(string), "First argument to db.metaSet should be a string");
 			error(args[1]->Get().type() == typeid(string), "Second argument to db.metaSet should be a string");
 			System_Database->setMeta(boost::any_cast<string>(args[0]->Get()), boost::any_cast<string>(args[1]->Get()));
-			return ValuePass(new ilang::Value);
+			return ValuePass(new ilang::Value_Old);
 		}
 		ValuePass DB_metaGet(Arguments &args) {
 			error(args.size() == 1, "db.metaGet takes 1 argument");
 			error(args[0]->Get().type() == typeid(string), "First argument to db.metaGet must should be a string");
-			return ValuePass(new ilang::Value( System_Database->getMeta(boost::any_cast<string>(args[0]->Get())) ));
+			return ValuePass(new ilang::Value_Old( System_Database->getMeta(boost::any_cast<string>(args[0]->Get())) ));
 		}
 	}
 	ILANG_LIBRARY_NAME("i/db",

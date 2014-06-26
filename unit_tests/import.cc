@@ -15,7 +15,7 @@ TEST_CASE("module mapping test", "[import][module][mapping]") {
 	auto fcreate = boost::any_cast<ilang::Function>(create->Get()->Get());
 	ilang::Object *obj = new ilang::Object;
 	obj->members["asdf"] = create;
-	ValuePass dat(new ilang::Value(obj));
+	ValuePass dat(new ilang::Value_Old(obj));
 	ValuePass ret = fcreate(dat);
 	ilang::Object *cls = boost::any_cast<ilang::Object*>(ret->Get());
 	REQUIRE(cls);

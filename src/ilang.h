@@ -59,7 +59,7 @@ namespace ilang {
 				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
+			var->Set(ValuePass(new ilang::Value_Old(f)));
 			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
 		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, ilang::Arguments &args) ) {
@@ -72,7 +72,7 @@ namespace ilang {
 				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
+			var->Set(ValuePass(new ilang::Value_Old(f)));
 			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
 		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, ilang::Arguments &args) ) {
@@ -85,7 +85,7 @@ namespace ilang {
 				});
 			std::list<std::string> mod = {"Const"};
 			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
+			var->Set(ValuePass(new ilang::Value_Old(f)));
 			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
 		ilang::Variable* operator[](std::string name) {
@@ -104,7 +104,7 @@ namespace ilang {
 	};
 	template<typename cc> ValuePass Class_Creater() {
 		ilang::Class *c = new Class_Creater_class<cc>();
-		return ValuePass(new ilang::Value(c));
+		return ValuePass(new ilang::Value_Old(c));
 	}
 }
 

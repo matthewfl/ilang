@@ -26,7 +26,7 @@ namespace {
 
 			m_emitted[boost::any_cast<std::string>(args[0]->Get())].push_back(args[1]); // save the emitted element into the map, this will not scale well at the moment.
 
-			return ValuePass(new ilang::Value(true));
+			return ValuePass(new ilang::Value_Old(true));
 		}
 
 		ValuePass MapAction(Arguments &args) {
@@ -41,7 +41,7 @@ namespace {
 			// 	obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
 			// }
 
-			ValuePass ret = ValuePass(new ilang::Value);
+			ValuePass ret = ValuePass(new ilang::Value_Old);
 			Mapper *returnMapper = new Mapper();
 			assert(returnMapper != this); // fcking free bugs
 			returnMapper->m_obj = (ilang::Object*)0x2;
@@ -51,13 +51,13 @@ namespace {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});
-			ValuePass emitFunctVal = ValuePass(new ilang::Value(emit_fun));
+			ValuePass emitFunctVal = ValuePass(new ilang::Value_Old(emit_fun));
 
 			assert(m_obj);
 			for(auto vals : m_obj->members) {
 				if(vals.first == "this") continue;
 				ilang::Variable *var = vals.second;
-				ValuePass ret = funct(ValuePass(new ilang::Value(vals.first)), var->Get(), emitFunctVal);
+				ValuePass ret = funct(ValuePass(new ilang::Value_Old(vals.first)), var->Get(), emitFunctVal);
 			}
 
 			/*
@@ -91,14 +91,14 @@ namespace {
 				#undef CALL_WITH
 			*/
 
-			return ValuePass(new ilang::Value(new ilang::Object(returnMapper)));
+			return ValuePass(new ilang::Value_Old(new ilang::Object(returnMapper)));
 		}
 
 		ValuePass Get(Arguments &args) {
 			error(args.size() == 1, "map.get expects 1 arugment");
 			error(args[0]->Get().type() == typeid(std::string), "map.get expects a string");
 
-			return ValuePass(new ilang::Value((ilang::Object*) new ilang::Array(m_emitted[boost::any_cast<std::string>(args[0]->Get())])));
+			return ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(m_emitted[boost::any_cast<std::string>(args[0]->Get())])));
 		}
 
 		ValuePass Reduce(Arguments &args) {
@@ -118,17 +118,17 @@ namespace {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});
-			ValuePass emitFunctVal = ValuePass(new ilang::Value(emitFunct));
+			ValuePass emitFunctVal = ValuePass(new ilang::Value_Old(emitFunct));
 
 #define CALL_WITH(_key, _value)																					\
 			{																																	\
-				ValuePass ret = funct(ValuePass(new ilang::Value( _key )), _value, emitFunctVal); \
+				ValuePass ret = funct(ValuePass(new ilang::Value_Old( _key )), _value, emitFunctVal); \
 			}
 
-			ValuePass ret = ValuePass(new ilang::Value);
+			ValuePass ret = ValuePass(new ilang::Value_Old);
 
 			for(auto vals : m_emitted) {
-				ValuePass arr = ValuePass(new ilang::Value((ilang::Object*) new ilang::Array(vals.second)));
+				ValuePass arr = ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(vals.second)));
 				CALL_WITH(vals.first, arr);
 			}
 
@@ -167,7 +167,7 @@ namespace {
 
 		Mapper *map = new Mapper(args[0], obj);
 
-		return ValuePass(new ilang::Value(new ilang::Object(map)));
+		return ValuePass(new ilang::Value_Old(new ilang::Object(map)));
 
 	}
 

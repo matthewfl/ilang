@@ -69,7 +69,7 @@ namespace {
 
 		Eval_FunctionPass = args[0];
 
-		return ValuePass(new ilang::Value(true));
+		return ValuePass(new ilang::Value_Old(true));
 	}
 
 

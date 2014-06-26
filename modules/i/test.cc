@@ -25,7 +25,7 @@ namespace {
 		ValuePass set(Arguments &args) {
 			assert(args.size() == 1);
 			something = args[0];
-			return ValuePass(new ilang::Value);
+			return ValuePass(new ilang::Value_Old);
 		}
 		ValuePass get(Arguments &args) {
 			return something;

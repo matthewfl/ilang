@@ -26,7 +26,7 @@ namespace ilang {
 	namespace parserNode {
 		using std::list;
 		using boost::shared_ptr;
-		//typedef boost::shared_ptr<ilang::Value> ValuePass;
+		//typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
 		using ilang::ValuePass; // defined in variable.h
 		class Node {
 			friend class ilang::Modification;
@@ -78,7 +78,7 @@ namespace ilang {
 
 
 
-		// I guess we will leave this in, but most things are using Value, not expression
+		// I guess we will leave this in, but most things are using Value_Old, not expression
 		class Expression : public Value {
 			friend class ilang::Modification;
 		};
@@ -205,7 +205,7 @@ namespace ilang {
 		public:
 			Function(std::list<Node*> *p, std::list<Node*> *b);
 			void Run(ScopePass);
-			//void Call(std::vector<ilang::Value*>);
+			//void Call(std::vector<ilang::Value_Old*>);
 			void Call(ScopePass _scope_made, ScopePass _scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
 			ValuePass GetValue(ScopePass);
 			void Print(Printer*);

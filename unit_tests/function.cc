@@ -53,7 +53,7 @@ TEST_CASE("function passing arguments", "[function]") {
 	Variable *f = tree->GetScope()->lookup("fun");
 	auto fun = boost::any_cast<Function>(f->Get()->Get());
 
-	fun(ValuePass(new ilang::Value(1)));
+	fun(ValuePass(new ilang::Value_Old(1)));
 	REQUIRE(!asserted);
 }
 

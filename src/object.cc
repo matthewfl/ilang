@@ -74,7 +74,7 @@ namespace ilang {
 
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value(this)));
+		this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {
@@ -83,7 +83,7 @@ namespace ilang {
 	Object::Object(): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value(this)));
+		this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
@@ -92,7 +92,7 @@ namespace ilang {
 
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value(this)));
+		this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 
 		for(auto it : *obj) {
@@ -141,7 +141,7 @@ namespace ilang {
 				use_name += name;
 				ilang::Variable *ret;
 				members.insert(pair<std::string, ilang::Variable*>(name, ret = new Variable(use_name, list<string>({"Db"}))));
-				//ret->Set(ValuePass(new ilang::Value)); // prime it to make it get the value out of the database
+				//ret->Set(ValuePass(new ilang::Value_Old)); // prime it to make it get the Value_old out of the database
 				// for the moment a hack
 				return ret;
 				//}
@@ -206,9 +206,9 @@ namespace ilang {
 			var->Set(args[0]);
 			self->members.push_back(var);
 			self->RefreshDB();
-			*ret = ValuePass(new ilang::Value(self->members.size()));
+			*ret = ValuePass(new ilang::Value_Old(self->members.size()));
 			});
-		mem_push->Set(ValuePass(new ilang::Value(push_fun)));
+		mem_push->Set(ValuePass(new ilang::Value_Old(push_fun)));
 
 		ilang::Function pop_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 0, "Array.pop does not take any arguments");
@@ -218,7 +218,7 @@ namespace ilang {
 			self->members.pop_back();
 			self->RefreshDB();
 			});
-		mem_pop->Set(ValuePass(new ilang::Value(pop_fun)));
+		mem_pop->Set(ValuePass(new ilang::Value_Old(pop_fun)));
 
 		ilang::Function insert_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 2, "Array.insert expects 2 arguments");
@@ -229,9 +229,9 @@ namespace ilang {
 			auto it = self->members.begin();
 			self->members.insert(it + n, 1, var);
 			self->RefreshDB();
-			*ret = ValuePass(new ilang::Value(self->members.size()));
+			*ret = ValuePass(new ilang::Value_Old(self->members.size()));
 			});
-		mem_insert->Set(ValuePass(new ilang::Value(insert_fun)));
+		mem_insert->Set(ValuePass(new ilang::Value_Old(insert_fun)));
 
 		ilang::Function remove_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.remove expects 1 argument");
@@ -243,7 +243,7 @@ namespace ilang {
 			self->members.erase(it);
 			self->RefreshDB();
 			});
-		mem_remove->Set(ValuePass(new ilang::Value(remove_fun)));
+		mem_remove->Set(ValuePass(new ilang::Value_Old(remove_fun)));
 		DB_name = NULL;
 	}
 
@@ -310,7 +310,7 @@ namespace ilang {
 	// this most likely will leak memory big time until there is some real memory management
 	ilang::Variable * Array::operator[] (std::string name) {
 		if(name == "length") {
-			ilang::Value *val = new ilang::Value((long)members.size());
+			ilang::Value_Old *val = new ilang::Value_Old((long)members.size());
 			//list<string> bm;
 			//ilang::Variable * v = new ilang::Variable("length", bm);
 			mem_length->Set(ValuePass(val));

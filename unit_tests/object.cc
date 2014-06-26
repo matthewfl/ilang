@@ -7,7 +7,7 @@ TEST_CASE("Basic interaction with an object", "[object]") {
 	init();
 	Object *o = new Object();
 	ilang::Variable *v = o->operator[]("test");
-	v->Set(ValuePass(new ilang::Value(10)));
+	v->Set(ValuePass(new ilang::Value_Old(10)));
 
 	v = o->operator[]("test");
 	REQUIRE(v->Get()->Get().type() == typeid(int));

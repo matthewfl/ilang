@@ -36,7 +36,7 @@ namespace ilang {
 		std::map<std::string, ilang::ValuePass> kwargs;
 
 		template<typename T> void unwrap(T t) {
-			push(ilang::ValuePass(new ilang::Value(t)));
+			push(ilang::ValuePass(new ilang::Value_Old(t)));
 		}
 
 		void unwrap(ilang::ValuePass t) {
@@ -117,16 +117,16 @@ namespace ilang {
 			build_arguments(a, args);
 		}
 	public:
-		template<typename... Arguments> ilang::Value operator() (Arguments... _args) {
+		template<typename... Arguments> ilang::Value_Old operator() (Arguments... _args) {
 			//ilang::Arguments a;
 			//build_arguments(a, args);
 			ilang::Arguments args(_args);
 			return call(args);
 		}
-		ilang::Value operator() (ilang::Arguments args) { return call(args); }
-		ilang::Value call(ilang::Arguments args) {}
+		ilang::Value_Old operator() (ilang::Arguments args) { return call(args); }
+		ilang::Value_Old call(ilang::Arguments args) {}
 		Function bind(Scope &scope) {}
-		Function bindThis(Value) {}
+		Function bindThis(Value_Old) {}
 	};
 */
 
@@ -137,7 +137,7 @@ namespace ilang {
 		Function (ilang::parserNode::Function *fun);
 		Function (Function_ptr fun);
 		void BindScope(Scope*);
-		ValuePass Call(vector<ilang::Value*> &p);
+		ValuePass Call(vector<ilang::Value_Old*> &p);
 		};
 	*/
 } // namespace ilang

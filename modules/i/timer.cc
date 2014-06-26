@@ -22,7 +22,7 @@ namespace {
 		ValuePass stopTimer(Arguments &args) {
 			uv_timer_stop(&m_data->m_timer);
 			m_data->doDelete = true;
-			return ValuePass(new ilang::Value(true));
+			return ValuePass(new ilang::Value_Old(true));
 		}
 
 		static void timer_callback(uv_timer_t *handle, int status) {
@@ -84,7 +84,7 @@ namespace {
 		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
 		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], false);
 
-		return ValuePass(new ilang::Value(new ilang::Object(time)));
+		return ValuePass(new ilang::Value_Old(new ilang::Object(time)));
 	}
 
 	ValuePass setInterval(Arguments &args) {
@@ -93,7 +93,7 @@ namespace {
 		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setInterval should be a function");
 		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], true);
 
-		return ValuePass(new ilang::Value(new ilang::Object(time)));
+		return ValuePass(new ilang::Value_Old(new ilang::Object(time)));
 	}
 
 

@@ -11,10 +11,10 @@ namespace ilang {
 	using boost::shared_ptr;
 
 	class Modification;
-	class Value;
+	class Value_Old;
 	class Variable;
-	typedef boost::shared_ptr<ilang::Value> ValuePass;
-	//typedef ilang::Value* ValuePass;
+	typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
+	//typedef ilang::Value_Old* ValuePass;
 	class Variable_modifier {
 	public:
 		virtual bool Check(Variable *self, const boost::any&)=0;
@@ -62,14 +62,14 @@ namespace ilang {
 		void Set();
 		};*/
 
-	class Value {
+	class Value_Old {
 	private:
 		boost::any val;
 		friend class Variable;
 	public:
-		Value (boost::any);
-		Value ();
-		~Value();
+		Value_Old (boost::any);
+		Value_Old ();
+		~Value_Old();
 		void Print();
 		std::string str();
 		void toJSON(std::stringstream&);

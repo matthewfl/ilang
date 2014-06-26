@@ -56,7 +56,7 @@ namespace ilang {
 	}
 	ValuePass Variable::Get () {
 		ValuePass ret = val;
-		if(!ret) ret = ValuePass(new ilang::Value);
+		if(!ret) ret = ValuePass(new ilang::Value_Old);
 		for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
 			(*it)->Read(this, ret);
 		}
@@ -72,15 +72,15 @@ namespace ilang {
 		cout << "deleting varaible " << Name << endl;
 		}*/
 
-	boost::any & Value::Get() {
+	boost::any & Value_Old::Get() {
 		return val;
 	}
 
-	Value::Value(boost::any v): val(v) {}
-	Value::Value(){}
-	Value::~Value() {
+	Value_Old::Value_Old(boost::any v): val(v) {}
+	Value_Old::Value_Old(){}
+	Value_Old::~Value_Old() {
 		// TODO: fix this to not only work with these classes
-		//cout << "destroying Value " << val.type().name() << endl;
+		//cout << "destroying Value_Old " << val.type().name() << endl;
 		if(val.type() == typeid(ilang::Class*))
 			delete boost::any_cast<ilang::Class*>(val);
 		else if(val.type() == typeid(ilang::Object*))
@@ -89,7 +89,7 @@ namespace ilang {
 			delete boost::any_cast<ilang::Array*>(val);
 		//else cout << "nothing deleted\n";
 	}
-	void Value::Print () {
+	void Value_Old::Print () {
 		// catch the type id to make this faster
 		//cout << "inside print " << this << endl;
 		if(val.empty()) {
@@ -124,7 +124,7 @@ namespace ilang {
 		//cout << "over the print\n";
 	}
 
-	std::string Value::str () {
+	std::string Value_Old::str () {
 		stringstream ss;
 		if(val.empty()) {
 			ss << "--STR OF EMPTY VARIABLE--";
@@ -159,7 +159,7 @@ namespace ilang {
 
 	}
 
-	void Value::toJSON(stringstream &ss) {
+	void Value_Old::toJSON(stringstream &ss) {
 		if(val.empty()) {
 			ss << "null";
 		}else if(typeid(std::string) == val.type()) {
@@ -191,7 +191,7 @@ namespace ilang {
 		}
 	}
 
-	bool Value::isTrue () {
+	bool Value_Old::isTrue () {
 		if(typeid(bool) == val.type()) {
 			return boost::any_cast<bool>(val);
 		}else if(typeid(std::string) == val.type()) {

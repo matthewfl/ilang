@@ -7,7 +7,7 @@ using namespace ilang;
 TEST_CASE( "Run empty function", "[parserTree]" ) {
 	using namespace ilang::parserNode;
 	init();
-	std::list<parserNode::Node*> nodes;;
+	std::list<parserNode::Node*> nodes;
 
 	// all of this is going to leak, yay
 	nodes.push_back(

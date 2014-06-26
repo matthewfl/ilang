@@ -145,7 +145,7 @@ namespace ilang {
 
 	void ImportScopeFile::load(Object *o) {
 		//ilang::Variable *v = o->operator[]("test");
-		//v->Set(new ilang::Value((long)123));
+		//v->Set(new ilang::Value_Old((long)123));
 
 		for(auto it : m_Scope->vars) {
 			cout << it.first << endl;
@@ -224,7 +224,7 @@ namespace ilang {
 			assert(a.type() == typeid(ilang::Object*));
 			obj = boost::any_cast<ilang::Object*>(a);
 		}else{
-			ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
+			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
 			var->Set(val);
 		}
 		return GetObject(obj, path);
@@ -240,7 +240,7 @@ namespace ilang {
 			assert(a.type() == typeid(ilang::Object*));
 			obj = boost::any_cast<ilang::Object*>(a);
 		}else{
-			ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
+			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
 			var->Set(val);
 		}
 		return GetObject(obj, path);
@@ -287,7 +287,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
-		return ValuePass(new ilang::Value(f));
+		return ValuePass(new ilang::Value_Old(f));
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) ) {
 		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
@@ -295,7 +295,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
-		return ValuePass(new ilang::Value(f));
+		return ValuePass(new ilang::Value_Old(f));
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
 		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
@@ -303,7 +303,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
- 		return ValuePass(new ilang::Value(f));
+ 		return ValuePass(new ilang::Value_Old(f));
 	}
 	C_Class::~C_Class() {
 		//std::cout << "---------------------deleting C_Class\n";
@@ -330,12 +330,12 @@ namespace {
 		/*auto it = StaticImportedFiles().find(name);
 			if(it != StaticImportedFiles().end()) {
 			it->second->load(obj);
-			return ValuePass(new ilang::Value(obj));
+			return ValuePass(new ilang::Value_Old(obj));
 			}*/
 		fs::path p = GlobalImportScope.locateFile(name);
 		GlobalImportScope.get(obj, p);
 
-		return ValuePass(new ilang::Value(obj));
+		return ValuePass(new ilang::Value_Old(obj));
 	}
 
 	ValuePass ilang_import_check(Arguments &args) {
@@ -346,7 +346,7 @@ namespace {
 
 		fs::path p = GlobalImportScope.locateFile(name);
 
-		return ValuePass(new ilang::Value(! p.empty()));
+		return ValuePass(new ilang::Value_Old(! p.empty()));
 	}
 
 	ILANG_LIBRARY_NAME("i/Import",
