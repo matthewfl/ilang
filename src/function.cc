@@ -58,7 +58,8 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 
 	ScopePass obj_scope = ScopePass();
 	if(object_scope)
-		obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(object_scope->Get())));
+		obj_scope = ScopePass(new ObjectScope(object_scope->cast<Object*>().get()));
+
 
 
 	ValuePass ret = ValuePass(new ilang::Value_Old);

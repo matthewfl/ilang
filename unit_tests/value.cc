@@ -11,9 +11,9 @@ using namespace ilang;
 
 TEST_CASE("basic value", "[value]") {
 	int c = 4;
-	ValuePass_new a = valueMaker(c);
+	ValuePass a = valueMaker(c);
 
-	REQUIRE(a.Get()->type() == typeid(long));
+	REQUIRE(a->type() == typeid(long));
 	int d = a->cast<int>();
 	REQUIRE(d == 4);
 
@@ -55,12 +55,12 @@ TEST_CASE("basic vtable", "[value]") {
 }
 
 TEST_CASE("basic value pass", "[value]") {
-	ValuePass_new v(IntType(4));
+	ValuePass v(IntType(4));
 	REQUIRE(v.Get() == v.operator->());
 }
 
 TEST_CASE("basic cast", "[value]") {
-	ValuePass_new v = valueMaker(5);
+	ValuePass v = valueMaker(5);
 
 	int a = v->cast<int>();
 	REQUIRE(a == 5);
@@ -68,10 +68,10 @@ TEST_CASE("basic cast", "[value]") {
 }
 
 TEST_CASE("basic math", "[value]") {
-	ValuePass_new v = valueMaker(5);
-	ValuePass_new w = valueMaker(6);
+	ValuePass v = valueMaker(5);
+	ValuePass w = valueMaker(6);
 
-	ValuePass_new g = v + w;
+	ValuePass g = v + w;
 
 	REQUIRE(g->type() == typeid(long));
 	int a = g->cast<int>();
@@ -105,7 +105,7 @@ TEST_CASE("function type", "[value]") {
 	auto v = valueMaker(f);
 
 	ilang::Arguments args;
-	ValuePass_new ret = v->call(args);
+	ValuePass ret = v->call(args);
 	REQUIRE(called);
 }
 

@@ -8,8 +8,8 @@
 namespace ilang {
 	class Hashable {
 	public:
-		virtual ValuePass_new get(ilang::Identifier)=0;
-		virtual void set(ilang::Identifier, ValuePass_new)=0;
+		virtual ValuePass get(ilang::Identifier)=0;
+		virtual void set(ilang::Identifier, ValuePass)=0;
 		virtual ~Hashable(){};
 	};
 }

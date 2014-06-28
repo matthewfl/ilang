@@ -45,9 +45,10 @@ namespace ilang {
 			}
 			case Entry::Array: {
 				ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
-				ilang::Array *a = static_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(arr->Get()));
-				a->DB_name = new char[entry->object_id().size()+1];
-				memcpy(a->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
+				// TODO: ehhhhh
+				//ilang::Array *a = static_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(arr->Get()));
+				//a->DB_name = new char[entry->object_id().size()+1];
+				//memcpy(a->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
 				return arr;
 			}
 			case Entry::Array_contents: {
@@ -328,7 +329,8 @@ namespace ilang {
 					//Variable *vvv = var;
 					//var = NULL;
 					recursion_block = true;
-					var->Set(toSet);
+					// TODO:
+					//var->Set(toSet);
 					recursion_block = false;
 					//var = vvv;
 				}
@@ -367,15 +369,15 @@ namespace ilang {
 	namespace {
 		ValuePass DB_metaSet(Arguments &args) {
 			error(args.size() == 2, "db.metaSet takes 2 arguments");
-			error(args[0]->Get().type() == typeid(string), "First argument to db.metaSet should be a string");
-			error(args[1]->Get().type() == typeid(string), "Second argument to db.metaSet should be a string");
-			System_Database->setMeta(boost::any_cast<string>(args[0]->Get()), boost::any_cast<string>(args[1]->Get()));
+			error(args[0]->type() == typeid(string), "First argument to db.metaSet should be a string");
+			error(args[1]->type() == typeid(string), "Second argument to db.metaSet should be a string");
+			System_Database->setMeta(args[0]->cast<string>(), args[1]->cast<string>());
 			return ValuePass(new ilang::Value_Old);
 		}
 		ValuePass DB_metaGet(Arguments &args) {
 			error(args.size() == 1, "db.metaGet takes 1 argument");
-			error(args[0]->Get().type() == typeid(string), "First argument to db.metaGet must should be a string");
-			return ValuePass(new ilang::Value_Old( System_Database->getMeta(boost::any_cast<string>(args[0]->Get())) ));
+			error(args[0]->type() == typeid(string), "First argument to db.metaGet must should be a string");
+			return ValuePass(new ilang::Value_Old( System_Database->getMeta(args[0]->cast<string>())));
 		}
 	}
 	ILANG_LIBRARY_NAME("i/db",
@@ -541,7 +543,8 @@ namespace ilang {
 		assert(data);
 		ValuePass value = DB_serializer::readStoredData(data);
 		std::stringstream ss;
-		value->toJSON(ss);
+		// TODO:
+		//value->toJSON(ss);
 		cout << ss;
 
 	}

@@ -45,7 +45,7 @@ namespace ilang {
 			}
 		}
 	}
-	void Variable::Set(ValuePass v) {
+	void Variable::Set(ValuePass_Old v) {
 		// this most likely will have a lot of calling of constructors and stuff for the shared_ptr
 		assert(Check(v->Get()));
 		val=v;
@@ -54,9 +54,9 @@ namespace ilang {
 			(*it)->Set(this, v->Get());
 		}
 	}
-	ValuePass Variable::Get () {
-		ValuePass ret = val;
-		if(!ret) ret = ValuePass(new ilang::Value_Old);
+	ValuePass_Old Variable::Get () {
+		ValuePass_Old ret = val;
+		if(!ret) ret = ValuePass_Old(new ilang::Value_Old);
 		for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
 			(*it)->Read(this, ret);
 		}

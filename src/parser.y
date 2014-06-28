@@ -62,7 +62,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %left '='
 %left T_plusEqual T_subEqual T_mulEqual T_divEqual
 %left T_and T_or
-%left T_eq T_ne T_le '<' '>'
+%left T_eq T_ne T_le T_ge '<' '>'
 %left '+' '-'
 %left '*' '/'
 %left '!'

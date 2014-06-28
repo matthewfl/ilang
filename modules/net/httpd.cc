@@ -102,8 +102,8 @@ namespace {
 
 		ValuePass getHeader (Arguments &args) {
 			error(args.size() == 1, "httpd.request.header expects 1 argument");
-			error(args[0]->Get().type() == typeid(std::string), "httpd.request.header expects a string type");
-			string s = boost::any_cast<std::string>(args[0]->Get());
+			error(args[0]->type() == typeid(std::string), "httpd.request.header expects a string type");
+			string s = args[0]->cast<std::string>();
 			boost::algorithm::to_lower(s);
 
 			// read data from the header and return it back
@@ -116,12 +116,12 @@ namespace {
 			//close_mutex.lock_shared();
 			int code = 200;
 			if(args.size() >= 1) {
-				error(args[0]->Get().type() == typeid(long), "httpd.request.writeHead expects a responce code for the first argument");
-				code = boost::any_cast<long>(args[0]->Get());
+				error(args[0]->type() == typeid(long), "httpd.request.writeHead expects a responce code for the first argument");
+				code = args[0]->cast<int>();
 				error(code < 1000 && code > 99, "Http code expects to be between 100 and 999");
 			}
 			for(int i=1;i<args.size();i++) {
-				error(args[i]->Get().type() == typeid(std::string), "httpd.request.writeHead expects a string for the 2+ arguments");
+				error(args[i]->type() == typeid(std::string), "httpd.request.writeHead expects a string for the 2+ arguments");
 			}
 
 			struct headWriteReq {
@@ -155,7 +155,7 @@ namespace {
 			status_code.copy(buf[0].base, status_code.length());
 			int place=1;
 			for(;place<args.size();place++) {
-				string str = args[place]->str();
+				string str = args[place]->cast<string>();
 				str += "\r\n";
 				buf[place].len = str.length();
 				buf[place].base = new char[str.length()];
@@ -210,7 +210,7 @@ namespace {
 			for(ValuePass val : args) {
 				// create buffers for all the iterms
 				// send to libuv
-				string str = val->str();
+				string str = val->cast<string>();
 				debug(4, "writing req with "<< str );
 				buf[place].len = str.length();
 				buf[place].base = new char[str.length()];
@@ -442,10 +442,10 @@ namespace {
 
 	ValuePass Server::setListen(Scope *scope, Arguments &args) {
 		error(args.size() == 1, "http.setListen takes 1 argument");
-		error(args[0]->Get().type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
+		error(args[0]->type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
 
 		_callback = args[0];
-		callback = boost::any_cast<Function>(args[0]->Get());
+		callback = *args[0]->cast<Function*>();
 
 		return ValuePass(new ilang::Value_Old);
 	}
@@ -455,8 +455,8 @@ namespace {
 		error(listening == false, "httpd already listening");
 
 		if(args.size()) {
-			error(args[0]->Get().type() == typeid(long), "argument to httpd.start expected to be a number");
-			listenPort = boost::any_cast<long>(args[0]->Get());
+			error(args[0]->type() == typeid(long), "argument to httpd.start expected to be a number");
+			listenPort = args[0]->cast<int>();
 		}
 
 		// fill in
@@ -502,11 +502,11 @@ namespace {
 	}
 
 	Server::Server(ValuePass call, int port) {
-		assert(call->Get().type() == typeid(Function));
+		assert(call->type() == typeid(Function));
 		assert(port >= 0 && port <= 0xFFFF);
 		listening = false;
 		_callback = call;
-		callback = boost::any_cast<Function>(call->Get());
+		callback = *call->cast<Function*>();
 		listenPort = port;
 		Init();
 	}
@@ -522,9 +522,9 @@ namespace {
 
 	ValuePass createServer(Arguments &args) {
 		error(args.size() == 2, "httpd.create takes 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "httpd.create 1st argument is a port number");
-		error(args[1]->Get().type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
-		Server *ser = new Server(args[1], boost::any_cast<long>(args[0]->Get()));
+		error(args[0]->type() == typeid(long), "httpd.create 1st argument is a port number");
+		error(args[1]->type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
+		Server *ser = new Server(args[1], args[0]->cast<int>());
 		return ValuePass(new ilang::Value_Old(new ilang::Object(ser)));
 	}
 }

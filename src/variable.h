@@ -7,20 +7,23 @@
 #include <boost/any.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "value.h"
+#include "value_types.h"
+
 namespace ilang {
 	using boost::shared_ptr;
 
 	class Modification;
 	class Value_Old;
 	class Variable;
-	typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
+	typedef boost::shared_ptr<ilang::Value_Old> ValuePass_Old;
 	//typedef ilang::Value_Old* ValuePass;
 	class Variable_modifier {
 	public:
 		virtual bool Check(Variable *self, const boost::any&)=0;
 		virtual shared_ptr<Variable_modifier> new_variable(Variable *self, std::string);
 		virtual void Set(Variable *self, const boost::any &a) {}
-		virtual void Read(Variable *self, ValuePass &val) {}
+		virtual void Read(Variable *self, ValuePass_Old &val) {}
 		virtual const char* Name() { return "NOT SET"; }
 	};
 
@@ -33,12 +36,12 @@ namespace ilang {
 		std::list<shared_ptr<Variable_modifier> > Modifiers;
 		std::string Name;
 		bool Check (boost::any&);
-		ValuePass val;
+		ValuePass_Old val;
 		Variable()=delete;
 	public:
 		Variable (std::string name, std::list<std::string> modifiers);
-		void Set(ValuePass v);
-		ValuePass Get();
+		void Set(ValuePass_Old v);
+		ValuePass_Old Get();
 		bool isSet();
 		//~Variable();
 	};

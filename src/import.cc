@@ -225,7 +225,8 @@ namespace ilang {
 			obj = boost::any_cast<ilang::Object*>(a);
 		}else{
 			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-			var->Set(val);
+			assert(0);
+			//var->Set(val);
 		}
 		return GetObject(obj, path);
 	}
@@ -241,7 +242,8 @@ namespace ilang {
 			obj = boost::any_cast<ilang::Object*>(a);
 		}else{
 			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-			var->Set(val);
+			assert(0); // TODO:
+			//var->Set(val);
 		}
 		return GetObject(obj, path);
 
@@ -262,7 +264,8 @@ namespace ilang {
 		for(auto it : m_members) {
 			//cout << "load: " << it.first << endl;
 			ilang::Variable *v = obj->operator[](it.first);
-			v->Set(it.second);
+			assert(0); // TODO:
+			//v->Set(it.second);
 		}
 	}
 
@@ -320,9 +323,9 @@ namespace {
 		Object *obj = new Object;
 
 		error(args.size() == 1, "i.Import.check expects 1 argument");
-		error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
+		error(args[0]->type() == typeid(std::string), "i.Import.check expects a string");
 
-		std::string name = boost::any_cast<std::string>(args[0]->Get());
+		std::string name = args[0]->cast<std::string>(); //boost::any_cast<std::string>(args[0]->Get());
 		boost::replace_all(name, ".", "\/");
 		/*auto it = ImportedFiles.find(name);
 			if(it == ImportedFiles.end());
@@ -340,8 +343,8 @@ namespace {
 
 	ValuePass ilang_import_check(Arguments &args) {
 		error(args.size() == 1, "i.Import.check expects 1 argument");
-		error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
-		std::string name = boost::any_cast<std::string>(args[0]->Get());
+		error(args[0]->type() == typeid(std::string), "i.Import.check expects a string");
+		std::string name = args[0]->cast<std::string>(); //boost::any_cast<std::string>(args[0]->Get());
 		boost::replace_all(name, ".", "\/");
 
 		fs::path p = GlobalImportScope.locateFile(name);

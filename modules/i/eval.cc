@@ -36,10 +36,10 @@ namespace {
 		std::string code = "_eval_worked = import(\"i.eval\")._eval_loader( { \n";
 		if(args.size() == 2) {
 			code += "|";
-			code += arg->str();
+			code += arg->cast<string>();
 			code += "| \n";
 		}
-		code += str->str();
+		code += str->cast<string>();
 		code += "} );\n";
 		// Use fmemopen to create a FILE* to pass to the parser
 

@@ -27,7 +27,7 @@ namespace {
 
 		static void timer_callback(uv_timer_t *handle, int status) {
 			timerData *data = (timerData*)handle->data;
-			ilang::Function func = boost::any_cast<ilang::Function>(data->m_function->Get());
+			ilang::Function func = *data->m_function->cast<Function*>();
 			//vector<ValuePass> params;
 			ValuePass ret = func();
 			// ValuePass ret = ValuePass(new ilang::Value);
@@ -56,7 +56,7 @@ namespace {
 		timerManager(long time, ValuePass func, bool interval = false) :
 			m_timeout(time), m_interval(interval)
 		{
-			assert(func->Get().type() == typeid(ilang::Function));
+			assert(func->type() == typeid(ilang::Function));
 			m_data = new timerData;
 			m_data->parent = this;
 			m_data->m_function = func;
@@ -80,18 +80,18 @@ namespace {
 
 	ValuePass setTimer(Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "first argument to setTimeout should be a time in ms");
-		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
-		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], false);
+		error(args[0]->type() == typeid(long), "first argument to setTimeout should be a time in ms");
+		error(args[1]->type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
+		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], false);
 
 		return ValuePass(new ilang::Value_Old(new ilang::Object(time)));
 	}
 
 	ValuePass setInterval(Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "first argument to setInterval should be a time in ms");
-		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setInterval should be a function");
-		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], true);
+		error(args[0]->type() == typeid(long), "first argument to setInterval should be a time in ms");
+		error(args[1]->type() == typeid(ilang::Function), "second argument to setInterval should be a function");
+		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], true);
 
 		return ValuePass(new ilang::Value_Old(new ilang::Object(time)));
 	}

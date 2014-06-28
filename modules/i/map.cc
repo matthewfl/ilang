@@ -22,19 +22,19 @@ namespace {
 
 		ValuePass EmitFunct(Arguments &args) {
 			error(args.size() == 2, "map.emit expects 2 arguments");
-			error(args[0]->Get().type() == typeid(std::string), "map.emit expects the first argument to be a string");
+			error(args[0]->type() == typeid(std::string), "map.emit expects the first argument to be a string");
 
-			m_emitted[boost::any_cast<std::string>(args[0]->Get())].push_back(args[1]); // save the emitted element into the map, this will not scale well at the moment.
+			m_emitted[args[0]->cast<string>()].push_back(args[1]); // save the emitted element into the map, this will not scale well at the moment.
 
 			return ValuePass(new ilang::Value_Old(true));
 		}
 
 		ValuePass MapAction(Arguments &args) {
 			error(args.size() == 1, "map.map expects 1 argument");
-			error(args[0]->Get().type() == typeid(ilang::Function), "map.map expects a function");
+			error(args[0]->type() == typeid(ilang::Function), "map.map expects a function");
 			error(m_obj, "There is no object to map on");
 
-			ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
+			ilang::Function funct = *args[0]->cast<Function*>();
 
 			//ScopePass obj_scope = ScopePass();
 			// if(funct.object) {
@@ -96,17 +96,19 @@ namespace {
 
 		ValuePass Get(Arguments &args) {
 			error(args.size() == 1, "map.get expects 1 arugment");
-			error(args[0]->Get().type() == typeid(std::string), "map.get expects a string");
+			error(args[0]->type() == typeid(std::string), "map.get expects a string");
 
-			return ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(m_emitted[boost::any_cast<std::string>(args[0]->Get())])));
+			return valueMaker(0);
+			// TODO;
+			//return ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(m_emitted[
 		}
 
 		ValuePass Reduce(Arguments &args) {
 			error(args.size() == 1, "map.reduce expects 1 argument");
-			error(args[0]->Get().type() == typeid(ilang::Function), "map.reduce expects a function");
+			error(args[0]->type() == typeid(ilang::Function), "map.reduce expects a function");
 			error(!m_obj, "can not reduce directly on an object"); // TODO: remove this constrain
 
-			ilang::Function funct = boost::any_cast<ilang::Function>(args[0]->Get());
+			ilang::Function funct = *args[0]->cast<Function*>();
 
 			// ScopePass obj_scope = ScopePass();
 			// if(funct.object) {
@@ -160,8 +162,8 @@ namespace {
 	ValuePass createMapper(Arguments &args) {
 		// when the argument is of a class that has not been constructed, then the type is ilang::Class*, after the obhject is constructed then the type is ilang::Object* with a pointer to class
 		error(args.size() == 1, "map.create expects 1 argument");
-		error(args[0]->Get().type() == typeid(ilang::Object*), "map.create expects type of object");
-		ilang::Object *obj = boost::any_cast<ilang::Object*>(args[0]->Get());
+		error(args[0]->type() == typeid(ilang::Object*), "map.create expects type of object");
+		ilang::Object *obj = args[0]->cast<Object*>().get(); //boost::any_cast<ilang::Object*>(args[0]->Get());
 		assert(obj);
 		error(dynamic_cast<ilang::Array*>(obj) == NULL, "map.create does not work on arrays");
 

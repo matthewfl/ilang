@@ -7,12 +7,12 @@
 namespace ilang {
 	class Variable_new {
 	private:
-		std::vector<ilang::ValuePass_new> m_modifiers;
-		ilang::ValuePass_new m_value;
+		std::vector<ilang::ValuePass> m_modifiers;
+		ilang::ValuePass m_value;
 	public:
-		Variable_new(std::vector<ilang::ValuePass_new> mod) : m_modifiers(mod) {}
-		void set(ilang::ValuePass_new);
-		ilang::ValuePass_new &get() { return m_value; }
+		Variable_new(std::vector<ilang::ValuePass> mod) : m_modifiers(mod) {}
+		void set(ilang::ValuePass);
+		ilang::ValuePass &get() { return m_value; }
 	};
 }
 

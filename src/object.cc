@@ -17,11 +17,11 @@ namespace ilang {
 
 		for(auto it : *p) {
 			assert(dynamic_cast<ilang::parserNode::Value*>(it));
-			boost::any & a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(scope)->Get();
+			auto a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(scope); //->Get();
 			// this will probably need to get changed and stuff, idk
 			// this is going to return what ever type is returned by the GetValue from class
-			assert(a.type() == typeid(Class*));
-			parents.push_back(boost::any_cast<Class*>(a));
+			assert(a->type() == typeid(Class*));
+			parents.push_back(a->cast<Class*>().get()); // TODO: hold the shared_ptr
 		}
 		for(auto it : *obj) {
 			std::string name = it.first->GetFirstName();
@@ -32,7 +32,8 @@ namespace ilang {
 			ilang::Variable *var = new Variable(name, *(it.first->modifiers));
 			if(it.second) {
 				assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
-				var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
+				// TODO:
+				//var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
 			}
 			members.insert(pair<std::string, ilang::Variable*>(name, var));
 		}
@@ -59,8 +60,8 @@ namespace ilang {
 		return NULL;
 	}
 	ilang::Variable * Class::operator[](ValuePass val) {
-		if(val->Get().type() == typeid(std::string))
-			return operator[](boost::any_cast<std::string>(val->Get()));
+		if(val->type() == typeid(std::string))
+			return operator[](val->cast<std::string>());
 		assert(0);
 		return NULL; // this most likely will get changed in the future
 	}
@@ -74,7 +75,8 @@ namespace ilang {
 
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value_Old(this)));
+		// TODO:
+		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {
@@ -83,7 +85,8 @@ namespace ilang {
 	Object::Object(): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value_Old(this)));
+		// TODO:
+		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
@@ -92,7 +95,8 @@ namespace ilang {
 
 		std::list<std::string> this_mod = {"Const"};
 		ilang::Variable *this_var = new Variable("this", this_mod);
-		this_var->Set(ValuePass(new ilang::Value_Old(this)));
+		// TODO:
+		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 
 		for(auto it : *obj) {
@@ -105,7 +109,8 @@ namespace ilang {
 			ilang::Variable *var = new ilang::Variable(name, *(it.first->modifiers));
 			if(it.second) { // != NULL
 				assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
-				var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
+				// TODO:
+				//var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
 			}
 			members.insert(pair<std::string, ilang::Variable*>(name, var));
 		}
@@ -177,9 +182,8 @@ namespace ilang {
 
 	ilang::Variable * Object::operator[] (ValuePass name) {
 		// the interface should be changed so that any value can be looked up in an object
-		boost::any & n = name->Get();
-		assert(n.type() == typeid(std::string));
-		return operator[](boost::any_cast<std::string>(n));
+		assert(name->type() == typeid(std::string));
+		return operator[](name->cast<std::string>());
 	}
 
 	void Object::Debug() {
@@ -203,12 +207,14 @@ namespace ilang {
 			error(args.size() == 1, "Array.push expects 1 argument");
 			assert(self->modifiers);
 			ilang::Variable *var = new ilang::Variable("", *self->modifiers);
-			var->Set(args[0]);
+			// TODO:
+			//var->Set(args[0]);
 			self->members.push_back(var);
 			self->RefreshDB();
-			*ret = ValuePass(new ilang::Value_Old(self->members.size()));
+			*ret = valueMaker(self->members.size());
 			});
-		mem_push->Set(ValuePass(new ilang::Value_Old(push_fun)));
+		// TODO:
+		//mem_push->Set(ValuePass(new ilang::Value_Old(push_fun)));
 
 		ilang::Function pop_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 0, "Array.pop does not take any arguments");
@@ -218,32 +224,34 @@ namespace ilang {
 			self->members.pop_back();
 			self->RefreshDB();
 			});
-		mem_pop->Set(ValuePass(new ilang::Value_Old(pop_fun)));
+		// TODO:
+		//mem_pop->Set(ValuePass(new ilang::Value_Old(pop_fun)));
 
 		ilang::Function insert_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 2, "Array.insert expects 2 arguments");
-			error(args[0]->Get().type() == typeid(long), "Array.insert expects first argument to be a integer");
-			long n = boost::any_cast<long>(args[0]->Get());
+			error(args[0]->type() == typeid(long), "Array.insert expects first argument to be a integer");
+			long n = args[0]->cast<long>();
 			ilang::Variable *var = new ilang::Variable("", *self->modifiers);
-			var->Set(args[1]);
+			//	var->Set(args[1]);
 			auto it = self->members.begin();
 			self->members.insert(it + n, 1, var);
 			self->RefreshDB();
-			*ret = ValuePass(new ilang::Value_Old(self->members.size()));
+			*ret = valueMaker(self->members.size()); //ValuePass(new ilang::Value_Old(self->members.size()));
 			});
-		mem_insert->Set(ValuePass(new ilang::Value_Old(insert_fun)));
+		// TODO:
+		//mem_insert->Set(ValuePass(new ilang::Value_Old(insert_fun)));
 
 		ilang::Function remove_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.remove expects 1 argument");
-			error(args[0]->Get().type() == typeid(long), "Array.remove expect argument to be integer");
-			long n = boost::any_cast<long>(args[0]->Get());
+			error(args[0]->type() == typeid(long), "Array.remove expect argument to be integer");
+			long n = args[0]->cast<long>();
 			auto it = self->members.begin() + n;
 			*ret = (*it)->Get();
 			delete *it;
 			self->members.erase(it);
 			self->RefreshDB();
 			});
-		mem_remove->Set(ValuePass(new ilang::Value_Old(remove_fun)));
+		//mem_remove->Set(ValuePass(new ilang::Value_Old(remove_fun)));
 		DB_name = NULL;
 	}
 
@@ -256,7 +264,8 @@ namespace ilang {
 			string name = "-ARRAY-";
 			name += count++;
 			ilang::Variable *var = new Variable(name, *modifiers);
-			var->Set(v->GetValue(scope));
+			// TODO:
+			//var->Set(v->GetValue(scope));
 			members.push_back(var);
 		}
 		Init();
@@ -268,7 +277,8 @@ namespace ilang {
 		std::list<std::string> mod;
 		for(auto it : val) {
 			ilang::Variable *var = new Variable("", mod);
-			var->Set(it);
+			// TODO:
+			//var->Set(it);
 			members.push_back(var);
 		}
 		Init();
@@ -295,16 +305,12 @@ namespace ilang {
 	}
 
 	ilang::Variable * Array::operator [] (ValuePass name) {
-		boost::any & n = name->Get();
-		if(n.type() == typeid(long)) { // look for the array number
-			long place = boost::any_cast<long>(n);
-			if(members.size() < place) {
-
-			}
-			return (members[place]);
-		}else if(n.type() == typeid(std::string)) {
-			return operator[](boost::any_cast<std::string>(n));
+		if(name->type() == typeid(long)) {
+			return members[name->cast<long>()];
+		}else if(name->type() == typeid(std::string)) {
+			return operator[](name->cast<std::string>());
 		}
+		assert(0);
 	}
 
 	// this most likely will leak memory big time until there is some real memory management
@@ -313,7 +319,8 @@ namespace ilang {
 			ilang::Value_Old *val = new ilang::Value_Old((long)members.size());
 			//list<string> bm;
 			//ilang::Variable * v = new ilang::Variable("length", bm);
-			mem_length->Set(ValuePass(val));
+			// TODO:
+			//mem_length->Set(ValuePass(val));
 			return mem_length; // this is going to end up leaking, needs to get fixed etc
 		}else if(name == "push") {
 			return mem_push;
@@ -338,9 +345,8 @@ namespace ilang {
 		return scope->lookup(name);
 	}
 	ilang::Variable * ScopeObject::operator[] (ValuePass val) {
-		boost::any &a = val->Get();
-		assert(a.type() == typeid(std::string));
-		return operator[](boost::any_cast<std::string>(a));
+		assert(val->type() == typeid(std::string));
+		return operator[](val->cast<std::string>());
 	}
 }
 

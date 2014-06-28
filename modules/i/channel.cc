@@ -35,8 +35,8 @@ namespace {
 		}
 		ValuePass setLimit(Arguments &args) {
 			error(args.size() == 1, "channel.setLimit expects one argument");
-			error(args[0]->Get().type() == typeid(long), "channel.setLimit expects a number");
-			m_queue.set_capacity(boost::any_cast<long>(args[0]->Get()));
+			error(args[0]->type() == typeid(long), "channel.setLimit expects a number");
+			m_queue.set_capacity(args[0]->cast<long>());
 			return ValuePass(new ilang::Value_Old);
 		}
 		void Init() {
@@ -60,7 +60,8 @@ namespace {
 		error(args.size() <= 1, "channel.create expects 1 or no arguments");
 		int channelLength = 10;
 		if(args.size()) {
-			error(args[0]->Get().type() == typeid(long), "channel.create expects 1 argument");
+			error(args[0]->type() == typeid(long), "channel.create expects 1 argument");
+			channelLength = args[0]->cast<int>();
 		}
 		threadChannel *ch = new threadChannel(channelLength);
 		return ValuePass(new ilang::Value_Old(new ilang::Object(ch)));

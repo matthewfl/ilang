@@ -11,6 +11,7 @@
 #include "scope.h"
 #include "import.h"
 #include "print.h"
+#include "value.h"
 
 /* There is a problem with the scope getting possibly deleted if a function gets ruturned from a function
  * and it is using the closure, the solution is to change the scope to use a smart pointer to be passed around
@@ -28,17 +29,18 @@ namespace ilang {
 		using boost::shared_ptr;
 		//typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
 		using ilang::ValuePass; // defined in variable.h
+		//using ilang::ValuePass;
 		class Node {
 			friend class ilang::Modification;
 		private:
-			unsigned long _node_id;
-			Node *_parent;
+			//unsigned long _node_id;
+			//Node *_parent;
 		protected:
-			void _setParent(Node*);
+			//void _setParent(Node*);
 		public:
 			Node();
-			const unsigned long getID() { return _node_id; }
-			const Node * getParent() { return _parent; }
+			//const unsigned long getID() { return _node_id; }
+			//const Node * getParent() { return _parent; }
 			virtual void Run(ScopePass)=0;
 			void randomsdafasdf(){} // take this out eventually, fixed some random compiler bug or something
 			virtual void Print(Printer*) =0;
@@ -244,7 +246,7 @@ namespace ilang {
 			FieldAccess(Node*, std::string);
 			//void Run(Scope*);
 			//void Set(Scope*, ValuePass var);
-			void Set(ScopePass, ValuePass var, bool force = false);
+			void Set(ScopePass, ValuePass val, bool force = false);
 			ilang::Variable * Get(ScopePass);
 			ValuePass GetValue(ScopePass);
 			virtual std::string GetFirstName();
