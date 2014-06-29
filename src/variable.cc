@@ -15,7 +15,7 @@ using namespace std;
 // TODO: make everything use a shared pointer or have some sort of memory heap managing thing to deal with variables going out of scope etc
 
 namespace ilang {
-	map<string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
+	map<string, std::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
 
 	bool Variable::Check (boost::any &a) {
 		for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
@@ -262,10 +262,10 @@ namespace {
 	public:
 		char* Name() { return "Const"; }
 		Const_var_type() : count(0) {}
-		boost::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
+		std::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
 			// this will leak when the variable goes out of scope
 			// this should not leak now that shared pointer is being used to track this
-			boost::shared_ptr<Variable_modifier> p ( new Const_var_type<max> );
+			std::shared_ptr<Variable_modifier> p ( new Const_var_type<max> );
 			return p;
 		}
 		bool Check(Variable *self, const boost::any &val) {

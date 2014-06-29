@@ -30,18 +30,19 @@ namespace ilang {
 			using namespace ilang_db;
 			switch(entry->type()) {
 			case Entry::Integer:
-				return ValuePass(new ilang::Value_Old(entry->integer_dat()));
+				return valueMaker(entry->integer_dat());
 			case Entry::Float:
-				return ValuePass(new ilang::Value_Old(entry->float_dat()));
+				return valueMaker(entry->float_dat());
 			case Entry::Bool:
-				return ValuePass(new ilang::Value_Old(entry->bool_dat()));
+				return valueMaker(entry->bool_dat());
 			case Entry::String:
-				return ValuePass(new ilang::Value_Old(entry->string_dat()));
+				return valueMaker(entry->string_dat());
 			case Entry::Object: {
-				ilang::Object *obj = new ilang::Object;
+				//ilang::Object *obj = new ilang::Object;
+				auto obj = std::make_shared<ilang::Object>();
 				obj->DB_name = new char[entry->object_id().size()+1];
 				memcpy(obj->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
-				return ValuePass(new ilang::Value_Old(obj));
+				return valueMaker(obj);
 			}
 			case Entry::Array: {
 				ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
@@ -58,8 +59,9 @@ namespace ilang {
 					ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
 					arr_members.push_back(gg);
 				}
-				ilang::Array *arr = new ilang::Array(arr_members);
-				return ValuePass(new ilang::Value_Old(static_cast<ilang::Object*>(arr)));
+				auto arr = make_shared<ilang::Array>(arr_members);
+				//ilang::Array *arr = new ilang::Array(arr_members);
+				return valueMaker(arr);
 			}
 			default:
 				assert(0);
@@ -354,7 +356,7 @@ namespace ilang {
 		bool Check(Variable *self, const boost::any &a) { return true; }
 		shared_ptr<Variable_modifier> new_variable(Variable *self, std::string name) {
 			assert(System_Database);
-			boost::shared_ptr<Variable_modifier> p ( new Database_variable(self, name) );
+			std::shared_ptr<Variable_modifier> p ( new Database_variable(self, name) );
 			return p;
 		}
 	};
@@ -372,12 +374,12 @@ namespace ilang {
 			error(args[0]->type() == typeid(string), "First argument to db.metaSet should be a string");
 			error(args[1]->type() == typeid(string), "Second argument to db.metaSet should be a string");
 			System_Database->setMeta(args[0]->cast<string>(), args[1]->cast<string>());
-			return ValuePass(new ilang::Value_Old);
+			return ValuePass();
 		}
 		ValuePass DB_metaGet(Arguments &args) {
 			error(args.size() == 1, "db.metaGet takes 1 argument");
 			error(args[0]->type() == typeid(string), "First argument to db.metaGet must should be a string");
-			return ValuePass(new ilang::Value_Old( System_Database->getMeta(args[0]->cast<string>())));
+			return valueMaker(System_Database->getMeta(args[0]->cast<string>()));
 		}
 	}
 	ILANG_LIBRARY_NAME("i/db",

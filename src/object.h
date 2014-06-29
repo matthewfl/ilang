@@ -7,10 +7,11 @@
 #include "variable.h"
 #include "parserTree.h"
 #include "scope.h"
+#include "hashable.h"
 
 namespace ilang {
 	class Object;
-	class Class {
+	class Class : public Hashable {
 	private:
 		std::vector<Class*> parents;
 		std::map<std::string, ilang::Variable*> members;
@@ -20,12 +21,16 @@ namespace ilang {
 		ilang::Variable * operator[](std::string name);
 		ilang::Variable * operator[](ValuePass);
 		virtual ~Class();
+
+		// TODO:
+		ValuePass get(ilang::Identifier i) {}
+		void set(ilang::Identifier i, ValuePass v) {}
 	};
 	class ObjectScope;
 	//typedef std::string storedData;
 	class DB_serializer;
 	class C_Class;
-	class Object {
+	class Object : public Hashable {
 	private:
 		friend class ObjectScope;
 		friend class DB_serializer;
@@ -45,6 +50,10 @@ namespace ilang {
 		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, ScopePass);
 		virtual ilang::Variable * operator [] (std::string name);
 		virtual ilang::Variable * operator [] (ValuePass);
+
+		// TODO:
+		ValuePass get(ilang::Identifier i) {}
+		void set(ilang::Identifier i, ValuePass v) {}
 	};
 	class Array : public Object {
 		//friend storedData *DB_createStoredData(const boost::any&);

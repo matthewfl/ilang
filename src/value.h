@@ -15,6 +15,9 @@ using namespace std;
 
 namespace ilang {
 
+	using std::make_shared;
+	using std::shared_ptr;
+
 	class Value_new;
 	class Function;
 	class Arguments;
@@ -24,12 +27,17 @@ namespace ilang {
 	class Class;
 	class Hashable;
 
+	typedef shared_ptr<Object> Object_ptr;
+
 
 	class ValuePass {
   private:
     char m_data[32]; // TODO: don't hard code the size // sizeof(Value_new), should be 16
 	public:
-		inline Value_new *Get() const { return (Value_new*)m_data; }
+		inline Value_new *Get() const {
+			assert(*(long*)m_data);
+			return (Value_new*)m_data;
+		}
     inline Value_new *operator->() const { return Get(); }
 		inline Value_new &operator*() const { return *Get(); }
 
@@ -40,6 +48,7 @@ namespace ilang {
     }
 		template <typename T>ValuePass (T t) {
 			assert(sizeof(T) <= sizeof(m_data));
+			assert(dynamic_cast<Value_new*>(&t));
 			new (m_data) T(t);
 		}
 		ValuePass(const ValuePass &x);

@@ -219,7 +219,8 @@ namespace ilang {
 		ilang::Function pop_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 0, "Array.pop does not take any arguments");
 			ilang::Variable *var = self->members.back();
-			*ret = var->Get();
+			// TODO:
+			//*ret = var->Get();
 			delete var;
 			self->members.pop_back();
 			self->RefreshDB();
@@ -246,7 +247,8 @@ namespace ilang {
 			error(args[0]->type() == typeid(long), "Array.remove expect argument to be integer");
 			long n = args[0]->cast<long>();
 			auto it = self->members.begin() + n;
-			*ret = (*it)->Get();
+			// TODO:
+			//*ret = (*it)->Get();
 			delete *it;
 			self->members.erase(it);
 			self->RefreshDB();

@@ -10,7 +10,7 @@
 
 
 namespace ilang {
-	using boost::shared_ptr;
+	//using boost::shared_ptr;
 
 	class Scope;
 	typedef boost::shared_ptr<ilang::Scope> ScopePass;

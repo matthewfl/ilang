@@ -143,7 +143,7 @@ namespace ilang {
 		scope->vars.find("test");
 		}*/
 
-	void ImportScopeFile::load(Object *o) {
+	void ImportScopeFile::load(std::shared_ptr<Object> o) {
 		//ilang::Variable *v = o->operator[]("test");
 		//v->Set(new ilang::Value_Old((long)123));
 
@@ -154,7 +154,7 @@ namespace ilang {
 		}
 	}
 
-	void ImportScope::get(Object *obj, fs::path &pa) {
+	void ImportScope::get(std::shared_ptr<Object> obj, fs::path &pa) {
 		auto find = ImportedFiles.find(pa);
 		if(find != ImportedFiles.end()) {
 			find->second->load(obj);
@@ -210,42 +210,48 @@ namespace ilang {
 		//std::list<std::string> tt = { "what_", "inthe", "world" };
 		//load(GetObject(scope, tt));
 		for(auto it : imports) {
-			Object *obj = GetObject(scope, it.first);
+			auto obj = GetObject(scope, it.first);
 			get(obj, it.second);
 		}
 	}
 
-	Object * ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
+	std::shared_ptr<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
 		assert(!path.empty());
-		ilang::Variable *var = scope->lookup(path.front());
-		Object *obj;
-		if(var->isSet()) {
-			boost::any &a = var->Get()->Get();
-			assert(a.type() == typeid(ilang::Object*));
-			obj = boost::any_cast<ilang::Object*>(a);
-		}else{
-			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-			assert(0);
-			//var->Set(val);
-		}
-		return GetObject(obj, path);
+		assert(0);
+		// TODO:
+		// ilang::Variable *var = scope->lookup(path.front());
+		// Object_ptr obj;
+		// if(var->isSet()) {
+
+		// 	boost::any &a = var->Get()->Get();
+		// 	assert(a.type() == typeid(ilang::Object*));
+		// 	obj = boost::any_cast<ilang::Object*>(a);
+		// }else{
+		// 	// TODO:
+		// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
+		// 	assert(0);
+		// 	//var->Set(val);
+		// }
+		// return GetObject(obj, path);
 	}
 
-	Object * ImportScopeFile::GetObject(Object *o, std::list<std::string> &path) {
+	std::shared_ptr<Object> ImportScopeFile::GetObject(std::shared_ptr<Object> o, std::list<std::string> &path) {
 		path.pop_front();
 		if(path.empty()) return o;
-		ilang::Variable *var = o->operator[](path.front());
-		Object *obj;
-		if(var->isSet()) {
-			boost::any &a = var->Get()->Get();
-			assert(a.type() == typeid(ilang::Object*));
-			obj = boost::any_cast<ilang::Object*>(a);
-		}else{
-			ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-			assert(0); // TODO:
-			//var->Set(val);
-		}
-		return GetObject(obj, path);
+		// TODO:
+		assert(0);
+		// ilang::Variable *var = o->operator[](path.front());
+		// Object *obj;
+		// if(var->isSet()) {
+		// 	boost::any &a = var->Get()->Get();
+		// 	assert(a.type() == typeid(ilang::Object*));
+		// 	obj = boost::any_cast<ilang::Object*>(a);
+		// }else{
+		// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
+		// 	assert(0); // TODO:
+		// 	//var->Set(val);
+		// }
+		// return GetObject(obj, path);
 
 	}
 
@@ -260,7 +266,7 @@ namespace ilang {
 		string n = name;
 		m_members.insert(pair<std::string, ValuePass>(n, val));
 	}
-	void ImportScopeC::load(Object *obj) {
+	void ImportScopeC::load(std::shared_ptr<Object> obj) {
 		for(auto it : m_members) {
 			//cout << "load: " << it.first << endl;
 			ilang::Variable *v = obj->operator[](it.first);
@@ -271,12 +277,13 @@ namespace ilang {
 
 
 
-	ilang::Object *ImportGetByName(std::string name) {
+	shared_ptr<ilang::Object> ImportGetByName(std::string name) {
 
 		boost::replace_all(name, ".", "\/");
 		fs::path p = GlobalImportScope.locateFile(name);
 		if(p.empty()) return NULL;
-		Object *obj = new Object;
+		//Object *obj = new Object;
+		auto obj = make_shared<Object>();
 		GlobalImportScope.get(obj, p);
 
 		return obj;
@@ -290,7 +297,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
-		return ValuePass(new ilang::Value_Old(f));
+		return valueMaker(f);
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) ) {
 		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
@@ -298,7 +305,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
-		return ValuePass(new ilang::Value_Old(f));
+		return valueMaker(f);
 	}
 	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
 		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
@@ -306,7 +313,7 @@ namespace ilang {
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
- 		return ValuePass(new ilang::Value_Old(f));
+		return valueMaker(f);
 	}
 	C_Class::~C_Class() {
 		//std::cout << "---------------------deleting C_Class\n";
@@ -320,7 +327,8 @@ namespace ilang {
 namespace {
 	using namespace ilang;
 	ValuePass ilang_import_get(Arguments &args) {
-		Object *obj = new Object;
+		auto obj = std::make_shared<Object>();
+		//Object *obj = new Object;
 
 		error(args.size() == 1, "i.Import.check expects 1 argument");
 		error(args[0]->type() == typeid(std::string), "i.Import.check expects a string");
@@ -338,7 +346,7 @@ namespace {
 		fs::path p = GlobalImportScope.locateFile(name);
 		GlobalImportScope.get(obj, p);
 
-		return ValuePass(new ilang::Value_Old(obj));
+		return valueMaker(obj);
 	}
 
 	ValuePass ilang_import_check(Arguments &args) {
@@ -349,7 +357,7 @@ namespace {
 
 		fs::path p = GlobalImportScope.locateFile(name);
 
-		return ValuePass(new ilang::Value_Old(! p.empty()));
+		return valueMaker(! p.empty());
 	}
 
 	ILANG_LIBRARY_NAME("i/Import",

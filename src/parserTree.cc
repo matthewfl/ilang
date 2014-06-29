@@ -88,7 +88,7 @@ namespace ilang {
 		}
 		ValuePass StringConst::GetValue (ScopePass scope) {
 			debug(-6, "string get value" );
-			return ValuePass(new ilang::Value_Old(std::string(string)));
+			return valueMaker(string);
 		}
 
 		void StringConst::Print(Printer *p) {
@@ -104,8 +104,7 @@ namespace ilang {
 
 		IntConst::IntConst(long n) : num(n) {}
 		ValuePass IntConst::GetValue (ScopePass scope) {
-			ValuePass r = ValuePass(new ilang::Value_Old(num));
-			return r;
+			return valueMaker(num);
 		}
 
 		void IntConst::Print(Printer *p) {
@@ -114,8 +113,7 @@ namespace ilang {
 
 		FloatConst::FloatConst(double d) : num(d) {}
 		ValuePass FloatConst::GetValue (ScopePass scope) {
-			ValuePass r = ValuePass(new ilang::Value_Old(num));
-			return r;
+			return valueMaker(num);
 		}
 		void FloatConst::Print(Printer *p) {
 			p->p() << num;
@@ -265,7 +263,7 @@ namespace ilang {
 			// fun.func = this;
 			// fun.ptr =
 
-			return ValuePass(new ilang::Value_Old(fun));
+			return valueMaker(fun);
 		}
 
 		void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
@@ -380,7 +378,8 @@ namespace ilang {
 			ilang::Variable *v = Get(scope);
 			error(v, "Variable " << GetFirstName() << " Not found"); // maybe an assert, not an error?
 			//assert(v);
-			ValuePass p = v->Get();
+			// TODO:
+			ValuePass p;// = v->Get();
 			// TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
 			error(p, "Variable " << GetFirstName() << " Not found");
 			return p;
@@ -466,8 +465,9 @@ namespace ilang {
 			}else{
 				ilang::Variable *v = scope->lookup(identifier);
 				error(v, "Did not find " << GetFirstName());
-				ValuePass ret = v->Get();
-				return ret;
+
+				//ValuePass ret = v->Get();
+				return valueMaker(false); // TODO:
 			}
 		}
 
@@ -846,7 +846,7 @@ namespace ilang {
 			assert(0);
 			ValuePass left = this->left->GetValue(scope);
 			if(Act == Not)
-				return ValuePass(new ilang::Value_Old( ! left->isTrue()));
+				return valueMaker(! left->isTrue() );
 			ValuePass right = this->right->GetValue(scope);
 			// cout << "logic check " << left->Get().type().name() << " " << right->Get().type().name() << endl;
 			// cout << left->str() << " " << right->str() << endl
@@ -855,12 +855,11 @@ namespace ilang {
 			case And:
 				if(left->isTrue())
 					if(right->isTrue())
-						return ValuePass(new ilang::Value_Old(true));
-				return ValuePass(new ilang::Value_Old(false));
+						return valueMaker(true);
+				return valueMaker(false);
 				break;
 			case Or:
-				if(left->isTrue() || right->isTrue()) return ValuePass(new ilang::Value_Old(true));
-				return ValuePass(new ilang::Value_Old(false));
+				return valueMaker(left->isTrue() || right->isTrue());
 			}
 			// case Equal:
 			// 	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string))
@@ -969,7 +968,7 @@ namespace ilang {
 			// 	}
 			// 	break;
 			// }
-			return ValuePass(new ilang::Value_Old(false));
+			return valueMaker(false);
 		}
 
 		void LogicExpression::Print(Printer *p) {
@@ -1158,9 +1157,10 @@ namespace ilang {
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
-			ilang::Object *obj = new ilang::Object(objects, scope);
-			ilang::Value_Old *val = new ilang::Value_Old(obj);
-			return ValuePass(val);
+			auto obj = make_shared<ilang::Object>(objects, scope);
+			return valueMaker(obj);
+			//ilang::Value_Old *val = new ilang::Value_Old(obj);
+			//return ValuePass(val);
 		}
 
 		void Object::Print(Printer *p) {
@@ -1191,9 +1191,11 @@ namespace ilang {
 		}
 		ValuePass Class::GetValue(ScopePass scope) {
 			errorTrace("Creating class");
-			ilang::Class *c = new ilang::Class(parents, objects, scope);
-			ilang::Value_Old *val = new ilang::Value_Old(c);
-			return ValuePass(val);
+			auto cls = make_shared<ilang::Class>(parents, objects, scope);
+			return valueMaker(cls);
+			//ilang::Class *c = new ilang::Class(parents, objects, scope);
+			//ilang::Value_Old *val = new ilang::Value_Old(c);
+			//return ValuePass(val);
 		}
 
 		void Class::Print(Printer *p) {
@@ -1237,9 +1239,11 @@ namespace ilang {
 
 		ValuePass Array::GetValue(ScopePass scope) {
 			errorTrace("Creating Array");
-			ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
-			ilang::Value_Old *val = new ilang::Value_Old(arr);
-			return ValuePass(val);
+			auto arr = make_shared<ilang::Array>(elements, modifiers, scope);
+			return valueMaker(arr);
+			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
+			//ilang::Value_Old *val = new ilang::Value_Old(arr);
+			//return ValuePass(val);
 		}
 
 		void Array::Print(Printer *p) {
@@ -1324,10 +1328,12 @@ namespace ilang {
 			//error(val->Get().type() == typeid(std::string), "import() expects a string");
 			std::string name = val->cast<std::string>(); //boost::any_cast<std::string>(val->Get());
 
-			ilang::Object *obj = ImportGetByName(name);
-			if(obj == NULL) return ValuePass(new ilang::Value_Old(false));
+			auto obj = ImportGetByName(name);
+			if(!obj) return valueMaker(false);
 
-			return ValuePass(new ilang::Value_Old(obj));
+			//if(obj == NULL) return ValuePass(new ilang::Value_Old(false));
+
+			return valueMaker(obj); //ValuePass(new ilang::Value_Old(obj));
 
 		}
 

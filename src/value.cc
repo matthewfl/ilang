@@ -2,17 +2,22 @@
 #include "value_types.h"
 #include "function.h"
 #include "hashable.h"
+#include "object.h"
 
 using namespace ilang;
 
 ValuePass::ValuePass(const ValuePass &x) {
 	//x->type2();
-	x->copyTo(m_data);
+	if(*(long*)x.m_data != 0)
+		x->copyTo(m_data);
+	else
+		*(long*)m_data = 0;
 	//Get()->type2();
 }
 
 ValuePass::~ValuePass() {
-	Get()->~Value_new();
+	if(*(long*)m_data != 0)
+		Get()->~Value_new();
 }
 
 ValuePass ValuePass::operator + (ValuePass v) {
@@ -105,6 +110,14 @@ ValuePass FunctionType::call(ilang::Arguments &args) {
 
 
 HashableType::HashableType(std::shared_ptr<Hashable> h) {
+	m_ptr = new std::shared_ptr<Hashable>(h);
+}
+HashableType::HashableType(std::shared_ptr<Object> o) {
+	auto h = std::dynamic_pointer_cast<Hashable>(o);
+	m_ptr = new std::shared_ptr<Hashable>(h);
+}
+HashableType::HashableType(std::shared_ptr<Array> a) {
+	auto h = std::dynamic_pointer_cast<Hashable>(a);
 	m_ptr = new std::shared_ptr<Hashable>(h);
 }
 HashableType::~HashableType() {

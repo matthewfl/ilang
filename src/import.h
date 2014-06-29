@@ -33,8 +33,8 @@ namespace ilang {
 		ImportScope(ImportScope*, boost::filesystem::path);
 		boost::filesystem::path locateFile(boost::filesystem::path search);
 		void Import (boost::filesystem::path p);
-		virtual void load(Object*) {};
-		void get(Object*, fs::path&);
+		virtual void load(std::shared_ptr<Object>) {};
+		void get(std::shared_ptr<Object>, fs::path&);
 	};
 	extern ImportScope GlobalImportScope;
 
@@ -43,14 +43,14 @@ namespace ilang {
 	private:
 		FileScope *m_Scope;
 		std::list<std::pair<std::list<std::string>, fs::path> > imports;
-		Object * GetObject(Scope*, std::list<std::string>);
-		Object * GetObject(Object*, std::list<std::string>&);
+		std::shared_ptr<Object> GetObject(Scope*, std::list<std::string>);
+		std::shared_ptr<Object> GetObject(std::shared_ptr<Object> , std::list<std::string>&);
 	public:
 		ImportScopeFile(fs::path p);
 		void push(std::list<std::string> *pre, std::list<std::string> *name);
 		void resolve(Scope*);
 
-		void load(Object*);
+		void load(std::shared_ptr<Object>);
 		//void provide(FileScope*);
 	};
 
@@ -63,10 +63,10 @@ namespace ilang {
 		ImportScopeC(char *);
 		explicit ImportScopeC(fs::path p);
 		void Set(char *name, ValuePass val);
-		void load(Object*);
+		void load(std::shared_ptr<Object>);
 	};
 
-	ilang::Object *ImportGetByName(std::string name);
+	shared_ptr<ilang::Object> ImportGetByName(std::string name);
 }
 
 #endif // _ilang_import

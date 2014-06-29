@@ -29,7 +29,7 @@ TEST_CASE("Basic class", "[object][class]") {
 	REQUIRE(v->Get()->Get().type() == typeid(ilang::Class*));
 	ilang::Class *c = boost::any_cast<ilang::Class*>(v->Get()->Get());
 	REQUIRE(c);
-	ilang::Object *o = new ilang::Object(c, v->Get());
+	// ilang::Object *o = new ilang::Object(c, v->Get());
 	// Variable *a = o->operator[] ("a");
 	// REQUIRE(a->Get()->Get().type() == typeid(long));
 	// REQUIRE(boost::any_cast<long>(a->Get()->Get()) == 1);
@@ -50,7 +50,7 @@ TEST_CASE("create class", "[object][class]") {
 	auto v = scope->lookup("gg");
 	REQUIRE(v->Get()->Get().type() == typeid(ilang::Class*));
 	ilang::Class *c = boost::any_cast<ilang::Class*>(v->Get()->Get());
-	ilang::Object *o = new ilang::Object(c, v->Get());
+	// ilang::Object *o = new ilang::Object(c, v->Get());
 	// Variable *a = o->operator[] ("a");
 	// REQUIRE(a->Get()->Get().type() == typeid(long));
 	// REQUIRE(boost::any_cast<long>(a->Get()->Get()) == 1);

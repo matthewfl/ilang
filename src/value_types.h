@@ -31,6 +31,8 @@ namespace ilang {
 	class HashableType : public Value_new {
 	public:
 		HashableType(std::shared_ptr<Hashable>);
+		HashableType(std::shared_ptr<Object>);
+		HashableType(std::shared_ptr<Array>);
 		~HashableType();
 
 		virtual const std::type_info &type();

@@ -11,12 +11,12 @@
 #include "value_types.h"
 
 namespace ilang {
-	using boost::shared_ptr;
+	//using boost::shared_ptr;
 
 	class Modification;
 	class Value_Old;
 	class Variable;
-	typedef boost::shared_ptr<ilang::Value_Old> ValuePass_Old;
+	typedef std::shared_ptr<ilang::Value_Old> ValuePass_Old;
 	//typedef ilang::Value_Old* ValuePass;
 	class Variable_modifier {
 	public:
@@ -27,7 +27,7 @@ namespace ilang {
 		virtual const char* Name() { return "NOT SET"; }
 	};
 
-	extern std::map<std::string, boost::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
+	extern std::map<std::string, std::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
 
 
 	class Variable {
@@ -87,7 +87,7 @@ namespace ilang {
 	namespace { struct _ILANG_VAR_MOD_##name {														\
 			_ILANG_VAR_MOD_##name () {																				\
 				::ilang::ilang_Variable_modifier_list[ #name ] =								\
-					::boost::shared_ptr< ::ilang::Variable_modifier > ( new obj ); \
+					::std::shared_ptr< ::ilang::Variable_modifier > ( new obj ); \
 			}} _ILANG_VAR_MOD_##name##_run;																		\
 	}
 
