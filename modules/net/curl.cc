@@ -34,10 +34,10 @@ namespace {
 		curl_easy_cleanup(curl);
 
 		if(res == CURLE_OK) {
-			return ValuePass(new ilang::Value_Old(ret));
+			return valueMaker(ret);
 		}else{
 			std::cerr << "curl error: " << bufferError << endl;
-			return ValuePass(new ilang::Value_Old(false));
+			return valueMaker(false);
 		}
 	}
 }

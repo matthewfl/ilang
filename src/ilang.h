@@ -106,8 +106,10 @@ namespace ilang {
 		}
 	};
 	template<typename cc> ValuePass Class_Creater() {
-		ilang::Class *c = new Class_Creater_class<cc>();
-		return ValuePass(new ilang::Value_Old(c));
+		auto c = make_shared<Class_Creater_class<cc> >();
+		return valueMaker(dynamic_pointer_cast<Class>(c));
+		//ilang::Class *c = new Class_Creater_class<cc>();
+		//return ValuePass(new ilang::Value_Old(c));
 	}
 }
 

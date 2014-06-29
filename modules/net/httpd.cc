@@ -97,7 +97,7 @@ namespace {
 
 		ValuePass getUrl (Arguments &args) {
 			error(args.size() == 0, "httpd.request.url expects no arguments");
-			return ValuePass(new ilang::Value_Old(url));
+			return valueMaker(url);
 		}
 
 		ValuePass getHeader (Arguments &args) {
@@ -107,7 +107,7 @@ namespace {
 			boost::algorithm::to_lower(s);
 
 			// read data from the header and return it back
-			return ValuePass(new ilang::Value_Old(headers[s]));
+			return valueMaker(headers[s]);
 		}
 
 		ValuePass writeHead(Arguments &args) {
@@ -181,7 +181,7 @@ namespace {
 
 			debug(4, "end of write head\n") ;
 
-			return ValuePass(new ilang::Value_Old);
+			return ValuePass();
 		}
 
 		ValuePass writeReq(Arguments &args) {
@@ -232,7 +232,7 @@ namespace {
 							 });
 
 			debug(4, "end of write req");
-			return ValuePass(new ilang::Value_Old(true));
+			return valueMaker(true);
 		}
 
 		ValuePass endReq(Arguments &args) {
@@ -240,7 +240,7 @@ namespace {
 				ValuePass ii = writeReq(args);
 			}
 			close();
-			return ValuePass(new ilang::Value_Old);
+			return ValuePass();
 		}
 
 		void Init() {
@@ -382,7 +382,8 @@ namespace {
 		Request *req = (Request*) parser->data;
 		debug(4, "got to point where headers are done" );
 		// believe that request is ready at this point
-		ValuePass rr = ValuePass(new ilang::Value_Old(new ilang::Object(req)));
+		auto rr_ = make_shared<ilang::Object>(req);
+		ValuePass rr = valueMaker(rr_);
 		// at this point Request will be deleted when rr is lost
 		vector<ValuePass> params = {rr};
 		//ValuePass ret = ValuePass(new ilang::Value);
@@ -437,7 +438,7 @@ namespace {
 
 	ValuePass Server::isRunning(Scope *scope, Arguments &args) {
 		error(args.size() == 0, "httpd.running does not take any arguments");
-		return ValuePass(new ilang::Value_Old(listening));
+		return valueMaker(listening);
 	}
 
 	ValuePass Server::setListen(Scope *scope, Arguments &args) {
@@ -447,7 +448,7 @@ namespace {
 		_callback = args[0];
 		callback = *args[0]->cast<Function*>();
 
-		return ValuePass(new ilang::Value_Old);
+		return ValuePass();
 	}
 
 	ValuePass Server::startListen(Scope *scope, Arguments &args) {
@@ -467,7 +468,7 @@ namespace {
 											on_connection_cb);
 		uv_run(loop, UV_RUN_DEFAULT);
 		if(r != 0) { cerr << "Problem opening up socket\n"; }
-		return ValuePass(new ilang::Value_Old((bool)r == 0));
+		return valueMaker(bool(r==0));
 
 	}
 	ValuePass Server::stopListen(Scope *scope, Arguments &args) {
@@ -477,7 +478,7 @@ namespace {
 		// fill in
 		// close the socket on loop
 
-		return ValuePass(new ilang::Value_Old);
+		return ValuePass();
 	}
 
 	ValuePass Server::waitEnd(Scope *scope, Arguments &args) {
@@ -525,7 +526,8 @@ namespace {
 		error(args[0]->type() == typeid(long), "httpd.create 1st argument is a port number");
 		error(args[1]->type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
 		Server *ser = new Server(args[1], args[0]->cast<int>());
-		return ValuePass(new ilang::Value_Old(new ilang::Object(ser)));
+		auto obj = make_shared<ilang::Object>(ser);
+		return valueMaker(obj);
 	}
 }
 

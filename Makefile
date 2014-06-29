@@ -198,7 +198,7 @@ build/function.o: src/value_types.h src/hashable.h src/identifier.h src/scope.h
 build/function.o: src/parserTree.h src/import.h src/print.h
 build/value.o: src/value.h src/debug.h src/value_types.h src/hashable.h
 build/value.o: src/identifier.h src/function.h src/variable.h src/scope.h
-build/value.o: src/parserTree.h src/import.h src/print.h
+build/value.o: src/parserTree.h src/import.h src/print.h src/object.h
 build/identifier.o: src/identifier.h
 build/object_new.o: src/object_new.h src/hashable.h src/identifier.h
 build/object_new.o: src/value.h src/debug.h src/variable_new.h src/parserTree.h

@@ -16,7 +16,7 @@ namespace {
 			error(args.size() == 1, "channel.push expects one argument");
 			m_queue.push(args[0]);
 			waiting.Trigger(NULL);
-			return ValuePass(new ilang::Value_Old);
+			return ValuePass();
 		}
 		ValuePass pop(Arguments &args) {
 			error(args.size() == 0, "channel.pop expects zero arguments");
@@ -31,13 +31,13 @@ namespace {
 		ValuePass size(Arguments &args) {
 			error(args.size() == 0, "channel.size expects zero arguments");
 			long size = m_queue.size();
-			return ValuePass(new ilang::Value_Old(size));
+			return valueMaker(size);
 		}
 		ValuePass setLimit(Arguments &args) {
 			error(args.size() == 1, "channel.setLimit expects one argument");
 			error(args[0]->type() == typeid(long), "channel.setLimit expects a number");
 			m_queue.set_capacity(args[0]->cast<long>());
-			return ValuePass(new ilang::Value_Old);
+			return ValuePass();
 		}
 		void Init() {
 			reg("push", &threadChannel::push);
@@ -64,7 +64,8 @@ namespace {
 			channelLength = args[0]->cast<int>();
 		}
 		threadChannel *ch = new threadChannel(channelLength);
-		return ValuePass(new ilang::Value_Old(new ilang::Object(ch)));
+		auto obj = make_shared<ilang::Object>(ch);
+		return valueMaker(obj);
 	}
 
 	ILANG_LIBRARY_NAME("i/channel",
