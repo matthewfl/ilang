@@ -120,6 +120,9 @@ HashableType::HashableType(std::shared_ptr<Array> a) {
 	auto h = std::dynamic_pointer_cast<Hashable>(a);
 	m_ptr = new std::shared_ptr<Hashable>(h);
 }
+HashableType::HashableType(const HashableType &h) {
+	m_ptr = new std::shared_ptr<Hashable>(*(shared_ptr<Hashable>*)h.m_ptr);
+}
 HashableType::~HashableType() {
 	delete (std::shared_ptr<Hashable>*)m_ptr;
 }
@@ -134,11 +137,15 @@ void HashableType::copyTo(void *d) {
 ClassType::ClassType(std::shared_ptr<Class> c) {
 	m_ptr = new std::shared_ptr<Class>(c);
 }
+ClassType::ClassType(const ClassType &c) {
+	m_ptr = new std::shared_ptr<Class>(*(shared_ptr<Class>*)c.m_ptr);
+}
 ClassType::~ClassType() {
 	delete (std::shared_ptr<Class>*)m_ptr;
 }
 const std::type_info& ClassType::type() { return typeid(Class*); }
 void ClassType::copyTo(void *d) {
+	cout << "copy to\\n" << flush;
 	new (d) ClassType(*this);
 }
 std::shared_ptr<Class> ClassType::Cast(cast_chooser<Class*> c) {
