@@ -98,7 +98,7 @@ namespace ilang {
 							char *name = DB_createName();
 							arr_contents.add_array_dat(name);
 							storedData *dat;
-							System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()->Get()));
+							System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()));
 							delete dat;
 						}
 						std::string str_arr_contents;
@@ -119,10 +119,12 @@ namespace ilang {
 							if(it.first == "this") continue;
 							string use_name = obj->DB_name;
 							use_name += it.first;
-							ilang::Variable *v = new Variable(use_name, list<string>({"Db"}));
-							v->Set(it.second->Get());
+							assert(0);
+							// TODO:
+							//ilang::Variable *v = new Variable(use_name, list<string>({"Db"}));
+							//v->Set(it.second->Get());
 							delete it.second;
-							it.second = v;
+							//it.second = v;
 						}
 						//obj->members.clear();
 						//cout << "db name given " << obj->DB_name << endl;
@@ -178,7 +180,7 @@ namespace ilang {
 					char *name = DB_createName();
 					arr_contents.add_array_dat(name);
 					storedData *dat;
-					System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()->Get()));
+					System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()));
 					delete dat;
 				}
 				std::string str_arr_contents;
@@ -564,7 +566,7 @@ namespace ilang {
 			char *name = DB_createName();
 			arr_contents.add_array_dat(name);
 			storedData *dat;
-			System_Database->Set(name, dat =	DB_serializer::createStoredData(members[i]->Get()->Get()));
+			System_Database->Set(name, dat =	DB_serializer::createStoredData(members[i]->Get()));
 			delete dat;
 		}
 		std::string str_arr_contents;

@@ -17,21 +17,21 @@ using namespace std;
 namespace ilang {
 	map<string, std::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
 
-	bool Variable::Check (boost::any &a) {
-		for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
-			assert(*it);
-			if(!(*it)->Check(this, a)) {
-				error(0, "Check on variable \"" << Name << "\" failed for check \"" << (*it)->Name() << "\"");
-				return false;
-			}
-		}
+	bool Variable_Old::Check (boost::any &a) {
+		// for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
+		// 	assert(*it);
+		// 	if(!(*it)->Check(this, a)) {
+		// 		error(0, "Check on variable \"" << Name << "\" failed for check \"" << (*it)->Name() << "\"");
+		// 		return false;
+		// 	}
+		// }
 		return true;
 	}
 	shared_ptr<Variable_modifier> Variable_modifier::new_variable(Variable *self, std::string name) {
 		return shared_ptr<Variable_modifier>();
 	}
 
-	Variable::Variable(string name, list<string> modifiers) {
+	Variable_Old::Variable_Old(string name, list<string> modifiers) {
 		Name = name;
 		//val = ValuePass(NULL);
 		for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
@@ -39,13 +39,13 @@ namespace ilang {
 			if(!m)
 				cerr << "Variable modifier "<<*it<<" not found\n";
 			else {
-				shared_ptr<Variable_modifier> vv = m->new_variable(this, name);
-				Modifiers.push_back(vv ? vv : m);
+				//shared_ptr<Variable_modifier> vv = m->new_variable(this, name);
+				//Modifiers.push_back(vv ? vv : m);
 
 			}
 		}
 	}
-	void Variable::Set(ValuePass_Old v) {
+	void Variable_Old::Set(ValuePass_Old v) {
 		// this most likely will have a lot of calling of constructors and stuff for the shared_ptr
 		assert(Check(v->Get()));
 		val=v;
@@ -54,7 +54,7 @@ namespace ilang {
 			(*it)->Set(this, v->Get());
 		}
 	}
-	ValuePass_Old Variable::Get () {
+	ValuePass_Old Variable_Old::Get () {
 		ValuePass_Old ret = val;
 		if(!ret) ret = ValuePass_Old(new ilang::Value_Old);
 		for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
@@ -64,7 +64,7 @@ namespace ilang {
 		//return val.get();
 	}
 
-	bool Variable::isSet() {
+	bool Variable_Old::isSet() {
 		return val != NULL;
 	}
 
@@ -125,70 +125,70 @@ namespace ilang {
 	}
 
 	std::string Value_Old::str () {
-		stringstream ss;
-		if(val.empty()) {
-			ss << "--STR OF EMPTY VARIABLE--";
-		}else if(typeid(std::string) == val.type()) {
-			//ss << boost::any_cast<std::string>(val);
-			return boost::any_cast<std::string>(val);
-		}else if(typeid(long) == val.type()) {
-			ss << boost::any_cast<long>(val);
-		}else if(typeid(int) == val.type()) {
-			// this should not happen as all ints are currently long
-			ss << boost::any_cast<int>(val);
-		}else if(typeid(double) == val.type()) {
-			ss << boost::any_cast<double>(val);
-		}else if(typeid(bool) == val.type()) {
-			ss << (boost::any_cast<bool>(val) ? "true" : "false") ;
-		}else if(typeid(ilang::Object*) == val.type()) {
-			ilang::Array *arr;
-			if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
-				bool first = true; ss << "[";
-				for(ilang::Variable *vv : arr->members) {
-					if(!first) ss << ", "; first = false;
-					ss << vv->Get()->str();
-				}
-				ss << "]";
-			}else{
-				ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
-			}
-		}else{
-			ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
-		}
-		return ss.str();
+		// stringstream ss;
+		// if(val.empty()) {
+		// 	ss << "--STR OF EMPTY VARIABLE--";
+		// }else if(typeid(std::string) == val.type()) {
+		// 	//ss << boost::any_cast<std::string>(val);
+		// 	return boost::any_cast<std::string>(val);
+		// }else if(typeid(long) == val.type()) {
+		// 	ss << boost::any_cast<long>(val);
+		// }else if(typeid(int) == val.type()) {
+		// 	// this should not happen as all ints are currently long
+		// 	ss << boost::any_cast<int>(val);
+		// }else if(typeid(double) == val.type()) {
+		// 	ss << boost::any_cast<double>(val);
+		// }else if(typeid(bool) == val.type()) {
+		// 	ss << (boost::any_cast<bool>(val) ? "true" : "false") ;
+		// }else if(typeid(ilang::Object*) == val.type()) {
+		// 	ilang::Array *arr;
+		// 	if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
+		// 		bool first = true; ss << "[";
+		// 		for(ilang::Variable *vv : arr->members) {
+		// 			if(!first) ss << ", "; first = false;
+		// 			ss << vv->Get()->str();
+		// 		}
+		// 		ss << "]";
+		// 	}else{
+		// 		ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
+		// 	}
+		// }else{
+		// 	ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
+		// }
+		// return ss.str();
 
 	}
 
 	void Value_Old::toJSON(stringstream &ss) {
-		if(val.empty()) {
-			ss << "null";
-		}else if(typeid(std::string) == val.type()) {
-			//ss << boost::any_cast<std::string>(val);
-			ss << '"' <<	boost::any_cast<std::string>(val) << '"' ;
-		}else if(typeid(long) == val.type()) {
-			ss << boost::any_cast<long>(val);
-		}else if(typeid(int) == val.type()) {
-			// this should not happen as all ints are currently long
-			ss << boost::any_cast<int>(val);
-		}else if(typeid(double) == val.type()) {
-			ss << boost::any_cast<double>(val);
-		}else if(typeid(bool) == val.type()) {
-			ss << boost::any_cast<bool>(val) ? "true" : "false" ;
-		}else if(typeid(ilang::Object*) == val.type()) {
-			ilang::Array *arr;
-			if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
-				bool first = true; ss << "[";
-				for(ilang::Variable *vv : arr->members) {
-					if(!first) ss << ", "; first = false;
-					vv->Get()->toJSON(ss);
-				}
-				ss << "]";
-			}else{
-				ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
-			}
-		}else{
-			ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
-		}
+		// if(val.empty()) {
+		// 	ss << "null";
+		// }else if(typeid(std::string) == val.type()) {
+		// 	//ss << boost::any_cast<std::string>(val);
+		// 	ss << '"' <<	boost::any_cast<std::string>(val) << '"' ;
+		// }else if(typeid(long) == val.type()) {
+		// 	ss << boost::any_cast<long>(val);
+		// }else if(typeid(int) == val.type()) {
+		// 	// this should not happen as all ints are currently long
+		// 	ss << boost::any_cast<int>(val);
+		// }else if(typeid(double) == val.type()) {
+		// 	ss << boost::any_cast<double>(val);
+		// }else if(typeid(bool) == val.type()) {
+		// 	ss << boost::any_cast<bool>(val) ? "true" : "false" ;
+		// }else if(typeid(ilang::Object*) == val.type()) {
+		// 	ilang::Array *arr;
+		// 	if(arr = dynamic_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(val))) {
+		// 		bool first = true; ss << "[";
+		// 		for(ilang::Variable *vv : arr->members) {
+		// 			if(!first) ss << ", "; first = false;
+		// 			vv->Get()->toJSON(ss);
+		// 		}
+		// 		ss << "]";
+		// 	}else{
+		// 		ss << "--- CAN NOT PRINT AN OBJECT RAW ---\n";
+		// 	}
+		// }else{
+		// 	ss << "--STR OF UNKNOWN TYPE: "<< val.type().name() << "--";
+		// }
 	}
 
 	bool Value_Old::isTrue () {

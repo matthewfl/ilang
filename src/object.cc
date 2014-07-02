@@ -21,42 +21,45 @@ namespace ilang {
 			// this will probably need to get changed and stuff, idk
 			// this is going to return what ever type is returned by the GetValue from class
 			assert(a->type() == typeid(Class*));
-			parents.push_back(a->cast<Class*>().get()); // TODO: hold the shared_ptr
+			parents.push_back(a->cast<Class*>());
 		}
 		for(auto it : *obj) {
-			std::string name = it.first->GetFirstName();
+
+			Identifier name(it.first->GetFirstName());
 			if(members.find(name) != members.end()) {
 				debug(0, "Member in class overwritten within self");
 				assert(0);
 			}
-			ilang::Variable *var = new Variable(name, *(it.first->modifiers));
+			auto var = make_shared<Variable>();
+			//ilang::Variable *var = new Variable(toVector(*(it.first->modifiers)));
 			if(it.second) {
 				assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 				// TODO:
 				//var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
 			}
-			members.insert(pair<std::string, ilang::Variable*>(name, var));
+			members.insert(pair<Identifier, shared_ptr<Variable> >(name, var));
 		}
 	}
 	Object* Class::NewClass(ValuePass self) {
-		return new Object(this, self);
+		assert(0);
+		//return new Object(this, self);
 	}
 	Class::~Class () {
-		for(auto it = members.begin(); it!=members.end(); it++) {
-			delete it->second;
-		}
+		//for(auto it = members.begin(); it!=members.end(); it++) {
+		//	delete it->second;
+		//}
 	}
 	ilang::Variable * Class::operator[](std::string name) {
-		ilang::Variable *var;
-		auto search = members.find(name);
-		if(search == members.end()) {
-			for(auto it : parents) {
-				var = it->operator[](name);
-				if(var) return var;
-			}
-		}else{
-			return (search->second);
-		}
+		// ilang::Variable *var;
+		// auto search = members.find(name);
+		// if(search == members.end()) {
+		// 	for(auto it : parents) {
+		// 		var = it->operator[](name);
+		// 		if(var) return var;
+		// 	}
+		// }else{
+		// 	return (search->second);
+		// }
 		return NULL;
 	}
 	ilang::Variable * Class::operator[](ValuePass val) {
@@ -73,31 +76,32 @@ namespace ilang {
 		//assert(base->Get().type() == typeid(Class*));
 		//baseClass = boost::any_cast<Class*>(base->Get());
 
-		std::list<std::string> this_mod = {"Const"};
-		ilang::Variable *this_var = new Variable("this", this_mod);
+		//std::list<std::string> this_mod = {"Const"};
+		//ilang::Variable *this_var = new Variable("this", this_mod);
+
 		// TODO:
 		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
-		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
+		//members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(C_Class *base): C_baseClass(base), baseClass(NULL), DB_name(NULL) {
 		// 'this' is not being set in this case, might only be a problem if something out the classes needs something like c.this == c
 	}
 	Object::Object(): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
 		std::list<std::string> this_mod = {"Const"};
-		ilang::Variable *this_var = new Variable("this", this_mod);
+		//ilang::Variable *this_var = new Variable("this", this_mod);
 		// TODO:
 		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
-		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
+		//members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
 	Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
 		assert(obj);
 		assert(scope);
 
 		std::list<std::string> this_mod = {"Const"};
-		ilang::Variable *this_var = new Variable("this", this_mod);
+		//ilang::Variable *this_var = new Variable("this", this_mod);
 		// TODO:
 		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
-		members.insert(pair<std::string, ilang::Variable*>("this", this_var));
+		//members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 
 		for(auto it : *obj) {
 			//assert(it.first->name);
@@ -106,20 +110,20 @@ namespace ilang {
 				debug(0, "Member in Object over written");
 				assert(0);
 			}
-			ilang::Variable *var = new ilang::Variable(name, *(it.first->modifiers));
+			//ilang::Variable *var = new ilang::Variable(name, *(it.first->modifiers));
 			if(it.second) { // != NULL
 				assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 				// TODO:
 				//var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
 			}
-			members.insert(pair<std::string, ilang::Variable*>(name, var));
+			//members.insert(pair<std::string, ilang::Variable*>(name, var));
 		}
 	}
 
 	Object::~Object () {
-		auto tt = members.find("this");
-		if(tt != members.end())
-			tt->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
+		//auto tt = members.find("this");
+		//if(tt != members.end())
+		//	tt->second->Get()->Get() = NULL; // clear out the 'this' variable to pervent the system from crashing when cleaning itself up
 
 		//cout << "deleting obj\n";
 		for(auto it=members.begin(); it!=members.end(); it++) {
@@ -145,7 +149,7 @@ namespace ilang {
 				//cout << "database name: " << use_name << endl;
 				use_name += name;
 				ilang::Variable *ret;
-				members.insert(pair<std::string, ilang::Variable*>(name, ret = new Variable(use_name, list<string>({"Db"}))));
+				//members.insert(pair<std::string, ilang::Variable*>(name, ret = new Variable(use_name, list<string>({"Db"}))));
 				//ret->Set(ValuePass(new ilang::Value_Old)); // prime it to make it get the Value_old out of the database
 				// for the moment a hack
 				return ret;
@@ -171,8 +175,8 @@ namespace ilang {
 			//debug(0, "Member "<< name << " not found in object");
 			// I guess create a new one and insert it
 			Variable *var;
-			members.insert(pair<std::string, ilang::Variable*>(name, var = new Variable(name, list<string>())));
-			return var;(members.find(name)->second);
+			//members.insert(pair<std::string, ilang::Variable*>(name, var = new Variable(name, list<string>())));
+			return var;
 			//assert(0);
 
 		}
@@ -198,18 +202,18 @@ namespace ilang {
 		Array *self = this;
 		std::list<std::string> internal_mods;
 		assert(!mem_length); // if the value was set before
-		mem_length = new Variable("length", internal_mods);
-		mem_push = new Variable("push", internal_mods);
-		mem_pop = new Variable("pop", internal_mods);
-		mem_insert = new Variable("insert", internal_mods);
-		mem_remove = new Variable("remove", internal_mods);
+		// mem_length = new Variable("length", internal_mods);
+		// mem_push = new Variable("push", internal_mods);
+		// mem_pop = new Variable("pop", internal_mods);
+		// mem_insert = new Variable("insert", internal_mods);
+		// mem_remove = new Variable("remove", internal_mods);
 		ilang::Function push_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.push expects 1 argument");
 			assert(self->modifiers);
-			ilang::Variable *var = new ilang::Variable("", *self->modifiers);
+			//ilang::Variable *var = new ilang::Variable("", *self->modifiers);
 			// TODO:
 			//var->Set(args[0]);
-			self->members.push_back(var);
+			//self->members.push_back(var);
 			self->RefreshDB();
 			*ret = valueMaker(self->members.size());
 			});
@@ -232,11 +236,12 @@ namespace ilang {
 			error(args.size() == 2, "Array.insert expects 2 arguments");
 			error(args[0]->type() == typeid(long), "Array.insert expects first argument to be a integer");
 			long n = args[0]->cast<long>();
-			ilang::Variable *var = new ilang::Variable("", *self->modifiers);
+			assert(0); // TODO:
+			//ilang::Variable *var = new ilang::Variable("", *self->modifiers);
 			//	var->Set(args[1]);
-			auto it = self->members.begin();
-			self->members.insert(it + n, 1, var);
-			self->RefreshDB();
+			//auto it = self->members.begin();
+			//self->members.insert(it + n, 1, var);
+			//self->RefreshDB();
 			*ret = valueMaker(self->members.size()); //ValuePass(new ilang::Value_Old(self->members.size()));
 			});
 		// TODO:
@@ -265,10 +270,10 @@ namespace ilang {
 			assert(v);
 			string name = "-ARRAY-";
 			name += count++;
-			ilang::Variable *var = new Variable(name, *modifiers);
+			//ilang::Variable *var = new Variable(name, *modifiers);
 			// TODO:
 			//var->Set(v->GetValue(scope));
-			members.push_back(var);
+			//members.push_back(var);
 		}
 		Init();
 	}
@@ -278,10 +283,10 @@ namespace ilang {
 		modifiers = new std::list<std::string>;
 		std::list<std::string> mod;
 		for(auto it : val) {
-			ilang::Variable *var = new Variable("", mod);
+			//ilang::Variable *var = new Variable("", mod);
 			// TODO:
 			//var->Set(it);
-			members.push_back(var);
+			//members.push_back(var);
 		}
 		Init();
 	}

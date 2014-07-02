@@ -44,8 +44,8 @@ namespace ilang {
 			scope->Debug();
 			ilang::Variable * find = scope->lookup("main");
 			error(find, "main function not found");
-			auto main = boost::any_cast<ilang::Function>(find->Get()->Get());
-			main(); // call the main function
+			//auto main = boost::any_cast<ilang::Function>(find->Get()->Get());
+			//main(); // call the main function
 
 			//.ptr(passScope, v, &ret);
 			//boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);

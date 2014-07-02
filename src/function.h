@@ -36,7 +36,7 @@ namespace ilang {
 		std::map<std::string, ilang::ValuePass> kwargs;
 
 		template<typename T> void unwrap(T t) {
-			push(ilang::ValuePass(new ilang::Value_Old(t)));
+			push(valueMaker(t));
 		}
 
 		void unwrap(ilang::ValuePass t) {
@@ -69,7 +69,7 @@ namespace ilang {
 
 		Arguments();
 		Arguments(std::vector<ValuePass> pargs);
-		template<typename... types> Arguments(types... values) : Arguments() {
+		template<typename... types> Arguments(types... values) {
 			unwrap(values...);
 		}
 

@@ -10,6 +10,7 @@ namespace ilang {
 	public:
 		virtual ValuePass get(ilang::Identifier)=0;
 		virtual void set(ilang::Identifier, ValuePass)=0;
+	  virtual bool has(ilang::Identifier)=0;
 		virtual ~Hashable(){};
 	};
 }

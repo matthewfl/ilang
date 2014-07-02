@@ -15,19 +15,21 @@ namespace ilang {
 	}
 
 	ilang::Variable * Scope::lookup (string name) {
-		ilang::Variable * f = _lookup(name);
-		if(f) return f;
-		list<string> mod;
-		f = new ilang::Variable(name, mod);
-		vars.insert(pair<string, ilang::Variable*>(name, f));
-		return f;
+		// ilang::Variable * f = _lookup(name);
+		// if(f) return f;
+		// list<string> mod;
+		// f = new ilang::Variable(name, mod);
+		// vars.insert(pair<string, ilang::Variable*>(name, f));
+		// return f;
+		assert(0);
 	}
 
 	ilang::Variable * Scope::forceNew (string name, std::list<std::string> &modifiers) {
-		assert(vars.find(name) == vars.end());
-		ilang::Variable *v = new ilang::Variable(name, modifiers);
-		vars.insert(pair<string, ilang::Variable*>(name, v));
-		return v;
+		// assert(vars.find(name) == vars.end());
+		// ilang::Variable *v = new ilang::Variable(name, modifiers);
+		// vars.insert(pair<string, ilang::Variable*>(name, v));
+		// return v;
+		assert(0);
 	}
 
 	int Scope::Debug() {

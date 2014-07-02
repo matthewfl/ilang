@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string.h>
+#include <sstream>
 
 using namespace ilang;
 using namespace std;
@@ -46,6 +47,22 @@ namespace ilang {
 			m_id = next_identifier;
 		}else{
 			m_id = it->second;
+		}
+	}
+	std::string Identifier::str() {
+		if(m_id < 0x0100000000000000) {
+			stringstream ss;
+			ss << m_id;
+			return ss.str();
+		}
+		if(m_id < 0x0200000000000000) {
+			long i = m_id << 8;
+			return std::string((char*)i);
+		}
+		// this is slow as it gets
+		for(auto it : *get_identifier_map()) {
+			if(it.second == m_id)
+				return it.first;
 		}
 	}
 }

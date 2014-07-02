@@ -13,8 +13,10 @@ namespace ilang {
 	class Object;
 	class Class : public Hashable {
 	private:
-		std::vector<Class*> parents;
-		std::map<std::string, ilang::Variable*> members;
+		std::vector<shared_ptr<Class> > parents;
+		std::map<ilang::Identifier, shared_ptr<Variable> > members;
+		//std::vector<Class*> parents;
+		//std::map<std::string, ilang::Variable*> members;
 	public:
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
 		virtual Object* NewClass(ValuePass self);
@@ -23,8 +25,9 @@ namespace ilang {
 		virtual ~Class();
 
 		// TODO:
-		ValuePass get(ilang::Identifier i) {}
-		void set(ilang::Identifier i, ValuePass v) {}
+		virtual ValuePass get(ilang::Identifier i) {}
+		virtual void set(ilang::Identifier i, ValuePass v) {}
+		virtual bool has(ilang::Identifier i) {}// return (bool)get(i); }
 	};
 	class ObjectScope;
 	//typedef std::string storedData;
@@ -54,6 +57,7 @@ namespace ilang {
 		// TODO:
 		ValuePass get(ilang::Identifier i) {}
 		void set(ilang::Identifier i, ValuePass v) {}
+		bool has(ilang::Identifier i) {}
 	};
 	class Array : public Object {
 		//friend storedData *DB_createStoredData(const boost::any&);

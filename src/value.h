@@ -11,12 +11,15 @@
 #include "debug.h"
 
 #include <iostream>
-using namespace std;
+//using namespace std;
+
+#include "identifier.h"
 
 namespace ilang {
 
 	using std::make_shared;
 	using std::shared_ptr;
+	using std::dynamic_pointer_cast;
 
 	class Value_new;
 	class Function;
@@ -162,12 +165,14 @@ namespace ilang {
 		// hashable/array mixin
 	public:
 		virtual ValuePass get(ValuePass key) RAISE_ERROR;
+		virtual ValuePass get(Identifier key) RAISE_ERROR;
 		virtual void set(ValuePass key, ValuePass value) RAISE_ERROR;
+		virtual void set(Identifier key, ValuePass value) RAISE_ERROR;
 
 		// helpers
 	public:
 		bool isTrue() { return cast<bool>(); }
-		void Print() { cout << cast<std::string>(); }
+		void Print() { std::cout << cast<std::string>(); }
 
 	};
 
@@ -177,7 +182,7 @@ namespace ilang {
 	virtual float Cast(cast_chooser<float> c) { return self; }					\
 	virtual double Cast(cast_chooser<double> c) { return self; }				\
 	virtual bool Cast(cast_chooser<bool> c) { return self != 0; }				\
-	virtual std::string Cast(cast_chooser<std::string> c) { stringstream ss; ss << self; return ss.str(); }
+	virtual std::string Cast(cast_chooser<std::string> c) { std::stringstream ss; ss << self; return ss.str(); }
 
 #define VALUE_MATH_CLS_MIXIN(self)																			\
 	virtual ValuePass operator + (ValuePass v) { return v->preform_math_op(OP_add, self); } \

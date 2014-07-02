@@ -5,6 +5,7 @@
 #include "object.h"
 
 using namespace ilang;
+using namespace std;
 
 ValuePass::ValuePass(const ValuePass &x) {
 	//x->type2();
@@ -51,7 +52,7 @@ ValuePass ValuePass::operator / (ValuePass v) {
 	ValuePass cls::preform_math_op(math_ops op, std::string v) {			\
 	  switch(op) {																												\
 		case OP_add: {																											\
-		  stringstream ss;																									\
+		  std::stringstream ss;																							\
 			ss << v;																													\
 			ss << self;																												\
 			return valueMaker(ss.str());																			\
@@ -145,7 +146,6 @@ ClassType::~ClassType() {
 }
 const std::type_info& ClassType::type() { return typeid(Class*); }
 void ClassType::copyTo(void *d) {
-	cout << "copy to\\n" << flush;
 	new (d) ClassType(*this);
 }
 std::shared_ptr<Class> ClassType::Cast(cast_chooser<Class*> c) {

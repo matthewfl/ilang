@@ -16,7 +16,7 @@ namespace ilang {
 	class Class_new : public Hashable {
 	private:
 		std::vector<ValuePass> m_parents;
-		std::map<ilang::Identifier, ilang::Variable_new> m_members;
+		std::map<ilang::Identifier, ilang::Variable> m_members;
 
 		// std::map<ilang::Identifier, ilang::ValuePass> m_members;
 		// std::map<ilang::Identifier, std::vector<ilang::ValuePass> > m_modifiers;

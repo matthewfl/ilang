@@ -4,15 +4,21 @@
 #include "value.h"
 #include <vector>
 
+#include "helpers.h"
+
 namespace ilang {
-	class Variable_new {
+	class Variable {
 	private:
+
+		//std::vector<ilang::Function> m_modifiers_set;
+		//std::vector<ilang::Function> m_modifiers_get;
 		std::vector<ilang::ValuePass> m_modifiers;
 		ilang::ValuePass m_value;
 	public:
-		Variable_new(std::vector<ilang::ValuePass> mod) : m_modifiers(mod) {}
-		void set(ilang::ValuePass);
-		ilang::ValuePass &get() { return m_value; }
+		Variable(std::vector<ilang::ValuePass> mod) : m_modifiers(mod) {}
+		Variable() {}
+		void Set(ilang::ValuePass);
+		ilang::ValuePass &Get() { return m_value; }
 	};
 }
 

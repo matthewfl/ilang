@@ -36,6 +36,7 @@ namespace ilang {
 
 		int Debug();
 	};
+
 	class ImportScopeFile;
 	namespace parserNode {
 		class Head;
@@ -49,7 +50,7 @@ namespace ilang {
 		virtual ilang::Variable * _lookup (std::string &name);
 	public:
 		FileScope(parserNode::Head *h): Scope(ScopePass()), head(h) {}
-		inline parserNode::Head *getHead() { return head; }
+		//inline parserNode::Head *getHead() { return head; }
 	};
 
 	template <typename ReturnHook> class FunctionScope : public Scope {
