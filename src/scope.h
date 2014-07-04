@@ -12,27 +12,27 @@
 namespace ilang {
 	//using boost::shared_ptr;
 
-	class Scope;
-	typedef boost::shared_ptr<ilang::Scope> ScopePass;
+	class Scope_Old;
+	typedef boost::shared_ptr<ilang::Scope_Old> ScopePass_Old;
 	//typedef Scope* ScopePass;
 
 	class FileScope;
 	class Modification;
 	template <typename ReturnHook> class FunctionScope;
-	class Scope : boost::noncopyable {
+	class Scope_Old : boost::noncopyable {
 		friend class Modification;
 	protected:
 		template <typename ReturnHook> friend class FunctionScope;
 		std::map<std::string, ilang::Variable*> vars;
-		ScopePass parent;
+		ScopePass_Old parent;
 		virtual ilang::Variable * _lookup (std::string &name);
 	public:
 		ilang::Variable * lookup (std::string name);
 		ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
 		ilang::FileScope * fileScope ();
 		virtual void ParentReturn(ValuePass *val) { assert(parent); parent->ParentReturn(val); }
-		Scope(ScopePass parent);
-		virtual ~Scope();
+		Scope_Old(ScopePass_Old parent);
+		virtual ~Scope_Old();
 
 		int Debug();
 	};
@@ -41,7 +41,7 @@ namespace ilang {
 	namespace parserNode {
 		class Head;
 	}
-	class FileScope : public Scope {
+	class FileScope : public Scope_Old {
 	private:
 		friend class ImportScopeFile;
 		friend class Modification;
@@ -49,18 +49,18 @@ namespace ilang {
 	protected:
 		virtual ilang::Variable * _lookup (std::string &name);
 	public:
-		FileScope(parserNode::Head *h): Scope(ScopePass()), head(h) {}
+		FileScope(parserNode::Head *h): Scope_Old(ScopePass_Old()), head(h) {}
 		//inline parserNode::Head *getHead() { return head; }
 	};
 
-	template <typename ReturnHook> class FunctionScope : public Scope {
+	template <typename ReturnHook> class FunctionScope : public Scope_Old {
 		friend class Modification;
 	public:
-		FunctionScope(ScopePass s, ScopePass other, ReturnHook h) : Scope(s), hook(h), objs(other) {}
+		FunctionScope(ScopePass_Old s, ScopePass_Old other, ReturnHook h) : Scope_Old(s), hook(h), objs(other) {}
 		void ParentReturn(ValuePass *r) { hook(r); }
 	private:
 		ReturnHook hook;
-		ScopePass objs;
+		ScopePass_Old objs;
 	protected:
 		virtual ilang::Variable * _lookup(std::string &name) { // the joy of template programming
 			auto it = vars.find(name);
@@ -82,7 +82,7 @@ namespace ilang {
 			};*/
 
 	class Object;
-	class ObjectScope : public Scope {
+	class ObjectScope : public Scope_Old {
 		friend class Modification;
 	private:
 		ValuePass hold;

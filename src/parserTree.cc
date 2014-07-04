@@ -20,18 +20,19 @@ namespace ilang {
 		Head::Head(list<Node*> *declars, ImportScopeFile *import): Import(import), Declars(declars) {
 			debug(-5, "head " << declars->size() );
 			debug(-5, "running ++++++++++++++++++++++++++++++++++++++++++++" );
-			scope=NULL;
+			//	scope=NULL;
 		}
 		void Head::Link () {
 			if(scope) return;
 			scope = new FileScope(this);
-			passScope = ScopePass(scope);
-			if(Import) // when used with eval, there is no import handler
-				Import->resolve(scope);
+			//passScope = ScopePass(scope);
+			Context ctx;
+			//if(Import) // when used with eval, there is no import handler
+			//	Import->resolve(scope);
 
 			for(list<Node*>::iterator it = Declars->begin(); it !=	Declars->end(); it++) {
 				debug(-6, "calling run" )
-					(*it)->Run(passScope);
+					(*it)->Run(ctx);
 				//scope->Debug();
 			}
 
@@ -59,7 +60,8 @@ namespace ilang {
 		}
 
 		Scope *Head::GetScope() {
-			return scope;
+			assert(0);
+			//return scope;
 		}
 
 		//static unsigned long _ilang_node_id;
@@ -74,7 +76,7 @@ namespace ilang {
 		// }
 
 		// this does not need to have anything
-		void Constant::Run(ScopePass scope) {}
+		void Constant::Run(Context &ctx) {}
 
 		StringConst::StringConst(char *str) :string(str){
 			delete[] str;
@@ -86,7 +88,7 @@ namespace ilang {
 			replace_all(string, "\\'", "'");
 
 		}
-		ValuePass StringConst::GetValue (ScopePass scope) {
+		ValuePass StringConst::GetValue (Context &ctx) {
 			debug(-6, "string get value" );
 			return valueMaker(string);
 		}
@@ -103,7 +105,7 @@ namespace ilang {
 		}
 
 		IntConst::IntConst(long n) : num(n) {}
-		ValuePass IntConst::GetValue (ScopePass scope) {
+		ValuePass IntConst::GetValue (Context &ctx) {
 			return valueMaker(num);
 		}
 
@@ -112,7 +114,7 @@ namespace ilang {
 		}
 
 		FloatConst::FloatConst(double d) : num(d) {}
-		ValuePass FloatConst::GetValue (ScopePass scope) {
+		ValuePass FloatConst::GetValue (Context &ctx) {
 			return valueMaker(num);
 		}
 		void FloatConst::Print(Printer *p) {
@@ -125,13 +127,13 @@ namespace ilang {
 			//assert(t);
 			test=t;
 		}
-		void IfStmt::Run(ScopePass scope) {
-			ValuePass search = test->GetValue(scope);
+		void IfStmt::Run(Context &ctx) {
+			ValuePass search = test->GetValue(ctx);
 			assert(search);
 			if(search->isTrue()) {
-				if(True) True->Run(scope);
+				if(True) True->Run(ctx);
 			}else{
-				if(False) False->Run(scope);
+				if(False) False->Run(ctx);
 			}
 		}
 
@@ -157,13 +159,13 @@ namespace ilang {
 			//assert(t);
 			test = t;
 		}
-		void ForStmt::Run(ScopePass scope) {
-			pre->Run(scope);
-			ValuePass t = test->GetValue(scope);
+		void ForStmt::Run(Context &ctx) {
+			pre->Run(ctx);
+			ValuePass t = test->GetValue(ctx);
 			while(t->isTrue()) {
-				exe->Run(scope);
-				each->Run(scope);
-				ValuePass n = test->GetValue(scope);
+				exe->Run(ctx);
+				each->Run(ctx);
+				ValuePass n = test->GetValue(ctx);
 				t = n;
 			}
 		}
@@ -187,12 +189,12 @@ namespace ilang {
 			//assert(t);
 			test=t;
 		}
-		void WhileStmt::Run(ScopePass scope) {
+		void WhileStmt::Run(Context &ctx) {
 			// note to self: must recall GetValue each time as it is what is actually doing the updating
-			ValuePass t = test->GetValue(scope);
+			ValuePass t = test->GetValue(ctx);
 			while(t->isTrue()) {
-				exe->Run(scope);
-				ValuePass n = test->GetValue(scope);
+				exe->Run(ctx);
+				ValuePass n = test->GetValue(ctx);
 				t = n;
 				//test->GetValue(scope)->Print();
 			}
@@ -215,10 +217,11 @@ namespace ilang {
 			}else
 				ret = NULL;
 		}
-		void ReturnStmt::Run(ScopePass scope) {
-			ValuePass v;
-			if(ret) v = ret->GetValue(scope);
-			scope->ParentReturn(&v); // this should avoid copying any smart pointers and run much faster
+		void ReturnStmt::Run(Context &ctx) {
+			if(ret)
+				ctx.returned = new ValuePass(ret->GetValue(ctx));
+			else
+				ctx.returned = (ilang::ValuePass*)1; // eh...haxs
 		}
 
 		void ReturnStmt::Print(Printer *p) {
@@ -234,13 +237,15 @@ namespace ilang {
 		Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
 			debug(-5, "\t\t\tfunction constructed" );
 		}
-		void Function::Run(ScopePass scope) {
-			ScopePass local_scope(new Scope(scope));
-			// TODO: what happens to the arguments when it is used as a block instead of called
+		void Function::Run(Context &ctx) {
+			// This is going to have duplicated code with calling function, minus dealing with the arguments
+			Scope local_scope(ctx);
+			//ScopePass local_scope(new Scope(scope));
 			if(body) {
 				for (Node *n : *body) {
 					// TODO: returning block break statement
-					n->Run(local_scope);
+					n->Run(ctx);
+					if(ctx.returned) break;
 				}
 			}
 
@@ -248,7 +253,7 @@ namespace ilang {
 			//vector<ValuePass> p;
 			//Call(scope, ScopePass(), p);
 		}
-		ValuePass Function::GetValue(ScopePass this_scope) {
+		ValuePass Function::GetValue(Context &ctx) {
 			// this need to track the scope at this point so that it could be use later in the funciton
 			debug(-6, "Function get value");
 			errorTrace("Getting value of a function");
@@ -257,16 +262,20 @@ namespace ilang {
 			// 	self->Call(ScopePass(this_scope), scope, args, ret);
 			// };
 
-			ilang::Function fun(this, this_scope);//, fptr);
+			assert(0);
+			//ilang::Function fun(this);
+			//return valueMaker(fun.bind(ctx.scope));
+
+			//ilang::Function fun(this, ctx);//, fptr);
 
 			// ilang::Function fun;
 			// fun.func = this;
 			// fun.ptr =
 
-			return valueMaker(fun);
+			//return valueMaker(fun);
 		}
 
-		void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
+		//	void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
 			// bool returned=false;
 			// errorTrace("Function called");
 			// // could clean this up to use boost::function and then would not have to template the whole class
@@ -288,7 +297,7 @@ namespace ilang {
 			// 		it++;
 			// 	}
 			// }
-			assert(0);
+		//	assert(0);
 			/*
 
 			std::list<std::string> arguments_mod;
@@ -307,7 +316,7 @@ namespace ilang {
 
 			// scope deleted
 			//delete scope; // not going to be needed when smart pointer
-		}
+		//}
 
 		void Function::Print(Printer *p) {
 			if(!body && !params) {
@@ -345,44 +354,53 @@ namespace ilang {
 			if(!modifiers) modifiers = new list<string>;
 			//cout << "\t\t\t" << name << "\n";
 		}
-		void Variable::Run (ScopePass scope) {
+		void Variable::Run (Context &ctx) {
 			// iirc this does not happen as the syntax does not allow for variables to be created without a default value
 			error(0, "Variables must always have some value set to them");
-			debug(-6,"\t\t\tSetting variable: " << name->front());
-			scope->forceNew(GetFirstName(), *modifiers);
+			//debug(-6,"\t\t\tSetting variable: " << name->front());
+			//scope->forceNew(GetFirstName(), *modifiers);
 		}
-		void Variable::Set (ScopePass scope, ValuePass var, bool force) {
+		void Variable::Set (Context &ctx, ValuePass var, bool force) {
 			errorTrace("Setting value of variable: " << GetFirstName());
-			scope->Debug();
-			ilang::Variable *v;
 			if(force || !modifiers->empty()) {
-				v = scope->forceNew(GetFirstName(), *modifiers);
+				assert(dynamic_cast<Scope*>(ctx.scope));
+				assert(0); // TODO:
+				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
-				//v = scope->lookup(name->front());
-				v = Get(scope);
+				ctx.scope->set(Identifier(GetFirstName()), var);
 			}
-			assert(v);
-			// TODO: setting of variables
-			//v->Set(var);
-			debug(-6,"Set: " << GetFirstName() << " " << var << " " << v->Get());
-			scope->Debug();
+			// scope->Debug();
+			// ilang::Variable *v;
+			// if(force || !modifiers->empty()) {
+			// 	v = scope->forceNew(GetFirstName(), *modifiers);
+			// } else {
+			// 	//v = scope->lookup(name->front());
+			// 	v = Get(scope);
+			// }
+			// assert(v);
+			// // TODO: setting of variables
+			// //v->Set(var);
+			// debug(-6,"Set: " << GetFirstName() << " " << var << " " << v->Get());
+			// scope->Debug();
 		}
-		ilang::Variable * Variable::Get(ScopePass scope) {
+		ilang::Variable * Variable::Get(Context &ctx) {
 			// this should not happen
 			assert(0);
 			return NULL;
 		}
 
-		ValuePass Variable::GetValue(ScopePass scope) {
-			errorTrace("Getting value of variable: "<<GetFirstName());
-			ilang::Variable *v = Get(scope);
-			error(v, "Variable " << GetFirstName() << " Not found"); // maybe an assert, not an error?
-			//assert(v);
-			// TODO:
-			ValuePass p;// = v->Get();
-			// TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
-			error(p, "Variable " << GetFirstName() << " Not found");
-			return p;
+		ValuePass Variable::GetValue(Context &ctx) {
+			return ctx.scope->get(Identifier(GetFirstName()));
+
+			// errorTrace("Getting value of variable: "<<GetFirstName());
+			// ilang::Variable *v = Get(scope);
+			// error(v, "Variable " << GetFirstName() << " Not found"); // maybe an assert, not an error?
+			// //assert(v);
+			// // TODO:
+			// ValuePass p;// = v->Get();
+			// // TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
+			// error(p, "Variable " << GetFirstName() << " Not found");
+			// return p;
 		}
 		std::string Variable::GetFirstName() {
 			return name->front();
@@ -409,7 +427,7 @@ namespace ilang {
 				Obj = dynamic_cast<Value*>(obj);
 			}
 		}
-		ilang::Variable * FieldAccess::Get(ScopePass scope) {
+		ilang::Variable * FieldAccess::Get(Context &ctx) {
 			// bug in this b/c of function pointer
 			assert(0);
 			// errorTrace("FieldAccess on " << GetFirstName());
@@ -437,11 +455,11 @@ namespace ilang {
 			// return v;
 		}
 
-		ValuePass FieldAccess::GetValue(ScopePass scope) {
+		ValuePass FieldAccess::GetValue(Context &ctx) {
 			errorTrace("FieldAccess on " << GetFirstName());
 			if(Obj) {
 				_errors.stream() << "\n\tLooking up FieldAccess where there is an object";
-				ValuePass obj_val = Obj->GetValue(scope);
+				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
 				ValuePass ret = obj_val->get(valueMaker(identifier));
 				// TODO: functions binding???
@@ -463,22 +481,23 @@ namespace ilang {
 				// }
 			//return ret;
 			}else{
-				ilang::Variable *v = scope->lookup(identifier);
-				error(v, "Did not find " << GetFirstName());
+				return ctx.scope->get(Identifier(identifier));
+				// ilang::Variable *v = scope->lookup(identifier);
+				// error(v, "Did not find " << GetFirstName());
 
-				//ValuePass ret = v->Get();
-				return valueMaker(false); // TODO:
+				// //ValuePass ret = v->Get();
+				// return valueMaker(false); // TODO:
 			}
 		}
 
-		void FieldAccess::Set(ScopePass scope, ValuePass val, bool force) {
+		void FieldAccess::Set(Context &ctx, ValuePass val, bool force) {
 			errorTrace("Setting value of variable : " << GetFirstName());
 			if (Obj) {
-				ValuePass obj_val = Obj->GetValue(scope);
+				ValuePass obj_val = Obj->GetValue(ctx);
 				ValuePass key = valueMaker(identifier);
 				obj_val->set(key, val);
 			}else{
-				// TODO: set the value when it is not on a object
+				ctx.scope->set(Identifier(identifier), val);
 			}
 
 			// ilang::Variable *v;
@@ -523,7 +542,8 @@ namespace ilang {
 			Lookup = dynamic_cast<Value*>(look);
 		}
 
-		ilang::Variable * ArrayAccess::Get(ScopePass scope) {
+		ilang::Variable * ArrayAccess::Get(Context &ctx) {
+			// TODO: ??
 			assert(0);
 			// errorTrace("Getting element using []: "<<GetFirstName());
 			// ValuePass obj_val = Obj->GetValue(scope);
@@ -540,11 +560,11 @@ namespace ilang {
 			// return var;
 		}
 
-		ValuePass ArrayAccess::GetValue(ScopePass scope) {
+		ValuePass ArrayAccess::GetValue(Context &ctx) {
 			errorTrace("Getting element using []: "<<GetFirstName());
 
-			ValuePass obj_val = Obj->GetValue(scope);
-			ValuePass key = Lookup->GetValue(scope);
+			ValuePass obj_val = Obj->GetValue(ctx);
+			ValuePass key = Lookup->GetValue(ctx);
 			ValuePass ret = obj_val->get(key);
 			return ret;
 
@@ -563,11 +583,11 @@ namespace ilang {
 			// return ret;
 		}
 
-		void ArrayAccess::Set(ScopePass scope, ValuePass var, bool force) {
+		void ArrayAccess::Set(Context &ctx, ValuePass var, bool force) {
 			assert(!force);
 			errorTrace("Setting element using []: " << GetFirstName());
-			ValuePass obj_val = Obj->GetValue(scope);
-			ValuePass key = Lookup->GetValue(scope);
+			ValuePass obj_val = Obj->GetValue(ctx);
+			ValuePass key = Lookup->GetValue(ctx);
 			obj_val->set(key, var);
 			// boost::any & a = obj_val->Get();
 			// error(a.type() == typeid(ilang::Object*), "Not of an object or array type");
@@ -592,15 +612,15 @@ namespace ilang {
 			calling(call), params(args) {
 			debug(-5,"\t\t\tCalling function");
 		}
-		void Call::Run(ScopePass scope) {
+		void Call::Run(Context &ctx) {
 			debug(-6,"call run");
-			GetValue(scope);
+			GetValue(ctx);
 		}
-		ValuePass Call::GetValue (ScopePass scope) {
+		ValuePass Call::GetValue (Context &ctx) {
 			errorTrace("Calling function");
 			// new stuff
 
-			ValuePass func = calling->GetValue(scope);
+			ValuePass func = calling->GetValue(ctx);
 			// boost::any &an = func->Get();
 			// error(an.type() == typeid(ilang::Function),
 			// 			"Calling a non function " << an.type().name());
@@ -611,7 +631,7 @@ namespace ilang {
 				// so nasty
 				// TODO: support for kwargs
 				assert(dynamic_cast<parserNode::Value*>(n));
-				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(scope));
+				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(ctx));
 			}
 
 			ValuePass ret = func->call(args);
@@ -661,12 +681,13 @@ namespace ilang {
 
 		PrintCall::PrintCall(list<Node*> *args):
 			Call(NULL, args) {}
-		ValuePass PrintCall::GetValue (ScopePass scope) {
+
+		ValuePass PrintCall::GetValue (Context &ctx) {
 			errorTrace("Print call");
 			debug(-6,"made into the print Call");
 			for(Node *it : *params) {
 				assert(dynamic_cast<parserNode::Value*>(it));
-				dynamic_cast<parserNode::Value*>((it))->GetValue(scope)->Print();
+				dynamic_cast<parserNode::Value*>((it))->GetValue(ctx)->Print();
 			}
 			debug(-5,"made it out of print");
 		}
@@ -687,17 +708,17 @@ namespace ilang {
 			assert(eval);
 			assert(target);
 		}
-		void AssignExpr::Run (ScopePass scope) {
+		void AssignExpr::Run (Context &ctx) {
 			errorTrace("Assignment expression");
-			ValuePass v = eval->GetValue(scope);
+			ValuePass v = eval->GetValue(ctx);
 
-			target->Set(scope, v);
-			scope->Debug();
+			target->Set(ctx, v);
+			//	scope->Debug();
 		}
-		ValuePass AssignExpr::GetValue (ScopePass scope) {
+		ValuePass AssignExpr::GetValue (Context &ctx) {
 			errorTrace("Assignment expression with gettin value");
-			ValuePass v = eval->GetValue(scope);
-			target->Set(scope, v);
+			ValuePass v = eval->GetValue(ctx);
+			target->Set(ctx, v);
 			return v;
 		}
 
@@ -711,13 +732,13 @@ namespace ilang {
 			assert(left);
 			if(a != uMinus) assert(right);
 		}
-		void MathEquation::Run(ScopePass scope) {
+		void MathEquation::Run(Context &ctx) {
 			errorTrace("Running math equation w/o getting value");
-			left->Run(scope);
-			if(Act != uMinus) right->Run(scope);
+			left->Run(ctx);
+			if(Act != uMinus) right->Run(ctx);
 			// we do not need the value so we should not request the vale from the nodes
 		}
-		ValuePass MathEquation::GetValue(ScopePass scope) {
+		ValuePass MathEquation::GetValue(Context &ctx) {
 			/*			errorTrace("Math equation");
 			ValuePass left = this->left->GetValue(scope);
 			ValuePass right;
@@ -822,32 +843,32 @@ namespace ilang {
 			assert(left);
 			if(a != Not) assert(right) ;
 		}
-		void LogicExpression::Run (ScopePass scope) {
+		void LogicExpression::Run (Context &ctx) {
 			errorTrace("Logic Expression w/o getting value");
 			switch(Act) {
 			case And:
-				if(left->GetValue(scope)->isTrue())
-					right->Run(scope);
+				if(left->GetValue(ctx)->isTrue())
+					right->Run(ctx);
 				break;
 			case Or:
-				if(!left->GetValue(scope)->isTrue())
-					right->Run(scope);
+				if(!left->GetValue(ctx)->isTrue())
+					right->Run(ctx);
 				break;
 			case Not:
-				left->Run(scope);
+				left->Run(ctx);
 				// no right
 			default:
-				left->Run(scope);
-				right->Run(scope);
+				left->Run(ctx);
+				right->Run(ctx);
 			}
 		}
-		ValuePass LogicExpression::GetValue(ScopePass scope) {
+		ValuePass LogicExpression::GetValue(Context &ctx) {
 			errorTrace("Logic Expression");
 			assert(0);
-			ValuePass left = this->left->GetValue(scope);
+			ValuePass left = this->left->GetValue(ctx);
 			if(Act == Not)
 				return valueMaker(! left->isTrue() );
-			ValuePass right = this->right->GetValue(scope);
+			ValuePass right = this->right->GetValue(ctx);
 			// cout << "logic check " << left->Get().type().name() << " " << right->Get().type().name() << endl;
 			// cout << left->str() << " " << right->str() << endl
 			//		 << (left->Get().type() == typeid(bool)) << " " << (right->Get().type() == typeid(long)) << endl;
@@ -1012,15 +1033,15 @@ namespace ilang {
 			assert(value);
 		}
 
-		void SingleExpression::Run(ScopePass scope) {
-			ValuePass v = GetValue(scope);
+		void SingleExpression::Run(Context &ctx) {
+			ValuePass v = GetValue(ctx);
 		}
 
-		ValuePass SingleExpression::GetValue(ScopePass scope) {
+		ValuePass SingleExpression::GetValue(Context &ctx) {
 			errorTrace("Single Expression");
 			assert(0);
-			ValuePass val = m_value->GetValue(scope);
-			ValuePass setTo = m_target->GetValue(scope);
+			ValuePass val = m_value->GetValue(ctx);
+			ValuePass setTo = m_target->GetValue(ctx);
 			ValuePass ret;
 			// if(setTo->Get().type() == typeid(std::string)) {
 			// 	error(Act == add, "Can only add to a string");
@@ -1146,18 +1167,19 @@ namespace ilang {
 		{
 			// object created later so we are just going to store the informationa atm
 		}
-		void Object::Run(ScopePass scope) {
+		void Object::Run(Context &ctx) {
 			// could possibly go through all the elements and call run
+			// should this assert that the types on the return match??
 			for(auto it : *objects) {
-				it.second->Run(scope);
+				it.second->Run(ctx);
 			}
 		}
-		ValuePass Object::GetValue(ScopePass scope) {
+		ValuePass Object::GetValue(Context &ctx) {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
-			auto obj = make_shared<ilang::Object>(objects, scope);
+			auto obj = make_shared<ilang::Object>(objects, ctx);
 			return valueMaker(obj);
 			//ilang::Value_Old *val = new ilang::Value_Old(obj);
 			//return ValuePass(val);
@@ -1184,14 +1206,14 @@ namespace ilang {
 			assert(p);
 			assert(obj);
 		}
-		void Class::Run(ScopePass scope) {
+		void Class::Run(Context &ctx) {
 			for(auto it : *objects) {
-				it.second->Run(scope);
+				it.second->Run(ctx);
 			}
 		}
-		ValuePass Class::GetValue(ScopePass scope) {
+		ValuePass Class::GetValue(Context &ctx) {
 			errorTrace("Creating class");
-			auto cls = make_shared<ilang::Class>(parents, objects, scope);
+			auto cls = make_shared<ilang::Class>(parents, objects, ctx);
 			return valueMaker(cls);
 			//ilang::Class *c = new ilang::Class(parents, objects, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(c);
@@ -1230,16 +1252,16 @@ namespace ilang {
 			if(!modifiers) modifiers = new std::list<string>;
 		}
 
-		void Array::Run(ScopePass scope) {
+		void Array::Run(Context &ctx) {
 			errorTrace("Creating Array w/o getting value");
 			for(auto it=elements->begin(); it!= elements->end(); it++) {
-				(*it)->Run(scope);
+				(*it)->Run(ctx);
 			}
 		}
 
-		ValuePass Array::GetValue(ScopePass scope) {
+		ValuePass Array::GetValue(Context &ctx) {
 			errorTrace("Creating Array");
-			auto arr = make_shared<ilang::Array>(elements, modifiers, scope);
+			auto arr = make_shared<ilang::Array>(elements, modifiers, ctx);
 			return valueMaker(arr);
 			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(arr);
@@ -1273,7 +1295,7 @@ namespace ilang {
 			error(args->size() == 1, "New only takes one argument");
 			error(dynamic_cast<Value_Old*>(args->front()), "First argument to New needs to be a Value_old");
 		}
-		ValuePass NewCall::GetValue(ScopePass scope) {
+		ValuePass NewCall::GetValue(Context &ctx) {
 			errorTrace("New Call");
 			assert(0); // TODO:
 			// ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
@@ -1296,10 +1318,11 @@ namespace ilang {
 				error(dynamic_cast<Value*>(it), "Arguments to assert need to have some Value");
 			}
 		}
-		ValuePass AssertCall::GetValue(ScopePass scope) {
+		ValuePass AssertCall::GetValue(Context &ctx) {
 			for(auto it : *params) {
-				ValuePass val = dynamic_cast<Value*>(it)->GetValue(scope);
+				ValuePass val = dynamic_cast<Value*>(it)->GetValue(ctx);
 				if(!val->isTrue()) {
+					// used for unit testing
 					if(ilang_Assert_fails) {
 						ilang_Assert_fails++;
 						return ValuePass();
@@ -1323,8 +1346,8 @@ namespace ilang {
 			error(dynamic_cast<Value_Old*>(args->front()), "import() expects a Value_old");
 		}
 
-		ValuePass ImportCall::GetValue(ScopePass scope) {
-			ValuePass val = dynamic_cast<Value*>(params->front())->GetValue(scope);
+		ValuePass ImportCall::GetValue(Context &ctx) {
+			ValuePass val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
 			//error(val->Get().type() == typeid(std::string), "import() expects a string");
 			std::string name = val->cast<std::string>(); //boost::any_cast<std::string>(val->Get());
 
@@ -1353,24 +1376,25 @@ namespace ilang {
 			}
 		}
 
-		ValuePass ThreadGoCall::GetValue(ScopePass scope) {
+		ValuePass ThreadGoCall::GetValue(Context &ctx) {
 			// TODO: rewrite, this is shit
-			ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(scope);
+			ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
 			error(calling_val->type() == typeid(ilang::Function), "go expects argument to be a function");
+			// TODO: should allocate this function along with the arguments
 			ilang::Function calling = *calling_val->cast<ilang::Function*>();
 			//ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
-			std::vector<ValuePass> *arguments = new std::vector<ValuePass>;
+			ilang::Arguments *arguments = new ilang::Arguments;
 			auto it = params->begin();
 			it++;
 			while(it != params->end()) {
-				arguments->push_back(dynamic_cast<Value*>(*it)->GetValue(scope));
+				arguments->push(dynamic_cast<Value*>(*it)->GetValue(ctx));
 				it++;
 			}
 			assert(ilang::global_EventPool());
 			Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
-					ilang::Arguments args (*arguments);
 
-					const_cast<ilang::Function*>(&calling)->call(ScopePass(), args);
+					Context ctx;
+					const_cast<ilang::Function*>(&calling)->call(ctx, *arguments);
 
 					delete arguments;
 

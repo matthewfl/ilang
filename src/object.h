@@ -18,7 +18,7 @@ namespace ilang {
 		//std::vector<Class*> parents;
 		//std::map<std::string, ilang::Variable*> members;
 	public:
-		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
+		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context&);
 		virtual Object* NewClass(ValuePass self);
 		ilang::Variable * operator[](std::string name);
 		ilang::Variable * operator[](ValuePass);
@@ -50,7 +50,7 @@ namespace ilang {
 		Object(C_Class *base);
 		Object();
 		virtual ~Object();
-		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, ScopePass);
+		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, Context&);
 		virtual ilang::Variable * operator [] (std::string name);
 		virtual ilang::Variable * operator [] (ValuePass);
 
@@ -75,7 +75,7 @@ namespace ilang {
 		void RefreshDB();
 		char *DB_name;
 	public:
-		Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, ScopePass);
+		Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, Context&);
 		Array(std::vector<ValuePass> &);
 		Array();
 		ilang::Variable * operator[] (std::string name);

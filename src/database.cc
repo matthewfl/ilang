@@ -98,7 +98,8 @@ namespace ilang {
 							char *name = DB_createName();
 							arr_contents.add_array_dat(name);
 							storedData *dat;
-							System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()));
+							assert(0);
+							//System_Database->Set(name, dat = createStoredData(arr->members[i]->Get());
 							delete dat;
 						}
 						std::string str_arr_contents;

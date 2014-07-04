@@ -19,7 +19,7 @@ void Arguments::set(std::string key, ilang::ValuePass value) {
 	kwargs.insert(std::pair<std::string, ValuePass>(key, value));
 }
 
-void Arguments::populate(ScopePass scope, Function *func) {
+void Arguments::populate(Context &ctx, Function *func) {
 	// TODO:
 	if(func->func && func->func->params) {
 		// there is some function with arguments that can be used to determine what to set values to
@@ -27,7 +27,7 @@ void Arguments::populate(ScopePass scope, Function *func) {
 		for(ValuePass v : pargs) {
 			if(it == func->func->params->end()) break;
 			// this needs better abstraction, as we shouldn't have this parserNode stuff here
-			dynamic_cast<parserNode::Variable*>(*it)->Set(scope, v, true);
+			dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, v, true);
 			it++;
 		}
 	}
@@ -48,37 +48,48 @@ size_t Arguments::size() {
 
 
 
-ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
-	bool returned = false;
-	ValuePass _ret;
-	auto returnHandle = [&returned, &_ret] (ValuePass *ret) {
-		returned = true;
-		_ret = *ret;
-	};
+ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
+	//bool returned = false;
+	//ValuePass _ret;
+	// auto returnHandle = [&returned, &_ret] (ValuePass *ret) {
+	// 	returned = true;
+	// 	_ret = *ret;
+	// };
 
-	ScopePass obj_scope = ScopePass();
-	if(object_scope)
-		obj_scope = ScopePass(new ObjectScope(object_scope->cast<Object*>().get()));
+	// ScopePass obj_scope = ScopePass();
+	// if(object_scope)
+	// 	obj_scope = ScopePass(new ObjectScope(object_scope->cast<Object*>().get()));
 
-
-
-	ValuePass ret;
+	//ValuePass ret;
 	//FunctionScope<decltype(returnHandle)> scope(_scope_made, _scope_self, returnHandle);
 	// TODO: make this be on the stack instead of using new here
-	auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, obj_scope, returnHandle);
-	ScopePass scopep(fscope);
-	args.populate(scopep, this);
+	//auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, obj_scope, returnHandle);
+	//ScopePass scopep(fscope);
+	//args.populate(scopep, this);
+
+	//	Context ctx;
+
+	Scope scope(ctx);
+	args.populate(ctx, this);
+
+	ValuePass ret;
 
 	if(native) {
-		ptr(scopep, args, &ret);
+		ptr(ctx, args, &ret);
 	}else{
 		if(func->body) {
 			for(auto n : *func->body) {
-				if(returned) break;
+				if(ctx.returned) break;
 				assert(n);
-				n->Run(scopep);
+				n->Run(ctx);
 			}
 		}
+		// this seems bad....
+		// thinking tha tusing excpetions to break out might
+		// be a good?? idea
+		ret = *ctx.returned;
+		delete ctx.returned;
+		ctx.returned = NULL;
 		//ptr(scopep, args.pargs, &ret);
 	}
 	return ret;
@@ -86,22 +97,27 @@ ValuePass Function::call(ScopePass scope, ilang::Arguments & args) {
 
 Function Function::bind(ilang::ValuePass object) {
 	// TODO: make this bind to a value
+	assert(0);
 	return *this;
+}
+
+Function Function::bind(Context &ctx) {
+
 }
 
 Function::Function(const Function &func) {
 	native = func.native;
 	ptr = func.ptr;
-	contained_scope = func.contained_scope;
+	//contained_scope = func.contained_scope;
 	object_scope = func.object_scope;
 	this->func = func.func;
 }
 
-Function::Function(parserNode::Function *f, ScopePass scope) { //, Function_ptr _ptr) {
+Function::Function(parserNode::Function *f, Context &ctx) { //, Function_ptr _ptr) {
 	func = f;
 	ptr = NULL;
 	//ptr = _ptr;
-	contained_scope = scope;
+	//contained_scope = scope;
 	native = false;
 }
 

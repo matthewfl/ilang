@@ -7,7 +7,7 @@ namespace ilang {
 
 	struct Context {
 		ValuePass *returned = NULL;
-		Hashable *scope;
+		Hashable *scope = NULL;
 	};
 
 }

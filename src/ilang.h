@@ -40,8 +40,8 @@ namespace ilang {
 	// used to create wrapper for C++ classes
 	// other helpers for wrappers in import.cc
 	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) );
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) );
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) );
+	//ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) );
+	ValuePass Function_Creater( ValuePass (*fun)(Context&, Arguments&) );
 
 	class C_Class {
 	private:
@@ -53,7 +53,7 @@ namespace ilang {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
+			ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
 					*ret = (self ->* fun)(args);
 					assert(*ret);
 				});
@@ -63,12 +63,12 @@ namespace ilang {
 			//var->Set(valueMaker(f));
 			//	m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, ilang::Arguments &args) ) {
+		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Context &ctx, ilang::Arguments &args) ) {
 			assert(m_members.find(name) == m_members.end());
 			cla *self = (cla*)this;
 			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
-					*ret = (self ->* fun)(scope.get(), args);
+			ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+					*ret = (self ->* fun)(ctx, args);
 					assert(*ret);
 				});
 			std::list<std::string> mod = {"Const"};
@@ -77,20 +77,20 @@ namespace ilang {
 			//var->Set(valueMaker(f));
 			//m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
 		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, ilang::Arguments &args) ) {
-			assert(m_members.find(name) == m_members.end());
-			cla *self = (cla*)this;
-			//assert(self);
-			ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
-					*ret = (self ->* fun)(scope, args);
-					assert(*ret);
-				});
-			std::list<std::string> mod = {"Const"};
-			//ilang::Variable *var = new ilang::Variable(name, mod);
-			assert(0); // TODO:
-			//var->Set(valueMaker(f));
-			//m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
-		}
+		// template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, ilang::Arguments &args) ) {
+		// 	assert(m_members.find(name) == m_members.end());
+		// 	cla *self = (cla*)this;
+		// 	//assert(self);
+		// 	ilang::Function f([fun, self](ScopePass scope, ilang::Arguments &args, ValuePass *ret) {
+		// 			*ret = (self ->* fun)(scope, args);
+		// 			assert(*ret);
+		// 		});
+		// 	std::list<std::string> mod = {"Const"};
+		// 	//ilang::Variable *var = new ilang::Variable(name, mod);
+		// 	assert(0); // TODO:
+		// 	//var->Set(valueMaker(f));
+		// 	//m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
+		// }
 		ilang::Variable* operator[](std::string name) {
 			auto it = m_members.find(name);
 			if(it != m_members.end()) return it->second;
@@ -98,9 +98,13 @@ namespace ilang {
 		}
 	};
 
+	static Context _void_context;
+
 	template<typename cc> class Class_Creater_class : public Class {
 	public:
-		Class_Creater_class () : Class(NULL, NULL, ScopePass()) {}
+		// this should not end up using the context in this state
+		// need ot create a new constructure for this
+		Class_Creater_class () : Class(NULL, NULL, _void_context) {}
 		Object * NewClass (ValuePass self) {
 			return new Object(new cc);
 		}

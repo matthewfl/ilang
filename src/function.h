@@ -8,6 +8,8 @@
 //#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
+#include "context.h"
+
 #include "variable.h"
 #include "scope.h"
 #include "parserTree.h"
@@ -27,7 +29,8 @@ namespace ilang {
 		class Function;
 	}
 
-	typedef boost::function3<void, ScopePass, ilang::Arguments&, ValuePass*> Function_ptr;
+	// TODO: change this to use std
+	typedef boost::function3<void, Context&, ilang::Arguments&, ValuePass*> Function_ptr;
 
 	// TODO: use the new type system to make this easy to work with
 	class Arguments {
@@ -47,7 +50,7 @@ namespace ilang {
 			unwrap(t);
 			unwrap(values...);
 		}
-		void populate(ScopePass, Function*);
+		void populate(Context &ctx, Function*);
 
 		friend class Function;
 	public:
@@ -84,22 +87,26 @@ namespace ilang {
 	private:
 		bool native = false;
 		Function_ptr ptr;
-		ScopePass contained_scope = ScopePass();
 		ValuePass object_scope = ValuePass();
 		ilang::parserNode::Function *func = NULL;
 		friend class Arguments;
 	public:
 		template <typename... types> ilang::ValuePass operator() (types... values) {
 			Arguments args(values...);
-			return call(ScopePass(), args);
+			Context ctx;
+			return call(ctx, args);
 		}
-		ilang::ValuePass operator() (ilang::Arguments &args) { return call(ScopePass(), args); }
-		ilang::ValuePass call(ScopePass, ilang::Arguments&);
+		ilang::ValuePass operator() (ilang::Arguments &args) {
+			Context ctx;
+			return call(ctx, args);
+		}
+		ilang::ValuePass call(Context&, ilang::Arguments&);
+
 		Function bind(ilang::ValuePass); // bind to an object
-		Function capture(ScopePass);
+		Function bind(Context &ctx);
 
 		Function(const Function&);
-		Function(ilang::parserNode::Function *f, ScopePass scope); //, Function_ptr _ptr);
+		Function(ilang::parserNode::Function *f, Context &ctx); //, Function_ptr _ptr);
 		Function(Function_ptr _ptr);
 		Function();
 	};

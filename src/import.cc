@@ -205,14 +205,15 @@ namespace ilang {
 	}
 
 	void ImportScopeFile::resolve(Scope *scope) {
-		assert(dynamic_cast<FileScope*>(scope));
-		m_Scope = dynamic_cast<FileScope*>(scope);
-		//std::list<std::string> tt = { "what_", "inthe", "world" };
-		//load(GetObject(scope, tt));
-		for(auto it : imports) {
-			auto obj = GetObject(scope, it.first);
-			get(obj, it.second);
-		}
+		assert(0);
+		// assert(dynamic_cast<FileScope*>(scope));
+		// m_Scope = dynamic_cast<FileScope*>(scope);
+		// //std::list<std::string> tt = { "what_", "inthe", "world" };
+		// //load(GetObject(scope, tt));
+		// for(auto it : imports) {
+		// 	auto obj = GetObject(scope, it.first);
+		// 	get(obj, it.second);
+		// }
 	}
 
 	std::shared_ptr<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
@@ -292,29 +293,29 @@ namespace ilang {
 
 namespace ilang {
 	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) ) {
-		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
+		auto fptr = [fun](Context &ctx, Arguments& args, ValuePass *ret) {
 			*ret = (*fun)(args);
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
 		return valueMaker(f);
 	}
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) ) {
-		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
-			*ret = (*fun)(scope.get(), args);
+	ValuePass Function_Creater( ValuePass (*fun)(Context&, Arguments&) ) {
+		auto fptr = [fun](Context &ctx, Arguments& args, ValuePass *ret) {
+			*ret = (*fun)(ctx, args);
 			assert(*ret);
 		};
 		ilang::Function f(fptr);
 		return valueMaker(f);
 	}
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
-		auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
-			*ret = (*fun)(scope, args);
-			assert(*ret);
-		};
-		ilang::Function f(fptr);
-		return valueMaker(f);
-	}
+	// ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
+	// 	auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
+	// 		*ret = (*fun)(scope, args);
+	// 		assert(*ret);
+	// 	};
+	// 	ilang::Function f(fptr);
+	// 	return valueMaker(f);
+	// }
 	C_Class::~C_Class() {
 		//std::cout << "---------------------deleting C_Class\n";
 		for(auto it : m_members) {

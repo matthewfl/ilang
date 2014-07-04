@@ -99,7 +99,7 @@ TEST_CASE("string type", "[value]") {
 
 TEST_CASE("function type", "[value]") {
 	bool called = false;
-	ilang::Function f([&called](ScopePass scope, Arguments &args, ValuePass *ret) {
+	ilang::Function f([&called](Context &ctx, Arguments &args, ValuePass *ret) {
 			called = true;
 		});
 	auto v = valueMaker(f);

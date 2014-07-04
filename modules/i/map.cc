@@ -47,7 +47,7 @@ namespace {
 			returnMapper->m_obj = (ilang::Object*)0x2;
 			// ilang::Function emitFunct;
 			// emitFunct.native = true;
-			ilang::Function emit_fun([returnMapper](ScopePass scope, Arguments &args, ValuePass *ret) {
+			ilang::Function emit_fun([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});
@@ -118,7 +118,7 @@ namespace {
 			// }
 
 			Mapper *returnMapper = new Mapper();
-			ilang::Function emitFunct([returnMapper](ScopePass scope, Arguments &args, ValuePass *ret) {
+			ilang::Function emitFunct([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
 				});

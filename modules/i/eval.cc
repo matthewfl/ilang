@@ -13,6 +13,7 @@
 
 namespace {
 	using namespace ilang;
+	using namespace std;
 
 	boost::mutex Eval_mutex;
 	ValuePass Eval_FunctionPass;

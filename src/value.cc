@@ -104,9 +104,9 @@ void FunctionType::copyTo(void *d) {
 	new (d) FunctionType(*this);
 }
 ValuePass FunctionType::call(ilang::Arguments &args) {
-	// TODO:
-	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ScopePass(), args);
-	return valueMaker(1);
+	Context ctx;
+	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ctx, args);
+	return gg;
 }
 
 

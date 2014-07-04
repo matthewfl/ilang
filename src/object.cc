@@ -9,15 +9,14 @@
 using namespace std;
 
 namespace ilang {
-	Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope) {
-		if(!p && !obj && !scope) return;
+	Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx) {
+		if(!p && !obj) return;
 		assert(p);
 		assert(obj);
-		assert(scope);
 
 		for(auto it : *p) {
 			assert(dynamic_cast<ilang::parserNode::Value*>(it));
-			auto a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(scope); //->Get();
+			auto a = dynamic_cast<ilang::parserNode::Value*>(it)->GetValue(ctx); //->Get();
 			// this will probably need to get changed and stuff, idk
 			// this is going to return what ever type is returned by the GetValue from class
 			assert(a->type() == typeid(Class*));
@@ -93,9 +92,8 @@ namespace ilang {
 		//this_var->Set(ValuePass(new ilang::Value_Old(this)));
 		//members.insert(pair<std::string, ilang::Variable*>("this", this_var));
 	}
-	Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
+	Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx): baseClass(NULL), C_baseClass(NULL), DB_name(NULL) {
 		assert(obj);
-		assert(scope);
 
 		std::list<std::string> this_mod = {"Const"};
 		//ilang::Variable *this_var = new Variable("this", this_mod);
@@ -207,7 +205,7 @@ namespace ilang {
 		// mem_pop = new Variable("pop", internal_mods);
 		// mem_insert = new Variable("insert", internal_mods);
 		// mem_remove = new Variable("remove", internal_mods);
-		ilang::Function push_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
+		ilang::Function push_fun([self](Context &ctx, Arguments &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.push expects 1 argument");
 			assert(self->modifiers);
 			//ilang::Variable *var = new ilang::Variable("", *self->modifiers);
@@ -220,7 +218,7 @@ namespace ilang {
 		// TODO:
 		//mem_push->Set(ValuePass(new ilang::Value_Old(push_fun)));
 
-		ilang::Function pop_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
+		ilang::Function pop_fun([self](Context &ctx, Arguments &args, ValuePass *ret) {
 			error(args.size() == 0, "Array.pop does not take any arguments");
 			ilang::Variable *var = self->members.back();
 			// TODO:
@@ -232,7 +230,7 @@ namespace ilang {
 		// TODO:
 		//mem_pop->Set(ValuePass(new ilang::Value_Old(pop_fun)));
 
-		ilang::Function insert_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
+		ilang::Function insert_fun([self](Context &ctx, Arguments &args, ValuePass *ret) {
 			error(args.size() == 2, "Array.insert expects 2 arguments");
 			error(args[0]->type() == typeid(long), "Array.insert expects first argument to be a integer");
 			long n = args[0]->cast<long>();
@@ -247,7 +245,7 @@ namespace ilang {
 		// TODO:
 		//mem_insert->Set(ValuePass(new ilang::Value_Old(insert_fun)));
 
-		ilang::Function remove_fun([self](ScopePass scope, Arguments &args, ValuePass *ret) {
+		ilang::Function remove_fun([self](Context &ctx, Arguments &args, ValuePass *ret) {
 			error(args.size() == 1, "Array.remove expects 1 argument");
 			error(args[0]->type() == typeid(long), "Array.remove expect argument to be integer");
 			long n = args[0]->cast<long>();
@@ -262,7 +260,7 @@ namespace ilang {
 		DB_name = NULL;
 	}
 
-	Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, ScopePass scope) :modifiers(mod), mem_length(NULL) {
+	Array::Array (std::list<ilang::parserNode::Node*> *elements, std::list<std::string> *mod, Context &ctx) :modifiers(mod), mem_length(NULL) {
 		members.reserve(elements->size());
 		unsigned int count=0;
 		for(auto it=elements->begin(); it!= elements->end(); it++) {
@@ -349,7 +347,8 @@ namespace ilang {
 	ScopeObject::ScopeObject (Scope *_scope, bool isolate) : scope(_scope), Isolate(isolate) {}
 	ilang::Variable * ScopeObject::operator [] (std::string name) {
 		//
-		return scope->lookup(name);
+		assert(0);
+		//return scope->lookup(name);
 	}
 	ilang::Variable * ScopeObject::operator[] (ValuePass val) {
 		assert(val->type() == typeid(std::string));

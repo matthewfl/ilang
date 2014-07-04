@@ -64,11 +64,11 @@ namespace {
 		static int header_value_cb(http_parser *parser, const char *dat, size_t length);
 
 
-		ValuePass isRunning(Scope *scope, Arguments &args);
-		ValuePass setListen(Scope *scope, Arguments &args);
-		ValuePass startListen(Scope *scope, Arguments &args);
-		ValuePass stopListen(Scope *scope, Arguments &args);
-		ValuePass waitEnd(Scope *scope, Arguments &args);
+		ValuePass isRunning(Arguments &args);
+		ValuePass setListen(Arguments &args);
+		ValuePass startListen(Arguments &args);
+		ValuePass stopListen(Arguments &args);
+		ValuePass waitEnd(Arguments &args);
 		void Init();
 
 	public:
@@ -436,12 +436,12 @@ namespace {
 
 		}*/
 
-	ValuePass Server::isRunning(Scope *scope, Arguments &args) {
+	ValuePass Server::isRunning(Arguments &args) {
 		error(args.size() == 0, "httpd.running does not take any arguments");
 		return valueMaker(listening);
 	}
 
-	ValuePass Server::setListen(Scope *scope, Arguments &args) {
+	ValuePass Server::setListen(Arguments &args) {
 		error(args.size() == 1, "http.setListen takes 1 argument");
 		error(args[0]->type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
 
@@ -451,7 +451,7 @@ namespace {
 		return ValuePass();
 	}
 
-	ValuePass Server::startListen(Scope *scope, Arguments &args) {
+	ValuePass Server::startListen(Arguments &args) {
 		error(args.size() <= 1, "httpd.start takes one argument");
 		error(listening == false, "httpd already listening");
 
@@ -471,7 +471,7 @@ namespace {
 		return valueMaker(bool(r==0));
 
 	}
-	ValuePass Server::stopListen(Scope *scope, Arguments &args) {
+	ValuePass Server::stopListen(Arguments &args) {
 		error(args.size()== 0, "httpd.stop takes no arguments");
 		error(listening == true, "httpd not listening");
 
@@ -481,7 +481,7 @@ namespace {
 		return ValuePass();
 	}
 
-	ValuePass Server::waitEnd(Scope *scope, Arguments &args) {
+	ValuePass Server::waitEnd(Arguments &args) {
 		assert(0);
 	}
 
