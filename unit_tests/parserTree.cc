@@ -16,21 +16,14 @@ TEST_CASE( "Run empty function", "[parserTree]" ) {
 																 new parserNode::Function(NULL, NULL)
 																 ));
 
-	auto head = new Head(&nodes, NULL);//&scope);
+	auto head = new Head(&nodes, NULL);
 	head->Link();
 
 	head->Run();
-	/*
-		ilang::Event rootEvent = ilang::global_eventPool()->CreateEvent([&head](void *data) {
-	    head.Run();
-		});
-		rootEvent.Trigger(NULL);
-		ilang::global_eventPool()->Run();
-	*/
+
 	reset();
 }
 
-/*  TODO: re enable
 TEST_CASE("Basic assert fail", "[parserTree]") {
 	auto head = PARSE_TREE(
 												 main = {
@@ -43,7 +36,6 @@ TEST_CASE("Basic assert fail", "[parserTree]") {
 	REQUIRE(asserted == 1);
 	reset();
 }
-*/
 
 TEST_CASE("Basic assert passed", "[parserTree]") {
 	auto head = PARSE_TREE(

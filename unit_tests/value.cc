@@ -109,6 +109,23 @@ TEST_CASE("function type", "[value]") {
 	REQUIRE(called);
 }
 
+TEST_CASE("logic ops", "[value]") {
+	auto v = valueMaker(1);
+	auto w = valueMaker(2);
+
+	bool result = v == w;
+	REQUIRE(!result);
+
+	auto x = valueMaker(1.0);
+	REQUIRE(x == v);
+
+	REQUIRE(v < w);
+	REQUIRE(v <= w);
+	REQUIRE(w > v);
+	REQUIRE(w >= v);
+	REQUIRE(w == w);
+}
+
 
 TEST_CASE("hashable type", "[value]") {
 	//	auto v = valueMaker(

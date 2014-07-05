@@ -63,6 +63,13 @@ namespace ilang {
 		ValuePass operator * (ValuePass v); // { return *Get() * v; }
 		ValuePass operator / (ValuePass v); // { return *Get() / v; }
 
+		bool operator == (ValuePass v);
+		bool operator != (ValuePass v) { return !operator==(v); }
+		bool operator <= (ValuePass v);
+		bool operator >= (ValuePass v) { return !operator<(v); }
+		bool operator < (ValuePass v);
+		bool operator > (ValuePass v) { return !operator<=(v); }
+
 		operator bool () { return *(long*)m_data != 0; }
 
 		ValuePass call(ilang::Arguments &a); // { return Get()->call(a); }
@@ -84,6 +91,12 @@ namespace ilang {
 		OP_devide
 	};
 
+	enum logic_ops {
+		OP_lessthan,
+		OP_lessequal,
+		OP_equal
+	};
+
 
 	// class callable_virtals_mixin {
 	// public:
@@ -92,12 +105,12 @@ namespace ilang {
 	// };
 
 
-	class hashable_virtuals_mixin {
-	public:
-		virtual ValuePass get(ilang::Identifier &i) RAISE_ERROR;
-		virtual void set(ilang::Identifier &i, ValuePass &v) RAISE_ERROR;
+	// class hashable_virtuals_mixin {
+	// public:
+	// 	virtual ValuePass get(ilang::Identifier &i) RAISE_ERROR;
+	// 	virtual void set(ilang::Identifier &i, ValuePass &v) RAISE_ERROR;
 
-	};
+	// };
 
 	template <typename T> class cast_chooser {
 		friend class Value_new;
@@ -156,7 +169,21 @@ namespace ilang {
 		virtual ValuePass preform_math_op(math_ops op, long v) RAISE_ERROR;
 		virtual ValuePass preform_math_op(math_ops op, double v) RAISE_ERROR;
 		virtual ValuePass preform_math_op(math_ops op, std::string v) RAISE_ERROR;
-		//virtual ValuePass preform_math_op(math_ops op, bool v) RAISE_ERROR;
+
+		// logic mixins
+	public:
+		virtual bool operator == (ValuePass v) RAISE_ERROR;
+		virtual bool operator <  (ValuePass v) RAISE_ERROR;
+		virtual bool operator <= (ValuePass v) RAISE_ERROR;
+		bool operator != (ValuePass v) { return !operator==(v); }
+		bool operator > (ValuePass v) { return !operator<=(v); }
+		bool operator >= (ValuePass v) { return !operator<(v); }
+
+		virtual bool preform_logic_op(logic_ops op, long v) RAISE_ERROR;
+		virtual bool preform_logic_op(logic_ops op, double v) RAISE_ERROR;
+		virtual bool preform_logic_op(logic_ops op, std::string) RAISE_ERROR;
+		virtual bool preform_logic_op(logic_ops op, bool v) RAISE_ERROR;
+
 
 		// callable mixins
 	public:
@@ -189,9 +216,18 @@ namespace ilang {
 	virtual ValuePass operator - (ValuePass v) { return v->preform_math_op(OP_substract, self); } \
 	virtual ValuePass operator * (ValuePass v) { return v->preform_math_op(OP_multiply, self); } \
 	virtual ValuePass operator / (ValuePass v) { return v->preform_math_op(OP_devide, self); } \
-	virtual ValuePass preform_math_op(math_ops op, long v);						\
-	virtual ValuePass preform_math_op(math_ops op, double v);					\
+	virtual ValuePass preform_math_op(math_ops op, long v);								\
+	virtual ValuePass preform_math_op(math_ops op, double v);							\
 	virtual ValuePass preform_math_op(math_ops op, std::string v);
+
+#define VALUE_LOGIC_CLS_MIXIN(self)																			\
+	virtual bool operator < (ValuePass v) { return v->preform_logic_op(OP_lessthan, self); } \
+	virtual bool operator <= (ValuePass v) { return v->preform_logic_op(OP_lessequal, self); } \
+	virtual bool operator == (ValuePass v) { return v->preform_logic_op(OP_equal, self); } \
+	virtual bool preform_logic_op(logic_ops op, long v);									\
+	virtual bool preform_logic_op(logic_ops op, double v);								\
+	virtual bool preform_logic_op(logic_ops op, std::string v);						\
+	virtual bool preform_logic_op(logic_ops op, bool v);
 
 	class IntType : public Value_new {
 	public:
@@ -203,6 +239,7 @@ namespace ilang {
 
 	public:
 		VALUE_MATH_CLS_MIXIN(m_int);
+		VALUE_LOGIC_CLS_MIXIN(m_int);
 	};
 
 	class FloatType : public Value_new {
@@ -214,6 +251,7 @@ namespace ilang {
 		VALUE_CAST_CLS_MIXIN(m_float);
 	public:
 		VALUE_MATH_CLS_MIXIN(m_float);
+		VALUE_LOGIC_CLS_MIXIN(m_float);
 	};
 
 	class BoolType : public Value_new {
@@ -222,6 +260,8 @@ namespace ilang {
 		const std::type_info &type() { return typeid(bool); }
 	protected:
 		VALUE_CAST_CLS_MIXIN(m_bool);
+	public:
+		VALUE_LOGIC_CLS_MIXIN(m_bool);
 	};
 
 	class StringType : public Value_new {
@@ -244,6 +284,7 @@ namespace ilang {
 		}
 	public:
 		VALUE_MATH_CLS_MIXIN(GetSelf());
+		VALUE_LOGIC_CLS_MIXIN(GetSelf());
 	};
 
 

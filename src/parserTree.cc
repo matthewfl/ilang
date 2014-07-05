@@ -64,8 +64,7 @@ namespace ilang {
 		}
 
 		Scope *Head::GetScope() {
-			assert(0);
-			//return scope;
+			return scope;
 		}
 
 		//static unsigned long _ilang_node_id;
@@ -859,10 +858,14 @@ namespace ilang {
 		}
 		ValuePass LogicExpression::GetValue(Context &ctx) {
 			errorTrace("Logic Expression");
-			assert(0);
 			ValuePass left = this->left->GetValue(ctx);
 			if(Act == Not)
 				return valueMaker(! left->isTrue() );
+			// short cut the execuition
+			if(Act == And && !left->isTrue())
+				return valueMaker(false);
+			if(Act == Or && left->isTrue())
+				return valueMaker(true);
 			ValuePass right = this->right->GetValue(ctx);
 			// cout << "logic check " << left->Get().type().name() << " " << right->Get().type().name() << endl;
 			// cout << left->str() << " " << right->str() << endl
@@ -876,7 +879,20 @@ namespace ilang {
 				break;
 			case Or:
 				return valueMaker(left->isTrue() || right->isTrue());
+			case Equal:
+				return valueMaker(left == right);
+			case Not_Equal:
+				return valueMaker(left != right);
+			case Less_Equal:
+				return valueMaker(left <= right);
+			case Greater_Equal:
+				return valueMaker(left >= right);
+			case Greater:
+				return valueMaker(left > right);
+			case Less:
+				return valueMaker(left < right);
 			}
+
 			// case Equal:
 			// 	if(left->Get().type() == typeid(std::string) && right->Get().type() == typeid(std::string))
 			// 		return ValuePass(new ilang::Value_Old(boost::any_cast<std::string>(left->Get()) == boost::any_cast<std::string>(right->Get())));
@@ -1034,10 +1050,33 @@ namespace ilang {
 
 		ValuePass SingleExpression::GetValue(Context &ctx) {
 			errorTrace("Single Expression");
-			assert(0);
+			// TODO: have some way to tell apart a += 1 and a = a + 1
 			ValuePass val = m_value->GetValue(ctx);
 			ValuePass setTo = m_target->GetValue(ctx);
 			ValuePass ret;
+			if(setTo->type() == typeid(std::string)) {
+				error(Act == add, "Can only add to a string");
+			}
+			switch(Act) {
+			case add:
+				ret = setTo + val;
+				break;
+			case subtract:
+				ret = setTo - val;
+				break;
+			case multiply:
+				ret = setTo * val;
+				break;
+			case divide:
+				ret = setTo / val;
+				break;
+			}
+
+			cout << "before" << m_target->GetValue(ctx)->cast<long>() << endl;
+			m_target->Set(ctx, ret);
+			cout << "after" << m_target->GetValue(ctx)->cast<long>() << endl;
+			return ret;
+
 			// if(setTo->Get().type() == typeid(std::string)) {
 			// 	error(Act == add, "Can only add to a string");
 			// 	ret = ValuePass(new ilang::Value_Old(boost::any_cast<std::string>(setTo->Get()) + val->str()));

@@ -18,6 +18,7 @@ Scope::~Scope() {
 // }
 
 shared_ptr<ilang::Variable> Scope::forceNew(ilang::Identifier i, std::vector<ValuePass> modifiers) {
+	assert(m_vars.find(i) == m_vars.end());
 	auto var = make_shared<ilang::Variable>(modifiers);
 	m_vars.insert(pair<Identifier, shared_ptr<Variable> >(i, var));
 	return var;
@@ -33,10 +34,16 @@ ValuePass Scope::get(ilang::Identifier i) {
 
 void Scope::set(ilang::Identifier i, ValuePass v) {
 	// TODO: optimize this??
-	if(m_parent && m_parent->has(i))
+	if(m_parent && m_parent->has(i)) {
 		m_parent->set(i, v);
-	else
-		forceNew(i, {})->Set(v);
+		return;
+	}
+	auto it = m_vars.find(i);
+	if(it != m_vars.end()) {
+		it->second->Set(v);
+		return;
+	}
+	forceNew(i, {})->Set(v);
 }
 
 bool Scope::has(ilang::Identifier i) {

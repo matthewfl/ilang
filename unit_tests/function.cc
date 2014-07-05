@@ -42,40 +42,41 @@ TEST_CASE("basic native function", "[function]") {
 }
 
 
-// TEST_CASE("function passing arguments", "[function]") {
-// 	init();
-// 	auto tree = PARSE_TREE(
-// 												 fun = {|a|
-// 														 assert(a);
-// 												 };
-// 												 );
-// 	tree->Link();
-// 	Variable *f = tree->GetScope()->lookup("fun");
-// 	auto fun = boost::any_cast<Function>(f->Get()->Get());
+TEST_CASE("function passing arguments", "[function]") {
+	init();
+	auto tree = PARSE_TREE(
+												 fun = {|a|
+														 assert(a);
+												 };
+												 );
+	tree->Link();
 
-// 	fun(valueMaker(1));
-// 	REQUIRE(!asserted);
-// }
+	ValuePass fun_ = tree->GetScope()->get("fun");
+	ilang::Function fun = *fun_->cast<ilang::Function*>();
+
+	fun(valueMaker(1));
+	REQUIRE(!asserted);
+}
 
 
-// TEST_CASE("function run", "[function]") {
-// 	init();
-// 	auto tree = PARSE_TREE(
-// 												 fun = {
-// 													 a = 1;
-// 													 b = 5;
-// 													 while(a && b -= 1) {
-// 														 a = 0;
-// 													 }
-// 													 assert(a);
-// 												 };
-// 												 );
+TEST_CASE("function run", "[function]") {
+	init();
+	auto tree = PARSE_TREE(
+												 fun = {
+													 a = 1;
+													 b = 5;
+													 while(a && b -= 1) {
+														 a = 0;
+													 }
+													 assert(a);
+												 };
+												 );
 
-// 	tree->Link();
+	tree->Link();
 
-// 	Variable *f = tree->GetScope()->lookup("fun");
-// 	auto fun = boost::any_cast<Function>(f->Get()->Get());
+	ValuePass fun_ = tree->GetScope()->get("fun");
+	ilang::Function fun = *fun_->cast<ilang::Function*>();
 
-// 	fun();
-// 	REQUIRE(asserted);
-// }
+	fun();
+	REQUIRE(asserted);
+}

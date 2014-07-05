@@ -33,6 +33,15 @@ ValuePass ValuePass::operator * (ValuePass v) {
 ValuePass ValuePass::operator / (ValuePass v) {
 	return *Get() / v;
 }
+bool ValuePass::operator == (ValuePass v) {
+	return *Get() == v;
+}
+bool ValuePass::operator <= (ValuePass v) {
+	return *Get() <= v;
+}
+bool ValuePass::operator < (ValuePass v) {
+	return *Get() < v;
+}
 
 
 #define VALUE_MATH_OPS(cls, self, external_type)											 \
@@ -85,6 +94,53 @@ ValuePass StringType::preform_math_op(math_ops op, long v) {
 StringType::~StringType() {
 	delete (std::string*)m_ptr;
 }
+
+#define VALUE_LOGIC_OPS(cls, self, external_type)							\
+	bool cls::preform_logic_op(logic_ops op, external_type v) { \
+	switch(op) {																								\
+	case OP_lessthan: return v < self;													\
+	case OP_lessequal: return v <= self;												\
+	case OP_equal: return v == self;														\
+	default: assert(0);																					\
+	}																														\
+	}
+
+#define VALUE_LOGIC_ALL_OPS(cls, self)				 \
+	VALUE_LOGIC_OPS(cls, self, long)						 \
+	VALUE_LOGIC_OPS(cls, self, double)					 \
+	VALUE_LOGIC_OPS(cls, self, bool)						 \
+	bool cls::preform_logic_op(logic_ops op, std::string v) {			\
+		std::stringstream ss; ss << self; std::string s = ss.str();	\
+		switch(op) {																								\
+		case OP_lessthan: return v < s;															\
+		case OP_lessequal: return v <= s;														\
+		case OP_equal: return v == s;																\
+		default: assert(0);																					\
+		}																														\
+	}
+
+
+VALUE_LOGIC_ALL_OPS(IntType, m_int);
+VALUE_LOGIC_ALL_OPS(FloatType, m_float);
+VALUE_LOGIC_ALL_OPS(BoolType, m_bool);
+
+#define VALUE_LOGIC_OPS_STRING(external_type) \
+	bool StringType::preform_logic_op(logic_ops op, external_type v) { \
+		std::stringstream ss; ss << v; std::string s = ss.str();			\
+		switch(op) {																									\
+		case OP_lessthan: return s < GetSelf();												\
+		case OP_lessequal: return s <= GetSelf();											\
+		case OP_equal: return s == GetSelf();													\
+		default: assert(0);																						\
+		}																															\
+	}
+
+VALUE_LOGIC_OPS_STRING(long)
+VALUE_LOGIC_OPS_STRING(double)
+VALUE_LOGIC_OPS_STRING(std::string)
+VALUE_LOGIC_OPS_STRING(bool)
+
+
 
 const std::type_info &FunctionType::type() { return typeid(ilang::Function); }
 FunctionType::FunctionType(const ilang::Function &f) {
