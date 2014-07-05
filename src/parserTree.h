@@ -53,12 +53,13 @@ namespace ilang {
 			friend class ImportCall;
 		private:
 			// also head by smart point so do not need to delete
-			FileScope *scope = NULL;
-			//Context& passScope;
+			Context ctx;
+			Scope *scope = NULL;
 			ImportScopeFile *Import;
 			std::list<Node*> *Declars;
 		public:
 			Head(std::list<Node*>*, ImportScopeFile*);
+			~Head();
 			void Link();
 			void Run();
 			Scope *GetScope ();

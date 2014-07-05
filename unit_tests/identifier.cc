@@ -12,4 +12,13 @@ TEST_CASE("basic identifier", "[identifier]") {
 	Identifier m("asdfasdfasdfasdf");
 	REQUIRE(l < m);
 	REQUIRE(i < l);
+
+	Identifier main("main");
+	Identifier main2("main");
+	REQUIRE(main == main2);
+	REQUIRE(main.str() == "main");
+	REQUIRE(l.str() == "qwerqwerqwerqwer");
+
+	Identifier s("7777777");
+	REQUIRE(s.str() == "7777777");
 }

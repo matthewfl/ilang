@@ -22,29 +22,33 @@ namespace ilang {
 			debug(-5, "running ++++++++++++++++++++++++++++++++++++++++++++" );
 			//	scope=NULL;
 		}
+
+		Head::~Head() {
+			delete scope;
+		}
+
 		void Head::Link () {
-			if(scope) return;
-			scope = new FileScope(this);
-			//passScope = ScopePass(scope);
-			Context ctx;
-			//if(Import) // when used with eval, there is no import handler
-			//	Import->resolve(scope);
+			assert(!scope);
+			scope = new Scope(ctx);
 
 			for(list<Node*>::iterator it = Declars->begin(); it !=	Declars->end(); it++) {
 				debug(-6, "calling run" )
 					(*it)->Run(ctx);
 				//scope->Debug();
 			}
-
-
 		}
 
 		void Head::Run() {
 			vector<ValuePass> v;
 			ValuePass ret;
-			scope->Debug();
-			ilang::Variable * find = scope->lookup("main");
-			error(find, "main function not found");
+			//scope->Debug();
+			ValuePass main = scope->get(Identifier("main"));
+			error(main, "main function not found");
+			ilang::Arguments args;
+			main->call(args);
+
+			//ilang::Variable * find = scope->lookup("main");
+			//error(find, "main function not found");
 			//auto main = boost::any_cast<ilang::Function>(find->Get()->Get());
 			//main(); // call the main function
 
@@ -257,22 +261,11 @@ namespace ilang {
 			// this need to track the scope at this point so that it could be use later in the funciton
 			debug(-6, "Function get value");
 			errorTrace("Getting value of a function");
-			// Function *self = this;
-			// auto fptr = [self, this_scope](ScopePass scope, Arguments& args, ValuePass *ret) {
-			// 	self->Call(ScopePass(this_scope), scope, args, ret);
-			// };
 
-			assert(0);
-			//ilang::Function fun(this);
-			//return valueMaker(fun.bind(ctx.scope));
+			ilang::Function fun(this, ctx);
+			// TODO: call bind??
+			return valueMaker(fun);
 
-			//ilang::Function fun(this, ctx);//, fptr);
-
-			// ilang::Function fun;
-			// fun.func = this;
-			// fun.ptr =
-
-			//return valueMaker(fun);
 		}
 
 		//	void Function::Call(ScopePass _scope_made, ScopePass _scope_self, vector<ValuePass> &p, ValuePass *_ret) {
@@ -363,6 +356,7 @@ namespace ilang {
 		void Variable::Set (Context &ctx, ValuePass var, bool force) {
 			errorTrace("Setting value of variable: " << GetFirstName());
 			if(force || !modifiers->empty()) {
+				assert(ctx.scope);
 				assert(dynamic_cast<Scope*>(ctx.scope));
 				assert(0); // TODO:
 				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
@@ -497,7 +491,8 @@ namespace ilang {
 				ValuePass key = valueMaker(identifier);
 				obj_val->set(key, val);
 			}else{
-				ctx.scope->set(Identifier(identifier), val);
+				Identifier name(identifier);
+				ctx.scope->set(name, val);
 			}
 
 			// ilang::Variable *v;
@@ -614,7 +609,7 @@ namespace ilang {
 		}
 		void Call::Run(Context &ctx) {
 			debug(-6,"call run");
-			GetValue(ctx);
+			ValuePass ret = GetValue(ctx);
 		}
 		ValuePass Call::GetValue (Context &ctx) {
 			errorTrace("Calling function");
@@ -1332,6 +1327,7 @@ namespace ilang {
 					exit(2);
 				}
 			}
+			return ValuePass();
 		}
 		void AssertCall::Print (Printer *p) {
 			p->p() << "assert(";

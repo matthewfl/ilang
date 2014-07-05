@@ -27,7 +27,6 @@ TEST_CASE( "Run empty function", "[parserTree]" ) {
 		rootEvent.Trigger(NULL);
 		ilang::global_eventPool()->Run();
 	*/
-
 	reset();
 }
 

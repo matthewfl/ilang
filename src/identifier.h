@@ -11,11 +11,12 @@ namespace ilang {
 		Identifier(const char*);
 		explicit Identifier(const std::string);
 		explicit Identifier(unsigned long i) : m_id(i) {}
+		Identifier(const Identifier &i) : m_id(i.m_id) {}
 		bool operator==(const Identifier i) const { return m_id == i.m_id; }
 		bool operator<(const Identifier i) const { return m_id < i.m_id; }
 		bool operator>(const Identifier i) const { return m_id > i.m_id; }
-		std::string str();
-		operator std::string() { return str(); }
+		std::string str() const;
+		operator std::string() const { return str(); }
 
 	};
 

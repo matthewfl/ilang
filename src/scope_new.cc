@@ -27,12 +27,13 @@ ValuePass Scope::get(ilang::Identifier i) {
 	auto it = m_vars.find(i);
 	if(it != m_vars.end())
 		return it->second->Get();
+	assert(m_parent);
 	return m_parent->get(i);
 }
 
 void Scope::set(ilang::Identifier i, ValuePass v) {
 	// TODO: optimize this??
-	if(m_parent->has(i))
+	if(m_parent && m_parent->has(i))
 		m_parent->set(i, v);
 	else
 		forceNew(i, {})->Set(v);
@@ -43,6 +44,11 @@ bool Scope::has(ilang::Identifier i) {
 }
 
 
+void Scope::Debug() {
+	for(auto it : m_vars) {
+		cout << it.first.str() << endl;//" " << it.second->Get()->cast<string>() << endl;
+	}
+}
 
 static std::map<ilang::Identifier, ilang::ValuePass> *global_scope = NULL;
 

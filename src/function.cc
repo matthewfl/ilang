@@ -85,11 +85,13 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 			}
 		}
 		// this seems bad....
-		// thinking tha tusing excpetions to break out might
+		// thinking that using excpetions to break out might
 		// be a good?? idea
-		ret = *ctx.returned;
-		delete ctx.returned;
-		ctx.returned = NULL;
+		if(ctx.returned && ctx.returned != (ValuePass*)1) {
+			ret = *ctx.returned;
+			delete ctx.returned;
+			ctx.returned = NULL;
+		}
 		//ptr(scopep, args.pargs, &ret);
 	}
 	return ret;

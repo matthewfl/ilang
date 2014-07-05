@@ -42,6 +42,7 @@ namespace ilang {
 		//Scope(ValuePass p) : m_handle(p), m_parent(p->cast<Hashable*>().get()) {}
 		~Scope();
 
+		void Debug();
 
 	};
 
