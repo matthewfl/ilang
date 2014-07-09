@@ -25,9 +25,13 @@ namespace ilang {
 	class Modification;
 	class Function;
 	class Arguments;
+
 	namespace parserNode {
+
+		using std::vector;
 		using std::list;
-		using boost::shared_ptr;
+
+		//using boost::shared_ptr;
 		//typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
 		using ilang::ValuePass; // defined in variable.h
 		//using ilang::ValuePass;
@@ -45,6 +49,8 @@ namespace ilang {
 			virtual void Run(Context&)=0;
 			void randomsdafasdf(){} // take this out eventually, fixed some random compiler bug or something
 			virtual void Print(Printer*) =0;
+
+			virtual IdentifierSet UndefinedElements()=0;
 			//virtual void setParent(Node*) =0;
 		};
 
@@ -78,11 +84,12 @@ namespace ilang {
 			friend class ilang::Modification;
 		public:
 			void Run(Context&);
+			IdentifierSet UndefinedElements() override;
 		};
 
 
 
-		// I guess we will leave this in, but most things are using Value_Old, not expression
+		// I guess we will leave this in, but most things are using Value, not expression
 		class Expression : public Value {
 			friend class ilang::Modification;
 		};
@@ -98,6 +105,7 @@ namespace ilang {
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements();
 		};
 
 		class Class : public Value {
@@ -111,6 +119,7 @@ namespace ilang {
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer *p);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Array : public Value {
@@ -123,6 +132,7 @@ namespace ilang {
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class StringConst : public Constant {
@@ -165,6 +175,7 @@ namespace ilang {
 			IfStmt(Node*, Node*, Node*);
 			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class WhileStmt : public Node {
 			friend class ilang::Modification;
@@ -175,6 +186,7 @@ namespace ilang {
 			WhileStmt(Node*, Node*);
 			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class ForStmt : public Node {
 			friend class ilang::Modification;
@@ -187,6 +199,7 @@ namespace ilang {
 			ForStmt(Node*, Node*, Node*, Node*);
 			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class ReturnStmt : public Node {
@@ -197,6 +210,7 @@ namespace ilang {
 			ReturnStmt(Node*);
 			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Function : public Value {
@@ -213,6 +227,7 @@ namespace ilang {
 			//void Call(Context& _scope_made, Context& _scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 
@@ -236,6 +251,7 @@ namespace ilang {
 			virtual std::string GetFirstName();
 			//virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 
@@ -254,6 +270,7 @@ namespace ilang {
 			virtual std::string GetFirstName();
 			//virtual ValuePass CallFun (Context&, std::vector<ValuePass> &par);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class ArrayAccess : public Variable {
@@ -268,6 +285,8 @@ namespace ilang {
 			void Set(Context&, ValuePass var, bool force = false); // forced is ignored as it makes no since
 			virtual std::string GetFirstName();
 			void Print(Printer*);
+
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Call : public Value {
@@ -281,6 +300,7 @@ namespace ilang {
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class PrintCall : public Call {
 			friend class ilang::Modification;
@@ -335,6 +355,7 @@ namespace ilang {
 			void Run(Context& scope);
 			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class MathEquation : public Expression {
 			friend class ilang::Modification;
@@ -350,6 +371,7 @@ namespace ilang {
 			void Run(Context& sope);
 			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Value *left, *right;
 			action Act;
@@ -372,6 +394,7 @@ namespace ilang {
 			void Run(Context& scope);
 			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Value *left, *right;
 			action Act;
@@ -390,6 +413,7 @@ namespace ilang {
 			void Run(Context& scope);
 			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Variable *m_target;
 			Value *m_value;

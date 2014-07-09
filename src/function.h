@@ -87,7 +87,7 @@ namespace ilang {
 	private:
 		bool native = false;
 		Function_ptr ptr;
-		ValuePass object_scope = ValuePass();
+		//		ValuePass object_scope = ValuePass();
 		ilang::parserNode::Function *func = NULL;
 		friend class Arguments;
 	public:
@@ -104,6 +104,7 @@ namespace ilang {
 
 		Function bind(ilang::ValuePass); // bind to an object
 		Function bind(Context &ctx);
+		Function bind(Hashable*);
 
 		Function(const Function&);
 		Function(ilang::parserNode::Function *f, Context &ctx); //, Function_ptr _ptr);

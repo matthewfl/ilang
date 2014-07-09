@@ -104,14 +104,19 @@ Function Function::bind(ilang::ValuePass object) {
 }
 
 Function Function::bind(Context &ctx) {
+  return bind(ctx.scope);
+}
 
+Function Function::bind(Hashable* h) {
+	assert(0);
+	return *this;
 }
 
 Function::Function(const Function &func) {
 	native = func.native;
 	ptr = func.ptr;
 	//contained_scope = func.contained_scope;
-	object_scope = func.object_scope;
+	//object_scope = func.object_scope;
 	this->func = func.func;
 }
 

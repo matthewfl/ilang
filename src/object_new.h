@@ -13,6 +13,41 @@
 #include "parserTree.h"
 
 namespace ilang {
+
+	class Object_ish : public Hashable {
+	protected:
+		std::map<Identifier, shared_ptr<Variable> > m_members;
+		std::weak_ptr<Hashable> m_self;
+		Object_ish() {}
+	public:
+		ValuePass get(ilang::Identifier);
+		void set(ilang::Identifier, ValuePass);
+		bool has(ilang::Identifier);
+		shared_ptr<Variable> getVariable(ilang::Identifier);
+	};
+
+	class C_Class : public Object_ish {
+	private:
+		//std::map<Identifier, ilang::Variable> m_members;
+		std::weak_ptr<C_Class> m_self;
+	protected:
+		C_Class() {}
+		virtual ~C_Class() {}
+		template<typename cls> void reg(Identifier id, ValuePass (cls::*fun)(ilang::Arguments &args) ) {
+			assert(m_members.find(id) == m_members.end());
+			cls *self = (cls*)this;
+			ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+					*ret = (self ->* fun)(args);
+					assert(*ret);
+				});
+			auto var = make_shared<Variable>();
+			var->Set(valueMaker(f));
+			m_members.insert(std::pair<Identifier, shared_ptr<Variable> >(id, var));
+		}
+
+	};
+
+
 	class Class_new : public Hashable {
 	private:
 		std::vector<ValuePass> m_parents;
@@ -25,13 +60,24 @@ namespace ilang {
 		Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
 	};
 
-	class Object_new : public Hashable {
+	class Class_instance : public Hashable {
 	private:
-		ValuePass m_cls_handle;
+		ValuePass m_handle;
+		Class_new *m_class = NULL;
+		C_Class *m_cclass = NULL;
 		std::map<ilang::Identifier, ilang::ValuePass> m_objs;
 	public:
-		Object_new();
+		Class_instance(ValuePass c);
+		Class_instance(C_Class *c);
 
+	};
+
+	class Object_new : public Object_ish {
+	private:
+		//ValuePass m_cls_handle;
+		//std::map<ilang::Identifier, ilang::ValuePass> m_objs;
+	public:
+		Object_new();
 	};
 
 }

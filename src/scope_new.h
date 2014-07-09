@@ -36,6 +36,7 @@ namespace ilang {
 		ValuePass get(ilang::Identifier);
 		void set(ilang::Identifier, ValuePass);
 		bool has(ilang::Identifier);
+		shared_ptr<Variable> getVariable(ilang::Identifier);
 
 		Scope(Hashable *h) : m_parent(h) {}
 		Scope(Context &ctx) : m_parent(ctx.scope), m_ctx(&ctx) { ctx.scope = this; }

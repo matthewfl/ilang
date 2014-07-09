@@ -28,6 +28,7 @@ namespace ilang {
 		virtual ValuePass get(ilang::Identifier i) {}
 		virtual void set(ilang::Identifier i, ValuePass v) {}
 		virtual bool has(ilang::Identifier i) {}// return (bool)get(i); }
+		shared_ptr<Variable> getVariable(ilang::Identifier i) override {}
 	};
 	class ObjectScope;
 	//typedef std::string storedData;
@@ -58,6 +59,7 @@ namespace ilang {
 		ValuePass get(ilang::Identifier i) {}
 		void set(ilang::Identifier i, ValuePass v) {}
 		bool has(ilang::Identifier i) {}
+		shared_ptr<Variable> getVariable(ilang::Identifier i) override {}
 	};
 	class Array : public Object {
 		//friend storedData *DB_createStoredData(const boost::any&);

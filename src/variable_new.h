@@ -15,11 +15,13 @@ namespace ilang {
 		std::vector<ilang::ValuePass> m_modifiers;
 		ilang::ValuePass m_value;
 	public:
-		Variable(std::vector<ilang::ValuePass> mod) : m_modifiers(mod) {}
+		Variable(std::vector<ilang::ValuePass> mod);
 		Variable() {}
 		void Set(ilang::ValuePass);
 		ilang::ValuePass &Get() { return m_value; }
 	};
 }
+
+
 
 #endif

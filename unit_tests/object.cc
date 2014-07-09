@@ -1,7 +1,17 @@
 #include "base.h"
 #include "object.h"
+#include "object_new.h"
 
 using namespace ilang;
+
+TEST_CASE("Basic interaction with an object", "[object]") {
+	init();
+	//Object_new obj;
+	//	obj.
+
+}
+
+
 
 // TEST_CASE("Basic interaction with an object", "[object]") {
 // 	init();

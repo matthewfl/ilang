@@ -50,6 +50,13 @@ bool Scope::has(ilang::Identifier i) {
 	return m_vars.find(i) != m_vars.end() || m_parent->has(i);
 }
 
+shared_ptr<Variable> Scope::getVariable(ilang::Identifier i) {
+	auto it = m_vars.find(i);
+	if(it == m_vars.end())
+		return shared_ptr<Variable>();
+	return it->second;
+}
+
 
 void Scope::Debug() {
 	for(auto it : m_vars) {

@@ -19,3 +19,14 @@ void Variable::Set(ValuePass v) {
 	}
 	m_value = v;
 }
+
+Variable::Variable(std::vector<ilang::ValuePass> mod) {
+	m_modifiers.resize(mod.size());
+	for(auto it : mod) {
+		if(it->type() == typeid(ilang::Class*)) {
+			// create a new instance of the class
+		} else {
+			m_modifiers.push_back(it);
+		}
+	}
+}
