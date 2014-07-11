@@ -58,6 +58,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token T_eq T_ne T_le T_ge T_and T_or
 %token T_plusEqual T_subEqual T_mulEqual T_divEqual
 
+%right LowerThanElse
 %right T_else
 %left ';'
 %left '='
@@ -78,8 +79,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> AccessList ImportLoc
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Decl Expr ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
-%type <node_list> Stmts ParamList DeclList ExprList ArgsList ProgramList ModifierList
+%type <node> Function Variable LValue Expr ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
+%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
 
@@ -100,24 +101,17 @@ ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back($3); }
 		|	T_Identifier			{ ($$=new std::list<std::string>)->push_back($1); }
 		;
 
-DeclList	:	DeclList Decl 			{ ($$=$1)->push_back($2); }
-		|	Decl				{ ($$ = new list<Node*>)->push_back($1); }
-		;
-
-Decl		:	Variable '=' Expr ';'		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
-		;
-
 ProgramList	:	ProgramList Expr ';'		{ ($$=$1)->push_back($2); }
 		|	Expr ';'			{ ($$=new list<Node*>)->push_back($1); }
 		;
 
-Variable	:	LValue				{ }
-		|	ModifierList AccessList		{ $$ = new Variable($2, $1); }
+Variable	:	ModifierList Identifier		{ $$ = new Variable(new list<string>{$2}, $1); }
+		|	LValue
 		;
 
 LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
-		|	Expr '.' Identifier		{ $$ = new FieldAccess($1, $3); }
-		|	Expr '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
+		|	ExprType '.' Identifier		{ $$ = new FieldAccess($1, $3); }
+		|	ExprType '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
 ModifierList	:	ModifierList ExprType		{ ($$ = $1)->push_back($2); }
@@ -135,7 +129,6 @@ Stmt		:	';'				{ $$ = new Function(NULL, NULL) ; /* not quite right, but should 
 		|	WhileStmt
 		|	ForStmt
 		|	ReturnStmt
-		|	Decl
 		;
 
 ObjectNode	:	Variable ':' Expr		{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), $3); /* should not have any problems with the cast */  }
@@ -147,22 +140,22 @@ ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
 		;
 
 Object		:	T_object '{' ObjectList OptComma '}'	{ $$ = new Object($3); }
-		|	T_object '{' '}'		{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
+		|	T_object '{' '}'			{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
 		;
 
 Class		:	T_class '{' ObjectList OptComma '}'	{ $$ = new Class(new std::list<Node*>, $3); }
 		|	T_class	'(' ParamList OptComma ')' '{' ObjectList OptComma '}'	{ $$ = new Class($3, $7); }
 		;
 
-Array		:	'[' ModifierList OptComma '|' ParamList OptComma ']' { $$ = new Array($5, $2); }
-		| 	'[' ParamList OptComma ']'		   { $$ = new Array($2, NULL); }
+Array		:	'[' ModifierList OptComma '|' ParamList OptComma ']'	{ $$ = new Array($5, $2); }
+		| 	'[' ParamList OptComma ']'				{ $$ = new Array($2, NULL); }
 		;
 
-IfStmt		:	T_if '(' Expr ')' Stmt 		{ $$ = new IfStmt($3, $5, NULL); }
-		|	T_if '(' Expr ')' Stmt T_else Stmt { $$ = new IfStmt($3, $5, $7); }
+IfStmt		:	T_if '(' Expr ')' Stmt %prec LowerThanElse	{ $$ = new IfStmt($3, $5, NULL); }
+		|	T_if '(' Expr ')' Stmt T_else Stmt 		{ $$ = new IfStmt($3, $5, $7); }
 		;
 
-WhileStmt	:	T_while	'(' Expr ')' Stmt 	{ $$ = new WhileStmt ($3, $5); }
+WhileStmt	:	T_while	'(' Expr ')' Stmt 			{ $$ = new WhileStmt ($3, $5); }
 		;
 
 ForStmt		:	T_for '(' Expr ';' Expr ';' Expr ')' Stmt	{ $$ = new ForStmt($3, $5, $7, $9); }
@@ -202,13 +195,7 @@ Call		:	Expr '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1)
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
-ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
-		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
-		;
-
 Expr		:	ExprType
-		|	Array
-		|	Variable
 		|	Variable '=' Expr		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	T_IntConst			{ $$ = new IntConst($1); }
@@ -237,6 +224,7 @@ Expr		:	ExprType
 ExprType	:	Function			{}
 		|	Class
 		|	Object
+		|	Array
 		|	Call
 		|	'(' Expr ')'			{ $$ = $2; }
 		|	LValue
@@ -246,7 +234,7 @@ Identifier	:	T_Identifier			{ }
 		;
 
 OptComma	:	','
-		|
+		|	%empty
 		;
 
 %%
