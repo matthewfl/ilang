@@ -126,9 +126,9 @@ namespace ilang {
 			friend class ilang::Modification;
 		private:
 			std::list<Node*> *elements;
-			std::list<std::string> *modifiers;
+			std::list<Node*> *modifiers;
 		public:
-			Array(std::list<Node*> *e, std::list<std::string> *m);
+			Array(std::list<Node*> *e, std::list<Node*> *m);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
@@ -240,9 +240,9 @@ namespace ilang {
 
 			std::list<std::string> *name;
 		protected:
-			std::list<std::string> *modifiers;
+			std::list<Node*> *modifiers;
 		public:
-			Variable (std::list<std::string> *n, std::list<std::string> *mod);
+			Variable (std::list<std::string> *n, std::list<Node*> *mod);
 			void Run(Context&);
 			virtual void Set(Context&, ValuePass var, bool force = false);
 			// not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily

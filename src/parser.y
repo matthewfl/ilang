@@ -7,6 +7,7 @@
 #include "parser.tab.hh"
 #include "import.h"
 #include "debug.h"
+#include "identifier.h"
 
 //using namespace ilang; // adding this in cause some conflicts with names
 using namespace ilang::parserNode;
@@ -41,7 +42,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 
 %union {
-  char Identifier[40];
+  char Identifier[128];
   int count;
   char *string;
   std::list<std::string> *string_list;
@@ -75,10 +76,10 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %token <intNumber> T_IntConst
 %token <floatNumber> T_FloatConst
 
-%type <string_list> ModifierList AccessList ImportLoc
+%type <string_list> AccessList ImportLoc
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Decl Expr Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
-%type <node_list> Stmts ParamList DeclList ExprList ArgsList ProgramList
+%type <node> Function Variable LValue Decl Expr ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
+%type <node_list> Stmts ParamList DeclList ExprList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
 
@@ -119,8 +120,8 @@ LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
 		|	Expr '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
-ModifierList	:	ModifierList Identifier		{ ($$ = $1)->push_back($2); }
-		|	Identifier			{ ($$ = new list<string>)->push_back($1); }
+ModifierList	:	ModifierList ExprType		{ ($$ = $1)->push_back($2); }
+		|	ExprType			{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
 		;
 
 AccessList	:	AccessList '.' Identifier	{ ($$ = $1)->push_back($3); }
@@ -205,17 +206,13 @@ ExprList	:	ExprList Expr			{ ($$=$1)->push_back($2); }
 		|	Expr				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
-Expr		:	Function			{}
-		|	Class
-		|	Object
+Expr		:	ExprType
 		|	Array
-		|	Call
 		|	Variable
 		|	Variable '=' Expr		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	T_IntConst			{ $$ = new IntConst($1); }
 		|	T_FloatConst			{ $$ = new FloatConst($1); }
-		|	'(' Expr ')'			{ $$ = $2; }
 		|	Expr '+' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::add); }
 		|	Expr '-' Expr			{ $$ = new MathEquation(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), MathEquation::subtract); }
 		|	'-' Expr %prec uMinus		{ $$ = new MathEquation(dynamic_cast<Value*>($2), NULL, MathEquation::uMinus); }
@@ -234,6 +231,15 @@ Expr		:	Function			{}
 		|	Variable T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
 		|	Variable T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
 		|	Variable T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
+		;
+
+/* ExprType is something that can be used for the type checking */
+ExprType	:	Function			{}
+		|	Class
+		|	Object
+		|	Call
+		|	'(' Expr ')'			{ $$ = $2; }
+		|	LValue
 		;
 
 Identifier	:	T_Identifier			{ }

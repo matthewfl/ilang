@@ -69,7 +69,7 @@ Change the type checking system to not use keyworks, and instead of some identif
 
 The system needs to be cleaned up internally, since it is becoming difficult to work with.  The jit engine is not necessary in the sort term and might not be required since the theme should be mostly calling out to C++ functions that are doing the heavy lifting computationally, and then just stringing together the components.  Thinking that the system could use some unit tests are there are starting to get a number of interal components.  Then there needs to be cleaning relating to the abstracting of working with functions, classes and objects as the current interface is "leaking" all over the code base.
 
-5/13/2013 (Refactor)
+5/13/2014 (Refactor)
 1) Functions need to be more abstracted.
 	 * Abstract the calling mechanism
 	 	 context of function created, this parameter, C++ vs ilang functions
@@ -82,3 +82,7 @@ The system needs to be cleaned up internally, since it is becoming difficult to 
 3) Using make_ptr to make std::smart_ptr
 4) There should be some common hash mapping representation.
 	 * this should be used to back objects and classes
+
+
+7/10/2014
+Need to add in error checking with 1/2 way reasonable errors to the parser tree

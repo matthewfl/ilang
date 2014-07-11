@@ -328,10 +328,10 @@ namespace ilang {
 			p->p() << "}";
 		}
 
-		Variable::Variable (list<string> *n, list<string> *mod):
+		Variable::Variable (list<string> *n, list<Node*> *mod):
 			name(n), modifiers(mod) {
 			if(!name) name = new list<string>;
-			if(!modifiers) modifiers = new list<string>;
+			if(!modifiers) modifiers = new list<Node*>;
 			//cout << "\t\t\t" << name << "\n";
 		}
 		void Variable::Run (Context &ctx) {
@@ -345,7 +345,10 @@ namespace ilang {
 			if(force || !modifiers->empty()) {
 				assert(ctx.scope);
 				assert(dynamic_cast<Scope*>(ctx.scope));
-				assert(0); // TODO:
+				// TODO: TODO: this is wrong, need to set the modifiers
+				ctx.scope->set(Identifier(GetFirstName()), var);
+
+				//assert(0); // TODO:
 				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
 				ctx.scope->set(Identifier(GetFirstName()), var);
@@ -395,8 +398,9 @@ namespace ilang {
 
 		void Variable::Print(Printer *p) {
 			if(modifiers) {
-				for(std::string it : *modifiers) {
-					p->p() << it << " ";
+				for(auto it : *modifiers) {
+					it->Print(p);
+					p->p() << " ";
 				}
 			}
 			bool first=true;
@@ -965,9 +969,9 @@ namespace ilang {
 			p->line() << "}";
 		}
 
-		Array::Array (std::list<Node*> *e, std::list<string> *m) : elements(e), modifiers(m) {
+		Array::Array (std::list<Node*> *e, std::list<Node*> *m) : elements(e), modifiers(m) {
 			assert(e);
-			if(!modifiers) modifiers = new std::list<string>;
+			if(!modifiers) modifiers = new std::list<Node*>;
 		}
 
 		void Array::Run(Context &ctx) {
@@ -979,8 +983,10 @@ namespace ilang {
 
 		ValuePass Array::GetValue(Context &ctx) {
 			errorTrace("Creating Array");
-			auto arr = make_shared<ilang::Array>(elements, modifiers, ctx);
-			return valueMaker(arr);
+			assert(0);
+			// TODO: new arrays
+			//auto arr = make_shared<ilang::Array>(elements, modifiers, ctx);
+			//return valueMaker(arr);
 			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(arr);
 			//return ValuePass(val);
@@ -999,9 +1005,9 @@ namespace ilang {
 			p->p() << "[";
 			if(modifiers && !modifiers->empty()) {
 				bool first=true;
-				for(std::string it : *modifiers) {
+				for(auto it : *modifiers) {
 					if(!first) p->p() << " ";
-					p->p() << it;
+					it->Print(p);
 					first = false;
 				}
 				p->p() << "| ";
