@@ -148,6 +148,11 @@ int main (int argc, char **argv) {
 	}
 	ilang::parserNode::Head *base = ilang::parser(f, mainImport, main_file);
 	fclose(f);
+	if(!base) {
+		cout << "There was a syntax error\n";
+		return 1;
+	}
+	assert(!base->GetScope()); // we should not have a scope before we attempt linking
 	{ ilang::error_trace ee("linking main file");
 		base->Link();
 	}

@@ -1,5 +1,5 @@
 equal_self = {
-	Int i = 5;
+	i = 5;
 	assert(i == 5);
 	assert(( i += 5) == 10);
 	assert(i == 10);

@@ -5,20 +5,20 @@ using namespace ilang;
 
 
 TEST_CASE("Basic function calling", "[function]") {
-		auto tree = PARSE_TREE(
+	auto tree = PARSE_TREE(
 												 ga = 1;
 												 fun = {
 													 assert(0);
 												 };
 												 );
-		tree->Link();
-		// omg, this seems bad
-		auto fun_ = tree->GetScope()->get("fun");
-		REQUIRE(fun_->type() == typeid(ilang::Function));
-		REQUIRE(typeid(fun_->cast<ilang::Function*>()) == typeid(ilang::Function*));
-		auto fun = *fun_->cast<ilang::Function*>();
-		fun();
-		REQUIRE(asserted);
+	tree->Link();
+	// omg, this seems bad
+	auto fun_ = tree->GetScope()->get("fun");
+	REQUIRE(fun_->type() == typeid(ilang::Function));
+	REQUIRE(typeid(fun_->cast<ilang::Function*>()) == typeid(ilang::Function*));
+	auto fun = *fun_->cast<ilang::Function*>();
+	fun();
+	REQUIRE(asserted);
 }
 
 

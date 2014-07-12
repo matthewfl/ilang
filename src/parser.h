@@ -21,6 +21,7 @@ namespace ilang {
 		ilang::ImportScopeFile *import;
 		ilang::parserNode::Head *head;
 		const char *fileName;
+		int error_count = 0;
 	};
 	ilang::parserNode::Head * parser (FILE *, ilang::ImportScopeFile *, const char *);
 };

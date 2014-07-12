@@ -586,6 +586,7 @@ namespace ilang {
 				dynamic_cast<parserNode::Value*>((it))->GetValue(ctx)->Print();
 			}
 			debug(-5,"made it out of print");
+			return ValuePass();
 		}
 
 		void PrintCall::Print (Printer *p) {

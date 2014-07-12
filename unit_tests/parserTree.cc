@@ -49,3 +49,14 @@ TEST_CASE("Basic assert passed", "[parserTree]") {
 	REQUIRE(asserted == 0);
 	reset();
 }
+
+TEST_CASE("basic function call", "[parserTree]") {
+	auto head = PARSE_TREE(
+												 test = { assert(0); };
+												 main = { test(); };
+												 );
+	head->Link();
+	head->Run();
+	REQUIRE(asserted);
+	reset();
+}

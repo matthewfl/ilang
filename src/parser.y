@@ -21,10 +21,11 @@ using namespace std;
 //struct yyltype yylloc;
 
 
-void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
+void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char *msg) {
   using namespace std;
   //cerr << "error: " << msg << endl << yylloc.first_line;
-  cerr << "error: " << msg << endl << loc->first_line;
+  parser_handle->error_count++;
+  cerr << "\33[0;31error @" << loc->first_line << ": " << msg << "\33[0m\n"; 
 }
 
 #define YYDEBUG 1
@@ -39,6 +40,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %parse-param {ilang::parser_data * parser_handle}
 %debug
 %error-verbose
+%glr-parser
 
 
 %union {
@@ -61,10 +63,11 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 %right LowerThanElse
 %right T_else
 %left ';'
+%right LowerThanEqual
 %left '='
 %left T_plusEqual T_subEqual T_mulEqual T_divEqual
 %left T_and T_or
-%left T_eq T_ne T_le T_ge '<' '>'
+%nonassoc T_eq T_ne T_le T_ge '<' '>'
 %left '+' '-'
 %left '*' '/'
 %left '!'
@@ -79,7 +82,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
 
 %type <string_list> AccessList ImportLoc
 %type <Identifier> Identifier
-%type <node> Function Variable LValue Expr ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
+%type <node> Function Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -90,7 +93,7 @@ Program		:	Imports ProgramList		{ parser_handle->head = new ilang::parserNode::H
 		;
 
 Imports		:	Imports Import			{ }
-		|					{ }
+		|	%empty				{ }
 		;
 
 Import		:	T_import ImportLoc			{ assert(parser_handle->import); parser_handle->import->push(NULL, $2); }
@@ -114,16 +117,15 @@ LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
 		|	ExprType '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
-ModifierList	:	ModifierList ExprType		{ ($$ = $1)->push_back($2); }
-		|	ExprType			{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
+ModifierList	:	ModifierList ExprType %prec ModListPrec	{ ($$ = $1)->push_back($2); }
+		|	ExprType %prec ModListPrec	{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
 		;
 
 AccessList	:	AccessList '.' Identifier	{ ($$ = $1)->push_back($3); }
 		|	Identifier			{ ($$ = new list<string>)->push_back($1);}
 		;
 
-Stmt		:	';'				{ $$ = new Function(NULL, NULL) ; /* not quite right, but should work for the most part */}
-		| 	Expr ';'
+Stmt		: 	Expr ';'
 		|	Function
 		|	IfStmt
 		|	WhileStmt
@@ -179,7 +181,8 @@ Args		:	ModifierList Identifier		{ list<string> *n = new list<string>; n->push_b
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
                 |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }
-                ;
+		|	error				{ $$ = new list<Node*>; }
+		;
 
 
 ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
@@ -195,8 +198,12 @@ Call		:	Expr '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1)
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
-Expr		:	ExprType
-		|	Variable '=' Expr		{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
+Expr		:	Expr_
+		|	error				{ $$ = new IntConst(0); }
+		;
+
+Expr_		:	ExprType
+		|	Variable '=' Expr %prec LowerThanEqual	{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
 		|	T_StringConst			{ $$ = new StringConst($1); }
 		|	T_IntConst			{ $$ = new IntConst($1); }
 		|	T_FloatConst			{ $$ = new FloatConst($1); }
@@ -221,7 +228,7 @@ Expr		:	ExprType
 		;
 
 /* ExprType is something that can be used for the type checking */
-ExprType	:	Function			{}
+ExprType	:	Function
 		|	Class
 		|	Object
 		|	Array
