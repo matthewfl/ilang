@@ -126,6 +126,16 @@ TEST_CASE("logic ops", "[value]") {
 	REQUIRE(w == w);
 }
 
+TEST_CASE("std copy", "[value]") {
+	auto v = valueMaker(1);
+	std::vector<ValuePass> vec;
+	vec.push_back(v);
+	REQUIRE((vec[0]));
+	std::vector<ValuePass> vec2(vec);
+	REQUIRE(vec2[0]);
+	int i = vec2[0]->cast<int>();
+	REQUIRE(i == 1);
+}
 
 TEST_CASE("hashable type", "[value]") {
 	//	auto v = valueMaker(

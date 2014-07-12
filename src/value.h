@@ -70,7 +70,7 @@ namespace ilang {
 		bool operator < (ValuePass v);
 		bool operator > (ValuePass v) { return !operator<=(v); }
 
-		operator bool () { return *(long*)m_data != 0; }
+		operator bool () const { return *(long*)m_data != 0; }
 
 		ValuePass call(ilang::Arguments &a); // { return Get()->call(a); }
 		//ValuePass operator () (ilang::Arguments &a) { return call(a); }
@@ -78,7 +78,7 @@ namespace ilang {
 
 	};
 
-	using ValuePass = ValuePass;
+	//using ValuePass = ValuePass;
 
 
 	// TODO: change to raise an exception that is caught

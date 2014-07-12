@@ -332,6 +332,9 @@ namespace ilang {
 			name(n), modifiers(mod) {
 			if(!name) name = new list<string>;
 			if(!modifiers) modifiers = new list<Node*>;
+			for(auto it : *modifiers) {
+				assert(dynamic_cast<parserNode::Value*>(it));
+			}
 			//cout << "\t\t\t" << name << "\n";
 		}
 		void Variable::Run (Context &ctx) {
@@ -346,26 +349,23 @@ namespace ilang {
 				assert(ctx.scope);
 				assert(dynamic_cast<Scope*>(ctx.scope));
 				// TODO: TODO: this is wrong, need to set the modifiers
-				ctx.scope->set(Identifier(GetFirstName()), var);
+				std::vector<ValuePass> mods;
+				mods.reserve(modifiers->size());
+				for(auto it : *modifiers) {
+					auto g = dynamic_cast<parserNode::Value*>(it)->GetValue(ctx);
+					assert(g);
+					mods.push_back(g);
+				}
+				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mods);
+				assert(var);
+				pvar->Set(var);
+				//ctx.scope->set(Identifier(GetFirstName()), var);
 
 				//assert(0); // TODO:
 				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
 				ctx.scope->set(Identifier(GetFirstName()), var);
 			}
-			// scope->Debug();
-			// ilang::Variable *v;
-			// if(force || !modifiers->empty()) {
-			// 	v = scope->forceNew(GetFirstName(), *modifiers);
-			// } else {
-			// 	//v = scope->lookup(name->front());
-			// 	v = Get(scope);
-			// }
-			// assert(v);
-			// // TODO: setting of variables
-			// //v->Set(var);
-			// debug(-6,"Set: " << GetFirstName() << " " << var << " " << v->Get());
-			// scope->Debug();
 		}
 		ilang::Variable * Variable::Get(Context &ctx) {
 			// this should not happen
@@ -488,7 +488,8 @@ namespace ilang {
 		ilang::Variable * ArrayAccess::Get(Context &ctx) {
 			// TODO: ??
 			// shouldn't be getting the variables direcrly any more
-			assert(0);		}
+			assert(0);
+		}
 
 		ValuePass ArrayAccess::GetValue(Context &ctx) {
 			errorTrace("Getting element using []: "<<GetFirstName());

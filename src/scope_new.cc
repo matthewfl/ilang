@@ -19,6 +19,7 @@ Scope::~Scope() {
 
 shared_ptr<ilang::Variable> Scope::forceNew(ilang::Identifier i, std::vector<ValuePass> modifiers) {
 	assert(m_vars.find(i) == m_vars.end());
+	for(auto it : modifiers) { assert(it); }
 	auto var = make_shared<ilang::Variable>(modifiers);
 	m_vars.insert(pair<Identifier, shared_ptr<Variable> >(i, var));
 	return var;
