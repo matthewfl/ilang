@@ -73,3 +73,22 @@ TEST_CASE("function run", "[function]") {
 	fun();
 	REQUIRE(asserted);
 }
+
+
+TEST_CASE("function undefined elements", "[function]") {
+	init();
+	auto tree = PARSE_TREE(
+												 fun = {
+													 asdf();
+													 GG qwer = {};
+													 qwer();
+												 };
+												 );
+	tree->Link();
+	ValuePass fun_ = tree->GetScope()->get("fun");
+	ilang::Function fun = *fun_->cast<ilang::Function*>();
+	auto undef = fun.UndefinedElements();
+	REQUIRE(undef.find("asdf") != undef.end());
+	// TODO: don't get elements that will be forcedNew
+	//REQUIRE(undef.find("qwer") == undef.end());
+}

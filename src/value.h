@@ -13,13 +13,11 @@
 #include <iostream>
 //using namespace std;
 
+#include "handle.h"
 #include "identifier.h"
 
-namespace ilang {
 
-	using std::make_shared;
-	using std::shared_ptr;
-	using std::dynamic_pointer_cast;
+namespace ilang {
 
 	class Value_new;
 	class Function;
@@ -54,6 +52,7 @@ namespace ilang {
 			assert(dynamic_cast<Value_new*>(&t));
 			new (m_data) T(t);
 		}
+		// TODO: xvalue constructure
 		ValuePass(const ValuePass &x);
 		~ValuePass();
 

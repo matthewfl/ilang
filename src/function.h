@@ -90,6 +90,11 @@ namespace ilang {
 		//		ValuePass object_scope = ValuePass();
 		ilang::parserNode::Function *func = NULL;
 		friend class Arguments;
+		//Context ctx;
+		std::map<ilang::Identifier, shared_ptr<Variable> > m_bound;
+		void bind_self(Hashable*);
+		//Scope m_bound;
+
 	public:
 		template <typename... types> ilang::ValuePass operator() (types... values) {
 			Arguments args(values...);
@@ -102,6 +107,8 @@ namespace ilang {
 		}
 		ilang::ValuePass call(Context&, ilang::Arguments&);
 
+		IdentifierSet UndefinedElements();
+
 		Function bind(ilang::ValuePass); // bind to an object
 		Function bind(Context &ctx);
 		Function bind(Hashable*);
@@ -112,42 +119,6 @@ namespace ilang {
 		Function();
 	};
 
-
-	/* FUTURE INTERFACE
-	class Function {
-	private:
-		// this shiuldn't be here, instead put this into an argument constructor
-		template<typename T> inline void build_arguments(ilang::Arguments &a, T t) {
-			a.append(t);
-		}
-		template<typename T, typename... Arguments> inline void build_arguments (ilang::Arguments &a, T t, Arguments... args) {
-			a.append(t);
-			build_arguments(a, args);
-		}
-	public:
-		template<typename... Arguments> ilang::Value_Old operator() (Arguments... _args) {
-			//ilang::Arguments a;
-			//build_arguments(a, args);
-			ilang::Arguments args(_args);
-			return call(args);
-		}
-		ilang::Value_Old operator() (ilang::Arguments args) { return call(args); }
-		ilang::Value_Old call(ilang::Arguments args) {}
-		Function bind(Scope &scope) {}
-		Function bindThis(Value_Old) {}
-	};
-*/
-
-	/*
-		class Function {
-		Scope *bound_scope;
-		public:
-		Function (ilang::parserNode::Function *fun);
-		Function (Function_ptr fun);
-		void BindScope(Scope*);
-		ValuePass Call(vector<ilang::Value_Old*> &p);
-		};
-	*/
 } // namespace ilang
 
 

@@ -23,7 +23,7 @@ namespace ilang {
 	private:
 		std::map<ilang::Identifier, shared_ptr<Variable> > m_vars;
 		Hashable *m_parent;
-		ValuePass m_returned;
+		//ValuePass m_returned;
 		//ValuePass m_handle;
 		Context *m_ctx;
 	protected:
@@ -37,6 +37,7 @@ namespace ilang {
 		void set(ilang::Identifier, ValuePass);
 		bool has(ilang::Identifier);
 		shared_ptr<Variable> getVariable(ilang::Identifier);
+		void insert(ilang::Identifier, shared_ptr<Variable>);
 
 		//Scope(Hashable *h) : m_parent(h) {}
 		Scope(Context &ctx) : m_parent(ctx.scope), m_ctx(&ctx) { ctx.scope = this; }

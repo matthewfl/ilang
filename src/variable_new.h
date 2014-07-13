@@ -20,6 +20,8 @@ namespace ilang {
 		void Set(ilang::ValuePass);
 		ilang::ValuePass &Get() { return m_value; }
 	};
+
+	using Variable_ptr = Handle<Variable>;
 }
 
 

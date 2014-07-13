@@ -31,6 +31,13 @@ namespace ilang {
 			assert(!scope);
 			scope = new Scope(ctx);
 
+			// int unbound_statements = Declars->size();
+			// while(unbound_statements) {
+			// 	for(auto it : *Declars) {
+
+			// 	}
+			// }
+
 			for(list<Node*>::iterator it = Declars->begin(); it !=	Declars->end(); it++) {
 				debug(-6, "calling run" )
 					(*it)->Run(ctx);
@@ -295,7 +302,14 @@ namespace ilang {
 		}
 
 		IdentifierSet Function::UndefinedElements() {
-			assert(0); // TODO
+			IdentifierSet ret;
+			if(!body)
+				return ret;
+			for(auto it = body->rbegin(); it != body->rend(); it++) {
+				ret = unionSets(ret, (*it)->UndefinedElements());
+			}
+			return ret;
+			// TODO: filter out elements that will be forced New, eg variables with types set for them
 		}
 
 		void Function::Print(Printer *p) {
@@ -556,7 +570,10 @@ namespace ilang {
 		}
 
 		IdentifierSet Call::UndefinedElements() {
-			IdentifierSet ret = calling->UndefinedElements();
+			IdentifierSet ret;
+			if(calling) {
+				ret = calling->UndefinedElements();
+			}
 			for(auto it : *params) {
 				ret = unionSets(ret, it->UndefinedElements());
 			}
