@@ -19,6 +19,16 @@ ValuePass::ValuePass(const ValuePass &x) {
 ValuePass::~ValuePass() {
 	if(*(long*)m_data != 0)
 		Get()->~Value_new();
+	*(long*)m_data = 0;
+}
+
+void ValuePass::operator = (const ValuePass &v) {
+  ValuePass s(v);
+	s.swap(*this);
+}
+
+void ValuePass::swap(ValuePass &v) {
+	std::swap(m_data, v.m_data);
 }
 
 ValuePass ValuePass::operator + (ValuePass v) {
@@ -144,17 +154,26 @@ VALUE_LOGIC_OPS_STRING(bool)
 
 const std::type_info &FunctionType::type() { return typeid(ilang::Function); }
 FunctionType::FunctionType(const ilang::Function &f) {
+	const_cast<ilang::Function*>(&f)->vvv();
 	m_ptr = new ilang::Function(f);
+	((ilang::Function*)m_ptr)->vvv();
 }
 FunctionType::FunctionType(const FunctionType &f) {
-	m_ptr = new ilang::Function(*(ilang::Function*)f.m_ptr);
+	const_cast<ilang::Function*>((ilang::Function*)f.m_ptr)->vvv();
+	auto fp = (ilang::Function*)f.m_ptr;
+	fp->vvv();
+	m_ptr = new ilang::Function(*fp);
+	fp->vvv();
+	((ilang::Function*)m_ptr)->vvv();
 }
 // FunctionType::FunctionType(FunctionType &&f) {
 // 	m_ptr = f.m_ptr;
 // 	f.m_ptr = NULL;
 // }
 FunctionType::~FunctionType() {
+	//cout << "delete " << this << endl << flush;
 	delete (ilang::Function*)m_ptr;
+	m_ptr = NULL;
 }
 void FunctionType::copyTo(void *d) {
 	new (d) FunctionType(*this);

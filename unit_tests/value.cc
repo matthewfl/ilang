@@ -135,6 +135,12 @@ TEST_CASE("std copy", "[value]") {
 	REQUIRE(vec2[0]);
 	int i = vec2[0]->cast<int>();
 	REQUIRE(i == 1);
+	{
+		ilang::Function f;
+		auto ff = valueMaker(f);
+		vec.push_back(ff);
+	}
+	vec2.insert(vec2.begin(), vec.begin(), vec.end());
 }
 
 TEST_CASE("hashable type", "[value]") {

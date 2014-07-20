@@ -86,3 +86,6 @@ The system needs to be cleaned up internally, since it is becoming difficult to 
 
 7/10/2014
 Need to add in error checking with 1/2 way reasonable errors to the parser tree
+
+7/16/2014
+We should be able to have "algebric" types by adding functions together, eg if we write {|Int + String a|};  Then the `Int + String` will validate that it passes the check for being an Int or a String.

@@ -1,6 +1,7 @@
 #ifndef _ilang_new_variable
 #define _ilang_new_variable
 
+#include "debug.h"
 #include "value.h"
 #include <vector>
 
@@ -18,7 +19,7 @@ namespace ilang {
 		Variable(std::vector<ilang::ValuePass> mod);
 		Variable() {}
 		void Set(ilang::ValuePass);
-		ilang::ValuePass &Get() { return m_value; }
+		ilang::ValuePass &Get() { assert(m_value); return m_value; }
 	};
 
 	using Variable_ptr = Handle<Variable>;

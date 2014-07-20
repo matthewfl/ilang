@@ -218,7 +218,7 @@ build/object_new.o: src/value.h src/debug.h src/handle.h src/variable_new.h
 build/object_new.o: src/helpers.h src/parserTree.h src/context.h src/variable.h
 build/object_new.o: src/value_types.h src/scope_new.h src/import.h src/print.h
 build/object_new.o: src/function.h src/scope.h
-build/variable_new.o: src/variable_new.h src/value.h src/debug.h src/handle.h
+build/variable_new.o: src/variable_new.h src/debug.h src/value.h src/handle.h
 build/variable_new.o: src/identifier.h src/helpers.h src/function.h
 build/variable_new.o: src/context.h src/variable.h src/value_types.h
 build/variable_new.o: src/hashable.h src/scope.h src/parserTree.h

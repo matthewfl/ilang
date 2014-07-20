@@ -22,7 +22,7 @@ void Arguments::set(std::string key, ilang::ValuePass value) {
 
 void Arguments::populate(Context &ctx, Function *func) {
 	// TODO:
-	if(func->func && func->func->params) {
+	if(!func->native && func->func->params) {
 		// there is some function with arguments that can be used to determine what to set values to
 		auto it = func->func->params->begin(); // wtf was I thinking
 		for(ValuePass v : pargs) {
@@ -55,6 +55,15 @@ private:
 public:
 	ScopeFake (std::map<Identifier, Handle<Variable> > *m, Context &ctx) : m_members(m), m_ctx(&ctx), m_parent(ctx.scope) {
 		ctx.scope = this;
+		assert(m_members);
+		for(auto v : *m_members) {
+			assert(v.second);
+			auto val = v.second->Get();
+			assert(val);
+			if(val->type() == typeid(Function)) {
+				val->cast<Function*>()->vvv();
+			}
+		}
 	}
 	~ScopeFake() {
 		assert(m_ctx->scope == this);
@@ -74,7 +83,13 @@ public:
 			error(m_parent, "unable to find variable " << i.str())
 			return m_parent->get(i);
 		}
-		return it->second->Get();
+		//		Function fun;
+		//return valueMaker(fun);
+		ValuePass ret = it->second->Get();
+		if(ret->type() == typeid(Function)) {
+			ret->cast<ilang::Function*>()->vvv();
+		}
+		return ret;
 	}
 	bool has(Identifier i) {
 		return m_members->find(i) != m_members->end() || m_parent && m_parent->has(i);
@@ -89,34 +104,19 @@ public:
 	}
 };
 
+void Function::vvv() {
+	assert((native && ptr) || ((long)func > 0x1000));
+	cout << "function " << this << " ok\n" << flush;
+}
 
 
 ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
-	//bool returned = false;
-	//ValuePass _ret;
-	// auto returnHandle = [&returned, &_ret] (ValuePass *ret) {
-	// 	returned = true;
-	// 	_ret = *ret;
-	// };
-
-	// ScopePass obj_scope = ScopePass();
-	// if(object_scope)
-	// 	obj_scope = ScopePass(new ObjectScope(object_scope->cast<Object*>().get()));
-
-	//ValuePass ret;
-	//FunctionScope<decltype(returnHandle)> scope(_scope_made, _scope_self, returnHandle);
-	// TODO: make this be on the stack instead of using new here
-	//auto fscope = new FunctionScope<decltype(returnHandle)>(contained_scope, obj_scope, returnHandle);
-	//ScopePass scopep(fscope);
-	//args.populate(scopep, this);
 	ValuePass ret;
 	ScopeFake bound_items(&m_bound, ctx);
 	{
 
 		Scope scope(ctx);
 		args.populate(ctx, this);
-
-
 
 		if(native) {
 			ptr(ctx, args, &ret);
@@ -182,15 +182,38 @@ void Function::bind_self(Hashable *h) {
 }
 
 Function::Function(const Function &func) {
+	assert(this != &func);
+	const_cast<ilang::Function*>(&func)->vvv();
+	assert(func.native || func.func);
 	native = func.native;
 	ptr = func.ptr;
-	//contained_scope = func.contained_scope;
-	//object_scope = func.object_scope;
 	this->func = func.func;
 	m_bound.insert(func.m_bound.begin(), func.m_bound.end());
-	//for(auto it : func.m_bound)
-	//	m_bound.insert(it->first, it->second);
+	vvv();
 }
+
+Function::~Function() {
+	func = NULL;
+	ptr = NULL;
+	native = false;
+	cout << "delete function " << this << endl << flush;
+}
+
+// Function::Function(const Function *func) {
+// 	assert(this != func);
+// 	const_cast<ilang::Function*>(func)->vvv();
+// 	native = func->native;
+// 	ptr = func->ptr;
+// 	//contained_scope = func.contained_scope;
+// 	//object_scope = func.object_scope;
+// 	this->func = func->func;
+// 	m_bound.insert(func->m_bound.begin(), func->m_bound.end());
+// 	//	assert(native || this->func);
+
+// 	//for(auto it : func.m_bound)
+// 	//	m_bound.insert(it->first, it->second);
+// 	vvv();
+// }
 
 Function::Function(parserNode::Function *f, Context &_ctx) { //, Function_ptr _ptr) {
 	func = f;
@@ -199,6 +222,7 @@ Function::Function(parserNode::Function *f, Context &_ctx) { //, Function_ptr _p
 	//contained_scope = scope;
 	native = false;
 	bind_self(_ctx.scope);
+	vvv();
 }
 
 Function::Function(Function_ptr _ptr) {
@@ -208,6 +232,9 @@ Function::Function(Function_ptr _ptr) {
 
 Function::Function () {
 	// idk
-	native = false;
-	func = NULL;
+	native = true;
+	ptr = [](Context &ctx, Arguments &args, ValuePass *ret) {
+		error(0, "Called empty function");
+	};
+	func = (parserNode::Function*)123;
 }

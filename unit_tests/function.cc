@@ -89,6 +89,7 @@ TEST_CASE("function undefined elements", "[function]") {
 	ilang::Function fun = *fun_->cast<ilang::Function*>();
 	auto undef = fun.UndefinedElements();
 	REQUIRE(undef.find("asdf") != undef.end());
+	REQUIRE(undef.find("GG") != undef.end());
 	// TODO: don't get elements that will be forcedNew
 	//REQUIRE(undef.find("qwer") == undef.end());
 }

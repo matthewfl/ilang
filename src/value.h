@@ -52,9 +52,14 @@ namespace ilang {
 			assert(dynamic_cast<Value_new*>(&t));
 			new (m_data) T(t);
 		}
+
 		// TODO: xvalue constructure
 		ValuePass(const ValuePass &x);
 		~ValuePass();
+
+		// copy operator
+		void operator = (const ValuePass &v);
+		void swap(ValuePass &v);
 
 		// proxy functions
 		ValuePass operator + (ValuePass v); // { return *Get() + v; }

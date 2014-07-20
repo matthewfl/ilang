@@ -31,6 +31,8 @@ namespace ilang {
 			assert(!scope);
 			scope = new Scope(ctx);
 
+			assert(ctx.scope == scope);
+
 			// int unbound_statements = Declars->size();
 			// while(unbound_statements) {
 			// 	for(auto it : *Declars) {
@@ -297,8 +299,8 @@ namespace ilang {
 
 			ilang::Function fun(this, ctx);
 			// TODO: call bind??
-			return valueMaker(fun);
-
+			auto ret = valueMaker(fun);
+			return ret;
 		}
 
 		IdentifierSet Function::UndefinedElements() {
@@ -368,7 +370,13 @@ namespace ilang {
 				for(auto it : *modifiers) {
 					auto g = dynamic_cast<parserNode::Value*>(it)->GetValue(ctx);
 					assert(g);
+					if(g->type() == typeid(ilang::Function)) {
+						g->cast<ilang::Function*>()->vvv();
+					}
 					mods.push_back(g);
+					if(g->type() == typeid(ilang::Function)) {
+						g->cast<ilang::Function*>()->vvv();
+					}
 				}
 				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mods);
 				assert(var);
@@ -388,7 +396,8 @@ namespace ilang {
 		}
 
 		ValuePass Variable::GetValue(Context &ctx) {
-			return ctx.scope->get(Identifier(GetFirstName()));
+			auto ret = ctx.scope->get(Identifier(GetFirstName()));
+			return ret;
 
 			// errorTrace("Getting value of variable: "<<GetFirstName());
 			// ilang::Variable *v = Get(scope);
@@ -407,6 +416,9 @@ namespace ilang {
 		IdentifierSet Variable::UndefinedElements() {
 			IdentifierSet ret;
 			ret.insert(Identifier(GetFirstName()));
+			for(auto it : *modifiers) {
+				ret = unionSets(ret, it->UndefinedElements());
+			}
 			return ret;
 		}
 
@@ -440,21 +452,24 @@ namespace ilang {
 
 		ValuePass FieldAccess::GetValue(Context &ctx) {
 			errorTrace("FieldAccess on " << GetFirstName());
+			ValuePass ret;
 			if(Obj) {
 				_errors.stream() << "\n\tLooking up FieldAccess where there is an object";
 				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
-				ValuePass ret = obj_val->get(valueMaker(identifier));
+				ret = obj_val->get(valueMaker(identifier));
 				// TODO: functions binding???
 				// should put functions bunding to scopes on their get value
 				// rather than the field access
 				if(ret->type() == typeid(ilang::Function)) {
 					// TODO:
 					// return valueMaker(ret->cast<ilang::Function*>->bind(...)
+					assert(0);
 				}
 				return ret;
 			}else{
-				return ctx.scope->get(Identifier(identifier));
+				ret = ctx.scope->get(Identifier(identifier));
+				return ret;
 			}
 		}
 

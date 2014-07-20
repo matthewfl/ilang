@@ -4,6 +4,7 @@
 using namespace ilang;
 
 void Variable::Set(ValuePass v) {
+	assert(v);
 	for(auto it : m_modifiers) {
 		assert(it);
 		Arguments args(v);
@@ -12,7 +13,6 @@ void Variable::Set(ValuePass v) {
 		}else if(it->type() == typeid(Object*)) {
 			Identifier check("check");
 			auto c = it->get(check);
-			Arguments args(c);
 			c->call(args);
 		}else{
 			assert(0);

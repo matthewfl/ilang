@@ -157,10 +157,10 @@ int main (int argc, char **argv) {
 		base->Link();
 	}
 
-	/*	{ ilang::error_trace ee("Printing main parse");
-			ilang::Printer pp;
-			base->Print(&pp);
-			}*/
+	{ ilang::error_trace ee("Printing main parse");
+		ilang::Printer pp;
+		base->Print(&pp);
+	}
 
 	/*{ ilang::error_trace ee("running main file");
 		base->Run();
