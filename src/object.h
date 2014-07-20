@@ -9,6 +9,9 @@
 #include "scope.h"
 #include "hashable.h"
 
+
+#include "object_new.h"
+
 namespace ilang {
 	class Object;
 	class Class : public Hashable {
@@ -20,6 +23,7 @@ namespace ilang {
 	public:
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context&);
 		virtual Object* NewClass(ValuePass self);
+		// TODO: remove
 		ilang::Variable * operator[](std::string name);
 		ilang::Variable * operator[](ValuePass);
 		virtual ~Class();
@@ -52,6 +56,8 @@ namespace ilang {
 		Object();
 		virtual ~Object();
 		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, Context&);
+
+		// TODO: remove
 		virtual ilang::Variable * operator [] (std::string name);
 		virtual ilang::Variable * operator [] (ValuePass);
 

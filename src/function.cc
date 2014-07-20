@@ -106,7 +106,6 @@ public:
 
 void Function::vvv() {
 	assert((native && ptr) || ((long)func > 0x1000));
-	cout << "function " << this << " ok\n" << flush;
 }
 
 
@@ -168,14 +167,14 @@ Function Function::bind(Hashable* h) {
 void Function::bind_self(Hashable *h) {
 	auto unbound = UndefinedElements();
 	for(auto it : unbound) {
-		cout << "looking to bind: " << it.str() << endl ;
+		//cout << "looking to bind: " << it.str() << endl ;
 		if(m_bound.find(it) == m_bound.end()) {
 			auto vptr = h->getVariable(it);
 			if(vptr) {
 				m_bound.insert(pair<Identifier, Handle<Variable> >(it, vptr));
-				cout << "was able to bind\n";
+				//cout << "was able to bind\n";
 			} else {
-				cout << "did not get var\n";
+				//cout << "did not get var\n";
 			}
 		}
 	}
@@ -196,7 +195,7 @@ Function::~Function() {
 	func = NULL;
 	ptr = NULL;
 	native = false;
-	cout << "delete function " << this << endl << flush;
+	//cout << "delete function " << this << endl << flush;
 }
 
 // Function::Function(const Function *func) {

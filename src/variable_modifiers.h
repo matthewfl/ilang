@@ -10,15 +10,12 @@ namespace ilang {
 	public:
 
 	};
-
-
 }
 
 #define ILANG_VARIABLE_MODIFIER(name, obj)															\
 	namespace { struct _ILANG_VAR_MOD_##name {														\
 			_ILANG_VAR_MOD_##name () {																				\
 				::ilang::global_scope_register(Identifier( #name ),							\
-
 			}} _ILANG_VAR_MOD_##name##_run;																		\
 	}
 

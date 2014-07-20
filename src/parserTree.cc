@@ -866,7 +866,6 @@ namespace ilang {
 		}
 
 		void SingleExpression::Print(Printer *p) {
-			assert(0);
 			m_target->Print(p);
 			switch(Act) {
 			case add:
@@ -903,9 +902,11 @@ namespace ilang {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
-			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
-			auto obj = make_shared<ilang::Object>(objects, ctx);
+			auto obj = make_shared<ilang::Object_new>(objects, ctx);
 			return valueMaker(obj);
+			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
+			//auto obj = make_shared<ilang::Object>(objects, ctx);
+			//return valueMaker(obj);
 			//ilang::Value_Old *val = new ilang::Value_Old(obj);
 			//return ValuePass(val);
 		}

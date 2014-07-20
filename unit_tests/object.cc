@@ -1,17 +1,44 @@
 #include "base.h"
 #include "object.h"
 #include "object_new.h"
+#include "function.h"
 
 using namespace ilang;
 
-TEST_CASE("Basic interaction with an object", "[object]") {
-	init();
-	//Object_new obj;
-	//	obj.
 
+
+TEST_CASE("Basic interaction with an object", "[object]") {
+	auto obj = valueMaker(make_shared<ilang::Object_new>());
+	Identifier t("test");
+	auto v = valueMaker(123);
+	obj->set(t, v);
+	auto r = obj->get(t);
+	REQUIRE(r == v);
 }
 
+TEST_CASE("Parser tree object", "[object]") {
+	auto tree = PARSE_TREE(
+												 gg = object {
+												   a: 1
+												 };
+												 );
+	tree->Link();
+	auto scope = tree->GetScope();
+	auto gg = scope->get("gg");
+	REQUIRE(gg->type() == typeid(Hashable*));
+	auto a = gg->get(Identifier("a"));
+	REQUIRE(a->type() == typeid(long));
+	long av = a->cast<long>();
+	REQUIRE(av == 1);
+}
 
+TEST_CASE("Basic interaction with class", "[object]") {
+	auto cls = valueMaker(make_shared<ilang::Class_new>());
+	auto new_fun = cls->get(Identifier("new"));
+	REQUIRE(cls->type() == typeid(Hashable*));
+	REQUIRE(new_fun->type() == typeid(Function));
+
+}
 
 // TEST_CASE("Basic interaction with an object", "[object]") {
 // 	init();

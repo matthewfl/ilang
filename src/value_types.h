@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "value.h"
-
 #include "hashable.h"
 
 namespace ilang {
@@ -28,17 +27,27 @@ namespace ilang {
 	class Hashable;
 	class Array;
 	class Object;
+	class Object_new;
+	class Class_new;
+	class Class_instance;
 	class HashableType : public Value_new {
 	public:
 		HashableType(std::shared_ptr<Hashable>);
-		HashableType(std::shared_ptr<Object>);
-		HashableType(std::shared_ptr<Array>);
+		template<typename T> HashableType(std::shared_ptr<T> t) {
+			auto h = std::dynamic_pointer_cast<Hashable>(t);
+			m_ptr = new std::shared_ptr<Hashable>(h);
+		}
+		//HashableType(std::shared_ptr<Object>);
+		//HashableType(std::shared_ptr<Array>);
 		HashableType(const HashableType&);
 		~HashableType();
 
 		virtual const std::type_info &type();
 		virtual void copyTo(void *d);
 		virtual std::shared_ptr<Hashable> Cast(cast_chooser<Hashable*>);
+
+		ValuePass get(Identifier key);
+		void set(Identifier key, ValuePass value);
 	};
 
 	class Class;
@@ -67,6 +76,9 @@ namespace ilang {
 		ilang::Function, FunctionType,
 		std::shared_ptr<ilang::Class>, ClassType,
 		std::shared_ptr<ilang::Object>, HashableType,
+		std::shared_ptr<ilang::Object_new>, HashableType,
+		std::shared_ptr<ilang::Class_new>, HashableType,
+		std::shared_ptr<ilang::Class_instance>, HashableType,
 		std::shared_ptr<ilang::Array>, HashableType,
 		std::shared_ptr<ilang::Hashable>, HashableType
 		>();

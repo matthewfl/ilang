@@ -238,6 +238,8 @@ namespace ilang {
 			friend class ::ilang::Object;
 			friend class ::ilang::Class;
 
+			// TODO: variables won't have access list for names
+			// just a single item, otherwise it is a field access
 			std::list<std::string> *name;
 		protected:
 			std::list<Node*> *modifiers;

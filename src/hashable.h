@@ -11,6 +11,8 @@ namespace ilang {
 	public:
 		virtual ValuePass get(ilang::Identifier)=0;
 		virtual void set(ilang::Identifier, ValuePass)=0;
+		//virtual void check(ilang::Identifier i, ValuePass v) {}
+		//virtual void set_no_check(ilang::Identifier i, ValuePass v) { set(i, v); }
 	  virtual bool has(ilang::Identifier)=0;
 		virtual shared_ptr<Variable> getVariable(ilang::Identifier)=0;
 		virtual ~Hashable(){};

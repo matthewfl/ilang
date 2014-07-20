@@ -188,14 +188,14 @@ ValuePass FunctionType::call(ilang::Arguments &args) {
 HashableType::HashableType(std::shared_ptr<Hashable> h) {
 	m_ptr = new std::shared_ptr<Hashable>(h);
 }
-HashableType::HashableType(std::shared_ptr<Object> o) {
-	auto h = std::dynamic_pointer_cast<Hashable>(o);
-	m_ptr = new std::shared_ptr<Hashable>(h);
-}
-HashableType::HashableType(std::shared_ptr<Array> a) {
-	auto h = std::dynamic_pointer_cast<Hashable>(a);
-	m_ptr = new std::shared_ptr<Hashable>(h);
-}
+// HashableType::HashableType(std::shared_ptr<Object> o) {
+// 	auto h = std::dynamic_pointer_cast<Hashable>(o);
+// 	m_ptr = new std::shared_ptr<Hashable>(h);
+// }
+// HashableType::HashableType(std::shared_ptr<Array> a) {
+// 	auto h = std::dynamic_pointer_cast<Hashable>(a);
+// 	m_ptr = new std::shared_ptr<Hashable>(h);
+// }
 HashableType::HashableType(const HashableType &h) {
 	m_ptr = new std::shared_ptr<Hashable>(*(shared_ptr<Hashable>*)h.m_ptr);
 }
@@ -208,6 +208,12 @@ std::shared_ptr<Hashable> HashableType::Cast(cast_chooser<Hashable*> c) {
 }
 void HashableType::copyTo(void *d) {
 	new (d) HashableType(*this);
+}
+ValuePass HashableType::get(Identifier key) {
+	return (*(std::shared_ptr<Hashable>*)m_ptr)->get(key);
+}
+void HashableType::set(Identifier key, ValuePass value) {
+	(*(std::shared_ptr<Hashable>*)m_ptr)->set(key, value);
 }
 
 ClassType::ClassType(std::shared_ptr<Class> c) {

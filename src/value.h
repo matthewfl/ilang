@@ -157,6 +157,7 @@ namespace ilang {
 		virtual std::shared_ptr<Class> Cast(cast_chooser<Class*> c) RAISE_ERROR;
 		virtual std::shared_ptr<Object> Cast(cast_chooser<Object*> c) RAISE_ERROR;
 		virtual std::shared_ptr<Array> Cast(cast_chooser<Array*> c) RAISE_ERROR;
+		virtual Identifier Cast(cast_chooser<Identifier> c) RAISE_ERROR;
 
 	public:
 		template <typename T> auto cast() {
@@ -195,9 +196,13 @@ namespace ilang {
 
 		// hashable/array mixin
 	public:
-		virtual ValuePass get(ValuePass key) RAISE_ERROR;
+		virtual ValuePass get(ValuePass key) {
+			return get(key->cast<Identifier>());
+		}
 		virtual ValuePass get(Identifier key) RAISE_ERROR;
-		virtual void set(ValuePass key, ValuePass value) RAISE_ERROR;
+		virtual void set(ValuePass key, ValuePass value) {
+			set(key->cast<Identifier>(), value);
+		}
 		virtual void set(Identifier key, ValuePass value) RAISE_ERROR;
 
 		// helpers
@@ -244,6 +249,7 @@ namespace ilang {
 	public:
 		VALUE_MATH_CLS_MIXIN(m_int);
 		VALUE_LOGIC_CLS_MIXIN(m_int);
+		Identifier Cast(cast_chooser<Identifier> c) { return Identifier(m_int); }
 	};
 
 	class FloatType : public Value_new {
@@ -289,6 +295,7 @@ namespace ilang {
 	public:
 		VALUE_MATH_CLS_MIXIN(GetSelf());
 		VALUE_LOGIC_CLS_MIXIN(GetSelf());
+		Identifier Cast(cast_chooser<Identifier> c) { return Identifier(GetSelf()); }
 	};
 
 

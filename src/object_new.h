@@ -20,57 +20,60 @@ namespace ilang {
 		std::weak_ptr<Hashable> m_self;
 		Object_ish() {}
 	public:
-		ValuePass get(ilang::Identifier);
-		void set(ilang::Identifier, ValuePass);
-		bool has(ilang::Identifier);
-		shared_ptr<Variable> getVariable(ilang::Identifier);
+		ValuePass get(ilang::Identifier) override;
+		void set(ilang::Identifier, ValuePass) override;
+		bool has(ilang::Identifier) override;
+		shared_ptr<Variable> getVariable(ilang::Identifier) override;
+		virtual ~Object_ish() {}
 	};
 
-	class C_Class : public Object_ish {
-	private:
-		//std::map<Identifier, ilang::Variable> m_members;
-		std::weak_ptr<C_Class> m_self;
-	protected:
-		C_Class() {}
-		virtual ~C_Class() {}
-		template<typename cls> void reg(Identifier id, ValuePass (cls::*fun)(ilang::Arguments &args) ) {
-			assert(m_members.find(id) == m_members.end());
-			cls *self = (cls*)this;
-			ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
-					*ret = (self ->* fun)(args);
-					assert(*ret);
-				});
-			auto var = make_shared<Variable>();
-			var->Set(valueMaker(f));
-			m_members.insert(std::pair<Identifier, shared_ptr<Variable> >(id, var));
-		}
+	// class C_Class : public Object_ish {
+	// private:
+	// 	//std::map<Identifier, ilang::Variable> m_members;
+	// 	std::weak_ptr<C_Class> m_self;
+	// protected:
+	// 	C_Class() {}
+	// 	virtual ~C_Class() {}
+	// 	template<typename cls> void reg(Identifier id, ValuePass (cls::*fun)(ilang::Arguments &args) ) {
+	// 		assert(m_members.find(id) == m_members.end());
+	// 		cls *self = (cls*)this;
+	// 		ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+	// 				*ret = (self ->* fun)(args);
+	// 				assert(*ret);
+	// 			});
+	// 		auto var = make_shared<Variable>();
+	// 		var->Set(valueMaker(f));
+	// 		m_members.insert(std::pair<Identifier, shared_ptr<Variable> >(id, var));
+	// 	}
 
-	};
+	// };
 
 
-	class Class_new : public Hashable {
+	class Class_new : public Object_ish {
 	private:
 		std::vector<ValuePass> m_parents;
-		std::map<ilang::Identifier, ilang::Variable> m_members;
+		//std::map<ilang::Identifier, ilang::Variable> m_members;
 
 		// std::map<ilang::Identifier, ilang::ValuePass> m_members;
 		// std::map<ilang::Identifier, std::vector<ilang::ValuePass> > m_modifiers;
 	public:
 		Class_new();
 		Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
+
+		ValuePass get(Identifier i);
 	};
 
-	class Class_instance : public Hashable {
-	private:
-		ValuePass m_handle;
-		Class_new *m_class = NULL;
-		C_Class *m_cclass = NULL;
-		std::map<ilang::Identifier, ilang::ValuePass> m_objs;
-	public:
-		Class_instance(ValuePass c);
-		Class_instance(C_Class *c);
+	// class Class_instance : public Hashable {
+	// private:
+	// 	ValuePass m_handle;
+	// 	Class_new *m_class = NULL;
+	// 	C_Class *m_cclass = NULL;
+	// 	std::map<ilang::Identifier, ilang::ValuePass> m_objs;
+	// public:
+	// 	Class_instance(ValuePass c);
+	// 	Class_instance(C_Class *c);
 
-	};
+	// };
 
 	class Object_new : public Object_ish {
 	private:
@@ -78,6 +81,7 @@ namespace ilang {
 		//std::map<ilang::Identifier, ilang::ValuePass> m_objs;
 	public:
 		Object_new();
+		Object_new(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 	};
 
 }
