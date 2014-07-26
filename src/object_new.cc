@@ -51,12 +51,20 @@ Class::Class() {
 
 }
 
-// Class_new::Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope) {
-// 	assert(p && obj && scope);
-// 	for(auto it : *p) {
-
-// 	}
-// }
+Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx) {
+	assert(p && obj);
+	m_parents.reserve(p->size());
+	Context self;
+	self.scope = this;
+	for(auto it : *p) {
+		m_parents.push_back(dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
+	}
+	for(auto it : *obj) {
+		// TODO: if there is no default value being set
+		assert(it.second);
+		it.first->Set(self, dynamic_cast<parserNode::Value*>(it.second)->GetValue(ctx), true);
+	}
+}
 
 ValuePass Class::get(Identifier i) {
 	if(has(i)) {
@@ -82,22 +90,54 @@ ValuePass Class::get(Identifier i) {
 	if(i == Identifier("create")) {
 		// creates a new instance of the class
 		// but does not init it
-		return ValuePass();
+		Handle<Class> cls(this);
+		ilang::Function crt([cls](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+				auto c = make_handle<Class_instance>(cls);
+				// for(auto it : args.kwargs) {
+				// 	c->set(it.first, it.second);
+				// }
+				*ret = valueMaker(c);
+			});
+		return valueMaker(crt);
 	}
 	if(i == Identifier("init")) {
-		ilang::Function fun;
+		ilang::Function fun([](Context &ctx, ilang::Arguments &args, ValuePass *ret) {});
 		return valueMaker(fun);
 	}
 	if(i == Identifier("instance")) {
 		// instance function
-		return ValuePass();
+		Handle<Class> cls(this);
+		ilang::Function inst([cls](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+				*ret = valueMaker(true);
+			});
+		return valueMaker(inst);
 	}
 	if(i == Identifier("interface")) {
 		// interface function
-		return ValuePass();
+		Handle<Class> cls(this);
+		ilang::Function inter([cls](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+				*ret = valueMaker(true);
+			});
+		return valueMaker(inter);
 	}
 	assert(0); // so, not found
 }
+
+
+Class_instance::Class_instance(Handle<Class> c) : m_class(c) {}
+//Class_instance::Class_instance(C_class *c) : m_ccclas(c) {}
+
+ValuePass Class_instance::get(Identifier i) {
+	if(Object_ish::has(i))
+		return Object_ish::get(i);
+	assert(m_class);
+	return m_class->get(i);
+}
+
+bool Class_instance::has(Identifier i) {
+	return Object_ish::has(i) || m_class->has(i);
+}
+
 
 Object::Object() {
 

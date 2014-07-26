@@ -72,6 +72,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %left '*' '/'
 %left '!'
 %right uMinus
+%left '(' ')'
 %left '.' '['
 
 %token <Identifier> T_Identifier

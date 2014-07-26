@@ -39,6 +39,23 @@ TEST_CASE("Basic interaction with class", "[object]") {
 
 }
 
+TEST_CASE("Basic class create", "[object]") {
+	RUN_CODE(
+					 test = class {
+					 a: 1
+					 };
+
+					 main = {
+						 assert(test.a == 1);
+						 gg = test.new();
+						 assert(test.instance(gg));
+						 assert(test.interface(gg));
+					 };
+					 );
+	REQUIRE(!asserted);
+}
+
+
 // TEST_CASE("Basic interaction with an object", "[object]") {
 // 	init();
 // 	Object *o = new Object();

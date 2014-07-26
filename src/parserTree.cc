@@ -459,13 +459,9 @@ namespace ilang {
 				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
 				ret = obj_val->get(valueMaker(identifier));
-				// TODO: functions binding???
-				// should put functions bunding to scopes on their get value
-				// rather than the field access
 				if(ret->type() == typeid(ilang::Function)) {
-					// TODO:
-					// return valueMaker(ret->cast<ilang::Function*>->bind(...)
-					assert(0);
+					// TODO: should not be doing the bind here.....do before getting the function
+					return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
 				}
 				return ret;
 			}else{
@@ -946,6 +942,9 @@ namespace ilang {
 		{
 			assert(p);
 			assert(obj);
+			for(auto it : *parents) {
+				assert(dynamic_cast<parserNode::Value*>(it));
+			}
 		}
 		void Class::Run(Context &ctx) {
 			for(auto it : *objects) {
@@ -954,8 +953,8 @@ namespace ilang {
 		}
 		ValuePass Class::GetValue(Context &ctx) {
 			errorTrace("Creating class");
-			// TODO: auto cls = make_handle<ilang::Class>(parents, objects, ctx);
-			return valueMaker(true);
+			 auto cls = make_handle<ilang::Class>(parents, objects, ctx);
+			return valueMaker(cls);
 			//ilang::Class *c = new ilang::Class(parents, objects, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(c);
 			//return ValuePass(val);

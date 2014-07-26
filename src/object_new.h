@@ -59,22 +59,22 @@ namespace ilang {
 		// std::map<ilang::Identifier, std::vector<ilang::ValuePass> > m_modifiers;
 	public:
 		Class();
-		//Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
+		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 
 		ValuePass get(Identifier i);
 	};
 
-	// class Class_instance : public Hashable {
-	// private:
-	// 	ValuePass m_handle;
-	// 	Class_new *m_class = NULL;
-	// 	C_Class *m_cclass = NULL;
-	// 	std::map<ilang::Identifier, ilang::ValuePass> m_objs;
-	// public:
-	// 	Class_instance(ValuePass c);
-	// 	Class_instance(C_Class *c);
+	class Class_instance : public Object_ish {
+	private:
+		Handle<Class> m_class;
+		//	C_Class *m_cclass = NULL;
+	public:
+		Class_instance(Handle<Class> c);
+		//Class_instance(C_Class *c);
 
-	// };
+		ValuePass get(Identifier i);
+		bool has(Identifier i);
+	};
 
 	class Object : public Object_ish {
 	private:

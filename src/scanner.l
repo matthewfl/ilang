@@ -51,7 +51,6 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "Print"			{ return T_print; }
 "class"			{ return T_class; }
 "object"		{ return T_object; }
-"new"			{ return T_new; }
 "assert"		{ return T_assert; }
 "go"			{ return T_go; }
 
