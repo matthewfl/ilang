@@ -74,7 +74,7 @@ namespace ilang {
 		std::string, StringType,
 		//std::stringstream, StringType
 		ilang::Function, FunctionType,
-		Handle<ilang::Class>, ClassType,
+		//Handle<ilang::Class>, ClassType,
 		Handle<ilang::Object>, HashableType,
 		Handle<ilang::Object>, HashableType,
 		Handle<ilang::Class>, HashableType,

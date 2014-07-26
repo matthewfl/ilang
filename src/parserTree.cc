@@ -903,9 +903,8 @@ namespace ilang {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
-			// TODO:
-			//auto obj = make_handle<ilang::Object>(objects, ctx);
-			return valueMaker(true); //obj);
+			auto obj = make_handle<ilang::Object>(objects, ctx);
+			return valueMaker(obj);
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
 			//auto obj = make_handle<ilang::Object>(objects, ctx);
 			//return valueMaker(obj);

@@ -6,7 +6,6 @@
 using namespace ilang;
 
 
-
 TEST_CASE("Basic interaction with an object", "[object]") {
 	auto obj = valueMaker(make_handle<ilang::Object>());
 	Identifier t("test");
@@ -34,8 +33,8 @@ TEST_CASE("Parser tree object", "[object]") {
 
 TEST_CASE("Basic interaction with class", "[object]") {
 	auto cls = valueMaker(make_handle<ilang::Class>());
-	auto new_fun = cls->get(Identifier("new"));
 	REQUIRE(cls->type() == typeid(Hashable*));
+	auto new_fun = cls->get(Identifier("new"));
 	REQUIRE(new_fun->type() == typeid(Function));
 
 }

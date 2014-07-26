@@ -33,7 +33,7 @@ namespace ilang {
 	template <typename T> void //std::enable_if<std::is_base_of<Handle_counter, T>::value, void>::type
 	intrusive_ptr_release(T * p) {
 		//if(--(static_cast<Handle_counter*>(p)->ptr_count) == 0)
-			delete p;
+		//delete p;
 	}
 }
 
