@@ -4,7 +4,7 @@
 #include "identifier.h"
 #include "value.h"
 #include "variable_new.h"
-
+#include "handle.h"
 
 namespace ilang {
 	class Hashable {
@@ -14,7 +14,7 @@ namespace ilang {
 		//virtual void check(ilang::Identifier i, ValuePass v) {}
 		//virtual void set_no_check(ilang::Identifier i, ValuePass v) { set(i, v); }
 	  virtual bool has(ilang::Identifier)=0;
-		virtual shared_ptr<Variable> getVariable(ilang::Identifier)=0;
+		virtual Handle<Variable> getVariable(ilang::Identifier)=0;
 		virtual ~Hashable(){};
 	};
 }

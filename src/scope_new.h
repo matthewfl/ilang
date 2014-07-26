@@ -7,21 +7,23 @@
 
 
 #include "identifier.h"
+#include "handle.h"
 #include "hashable.h"
 #include "context.h"
 #include "variable_new.h"
+#include "handle.h"
 
 #include "helpers.h"
 
 
 namespace ilang {
 
-	class Scope;
-	typedef std::shared_ptr<Scope> ScopePass;
+	//class Scope;
+	//typedef Handle<Scope> ScopePass;
 
 	class Scope : public Hashable, boost::noncopyable {
 	private:
-		std::map<ilang::Identifier, shared_ptr<Variable> > m_vars;
+		std::map<ilang::Identifier, Handle<Variable> > m_vars;
 		Hashable *m_parent;
 		//ValuePass m_returned;
 		//ValuePass m_handle;
@@ -30,14 +32,14 @@ namespace ilang {
 		//ilang::Variable * _lookup(ilang::Identifier);
 	public:
 		//ilang::Variable * lookup(ilang::Identifier);
-		shared_ptr<ilang::Variable> forceNew(ilang::Identifier, std::vector<ValuePass> modifiers);
+		Handle<Variable> forceNew(ilang::Identifier, std::vector<ValuePass> modifiers);
 
 		// Hashable
 		ValuePass get(ilang::Identifier);
 		void set(ilang::Identifier, ValuePass);
 		bool has(ilang::Identifier);
-		shared_ptr<Variable> getVariable(ilang::Identifier);
-		void insert(ilang::Identifier, shared_ptr<Variable>);
+		Handle<Variable> getVariable(ilang::Identifier);
+		void insert(ilang::Identifier, Handle<Variable>);
 
 		//Scope(Hashable *h) : m_parent(h) {}
 		Scope(Context &ctx) : m_parent(ctx.scope), m_ctx(&ctx) { ctx.scope = this; }

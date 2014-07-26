@@ -15,7 +15,7 @@ using namespace std;
 // TODO: make everything use a shared pointer or have some sort of memory heap managing thing to deal with variables going out of scope etc
 
 namespace ilang {
-	map<string, std::shared_ptr<Variable_modifier> > ilang_Variable_modifier_list;
+	map<string, Handle<Variable_modifier> > ilang_Variable_modifier_list;
 
 	bool Variable_Old::Check (boost::any &a) {
 		// for(auto it=Modifiers.begin(); it!=Modifiers.end(); it++) {
@@ -27,26 +27,26 @@ namespace ilang {
 		// }
 		return true;
 	}
-	shared_ptr<Variable_modifier> Variable_modifier::new_variable(Variable *self, std::string name) {
-		return shared_ptr<Variable_modifier>();
+	Handle<Variable_modifier> Variable_modifier::new_variable(Variable *self, std::string name) {
+		return Handle<Variable_modifier>();
 	}
 
 	Variable_Old::Variable_Old(string name, list<string> modifiers) {
 		Name = name;
 		//val = ValuePass(NULL);
 		for(list<string>::iterator it=modifiers.begin(); it!=modifiers.end(); it++) {
-			shared_ptr<Variable_modifier> m = ilang_Variable_modifier_list[*it];
+			Handle<Variable_modifier> m = ilang_Variable_modifier_list[*it];
 			if(!m)
 				cerr << "Variable modifier "<<*it<<" not found\n";
 			else {
-				//shared_ptr<Variable_modifier> vv = m->new_variable(this, name);
+				//Handle<Variable_modifier> vv = m->new_variable(this, name);
 				//Modifiers.push_back(vv ? vv : m);
 
 			}
 		}
 	}
 	void Variable_Old::Set(ValuePass_Old v) {
-		// this most likely will have a lot of calling of constructors and stuff for the shared_ptr
+		// this most likely will have a lot of calling of constructors and stuff for the Handle
 		assert(Check(v->Get()));
 		val=v;
 		debug(4, v << " " << val );
@@ -262,10 +262,10 @@ namespace {
 	public:
 		char* Name() { return "Const"; }
 		Const_var_type() : count(0) {}
-		std::shared_ptr<Variable_modifier> new_variable(Variable *v, std::string name) {
+		Handle<Variable_modifier> new_variable(Variable *v, std::string name) {
 			// this will leak when the variable goes out of scope
 			// this should not leak now that shared pointer is being used to track this
-			std::shared_ptr<Variable_modifier> p ( new Const_var_type<max> );
+			Handle<Variable_modifier> p ( new Const_var_type<max> );
 			return p;
 		}
 		bool Check(Variable *self, const boost::any &val) {

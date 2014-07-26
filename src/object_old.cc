@@ -29,14 +29,14 @@ namespace ilang {
 				debug(0, "Member in class overwritten within self");
 				assert(0);
 			}
-			auto var = make_shared<Variable>();
+			auto var = make_handle<Variable>();
 			//ilang::Variable *var = new Variable(toVector(*(it.first->modifiers)));
 			if(it.second) {
 				assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 				// TODO:
 				//var->Set(dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(scope));
 			}
-			members.insert(pair<Identifier, shared_ptr<Variable> >(name, var));
+			members.insert(pair<Identifier, Handle<Variable> >(name, var));
 		}
 	}
 	Object* Class::NewClass(ValuePass self) {

@@ -1,6 +1,6 @@
 #include "ilang.h"
 #include "import.h"
-#include "variable.h"
+#include "variable_new.h"
 
 #include <iostream>
 using namespace std;

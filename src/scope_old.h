@@ -5,15 +5,15 @@
 #include <string>
 #include "variable.h"
 
-#include <boost/shared_ptr.hpp>
+#include "handle.h"
 #include <boost/utility.hpp>
 
 
 namespace ilang {
-	//using boost::shared_ptr;
+	//using boost::Handle;
 
 	class Scope_Old;
-	typedef boost::shared_ptr<ilang::Scope_Old> ScopePass_Old;
+	typedef boost::Handle<ilang::Scope_Old> ScopePass_Old;
 	//typedef Scope* ScopePass;
 
 	class FileScope;

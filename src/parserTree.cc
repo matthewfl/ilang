@@ -1,11 +1,12 @@
 #include "parserTree.h"
 #include "parser.h"
-#include "scope.h"
-#include "object.h"
+#include "scope_new.h"
+#include "object_new.h"
 #include "function.h"
 #include "thread.h"
 #include "debug.h"
 #include "error.h"
+#include "value_types.h"
 
 // for string escape
 #include <boost/algorithm/string.hpp>
@@ -902,10 +903,11 @@ namespace ilang {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
-			auto obj = make_shared<ilang::Object_new>(objects, ctx);
-			return valueMaker(obj);
+			// TODO:
+			//auto obj = make_handle<ilang::Object>(objects, ctx);
+			return valueMaker(true); //obj);
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
-			//auto obj = make_shared<ilang::Object>(objects, ctx);
+			//auto obj = make_handle<ilang::Object>(objects, ctx);
 			//return valueMaker(obj);
 			//ilang::Value_Old *val = new ilang::Value_Old(obj);
 			//return ValuePass(val);
@@ -953,8 +955,8 @@ namespace ilang {
 		}
 		ValuePass Class::GetValue(Context &ctx) {
 			errorTrace("Creating class");
-			auto cls = make_shared<ilang::Class>(parents, objects, ctx);
-			return valueMaker(cls);
+			// TODO: auto cls = make_handle<ilang::Class>(parents, objects, ctx);
+			return valueMaker(true);
 			//ilang::Class *c = new ilang::Class(parents, objects, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(c);
 			//return ValuePass(val);
@@ -1020,7 +1022,7 @@ namespace ilang {
 			errorTrace("Creating Array");
 			assert(0);
 			// TODO: new arrays
-			//auto arr = make_shared<ilang::Array>(elements, modifiers, ctx);
+			//auto arr = make_handle<ilang::Array>(elements, modifiers, ctx);
 			//return valueMaker(arr);
 			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(arr);
@@ -1112,7 +1114,7 @@ namespace ilang {
 
 		ImportCall::ImportCall(list<Node*> *args) : Call(NULL, args) {
 			error(args->size() == 1, "import() expects 1 argument");
-			error(dynamic_cast<Value_Old*>(args->front()), "import() expects a Value_old");
+			error(dynamic_cast<parserNode::Value*>(args->front()), "import() expects a Value");
 		}
 
 		ValuePass ImportCall::GetValue(Context &ctx) {
@@ -1141,7 +1143,7 @@ namespace ilang {
 			// following arguments are values to be passed to the function, but they will be evaluated in the current thread
 			error(args->size() >= 1, "go call expects at least 1 argument " << args->size());
 			for(auto it : *args) {
-				assert(dynamic_cast<Value_Old*>(it));
+				assert(dynamic_cast<parserNode::Value*>(it));
 			}
 		}
 

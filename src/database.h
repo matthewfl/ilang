@@ -2,12 +2,13 @@
 #define _ilang_databsae
 
 #include "debug.h"
-#include "variable.h"
+#include "variable_new.h"
 
 #include "leveldb/db.h"
 
 #include <boost/filesystem.hpp>
 #include <stdio.h>
+#include <map>
 
 /* notes on the database
  * When networked: (raw storage, trust all nodes)

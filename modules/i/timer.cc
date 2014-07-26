@@ -84,8 +84,9 @@ namespace {
 		error(args[1]->type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
 		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], false);
 
-		auto obj = make_shared<ilang::Object>(time);
-		return valueMaker(obj);
+		// TODO: returning class instance
+		//auto obj = make_handle<ilang::Object>(time);
+		return valueMaker(false);
 	}
 
 	ValuePass setInterval(Arguments &args) {
@@ -95,8 +96,8 @@ namespace {
 		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], true);
 
 
-		auto obj = make_shared<ilang::Object>(time);
-		return valueMaker(obj);
+		//auto obj = make_handle<ilang::Object>(time);
+		return valueMaker(false); //obj);
 	}
 
 

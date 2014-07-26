@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "variable.h"
+#include "variable_new.h"
 #include "parserTree.h"
-#include "scope.h"
+#include "scope_new.h"
 #include "hashable.h"
 
 
@@ -16,8 +16,8 @@ namespace ilang {
 	class Object;
 	class Class : public Hashable {
 	private:
-		std::vector<shared_ptr<Class> > parents;
-		std::map<ilang::Identifier, shared_ptr<Variable> > members;
+		std::vector<Handle<Class> > parents;
+		std::map<ilang::Identifier, Handle<Variable> > members;
 		//std::vector<Class*> parents;
 		//std::map<std::string, ilang::Variable*> members;
 	public:
@@ -32,7 +32,7 @@ namespace ilang {
 		virtual ValuePass get(ilang::Identifier i) {}
 		virtual void set(ilang::Identifier i, ValuePass v) {}
 		virtual bool has(ilang::Identifier i) {}// return (bool)get(i); }
-		shared_ptr<Variable> getVariable(ilang::Identifier i) override {}
+		Handle<Variable> getVariable(ilang::Identifier i) override {}
 	};
 	class ObjectScope;
 	//typedef std::string storedData;
@@ -65,7 +65,7 @@ namespace ilang {
 		ValuePass get(ilang::Identifier i) {}
 		void set(ilang::Identifier i, ValuePass v) {}
 		bool has(ilang::Identifier i) {}
-		shared_ptr<Variable> getVariable(ilang::Identifier i) override {}
+		Handle<Variable> getVariable(ilang::Identifier i) override {}
 	};
 	class Array : public Object {
 		//friend storedData *DB_createStoredData(const boost::any&);

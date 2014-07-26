@@ -17,11 +17,11 @@ Scope::~Scope() {
 // 	return NULL;
 // }
 
-shared_ptr<ilang::Variable> Scope::forceNew(ilang::Identifier i, std::vector<ValuePass> modifiers) {
+Handle<Variable> Scope::forceNew(ilang::Identifier i, std::vector<ValuePass> modifiers) {
 	assert(m_vars.find(i) == m_vars.end());
 	for(auto it : modifiers) { assert(it); }
-	auto var = make_shared<ilang::Variable>(modifiers);
-	m_vars.insert(pair<Identifier, shared_ptr<Variable> >(i, var));
+	auto var = make_handle<ilang::Variable>(modifiers);
+	m_vars.insert(pair<Identifier, Handle<Variable> >(i, var));
 	return var;
 }
 
@@ -60,15 +60,15 @@ bool Scope::has(ilang::Identifier i) {
 	return m_vars.find(i) != m_vars.end() || m_parent && m_parent->has(i);
 }
 
-shared_ptr<Variable> Scope::getVariable(ilang::Identifier i) {
+Handle<Variable> Scope::getVariable(ilang::Identifier i) {
 	auto it = m_vars.find(i);
 	if(it == m_vars.end())
-		return shared_ptr<Variable>();
+		return Handle<Variable>();
 	return it->second;
 }
 
-void Scope::insert(ilang::Identifier i, shared_ptr<Variable> v) {
-	m_vars.insert(pair<Identifier, shared_ptr<Variable> >(i, v));
+void Scope::insert(ilang::Identifier i, Handle<Variable> v) {
+	m_vars.insert(pair<Identifier, Handle<Variable> >(i, v));
 }
 
 void Scope::Debug() {

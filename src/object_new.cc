@@ -1,6 +1,7 @@
 #include "object_new.h"
 #include "function.h"
 #include "error.h"
+#include "value_types.h"
 
 using namespace ilang;
 using namespace std;
@@ -19,9 +20,9 @@ ValuePass Object_ish::get(Identifier i) {
 void Object_ish::set(Identifier i, ValuePass v) {
 	auto it = m_members.find(i);
 	if(it == m_members.end()) {
-		auto var = make_shared<Variable>();
+		auto var = make_handle<Variable>();
 		var->Set(v);
-		m_members.insert(pair<Identifier, shared_ptr<Variable> >(i, var));
+		m_members.insert(pair<Identifier, Handle<Variable> >(i, var));
 	} else {
 		it->second->Set(v);
 	}
@@ -31,12 +32,12 @@ bool Object_ish::has(Identifier i) {
 	return m_members.find(i) != m_members.end();
 }
 
-shared_ptr<Variable> Object_ish::getVariable(ilang::Identifier i) {
+Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
 	if(i == "this") {
 		// can just create a new variable here which holds the reference to
 		// the this ptr
-		auto ptr = m_self.lock();
-		auto ret = make_shared<Variable>();
+		auto ptr = Handle<Hashable>(this);
+		auto ret = make_handle<Variable>();
 		ret->Set(valueMaker(ptr));
 		return ret;
 	}
@@ -46,18 +47,18 @@ shared_ptr<Variable> Object_ish::getVariable(ilang::Identifier i) {
 }
 
 
-Class_new::Class_new() {
+Class::Class() {
 
 }
 
-Class_new::Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope) {
-	assert(p && obj && scope);
-	for(auto it : *p) {
+// Class_new::Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass scope) {
+// 	assert(p && obj && scope);
+// 	for(auto it : *p) {
 
-	}
-}
+// 	}
+// }
 
-ValuePass Class_new::get(Identifier i) {
+ValuePass Class::get(Identifier i) {
 	if(has(i)) {
 		return Object_ish::get(i);
 	}
@@ -98,11 +99,11 @@ ValuePass Class_new::get(Identifier i) {
 	assert(0); // so, not found
 }
 
-Object_new::Object_new() {
+Object::Object() {
 
 }
 
-Object_new::Object_new(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx) : Object_ish() {
+Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx) : Object_ish() {
 	Context ctx_to;
 	ctx_to.scope = this;
 	for(auto it : *obj) {

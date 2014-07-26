@@ -27,24 +27,24 @@ namespace ilang {
 	class Hashable;
 	class Array;
 	class Object;
-	class Object_new;
-	class Class_new;
+	class Object;
+	class Class;
 	class Class_instance;
 	class HashableType : public Value_new {
 	public:
-		HashableType(std::shared_ptr<Hashable>);
-		template<typename T> HashableType(std::shared_ptr<T> t) {
-			auto h = std::dynamic_pointer_cast<Hashable>(t);
-			m_ptr = new std::shared_ptr<Hashable>(h);
+		HashableType(Handle<Hashable>);
+		template<typename T> HashableType(Handle<T> t) {
+			auto h = dynamic_pointer_cast<Hashable>(t);
+			m_ptr = new Handle<Hashable>(h);
 		}
-		//HashableType(std::shared_ptr<Object>);
-		//HashableType(std::shared_ptr<Array>);
+		//HashableType(Handle<Object>);
+		//HashableType(Handle<Array>);
 		HashableType(const HashableType&);
 		~HashableType();
 
 		virtual const std::type_info &type();
 		virtual void copyTo(void *d);
-		virtual std::shared_ptr<Hashable> Cast(cast_chooser<Hashable*>);
+		virtual Handle<Hashable> Cast(cast_chooser<Hashable*>);
 
 		ValuePass get(Identifier key);
 		void set(Identifier key, ValuePass value);
@@ -53,13 +53,13 @@ namespace ilang {
 	class Class;
 	class ClassType : public Value_new {
 	public:
-		ClassType(std::shared_ptr<Class>);
+		ClassType(Handle<Class>);
 		ClassType(const ClassType&);
 		~ClassType();
 
 		virtual const std::type_info &type();
 		virtual void copyTo(void *d);
-		virtual std::shared_ptr<Class> Cast(cast_chooser<ilang::Class*>);
+		virtual Handle<Class> Cast(cast_chooser<ilang::Class*>);
 	};
 
 	static auto valueMaker = _valueMaker<
@@ -70,17 +70,17 @@ namespace ilang {
 		float, FloatType,
 		bool, BoolType,
 		const char*, StringType,
-		char*, StringType,
+		//char*, StringType,
 		std::string, StringType,
 		//std::stringstream, StringType
 		ilang::Function, FunctionType,
-		std::shared_ptr<ilang::Class>, ClassType,
-		std::shared_ptr<ilang::Object>, HashableType,
-		std::shared_ptr<ilang::Object_new>, HashableType,
-		std::shared_ptr<ilang::Class_new>, HashableType,
-		std::shared_ptr<ilang::Class_instance>, HashableType,
-		std::shared_ptr<ilang::Array>, HashableType,
-		std::shared_ptr<ilang::Hashable>, HashableType
+		Handle<ilang::Class>, ClassType,
+		Handle<ilang::Object>, HashableType,
+		Handle<ilang::Object>, HashableType,
+		Handle<ilang::Class>, HashableType,
+		Handle<ilang::Class_instance>, HashableType,
+		Handle<ilang::Array>, HashableType,
+		Handle<ilang::Hashable>, HashableType
 		>();
 }
 

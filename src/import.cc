@@ -1,7 +1,7 @@
 #include "import.h"
-#include "scope.h"
-#include "variable.h"
-#include "object.h"
+#include "scope_new.h"
+#include "variable_new.h"
+#include "object_new.h"
 #include "parserTree.h"
 #include "parser.h"
 #include "function.h"
@@ -143,18 +143,18 @@ namespace ilang {
 		scope->vars.find("test");
 		}*/
 
-	void ImportScopeFile::load(std::shared_ptr<Object> o) {
+	void ImportScopeFile::load(Handle<Object> o) {
 		//ilang::Variable *v = o->operator[]("test");
 		//v->Set(new ilang::Value_Old((long)123));
 
-		for(auto it : m_Scope->vars) {
-			cout << it.first << endl;
-			ilang::Variable *v = o->operator[](it.first);
-			v->Set(it.second->Get());
-		}
+		// for(auto it : m_Scope->vars) {
+		// 	cout << it.first << endl;
+		// 	ilang::Variable *v = o->operator[](it.first);
+		// 	v->Set(it.second->Get());
+		// }
 	}
 
-	void ImportScope::get(std::shared_ptr<Object> obj, fs::path &pa) {
+	void ImportScope::get(Handle<Object> obj, fs::path &pa) {
 		auto find = ImportedFiles.find(pa);
 		if(find != ImportedFiles.end()) {
 			find->second->load(obj);
@@ -216,7 +216,7 @@ namespace ilang {
 		// }
 	}
 
-	std::shared_ptr<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
+	Handle<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
 		assert(!path.empty());
 		assert(0);
 		// TODO:
@@ -236,7 +236,7 @@ namespace ilang {
 		// return GetObject(obj, path);
 	}
 
-	std::shared_ptr<Object> ImportScopeFile::GetObject(std::shared_ptr<Object> o, std::list<std::string> &path) {
+	Handle<Object> ImportScopeFile::GetObject(Handle<Object> o, std::list<std::string> &path) {
 		path.pop_front();
 		if(path.empty()) return o;
 		// TODO:
@@ -267,24 +267,24 @@ namespace ilang {
 		string n = name;
 		m_members.insert(pair<std::string, ValuePass>(n, val));
 	}
-	void ImportScopeC::load(std::shared_ptr<Object> obj) {
-		for(auto it : m_members) {
-			//cout << "load: " << it.first << endl;
-			ilang::Variable *v = obj->operator[](it.first);
-			assert(0); // TODO:
-			//v->Set(it.second);
-		}
+	void ImportScopeC::load(Handle<Object> obj) {
+		// for(auto it : m_members) {
+		// 	//cout << "load: " << it.first << endl;
+		// 	ilang::Variable *v = obj->operator[](it.first);
+		// 	assert(0); // TODO:
+		// 	//v->Set(it.second);
+		// }
 	}
 
 
 
-	shared_ptr<ilang::Object> ImportGetByName(std::string name) {
+	Handle<ilang::Object> ImportGetByName(std::string name) {
 
 		boost::replace_all(name, ".", "\/");
 		fs::path p = GlobalImportScope.locateFile(name);
 		if(p.empty()) return NULL;
 		//Object *obj = new Object;
-		auto obj = make_shared<Object>();
+		auto obj = make_handle<Object>();
 		GlobalImportScope.get(obj, p);
 
 		return obj;
@@ -328,7 +328,7 @@ namespace ilang {
 namespace {
 	using namespace ilang;
 	ValuePass ilang_import_get(Arguments &args) {
-		auto obj = std::make_shared<Object>();
+		auto obj = make_handle<Object>();
 		//Object *obj = new Object;
 
 		error(args.size() == 1, "i.Import.check expects 1 argument");

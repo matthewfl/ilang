@@ -10,8 +10,8 @@
 
 #include "context.h"
 
-#include "variable.h"
-#include "scope.h"
+#include "variable_new.h"
+#include "scope_new.h"
 #include "parserTree.h"
 
 
@@ -91,7 +91,7 @@ namespace ilang {
 		ilang::parserNode::Function *func = NULL;
 		friend class Arguments;
 		//Context ctx;
-		std::map<ilang::Identifier, shared_ptr<Variable> > m_bound;
+		std::map<ilang::Identifier, Handle<Variable> > m_bound;
 		void bind_self(Hashable*);
 		//Scope m_bound;
 

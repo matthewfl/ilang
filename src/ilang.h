@@ -4,8 +4,9 @@
 // the interface for modules that are compiled
 
 #include "import.h"
-#include "object.h"
+#include "object_new.h"
 #include "function.h"
+#include "value_types.h"
 #include <string>
 
 #include <iostream>
@@ -104,13 +105,14 @@ namespace ilang {
 	public:
 		// this should not end up using the context in this state
 		// need ot create a new constructure for this
-		Class_Creater_class () : Class(NULL, NULL, _void_context) {}
+		Class_Creater_class () {} //: Class(NULL, NULL, _void_context) {}
 		Object * NewClass (ValuePass self) {
-			return new Object(new cc);
+			return NULL;
+			//return new Object(new cc);
 		}
 	};
 	template<typename cc> ValuePass Class_Creater() {
-		auto c = make_shared<Class_Creater_class<cc> >();
+		auto c = make_handle<Class_Creater_class<cc> >();
 		return valueMaker(dynamic_pointer_cast<Class>(c));
 		//ilang::Class *c = new Class_Creater_class<cc>();
 		//return ValuePass(new ilang::Value_Old(c));

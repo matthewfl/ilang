@@ -2,7 +2,7 @@
 #include "value_types.h"
 #include "function.h"
 #include "hashable.h"
-#include "object.h"
+#include "object_new.h"
 
 using namespace ilang;
 using namespace std;
@@ -185,50 +185,50 @@ ValuePass FunctionType::call(ilang::Arguments &args) {
 }
 
 
-HashableType::HashableType(std::shared_ptr<Hashable> h) {
-	m_ptr = new std::shared_ptr<Hashable>(h);
+HashableType::HashableType(Handle<Hashable> h) {
+	m_ptr = new Handle<Hashable>(h);
 }
-// HashableType::HashableType(std::shared_ptr<Object> o) {
+// HashableType::HashableType(Handle<Object> o) {
 // 	auto h = std::dynamic_pointer_cast<Hashable>(o);
-// 	m_ptr = new std::shared_ptr<Hashable>(h);
+// 	m_ptr = new Handle<Hashable>(h);
 // }
-// HashableType::HashableType(std::shared_ptr<Array> a) {
+// HashableType::HashableType(Handle<Array> a) {
 // 	auto h = std::dynamic_pointer_cast<Hashable>(a);
-// 	m_ptr = new std::shared_ptr<Hashable>(h);
+// 	m_ptr = new Handle<Hashable>(h);
 // }
 HashableType::HashableType(const HashableType &h) {
-	m_ptr = new std::shared_ptr<Hashable>(*(shared_ptr<Hashable>*)h.m_ptr);
+	m_ptr = new Handle<Hashable>(*(Handle<Hashable>*)h.m_ptr);
 }
 HashableType::~HashableType() {
-	delete (std::shared_ptr<Hashable>*)m_ptr;
+	delete (Handle<Hashable>*)m_ptr;
 }
 const std::type_info& HashableType::type() { return typeid(Hashable*); }
-std::shared_ptr<Hashable> HashableType::Cast(cast_chooser<Hashable*> c) {
-	return *(std::shared_ptr<Hashable>*)m_ptr;
+Handle<Hashable> HashableType::Cast(cast_chooser<Hashable*> c) {
+	return *(Handle<Hashable>*)m_ptr;
 }
 void HashableType::copyTo(void *d) {
 	new (d) HashableType(*this);
 }
 ValuePass HashableType::get(Identifier key) {
-	return (*(std::shared_ptr<Hashable>*)m_ptr)->get(key);
+	return (*(Handle<Hashable>*)m_ptr)->get(key);
 }
 void HashableType::set(Identifier key, ValuePass value) {
-	(*(std::shared_ptr<Hashable>*)m_ptr)->set(key, value);
+	(*(Handle<Hashable>*)m_ptr)->set(key, value);
 }
 
-ClassType::ClassType(std::shared_ptr<Class> c) {
-	m_ptr = new std::shared_ptr<Class>(c);
+ClassType::ClassType(Handle<Class> c) {
+	m_ptr = new Handle<Class>(c);
 }
 ClassType::ClassType(const ClassType &c) {
-	m_ptr = new std::shared_ptr<Class>(*(shared_ptr<Class>*)c.m_ptr);
+	m_ptr = new Handle<Class>(*(Handle<Class>*)c.m_ptr);
 }
 ClassType::~ClassType() {
-	delete (std::shared_ptr<Class>*)m_ptr;
+	delete (Handle<Class>*)m_ptr;
 }
 const std::type_info& ClassType::type() { return typeid(Class*); }
 void ClassType::copyTo(void *d) {
 	new (d) ClassType(*this);
 }
-std::shared_ptr<Class> ClassType::Cast(cast_chooser<Class*> c) {
-	return *(std::shared_ptr<Class>*)m_ptr;
+Handle<Class> ClassType::Cast(cast_chooser<Class*> c) {
+	return *(Handle<Class>*)m_ptr;
 }

@@ -1,5 +1,4 @@
 #include "function.h"
-#include "scope.h"
 #include "error.h"
 
 using namespace ilang;

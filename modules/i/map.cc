@@ -1,8 +1,10 @@
 // this is a very bad hack to make this work, in the future I would like to be able to have some sort of visitor system that allows for this to be done in a clean way.
 
 #define private public
-#include "object.h"
+#define protected public
+#include "object_new.h"
 #undef private
+#undef protected
 
 #include "ilang.h"
 #include "error.h"
@@ -54,9 +56,9 @@ namespace {
 			ValuePass emitFunctVal = valueMaker(emit_fun);
 
 			assert(m_obj);
-			for(auto vals : m_obj->members) {
+			for(auto vals : m_obj->m_members) {
 				if(vals.first == "this") continue;
-				ilang::Variable *var = vals.second;
+				auto val = vals.second;
 				// TODO: var->Get()
 				// ValuePass ret = funct(valueMaker(vals.first), 1, emitFunctVal);
 			}
@@ -92,8 +94,9 @@ namespace {
 				#undef CALL_WITH
 			*/
 
-			auto obj = make_shared<ilang::Object>(returnMapper);
-			return valueMaker(obj);
+			//auto obj = make_handle<ilang::Object>(returnMapper);
+
+			return valueMaker(true);//obj);
 		}
 
 		ValuePass Get(Arguments &args) {
@@ -132,8 +135,8 @@ namespace {
 			ValuePass ret;
 
 			for(auto vals : m_emitted) {
-				auto arr_ = make_shared<ilang::Array>(vals.second);
-				ValuePass arr = valueMaker(arr_);
+				//auto arr_ = make_handle<ilang::Array>(vals.second);
+				ValuePass arr = valueMaker(true);//arr_); // TODO:
 				CALL_WITH(vals.first, arr);
 			}
 
@@ -168,12 +171,12 @@ namespace {
 		error(args[0]->type() == typeid(ilang::Object*), "map.create expects type of object");
 		ilang::Object *obj = args[0]->cast<Object*>().get(); //boost::any_cast<ilang::Object*>(args[0]->Get());
 		assert(obj);
-		error(dynamic_cast<ilang::Array*>(obj) == NULL, "map.create does not work on arrays");
+		//error(dynamic_cast<ilang::Array*>(obj) == NULL, "map.create does not work on arrays");
 
 		Mapper *map = new Mapper(args[0], obj);
 
-		auto obj_ = make_shared<ilang::Object>(map);
-		return valueMaker(obj_);
+		//auto obj_ = make_handle<ilang::Object>(map);
+		return valueMaker(false);//obj_);
 
 	}
 

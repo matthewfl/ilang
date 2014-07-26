@@ -5,6 +5,7 @@
 #include "identifier.h"
 #include "value.h"
 #include "variable_new.h"
+#include "handle.h"
 #include <map>
 #include <vector>
 
@@ -16,14 +17,14 @@ namespace ilang {
 
 	class Object_ish : public Hashable {
 	protected:
-		std::map<Identifier, shared_ptr<Variable> > m_members;
+		std::map<Identifier, Handle<Variable> > m_members;
 		std::weak_ptr<Hashable> m_self;
 		Object_ish() {}
 	public:
 		ValuePass get(ilang::Identifier) override;
 		void set(ilang::Identifier, ValuePass) override;
 		bool has(ilang::Identifier) override;
-		shared_ptr<Variable> getVariable(ilang::Identifier) override;
+		Handle<Variable> getVariable(ilang::Identifier) override;
 		virtual ~Object_ish() {}
 	};
 
@@ -41,15 +42,15 @@ namespace ilang {
 	// 				*ret = (self ->* fun)(args);
 	// 				assert(*ret);
 	// 			});
-	// 		auto var = make_shared<Variable>();
+	// 		auto var = make_handle<Variable>();
 	// 		var->Set(valueMaker(f));
-	// 		m_members.insert(std::pair<Identifier, shared_ptr<Variable> >(id, var));
+	// 		m_members.insert(std::pair<Identifier, Handle<Variable> >(id, var));
 	// 	}
 
 	// };
 
 
-	class Class_new : public Object_ish {
+	class Class : public Object_ish {
 	private:
 		std::vector<ValuePass> m_parents;
 		//std::map<ilang::Identifier, ilang::Variable> m_members;
@@ -57,8 +58,8 @@ namespace ilang {
 		// std::map<ilang::Identifier, ilang::ValuePass> m_members;
 		// std::map<ilang::Identifier, std::vector<ilang::ValuePass> > m_modifiers;
 	public:
-		Class_new();
-		Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
+		Class();
+		//Class_new(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
 
 		ValuePass get(Identifier i);
 	};
@@ -75,13 +76,18 @@ namespace ilang {
 
 	// };
 
-	class Object_new : public Object_ish {
+	class Object : public Object_ish {
 	private:
 		//ValuePass m_cls_handle;
 		//std::map<ilang::Identifier, ilang::ValuePass> m_objs;
 	public:
-		Object_new();
-		Object_new(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+		Object();
+		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+	};
+
+
+	class Array : public Hashable {
+
 	};
 
 }

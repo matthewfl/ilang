@@ -1,6 +1,7 @@
 #include "base.h"
 #include "scope_new.h"
 #include "function.h"
+#include "value_types.h"
 
 using namespace ilang;
 using namespace std;

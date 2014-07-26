@@ -28,7 +28,7 @@ namespace ilang {
 	class Class;
 	class Hashable;
 
-	typedef shared_ptr<Object> Object_ptr;
+	typedef Handle<Object> Object_ptr;
 
 
 	class ValuePass {
@@ -135,7 +135,7 @@ namespace ilang {
 			char *m_str;
 			long m_identifier;
 			void *m_ptr;
-			char m_sptr[sizeof(std::shared_ptr<void>)];
+			char m_sptr[sizeof(Handle<void*>)];
 		};
 
   public:
@@ -153,10 +153,10 @@ namespace ilang {
 		virtual bool Cast(cast_chooser<bool> c) RAISE_ERROR;
 		virtual std::string Cast(cast_chooser<std::string> c) RAISE_ERROR;
 		virtual ilang::Function* Cast(cast_chooser<ilang::Function*> c) RAISE_ERROR;
-		virtual std::shared_ptr<Hashable> Cast(cast_chooser<Hashable*> c) RAISE_ERROR;
-		virtual std::shared_ptr<Class> Cast(cast_chooser<Class*> c) RAISE_ERROR;
-		virtual std::shared_ptr<Object> Cast(cast_chooser<Object*> c) RAISE_ERROR;
-		virtual std::shared_ptr<Array> Cast(cast_chooser<Array*> c) RAISE_ERROR;
+		virtual Handle<Hashable> Cast(cast_chooser<Hashable*> c) RAISE_ERROR;
+		virtual Handle<Class> Cast(cast_chooser<Class*> c) RAISE_ERROR;
+		virtual Handle<Object> Cast(cast_chooser<Object*> c) RAISE_ERROR;
+		virtual Handle<Array> Cast(cast_chooser<Array*> c) RAISE_ERROR;
 		virtual Identifier Cast(cast_chooser<Identifier> c) RAISE_ERROR;
 
 	public:

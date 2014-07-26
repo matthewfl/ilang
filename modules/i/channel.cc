@@ -1,5 +1,5 @@
 #include "ilang.h"
-#include "variable.h"
+#include "variable_new.h"
 #include "error.h"
 #include "thread.h"
 
@@ -64,8 +64,8 @@ namespace {
 			channelLength = args[0]->cast<int>();
 		}
 		threadChannel *ch = new threadChannel(channelLength);
-		auto obj = make_shared<ilang::Object>(ch);
-		return valueMaker(obj);
+		//auto obj = make_handle<ilang::Object>(ch);
+		return valueMaker(true); //obj);
 	}
 
 	ILANG_LIBRARY_NAME("i/channel",

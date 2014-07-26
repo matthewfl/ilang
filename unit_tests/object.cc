@@ -1,14 +1,14 @@
 #include "base.h"
-#include "object.h"
 #include "object_new.h"
 #include "function.h"
+#include "value_types.h"
 
 using namespace ilang;
 
 
 
 TEST_CASE("Basic interaction with an object", "[object]") {
-	auto obj = valueMaker(make_shared<ilang::Object_new>());
+	auto obj = valueMaker(make_handle<ilang::Object>());
 	Identifier t("test");
 	auto v = valueMaker(123);
 	obj->set(t, v);
@@ -33,7 +33,7 @@ TEST_CASE("Parser tree object", "[object]") {
 }
 
 TEST_CASE("Basic interaction with class", "[object]") {
-	auto cls = valueMaker(make_shared<ilang::Class_new>());
+	auto cls = valueMaker(make_handle<ilang::Class>());
 	auto new_fun = cls->get(Identifier("new"));
 	REQUIRE(cls->type() == typeid(Hashable*));
 	REQUIRE(new_fun->type() == typeid(Function));

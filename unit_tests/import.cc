@@ -1,7 +1,6 @@
 #include "base.h"
 #define private public
 #include "import.h"
-#include "object.h"
 #include "function.h"
 
 using namespace ilang;

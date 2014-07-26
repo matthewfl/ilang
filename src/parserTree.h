@@ -5,10 +5,10 @@
 #include <map>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+//#include <boost/Handle.hpp>
 
 #include "context.h"
-#include "variable.h"
+#include "variable_new.h"
 #include "scope_new.h"
 #include "import.h"
 #include "print.h"
@@ -31,8 +31,8 @@ namespace ilang {
 		using std::vector;
 		using std::list;
 
-		//using boost::shared_ptr;
-		//typedef boost::shared_ptr<ilang::Value_Old> ValuePass;
+		//using boost::Handle;
+		//typedef boost::Handle<ilang::Value_Old> ValuePass;
 		using ilang::ValuePass; // defined in variable.h
 		//using ilang::ValuePass;
 		class Node {

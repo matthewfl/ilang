@@ -1,7 +1,7 @@
 #include "ilang.h"
 #include "error.h"
 #include "function.h"
-#include "object.h"
+#include "object_new.h"
 #include "debug.h"
 
 //#include <boost/thread/shared_mutex.hpp>
@@ -382,8 +382,8 @@ namespace {
 		Request *req = (Request*) parser->data;
 		debug(4, "got to point where headers are done" );
 		// believe that request is ready at this point
-		auto rr_ = make_shared<ilang::Object>(req);
-		ValuePass rr = valueMaker(rr_);
+		//auto rr_ = make_handle<ilang::Object>(req);
+		ValuePass rr = valueMaker(true);
 		// at this point Request will be deleted when rr is lost
 		vector<ValuePass> params = {rr};
 		//ValuePass ret = ValuePass(new ilang::Value);
@@ -526,8 +526,8 @@ namespace {
 		error(args[0]->type() == typeid(long), "httpd.create 1st argument is a port number");
 		error(args[1]->type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
 		Server *ser = new Server(args[1], args[0]->cast<int>());
-		auto obj = make_shared<ilang::Object>(ser);
-		return valueMaker(obj);
+		//auto obj = make_handle<ilang::Object>(ser);
+		return valueMaker(true);//obj);
 	}
 }
 
