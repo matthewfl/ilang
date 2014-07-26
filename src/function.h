@@ -41,16 +41,22 @@ namespace ilang {
 		template<typename T> void unwrap(T t) {
 			push(valueMaker(t));
 		}
-
 		void unwrap(ilang::ValuePass t) {
 			push(t);
 		}
-
 		template<typename T, typename... types> void unwrap(T t, types... values) {
 			unwrap(t);
 			unwrap(values...);
 		}
 		void populate(Context &ctx, Function*);
+
+		void injector(std::vector<ilang::ValuePass>::iterator it) {}
+		template<typename T, typename... types> void injector(std::vector<ilang::ValuePass>::iterator it, T &t, types & ... values) {
+			assert(it != end());
+			(*it)->inject(t);
+			it++;
+			injector(it, values...);
+		}
 
 		friend class Function;
 	public:
@@ -77,6 +83,7 @@ namespace ilang {
 		}
 
 		template <typename... types> void inject(types & ... values) {
+			injector(begin(), values...);
 		}
 		// int a; std::stinrg b; args.inject(a, b);
 

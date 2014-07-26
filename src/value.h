@@ -165,6 +165,22 @@ namespace ilang {
 			return Cast(c);
 		}
 
+		template <typename T> void inject(Handle<T> &t) {
+			auto v = cast<T*>();
+			t = v;
+		}
+		template <typename T> void inject(T &t) {
+			auto v = cast<T>();
+			inject_helper(t, v);
+		}
+	private:
+		template <typename T> void inject_helper(T* &t, Handle<T> v) {
+			t = v.get();
+		}
+		template <typename T> void inject_helper(T &t, T v) {
+			t = v;
+		}
+
 		// math mixins
 	public:
 		virtual ValuePass operator + (ValuePass v) RAISE_ERROR;

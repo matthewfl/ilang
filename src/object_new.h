@@ -74,6 +74,7 @@ namespace ilang {
 
 		ValuePass get(Identifier i);
 		bool has(Identifier i);
+		friend class Class;
 	};
 
 	class Object : public Object_ish {

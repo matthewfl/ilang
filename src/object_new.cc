@@ -108,7 +108,12 @@ ValuePass Class::get(Identifier i) {
 		// instance function
 		Handle<Class> cls(this);
 		ilang::Function inst([cls](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
-				*ret = valueMaker(true);
+				Hashable *hash;
+				args.inject(hash);
+				auto c = dynamic_cast<Class_instance*>(hash);
+				// TODO: check if one of the parent classes
+				bool r = c && (c->m_class == cls);
+				*ret = valueMaker(r);
 			});
 		return valueMaker(inst);
 	}
