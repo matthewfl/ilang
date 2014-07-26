@@ -6,9 +6,10 @@
 #include <vector>
 
 #include "helpers.h"
+#include "handle.h"
 
 namespace ilang {
-	class Variable {
+	class Variable : public Handle_base {
 	private:
 
 		//std::vector<ilang::Function> m_modifiers_set;

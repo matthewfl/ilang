@@ -7,7 +7,7 @@
 #include "handle.h"
 
 namespace ilang {
-	class Hashable {
+	class Hashable : public Handle_base {
 	public:
 		virtual ValuePass get(ilang::Identifier)=0;
 		virtual void set(ilang::Identifier, ValuePass)=0;

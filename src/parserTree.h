@@ -7,6 +7,7 @@
 
 //#include <boost/Handle.hpp>
 
+#include "handle.h"
 #include "context.h"
 #include "variable_new.h"
 #include "scope_new.h"

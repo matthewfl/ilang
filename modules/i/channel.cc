@@ -3,6 +3,8 @@
 #include "error.h"
 #include "thread.h"
 
+#include "handle.h"
+
 #include <tbb/concurrent_queue.h>
 
 namespace {

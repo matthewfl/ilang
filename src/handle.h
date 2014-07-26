@@ -2,8 +2,10 @@
 #define _ilang_handle
 
 #include <memory>
-#include <boost/intrusive_ptr.hpp>
+#include <boost/smart_ptr.hpp>
 #include <atomic>
+#include <assert.h>
+
 
 namespace ilang {
 	// using std::make_handle;
@@ -12,28 +14,37 @@ namespace ilang {
 
 	// template <typename T> using Handle = Handle<T>;
 
+	//template <typename T> using make_handle = make_handle<T>;
 	template <typename T> using Handle = boost::intrusive_ptr<T>;
 	using boost::dynamic_pointer_cast;
+
 	template <typename T, typename... args> Handle<T> make_handle(args... arg) {
 		return Handle<T>(new T(arg...));
 	}
 
-	//template <typename T> using make_handle = make_handle<T>;
-
-	class Handle_counter {
+	class Handle_base {
 	private:
-		std::atomic<unsigned int> ptr_count;//(0); // hopefully this zeros it out, which it seems to imply
-		template <typename T> friend void intrusive_ptr_add_ref(T*);
-		template <typename T> friend void intrusive_ptr_release(T*);
+		mutable std::atomic<unsigned int> ptr_count;
+		friend void handle_ptr_add_ref(const Handle_base *);
+		friend bool handle_ptr_release(const Handle_base *);
+	public:
+		Handle_base() { ptr_count = 0; }
 	};
-	template <typename T> void //std::enable_if<std::is_base_of<Handle_counter, T>::value, void>::type
-	intrusive_ptr_add_ref(T * p) {
-		//static_cast<Handle_counter*>(p)->ptr_count++;
+
+	inline void handle_ptr_add_ref(const Handle_base * p) {
+		p->ptr_count++;
 	}
-	template <typename T> void //std::enable_if<std::is_base_of<Handle_counter, T>::value, void>::type
-	intrusive_ptr_release(T * p) {
-		//if(--(static_cast<Handle_counter*>(p)->ptr_count) == 0)
-		//delete p;
+	inline bool handle_ptr_release(const Handle_base * p) {
+		assert(p->ptr_count != 0);
+		return --p->ptr_count;
+	}
+	template <typename T> inline void intrusive_ptr_add_ref(const T *p) {
+		handle_ptr_add_ref(p);
+	}
+	template <typename T> inline void intrusive_ptr_release(const T *p) {
+		if(!handle_ptr_release(p)) {
+			delete p;
+		}
 	}
 }
 

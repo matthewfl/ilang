@@ -2,6 +2,8 @@
 #include "import.h"
 #include "variable_new.h"
 
+#include "handle.h"
+
 #include <iostream>
 using namespace std;
 using namespace ilang;

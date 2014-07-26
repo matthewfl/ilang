@@ -154,12 +154,12 @@ $(libuv): ./deps/libuv/include/uv.h
 build/parserTree.o: src/parserTree.h src/context.h src/variable_new.h
 build/parserTree.o: src/debug.h src/value.h src/handle.h src/identifier.h
 build/parserTree.o: src/helpers.h src/scope_new.h src/hashable.h src/import.h
-build/parserTree.o: src/print.h src/parser.h src/function.h src/thread.h
-build/parserTree.o: src/error.h
+build/parserTree.o: src/print.h src/parser.h src/object_new.h src/function.h
+build/parserTree.o: src/thread.h src/error.h src/value_types.h
 build/import.o: src/import.h src/debug.h src/variable_new.h src/value.h
 build/import.o: src/handle.h src/identifier.h src/helpers.h src/scope_new.h
-build/import.o: src/hashable.h src/context.h src/parserTree.h src/print.h
-build/import.o: src/parser.h src/function.h src/error.h src/ilang.h
+build/import.o: src/hashable.h src/context.h src/object_new.h src/parserTree.h
+build/import.o: src/print.h src/parser.h src/function.h src/error.h src/ilang.h
 build/import.o: src/value_types.h
 build/parser.o: src/parser.h src/debug.h
 build/database.o: src/database.h src/debug.h src/variable_new.h src/value.h
@@ -169,16 +169,16 @@ build/database.o: deps/leveldb/include/leveldb/iterator.h
 build/database.o: deps/leveldb/include/leveldb/slice.h
 build/database.o: deps/leveldb/include/leveldb/status.h
 build/database.o: deps/leveldb/include/leveldb/options.h src/ilang.h
-build/database.o: src/import.h src/function.h src/context.h src/scope_new.h
-build/database.o: src/hashable.h src/parserTree.h src/print.h src/value_types.h
-build/database.o: src/error.h build/database.pb.h
+build/database.o: src/import.h src/object_new.h src/hashable.h src/parserTree.h
+build/database.o: src/context.h src/scope_new.h src/print.h src/function.h
+build/database.o: src/value_types.h src/error.h build/database.pb.h
 build/error.o: src/error.h
 build/print.o: src/print.h src/debug.h
 build/init.o: src/ilang.h src/import.h src/debug.h src/variable_new.h
 build/init.o: src/value.h src/handle.h src/identifier.h src/helpers.h
-build/init.o: src/function.h src/context.h src/scope_new.h src/hashable.h
-build/init.o: src/parserTree.h src/print.h src/value_types.h src/database.h
-build/init.o: deps/leveldb/include/leveldb/db.h
+build/init.o: src/object_new.h src/hashable.h src/parserTree.h src/context.h
+build/init.o: src/scope_new.h src/print.h src/function.h src/value_types.h
+build/init.o: src/database.h deps/leveldb/include/leveldb/db.h
 build/init.o: deps/leveldb/include/leveldb/iterator.h
 build/init.o: deps/leveldb/include/leveldb/slice.h
 build/init.o: deps/leveldb/include/leveldb/status.h
@@ -193,7 +193,7 @@ build/function.o: src/print.h src/error.h
 build/value.o: src/value.h src/debug.h src/handle.h src/identifier.h
 build/value.o: src/value_types.h src/hashable.h src/variable_new.h
 build/value.o: src/helpers.h src/function.h src/context.h src/scope_new.h
-build/value.o: src/parserTree.h src/import.h src/print.h
+build/value.o: src/parserTree.h src/import.h src/print.h src/object_new.h
 build/identifier.o: src/identifier.h
 build/object_new.o: src/object_new.h src/hashable.h src/identifier.h
 build/object_new.o: src/value.h src/debug.h src/handle.h src/variable_new.h
