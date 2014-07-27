@@ -13,6 +13,7 @@
 #include <iostream>
 //using namespace std;
 
+#include "exception.h"
 #include "handle.h"
 #include "identifier.h"
 
@@ -87,6 +88,7 @@ namespace ilang {
 
 	// TODO: change to raise an exception that is caught
 #define RAISE_ERROR {assert(0);}
+#define RAISE_TYPE_ERROR(typ) { throw BadValueCastType<typ>(); }
 
 	enum math_ops {
 		OP_add,
@@ -146,18 +148,18 @@ namespace ilang {
 		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value_new)); }
 
 		// cast mixins
-		virtual int Cast(cast_chooser<int> c) RAISE_ERROR;
-		virtual long Cast(cast_chooser<long> c) RAISE_ERROR;
-		virtual float Cast(cast_chooser<float> c) RAISE_ERROR;
-		virtual double Cast(cast_chooser<double> c) RAISE_ERROR;
-		virtual bool Cast(cast_chooser<bool> c) RAISE_ERROR;
-		virtual std::string Cast(cast_chooser<std::string> c) RAISE_ERROR;
-		virtual ilang::Function* Cast(cast_chooser<ilang::Function*> c) RAISE_ERROR;
-		virtual Handle<Hashable> Cast(cast_chooser<Hashable*> c) RAISE_ERROR;
-		virtual Handle<Class> Cast(cast_chooser<Class*> c) RAISE_ERROR;
-		virtual Handle<Object> Cast(cast_chooser<Object*> c) RAISE_ERROR;
-		virtual Handle<Array> Cast(cast_chooser<Array*> c) RAISE_ERROR;
-		virtual Identifier Cast(cast_chooser<Identifier> c) RAISE_ERROR;
+		virtual int Cast(cast_chooser<int> c) RAISE_TYPE_ERROR(int);
+		virtual long Cast(cast_chooser<long> c) RAISE_TYPE_ERROR(long);
+		virtual float Cast(cast_chooser<float> c) RAISE_TYPE_ERROR(float);
+		virtual double Cast(cast_chooser<double> c) RAISE_TYPE_ERROR(double);
+		virtual bool Cast(cast_chooser<bool> c) RAISE_TYPE_ERROR(double);
+		virtual std::string Cast(cast_chooser<std::string> c) RAISE_TYPE_ERROR(std::string);
+		virtual ilang::Function* Cast(cast_chooser<ilang::Function*> c) RAISE_TYPE_ERROR(ilang::Function*);
+		virtual Handle<Hashable> Cast(cast_chooser<Hashable*> c) RAISE_TYPE_ERROR(Hashable*);
+		virtual Handle<Class> Cast(cast_chooser<Class*> c) RAISE_TYPE_ERROR(Class*);
+		virtual Handle<Object> Cast(cast_chooser<Object*> c) RAISE_TYPE_ERROR(Object*);
+		virtual Handle<Array> Cast(cast_chooser<Array*> c) RAISE_TYPE_ERROR(Array*);
+		virtual Identifier Cast(cast_chooser<Identifier> c) RAISE_TYPE_ERROR(Identifier);
 
 	public:
 		template <typename T> auto cast() {

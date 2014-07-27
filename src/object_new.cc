@@ -140,7 +140,7 @@ ValuePass Class::get(Identifier i) {
 						}
 						it.second->Check(v);
 					}
-				} catch(BadTypeCheck &e) {
+				} catch(BadType &e) {
 					*ret = valueMaker(false);
 					return;
 				}

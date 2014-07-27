@@ -11,9 +11,19 @@ namespace ilang {
 		virtual const char* what() const throw() override { return "ilang Exception"; }
 	};
 
-	class BadTypeCheck : public Exception {
+	class BadType : public Exception {};
+
+	class BadTypeCheck : public BadType {
 	public:
 		const char* name() override { return "BadTypeCheck"; }
+	};
+
+	class BadValueCast : public BadType {
+	public:
+		const char* name() override { return "BadValueCast"; }
+	};
+
+	template <typename T> class BadValueCastType : public BadValueCast {
 	};
 
 } // namespace ilang

@@ -10,3 +10,19 @@ TEST_CASE("Variable modifiers", "[variable]") {
 					 );
 	REQUIRE(asserted);
 }
+
+TEST_CASE("Builtin variable modifiers", "[variable]") {
+	init();
+	REQUIRE_NOTHROW(
+	  RUN_CODE(
+					 Int a = 5;
+					 main = {};
+					 ) ;
+	);
+	REQUIRE_THROWS_AS(
+		RUN_CODE(
+						 Int a = 5.5;
+						 main = {};
+						 ) ;
+		, BadType) ;
+}

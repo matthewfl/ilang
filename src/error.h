@@ -28,13 +28,13 @@ namespace ilang {
 
 #define error(check, message)																						\
 	if(!( check )) {																											\
-		error_print_trace();																								\
+		ilang::error_print_trace();																					\
 		std::cerr << "\n\n" << __FILE__ << ":" << __LINE__ << " \t" << message << std::endl << std::flush; \
 		exit(1);																														\
 	}
 
 #define errorTrace(message)											\
-	error_trace _errors;													\
+	ilang::error_trace _errors;										\
 	{ _errors.stream() << message ; }
 
 #endif // _ilang_error

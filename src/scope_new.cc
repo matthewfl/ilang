@@ -32,8 +32,11 @@ ValuePass Scope::get(ilang::Identifier i) {
 	if(it != m_vars.end()) {
 		ret = it->second->Get();
 	} else {
-		assert(m_parent);
-		ret = m_parent->get(i);
+		if(!m_parent) {
+			// just use the global scope if there is no parent
+			ret = global_scope_lookup(i);
+		} else
+			ret = m_parent->get(i);
 	}
 	assert(ret);
 	return ret;
@@ -79,17 +82,21 @@ void Scope::Debug() {
 
 static std::map<ilang::Identifier, ilang::ValuePass> *global_scope = NULL;
 
-ValuePass global_scope_lookup(ilang::Identifier i) {
-	if(!global_scope)
-		global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
-	auto it = global_scope->find(i);
-	if(it == global_scope->end())
-		return ValuePass();
-	return it->second;
-}
+namespace ilang {
 
-void global_scope_register(ilang::Identifier i, ValuePass v) {
-	if(!global_scope)
-		global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
-	global_scope->insert(std::pair<ilang::Identifier, ilang::ValuePass>(i, v));
+	ValuePass global_scope_lookup(ilang::Identifier i) {
+		if(!global_scope)
+			global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
+		auto it = global_scope->find(i);
+		if(it == global_scope->end())
+			return ValuePass();
+		return it->second;
+	}
+
+	void global_scope_register(ilang::Identifier i, ValuePass v) {
+		if(!global_scope)
+			global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
+		global_scope->insert(std::pair<ilang::Identifier, ilang::ValuePass>(i, v));
+	}
+
 }
