@@ -15,16 +15,17 @@
 
 namespace ilang {
 
-	class Object_ish : public Hashable {
+	class Object_ish : public Iterable /* Hashable */ {
 	protected:
 		std::map<Identifier, Handle<Variable> > m_members;
-		std::weak_ptr<Hashable> m_self;
 		Object_ish() {}
 	public:
 		ValuePass get(ilang::Identifier) override;
 		void set(ilang::Identifier, ValuePass) override;
 		bool has(ilang::Identifier) override;
 		Handle<Variable> getVariable(ilang::Identifier) override;
+		Hashable_iterator begin() override;
+		Hashable_iterator end() override;
 		virtual ~Object_ish() {}
 	};
 
@@ -51,6 +52,7 @@ namespace ilang {
 
 
 	class Class : public Object_ish {
+		// TODO: iterating over the items including the parents
 	private:
 		std::vector<ValuePass> m_parents;
 		//std::map<ilang::Identifier, ilang::Variable> m_members;

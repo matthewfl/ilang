@@ -21,6 +21,7 @@ namespace ilang {
 		Variable() {}
 		void Set(ilang::ValuePass);
 		ilang::ValuePass &Get() { assert(m_value); return m_value; }
+		void Check(ilang::ValuePass);
 	};
 
 	using Variable_ptr = Handle<Variable>;

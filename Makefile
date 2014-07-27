@@ -151,8 +151,8 @@ $(libuv): ./deps/libuv/include/uv.h
 
 # DO NOT DELETE
 
-build/parserTree.o: src/parserTree.h src/context.h src/variable_new.h
-build/parserTree.o: src/debug.h src/value.h src/handle.h src/identifier.h
+build/parserTree.o: src/parserTree.h src/handle.h src/context.h
+build/parserTree.o: src/variable_new.h src/debug.h src/value.h src/identifier.h
 build/parserTree.o: src/helpers.h src/scope_new.h src/hashable.h src/import.h
 build/parserTree.o: src/print.h src/parser.h src/object_new.h src/function.h
 build/parserTree.o: src/thread.h src/error.h src/value_types.h
@@ -203,7 +203,7 @@ build/object_new.o: src/error.h src/value_types.h
 build/variable_new.o: src/variable_new.h src/debug.h src/value.h src/handle.h
 build/variable_new.o: src/identifier.h src/helpers.h src/function.h
 build/variable_new.o: src/context.h src/scope_new.h src/hashable.h
-build/variable_new.o: src/parserTree.h src/import.h src/print.h
+build/variable_new.o: src/parserTree.h src/import.h src/print.h src/exception.h
 build/scope_new.o: src/scope_new.h src/identifier.h src/handle.h src/hashable.h
 build/scope_new.o: src/value.h src/debug.h src/variable_new.h src/helpers.h
 build/scope_new.o: src/context.h

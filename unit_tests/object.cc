@@ -56,6 +56,26 @@ TEST_CASE("Basic class create", "[object]") {
 }
 
 
+TEST_CASE("iterate object", "[object]") {
+	auto tree = PARSE_TREE(
+												 gg = object {
+												  a:1,
+												  b: 2,
+												 };
+												 );
+	tree->Link();
+	auto scope = tree->GetScope();
+	auto gg_ = scope->get("gg");
+	auto gg = gg_->cast<Hashable*>();
+	Handle<Iterable> ggi = dynamic_pointer_cast<Iterable>(gg);
+	REQUIRE(ggi.get() != NULL);
+	int c = 0;
+	for(auto it : *ggi) {
+		c++;
+	}
+	REQUIRE(c == 2);
+}
+
 // TEST_CASE("Basic interaction with an object", "[object]") {
 // 	init();
 // 	Object *o = new Object();

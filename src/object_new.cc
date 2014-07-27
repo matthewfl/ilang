@@ -2,6 +2,7 @@
 #include "function.h"
 #include "error.h"
 #include "value_types.h"
+#include "exception.h"
 
 using namespace ilang;
 using namespace std;
@@ -11,8 +12,7 @@ ValuePass Object_ish::get(Identifier i) {
 	assert(it != m_members.end());
 	ValuePass ret = it->second->Get();
 	if(ret->type() == typeid(ilang::Function)) {
-		auto ptr = m_self.lock();
-		return valueMaker(ret->cast<ilang::Function*>()->bind(ptr.get()));
+		return valueMaker(ret->cast<ilang::Function*>()->bind(this));
 	}
 	return ret;
 }
@@ -44,6 +44,14 @@ Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
 	auto it = m_members.find(i);
 	assert(it != m_members.end());
 	return it->second;
+}
+
+Hashable_iterator Object_ish::begin() {
+	return Hashable_iterator(m_members.begin());
+}
+
+Hashable_iterator Object_ish::end() {
+	return Hashable_iterator(m_members.end());
 }
 
 
@@ -121,6 +129,21 @@ ValuePass Class::get(Identifier i) {
 		// interface function
 		Handle<Class> cls(this);
 		ilang::Function inter([cls](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
+				Hashable *hash;
+				args.inject(hash);
+				try {
+					for(auto it : *cls) {
+						ValuePass v = hash->get(it.first);
+						if(!v) {
+							*ret = valueMaker(false);
+							return;
+						}
+						it.second->Check(v);
+					}
+				} catch(BadTypeCheck &e) {
+					*ret = valueMaker(false);
+					return;
+				}
 				*ret = valueMaker(true);
 			});
 		return valueMaker(inter);
