@@ -181,3 +181,58 @@ Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> 
 		it.first->Set(ctx_to, val);
 	}
 }
+
+Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserNode::Node*> *elems, Context &ctx) {
+	m_modifiers.reserve(mods->size());
+	for(auto it : *mods) {
+		m_modifiers.push_back(dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
+	}
+	m_members.reserve(elems->size());
+	for(auto it : *elems) {
+		auto var = make_handle<Variable>(m_modifiers);
+		var->Set(dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
+		m_members.push_back(var);
+	}
+}
+
+ValuePass Array::get(Identifier i) {
+	if(i.raw() < 0x0200000000000000) { // this is an item in the array
+		if(m_members.size() < i.raw()) {
+			assert(0); // TODO: raise an exception or something...
+		}
+		auto v = m_members.at(i.raw());
+		return v->Get();
+	}
+	if(i == Identifier("length")) {
+		return valueMaker(m_members.size());
+	}
+	// TODO: other array methods
+}
+
+void Array::set(Identifier i, ValuePass v) {
+	if(i.raw() >= 0x0200000000000000) {
+		assert(0); // trying to set some string type???
+	}
+	// TODO: if member already exists use that variable
+	auto h = make_handle<Variable>(m_modifiers);
+	h->Set(v);
+	m_members[i.raw()] = h;
+}
+
+bool Array::has(Identifier i) {
+	if(i.raw() < 0x0200000000000000) {
+		return i.raw() < m_members.size();
+	}
+	return i == Identifier("length");
+}
+
+Handle<Variable> Array::getVariable(Identifier i) {
+	if(i.raw() >= 0x0200000000000000) {
+		assert(0); // well there is basically no variable
+	}
+	if(i.raw() >= m_members.size()) {
+		assert(0); // TODO: exception about not having...
+	}
+	auto h = m_members[i.raw()];
+	return h;
+}

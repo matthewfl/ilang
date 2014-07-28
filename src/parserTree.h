@@ -312,13 +312,13 @@ namespace ilang {
 			ValuePass GetValue (Context&); // returns null
 			void Print(Printer*);
 		};
-		class NewCall : public Call {
-			friend class ilang::Modification;
-		public:
-			NewCall(std::list<Node*> *args);
-			ValuePass GetValue(Context&);
-			void Print(Printer*);
-		};
+		// class NewCall : public Call {
+		// 	friend class ilang::Modification;
+		// public:
+		// 	NewCall(std::list<Node*> *args);
+		// 	ValuePass GetValue(Context&);
+		// 	void Print(Printer*);
+		// };
 
 		class AssertCall : public Call {
 			friend class ilang::Modification;

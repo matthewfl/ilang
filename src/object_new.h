@@ -90,7 +90,15 @@ namespace ilang {
 
 
 	class Array : public Hashable {
-
+		std::vector<Handle<Variable> > m_members;
+		std::vector<ValuePass> m_modifiers;
+	public:
+		Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserNode::Node*> *elems, Context &ctx);
+		Array(std::vector<ValuePass> elems);
+		ValuePass get(Identifier) override;
+		void set(Identifier, ValuePass) override;
+		bool has(Identifier) override;
+		Handle<Variable> getVariable(Identifier);
 	};
 
 }

@@ -64,9 +64,21 @@ bool Scope::has(ilang::Identifier i) {
 }
 
 Handle<Variable> Scope::getVariable(ilang::Identifier i) {
+	// TODO: this needs to call parent scopes, so that bind can bind to higher scopes..
 	auto it = m_vars.find(i);
-	if(it == m_vars.end())
-		return Handle<Variable>();
+	if(it == m_vars.end()) {
+		if(m_parent) {
+			return m_parent->getVariable(i);
+		} else {
+			ValuePass g = global_scope_lookup(i);
+			if(g) {
+				auto var = make_handle<Variable>();
+				var->Set(g);
+				return var;
+			}
+			return Handle<Variable>();
+		}
+	}
 	return it->second;
 }
 

@@ -193,7 +193,6 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 
 Call		:	Expr '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
-		|	T_new '(' ParamList OptComma')'		{ $$ = new NewCall($3); }
 		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
 		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }

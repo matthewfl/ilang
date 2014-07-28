@@ -24,7 +24,7 @@ ILANG_VARIABLE_CHECKER(Number) {
 
 ILANG_VARIABLE_CHECKER(Function) {
 	// TODO: make this more advance to it can check the type params of the function
-	return var->type() == typeid(Function*);
+	return var->type() == typeid(Function); // omfg this isn't Function*
 }
 
 ILANG_VARIABLE_CHECKER(Object) {

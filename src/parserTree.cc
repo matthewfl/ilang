@@ -1007,6 +1007,12 @@ namespace ilang {
 		Array::Array (std::list<Node*> *e, std::list<Node*> *m) : elements(e), modifiers(m) {
 			assert(e);
 			if(!modifiers) modifiers = new std::list<Node*>;
+			for(auto it : *modifiers) {
+				assert(dynamic_cast<parserNode::Value*>(it));
+			}
+			for(auto it : *elements) {
+				assert(dynamic_cast<parserNode::Value*>(it));
+			}
 		}
 
 		void Array::Run(Context &ctx) {
@@ -1018,8 +1024,9 @@ namespace ilang {
 
 		ValuePass Array::GetValue(Context &ctx) {
 			errorTrace("Creating Array");
-			assert(0);
-			// TODO: new arrays
+
+			auto arr = make_handle<ilang::Array>(modifiers, elements, ctx);
+			return valueMaker(arr);
 			//auto arr = make_handle<ilang::Array>(elements, modifiers, ctx);
 			//return valueMaker(arr);
 			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
@@ -1056,30 +1063,30 @@ namespace ilang {
 			p->p() << "]";
 		}
 
-		NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
-			// might change the grammer to reflect that this needs one element
-			// might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
+		// NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
+		// 	// might change the grammer to reflect that this needs one element
+		// 	// might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
 
-			error(args->size() == 1, "New only takes one argument");
-			error(dynamic_cast<Value*>(args->front()), "First argument to New needs to be a Value");
-		}
-		ValuePass NewCall::GetValue(Context &ctx) {
-			errorTrace("New Call");
-			assert(0); // TODO:
-			// ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
-			// error(a->Get().type() == typeid(ilang::Class*), "Can not create something with new that is not a class");
-			// ilang::Value_Old *val = new ilang::Value_Old( boost::any_cast<ilang::Class*>(a->Get())->NewClass(a) ); // returns an Object*
-			// //ilang::Value_Old *val = new ilang::Value_Old( new ilang::Object(a) );
-			// // TODO: make this call an init function that is defined in the class
-			// // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
-			// return ValuePass(val);
-		}
+		// 	error(args->size() == 1, "New only takes one argument");
+		// 	error(dynamic_cast<Value*>(args->front()), "First argument to New needs to be a Value");
+		// }
+		// ValuePass NewCall::GetValue(Context &ctx) {
+		// 	errorTrace("New Call");
+		// 	assert(0); // TODO:
+		// 	// ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
+		// 	// error(a->Get().type() == typeid(ilang::Class*), "Can not create something with new that is not a class");
+		// 	// ilang::Value_Old *val = new ilang::Value_Old( boost::any_cast<ilang::Class*>(a->Get())->NewClass(a) ); // returns an Object*
+		// 	// //ilang::Value_Old *val = new ilang::Value_Old( new ilang::Object(a) );
+		// 	// // TODO: make this call an init function that is defined in the class
+		// 	// // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
+		// 	// return ValuePass(val);
+		// }
 
-		void NewCall::Print (Printer *p) {
-			p->p() << "new(";
-			params->front()->Print(p);
-			p->p() << ")";
-		}
+		// void NewCall::Print (Printer *p) {
+		// 	p->p() << "new(";
+		// 	params->front()->Print(p);
+		// 	p->p() << ")";
+		// }
 
 		AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
 			for(auto it : *args) {
