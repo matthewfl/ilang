@@ -1,5 +1,6 @@
 #include "function.h"
 #include "error.h"
+#include "value_types.h"
 
 using namespace ilang;
 using namespace std;
@@ -34,6 +35,7 @@ void Arguments::populate(Context &ctx, Function *func) {
 }
 
 ValuePass Arguments::get(int i) {
+	// TODO: should this raise an exception
 	return i < pargs.size() ? pargs.at(i) : ValuePass();
 }
 
@@ -110,31 +112,40 @@ void Function::vvv() {
 
 ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 	ValuePass ret;
-	ScopeFake bound_items(&m_bound, ctx);
-	{
+	try {
+		ScopeFake bound_items(&m_bound, ctx);
+		{
 
-		Scope scope(ctx);
-		args.populate(ctx, this);
+			Scope scope(ctx);
+			args.populate(ctx, this);
 
-		if(native) {
-			ptr(ctx, args, &ret);
-		}else{
-			if(func->body) {
-				for(auto n : *func->body) {
-					if(ctx.returned) break;
-					assert(n);
-					n->Run(ctx);
+			if(native) {
+				ptr(ctx, args, &ret);
+			}else{
+				if(func->body) {
+					for(auto n : *func->body) {
+						if(ctx.returned) break;
+						assert(n);
+						n->Run(ctx);
+					}
 				}
+				// this seems bad....
+				// thinking that using excpetions to break out might
+				// be a good?? idea
+				if(ctx.returned && ctx.returned != (ValuePass*)1) {
+					ret = *ctx.returned;
+					delete ctx.returned;
+				}
+				ctx.returned = NULL;
+				//ptr(scopep, args.pargs, &ret);
 			}
-			// this seems bad....
-			// thinking that using excpetions to break out might
-			// be a good?? idea
-			if(ctx.returned && ctx.returned != (ValuePass*)1) {
-				ret = *ctx.returned;
-				delete ctx.returned;
-			}
-			ctx.returned = NULL;
-			//ptr(scopep, args.pargs, &ret);
+		}
+	} catch(BadType &e) {
+		// should this only apply to when checking the arguments??
+		if(m_alternate) {
+			ret = m_alternate->call(args);
+		} else {
+			throw;
 		}
 	}
 	return ret;
@@ -177,6 +188,18 @@ void Function::bind_self(Hashable *h) {
 			}
 		}
 	}
+	// this is somewhat inefficent....
+	if(m_alternate) {
+		ValuePass temp = valueMaker(m_alternate->cast<ilang::Function*>()->bind(h));
+		m_alternate = temp;
+	}
+}
+
+Function Function::alternate(ilang::ValuePass alt) {
+	assert(alt->type() == typeid(Function));
+	Function ret(*this);
+	ret.m_alternate = alt;
+	return ret;
 }
 
 Function::Function(const Function &func) {
@@ -187,6 +210,7 @@ Function::Function(const Function &func) {
 	ptr = func.ptr;
 	this->func = func.func;
 	m_bound.insert(func.m_bound.begin(), func.m_bound.end());
+	m_alternate = func.m_alternate;
 	vvv();
 }
 
@@ -196,22 +220,6 @@ Function::~Function() {
 	native = false;
 	//cout << "delete function " << this << endl << flush;
 }
-
-// Function::Function(const Function *func) {
-// 	assert(this != func);
-// 	const_cast<ilang::Function*>(func)->vvv();
-// 	native = func->native;
-// 	ptr = func->ptr;
-// 	//contained_scope = func.contained_scope;
-// 	//object_scope = func.object_scope;
-// 	this->func = func->func;
-// 	m_bound.insert(func->m_bound.begin(), func->m_bound.end());
-// 	//	assert(native || this->func);
-
-// 	//for(auto it : func.m_bound)
-// 	//	m_bound.insert(it->first, it->second);
-// 	vvv();
-// }
 
 Function::Function(parserNode::Function *f, Context &_ctx) { //, Function_ptr _ptr) {
 	func = f;

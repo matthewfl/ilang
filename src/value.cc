@@ -183,6 +183,11 @@ ValuePass FunctionType::call(ilang::Arguments &args) {
 	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ctx, args);
 	return gg;
 }
+ValuePass FunctionType::operator + (ValuePass v) {
+	assert(v->type() == typeid(Function)); // should raise some bad operation exception...
+	Function ret = ((ilang::Function*)m_ptr)->alternate(v);
+	return valueMaker(ret);
+}
 
 
 HashableType::HashableType(Handle<Hashable> h) {

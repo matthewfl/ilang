@@ -20,6 +20,8 @@ namespace ilang {
 		virtual const std::type_info &type();
 		virtual ValuePass call(ilang::Arguments &args);
 
+		virtual ValuePass operator + (ValuePass v) override;
+
 	protected:
 		virtual ilang::Function* Cast(cast_chooser<ilang::Function*> c) { return (ilang::Function*)m_ptr; }
 	};

@@ -102,6 +102,8 @@ namespace ilang {
 		void bind_self(Hashable*);
 		//Scope m_bound;
 
+		ValuePass m_alternate; // if the type check fails for this function call alternate
+
 	public:
 		void vvv();
 		template <typename... types> ilang::ValuePass operator() (types... values) {
@@ -120,6 +122,8 @@ namespace ilang {
 		Function bind(ilang::ValuePass); // bind to an object
 		Function bind(Context &ctx);
 		Function bind(Hashable*);
+
+		Function alternate(ilang::ValuePass);
 
 		Function(const Function &func);
 		Function(ilang::parserNode::Function *f, Context &ctx); //, Function_ptr _ptr);

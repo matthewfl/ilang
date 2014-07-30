@@ -191,7 +191,7 @@ build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
 build/function.o: src/function.h src/context.h src/variable_new.h src/debug.h
 build/function.o: src/value.h src/exception.h src/handle.h src/identifier.h
 build/function.o: src/helpers.h src/scope_new.h src/hashable.h src/parserTree.h
-build/function.o: src/import.h src/print.h src/error.h
+build/function.o: src/import.h src/print.h src/error.h src/value_types.h
 build/value.o: src/value.h src/debug.h src/exception.h src/handle.h
 build/value.o: src/identifier.h src/value_types.h src/hashable.h
 build/value.o: src/variable_new.h src/helpers.h src/function.h src/context.h

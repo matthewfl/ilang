@@ -306,11 +306,14 @@ namespace ilang {
 
 		IdentifierSet Function::UndefinedElements() {
 			IdentifierSet ret;
-			if(!body)
-				return ret;
-			for(auto it = body->rbegin(); it != body->rend(); it++) {
-				ret = unionSets(ret, (*it)->UndefinedElements());
-			}
+			if(body)
+				for(auto it = body->rbegin(); it != body->rend(); it++) {
+					ret = unionSets(ret, (*it)->UndefinedElements());
+				}
+			if(params)
+				for(auto it : *params) {
+					ret = unionSets(ret, it->UndefinedElements());
+				}
 			return ret;
 			// TODO: filter out elements that will be forced New, eg variables with types set for them
 		}

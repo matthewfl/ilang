@@ -94,3 +94,19 @@ TEST_CASE("function undefined elements", "[function]") {
 	// TODO: don't get elements that will be forcedNew
 	//REQUIRE(undef.find("qwer") == undef.end());
 }
+
+TEST_CASE("function combine", "[function]") {
+	init();
+	RUN_CODE(
+					 fun = {|Int _|
+							 return 1;
+					 } + {|Float _|
+								 return 2;
+					 };
+					 main = {
+						 assert(fun(1) == 1);
+						 assert(fun(1.5) == 2);
+					 };
+					 );
+	REQUIRE(!asserted);
+}
