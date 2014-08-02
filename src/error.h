@@ -26,6 +26,7 @@ namespace ilang {
 	extern std::list<error_trace*> ILANG_ERRORS_TRACE;
 }
 
+// TODO: raise an exception instead of kill the program
 #define error(check, message)																						\
 	if(!( check )) {																											\
 		ilang::error_print_trace();																					\

@@ -47,11 +47,13 @@ namespace ilang {
 		virtual const std::type_info &type();
 		virtual void copyTo(void *d);
 		virtual Handle<Hashable> Cast(cast_chooser<Hashable*>);
+		virtual Handle<Class> Cast(cast_chooser<Class*>); // TODO: make an new type??
 
 		ValuePass get(Identifier key);
 		void set(Identifier key, ValuePass value);
 	};
 
+	// TODO: remove?, class type isn't used
 	class Class;
 	class ClassType : public Value_new {
 	public:

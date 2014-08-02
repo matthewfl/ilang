@@ -64,6 +64,9 @@ namespace ilang {
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 
 		ValuePass get(Identifier i);
+
+		// Hashable_iterator begin() override;
+		// Hashable_iterator end() override;
 	};
 
 	class Class_instance : public Object_ish {

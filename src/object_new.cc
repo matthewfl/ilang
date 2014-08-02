@@ -65,7 +65,11 @@ Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode:
 	Context self;
 	self.scope = this;
 	for(auto it : *p) {
-		m_parents.push_back(dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
+		auto v = dynamic_cast<parserNode::Value*>(it)->GetValue(ctx);
+		auto ptr = v->cast<Class*>();
+		error(ptr, "Class can not inherit from non class");
+		m_parents.push_back(v);
+		m_members.insert(ptr->begin(), ptr->end());
 	}
 	for(auto it : *obj) {
 		// TODO: if there is no default value being set
@@ -150,6 +154,8 @@ ValuePass Class::get(Identifier i) {
 	}
 	assert(0); // so, not found
 }
+
+
 
 
 Class_instance::Class_instance(Handle<Class> c) : m_class(c) {}

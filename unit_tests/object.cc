@@ -76,6 +76,30 @@ TEST_CASE("iterate object", "[object]") {
 	REQUIRE(c == 2);
 }
 
+
+TEST_CASE("iterate class", "[object]") {
+	auto tree = PARSE_TREE(
+												 gg = class {
+												   a: 1,
+												 };
+												 ff = class (gg) {
+												   b: 2
+												 };
+												 );
+	tree->Link();
+	auto scope = tree->GetScope();
+	auto ff = scope->get("ff")->cast<Hashable*>();
+	Handle<Iterable> ffi = dynamic_pointer_cast<Iterable>(ff);
+	REQUIRE(ffi.get() != NULL);
+	int c = 0;
+	for(auto it : *ffi) {
+		c++;
+		bool r = it.first == "a" || it.first == "b";
+		REQUIRE(r);
+	}
+	REQUIRE(c == 2);
+}
+
 // TEST_CASE("Basic interaction with an object", "[object]") {
 // 	init();
 // 	Object *o = new Object();

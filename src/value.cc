@@ -211,6 +211,10 @@ const std::type_info& HashableType::type() { return typeid(Hashable*); }
 Handle<Hashable> HashableType::Cast(cast_chooser<Hashable*> c) {
 	return *(Handle<Hashable>*)m_ptr;
 }
+Handle<Class> HashableType::Cast(cast_chooser<Class*> c) {
+	auto p = *(Handle<Hashable>*)m_ptr;
+	return dynamic_pointer_cast<Class>(p);
+}
 void HashableType::copyTo(void *d) {
 	new (d) HashableType(*this);
 }

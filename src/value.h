@@ -77,7 +77,7 @@ namespace ilang {
 
 		operator bool () const { return *(long*)m_data != 0; }
 
-		ValuePass call(ilang::Arguments &a); // { return Get()->call(a); }
+		//ValuePass call(ilang::Arguments &a); // { return Get()->call(a); }
 		//ValuePass operator () (ilang::Arguments &a) { return call(a); }
 		//template<typename... types> ValuePass operator() (types... values);
 
