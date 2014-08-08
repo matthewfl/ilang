@@ -25,6 +25,21 @@ TEST_CASE("basic import i", "[import]") {
 	REQUIRE(sss->type() == typeid(ilang::Function));
 }
 
+TEST_CASE("import from other", "[import]") {
+	init();
+	SET_FILE("tests/another",
+					 ggg = { return 10; };
+					 );
+	RUN_CODE(
+					 from tests import another
+
+					 main = {
+						 assert(another.ggg() == 10);
+					 };
+					 );
+	REQUIRE(!asserted);
+}
+
 
 
 

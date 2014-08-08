@@ -38,7 +38,7 @@ ValuePass Scope::get(ilang::Identifier i) {
 		} else
 			ret = m_parent->get(i);
 	}
-	assert(ret);
+	assert(ret); // TODO: remove, just return an empty object
 	return ret;
 }
 

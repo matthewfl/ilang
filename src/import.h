@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "variable_new.h"
 //#include "object_new.h"
+#include "context.h"
 
 namespace ilang {
 //	class Scope;
@@ -39,8 +40,8 @@ namespace ilang {
 		ImportScope(ImportScope*, boost::filesystem::path);
 		boost::filesystem::path locateFile(boost::filesystem::path search);
 		void Import (boost::filesystem::path p);
-		virtual void load(Handle<Object>) {};
-		void get(Handle<Object>, fs::path&);
+		virtual void load(Handle<Hashable>) {};
+		void get(Handle<Hashable>, fs::path&);
 	};
 	extern ImportScope GlobalImportScope;
 
@@ -50,16 +51,16 @@ namespace ilang {
 		//FileScope *m_Scope;
 		std::list<std::pair<std::list<std::string>, fs::path> > imports;
 		parserNode::Head *m_head = NULL;
-		//Handle<Object> GetObject(Scope*, std::list<std::string>);
-		//Handle<Object> GetObject(Handle<Object> , std::list<std::string>&);
+		Handle<Hashable> GetObject(Context &ctx, std::list<std::string>);
+		Handle<Hashable> GetObject(Handle<Hashable> , std::list<std::string>&);
 		//Handle<Hashable> GetObject(std::vector<Identifier>);
 		friend class parserNode::Head;
 	public:
 		ImportScopeFile(fs::path p);
 		void push(std::list<std::string> *pre, std::list<std::string> *name);
-		//void resolve(Scope*);
+		void resolve(Context &ctx);
 
-		void load(Handle<Object>);
+		void load(Handle<Hashable>);
 		//void provide(FileScope*);
 	};
 
@@ -72,7 +73,7 @@ namespace ilang {
 		ImportScopeC(char *);
 		explicit ImportScopeC(fs::path p);
 		void Set(char *name, ValuePass val);
-		void load(Handle<Object>);
+		void load(Handle<Hashable>);
 	};
 
 	Handle<ilang::Object> ImportGetByName(std::string name);

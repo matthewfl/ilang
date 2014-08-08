@@ -33,11 +33,10 @@ namespace ilang {
 			scope = new Scope(ctx);
 
 			assert(ctx.scope == scope);
-			if(Import)
+			if(Import) {
 				Import->m_head = this;
-
-			//Import->resolve();
-			//Import->resolve(ctx);
+				Import->resolve(ctx);
+			}
 
 			// int unbound_statements = Declars->size();
 			// while(unbound_statements) {

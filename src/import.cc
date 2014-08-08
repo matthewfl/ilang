@@ -145,7 +145,7 @@ namespace ilang {
 		scope->vars.find("test");
 		}*/
 
-	void ImportScopeFile::load(Handle<Object> o) {
+	void ImportScopeFile::load(Handle<Hashable> o) {
 		for(auto it : *m_head->GetScope()) {
 			o->set(it.first, it.second->Get());
 		}
@@ -159,7 +159,7 @@ namespace ilang {
 		// }
 	}
 
-	void ImportScope::get(Handle<Object> obj, fs::path &pa) {
+	void ImportScope::get(Handle<Hashable> obj, fs::path &pa) {
 		auto find = ImportedFiles.find(pa);
 		if(find != ImportedFiles.end()) {
 			find->second->load(obj);
@@ -210,6 +210,14 @@ namespace ilang {
 		}
 	}
 
+	void ImportScopeFile::resolve(Context &ctx) {
+		for(auto it : imports) {
+			auto obj = GetObject(ctx, it.first);
+			get(obj, it.second);
+		}
+	}
+
+
 	// void ImportScopeFile::resolve(Scope *scope) {
 	// 	assert(0);
 	// 	// assert(dynamic_cast<FileScope*>(scope));
@@ -221,6 +229,38 @@ namespace ilang {
 	// 	// 	get(obj, it.second);
 	// 	// }
 	// }
+
+	Handle<Hashable> ImportScopeFile::GetObject(Context &ctx, std::list<std::string> path) {
+		ValuePass obj;
+		Handle<Hashable> o;
+		if(ctx.scope->has(path.front())) {
+			obj = ctx.scope->get(path.front());
+			assert(obj->type() == typeid(Hashable*));
+			o = obj->cast<Hashable*>();
+		}else{
+			o = make_handle<Object>();
+			obj = valueMaker(o);
+			ctx.scope->set(path.front(), obj);
+		}
+		return GetObject(o, path);
+	}
+
+	Handle<Hashable> ImportScopeFile::GetObject(Handle<Hashable> obj, std::list<std::string> &path) {
+		path.pop_front();
+		if(path.empty()) return obj;
+		ValuePass val;
+		Handle<Hashable> nex;
+		if(obj->has(path.front())) {
+			val = obj->get(path.front());
+			nex = val->cast<Hashable*>();
+		}else{
+			nex = make_handle<Object>();
+			val = valueMaker(nex);
+			obj->set(path.front(), val);
+		}
+		return GetObject(nex, path);
+	}
+
 
 	// Handle<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
 	// 	assert(!path.empty());
@@ -272,7 +312,7 @@ namespace ilang {
 		string n = name;
 		m_members.insert(pair<std::string, ValuePass>(n, val));
 	}
-	void ImportScopeC::load(Handle<Object> obj) {
+	void ImportScopeC::load(Handle<Hashable> obj) {
 		for(auto it : m_members) {
 			obj->set(Identifier(it.first), it.second);
 		}

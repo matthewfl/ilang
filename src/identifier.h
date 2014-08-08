@@ -12,7 +12,7 @@ namespace ilang {
 		unsigned long m_id;
 	public:
 		Identifier(const char*);
-		explicit Identifier(const std::string);
+		Identifier(const std::string);
 		explicit Identifier(unsigned long i) : m_id(i) {}
 		Identifier(const Identifier &i) : m_id(i.m_id) {}
 		bool operator==(const Identifier i) const { return m_id == i.m_id; }

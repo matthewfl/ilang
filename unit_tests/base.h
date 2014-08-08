@@ -42,20 +42,20 @@ static ilang::parserNode::Head *_build_tree(std::string code, char* fileName=NUL
 
 
 
-#define PARSE_TREE(...)														\
+#define PARSE_TREE(...)													\
 	_build_tree( #__VA_ARGS__ )
 
 #define SET_FILE(name, ...)											\
 	do {																					\
-	auto c = _build_tree( #__VA_ARGS__ , name); \
-	c->Link();																	\
+		auto c = _build_tree( #__VA_ARGS__ , name); \
+		c->Link();																	\
 	} while(0);
 
 #define RUN_CODE(X)																\
 	do {																						\
-	ilang::parserNode::Head *c = _build_tree( #X ); \
-	c->Link();																			\
-	c->Run();																				\
+		ilang::parserNode::Head *c = _build_tree( #X , __FILE__ "/gg.i"); \
+		c->Link();																													\
+		c->Run();																														\
 	} while(0);
 
 extern "C" int ilang_Assert_fails;
