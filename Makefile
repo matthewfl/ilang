@@ -170,15 +170,15 @@ build/database.o: deps/leveldb/include/leveldb/iterator.h
 build/database.o: deps/leveldb/include/leveldb/slice.h
 build/database.o: deps/leveldb/include/leveldb/status.h
 build/database.o: deps/leveldb/include/leveldb/options.h src/ilang.h
-build/database.o: src/import.h src/object_new.h src/hashable.h src/parserTree.h
-build/database.o: src/context.h src/scope_new.h src/print.h src/function.h
+build/database.o: src/import.h src/object_new.h src/hashable.h src/context.h
+build/database.o: src/function.h src/scope_new.h src/parserTree.h src/print.h
 build/database.o: src/value_types.h src/error.h build/database.pb.h
 build/error.o: src/error.h
 build/print.o: src/print.h src/debug.h
 build/init.o: src/ilang.h src/import.h src/debug.h src/variable_new.h
 build/init.o: src/value.h src/exception.h src/handle.h src/identifier.h
-build/init.o: src/helpers.h src/object_new.h src/hashable.h src/parserTree.h
-build/init.o: src/context.h src/scope_new.h src/print.h src/function.h
+build/init.o: src/helpers.h src/object_new.h src/hashable.h src/context.h
+build/init.o: src/function.h src/scope_new.h src/parserTree.h src/print.h
 build/init.o: src/value_types.h src/database.h
 build/init.o: deps/leveldb/include/leveldb/db.h
 build/init.o: deps/leveldb/include/leveldb/iterator.h
@@ -200,9 +200,9 @@ build/value.o: src/object_new.h
 build/identifier.o: src/identifier.h
 build/object_new.o: src/object_new.h src/hashable.h src/identifier.h
 build/object_new.o: src/value.h src/debug.h src/exception.h src/handle.h
-build/object_new.o: src/variable_new.h src/helpers.h src/parserTree.h
-build/object_new.o: src/context.h src/scope_new.h src/import.h src/print.h
-build/object_new.o: src/function.h src/error.h src/value_types.h
+build/object_new.o: src/variable_new.h src/helpers.h src/context.h
+build/object_new.o: src/function.h src/scope_new.h src/parserTree.h
+build/object_new.o: src/import.h src/print.h src/error.h src/value_types.h
 build/variable_new.o: src/variable_new.h src/debug.h src/value.h
 build/variable_new.o: src/exception.h src/handle.h src/identifier.h
 build/variable_new.o: src/helpers.h src/function.h src/context.h
@@ -215,8 +215,8 @@ build/variable_modifiers.o: src/variable_modifiers.h src/ilang.h src/import.h
 build/variable_modifiers.o: src/debug.h src/variable_new.h src/value.h
 build/variable_modifiers.o: src/exception.h src/handle.h src/identifier.h
 build/variable_modifiers.o: src/helpers.h src/object_new.h src/hashable.h
-build/variable_modifiers.o: src/parserTree.h src/context.h src/scope_new.h
-build/variable_modifiers.o: src/print.h src/function.h src/value_types.h
+build/variable_modifiers.o: src/context.h src/function.h src/scope_new.h
+build/variable_modifiers.o: src/parserTree.h src/print.h src/value_types.h
 build/variable_modifiers.o: src/error.h
 build/main.o: src/parser.h src/debug.h src/import.h src/variable_new.h
 build/main.o: src/value.h src/exception.h src/handle.h src/identifier.h

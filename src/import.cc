@@ -45,6 +45,8 @@ namespace ilang {
 		exe.remove_filename();
 		exe /= "/modules";
 		ImportSearchPaths.push_back(exe);
+#else
+#warning "Path local to the execuitable location will not be included"
 #endif
 	}
 
@@ -144,6 +146,9 @@ namespace ilang {
 		}*/
 
 	void ImportScopeFile::load(Handle<Object> o) {
+		for(auto it : *m_head->GetScope()) {
+			o->set(it.first, it.second->Get());
+		}
 		//ilang::Variable *v = o->operator[]("test");
 		//v->Set(new ilang::Value_Old((long)123));
 
@@ -191,6 +196,7 @@ namespace ilang {
 					//load_fun(imp);
 					*/
 				}else{
+					// TODO: error handling if there is no file
 					ilang::ImportScopeFile *imp = new ImportScopeFile(p);
 					FILE *f = fopen(p.c_str(), "r");
 					ilang::parserNode::Head *head = ilang::parser(f, imp, p.c_str());
@@ -204,57 +210,56 @@ namespace ilang {
 		}
 	}
 
-	void ImportScopeFile::resolve(Scope *scope) {
-		assert(0);
-		// assert(dynamic_cast<FileScope*>(scope));
-		// m_Scope = dynamic_cast<FileScope*>(scope);
-		// //std::list<std::string> tt = { "what_", "inthe", "world" };
-		// //load(GetObject(scope, tt));
-		// for(auto it : imports) {
-		// 	auto obj = GetObject(scope, it.first);
-		// 	get(obj, it.second);
-		// }
-	}
+	// void ImportScopeFile::resolve(Scope *scope) {
+	// 	assert(0);
+	// 	// assert(dynamic_cast<FileScope*>(scope));
+	// 	// m_Scope = dynamic_cast<FileScope*>(scope);
+	// 	// //std::list<std::string> tt = { "what_", "inthe", "world" };
+	// 	// //load(GetObject(scope, tt));
+	// 	// for(auto it : imports) {
+	// 	// 	auto obj = GetObject(scope, it.first);
+	// 	// 	get(obj, it.second);
+	// 	// }
+	// }
 
-	Handle<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
-		assert(!path.empty());
-		assert(0);
-		// TODO:
-		// ilang::Variable *var = scope->lookup(path.front());
-		// Object_ptr obj;
-		// if(var->isSet()) {
+	// Handle<Object> ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
+	// 	assert(!path.empty());
+	// 	assert(0);
+	// 	// TODO:
+	// 	// ilang::Variable *var = scope->lookup(path.front());
+	// 	// Object_ptr obj;
+	// 	// if(var->isSet()) {
 
-		// 	boost::any &a = var->Get()->Get();
-		// 	assert(a.type() == typeid(ilang::Object*));
-		// 	obj = boost::any_cast<ilang::Object*>(a);
-		// }else{
-		// 	// TODO:
-		// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-		// 	assert(0);
-		// 	//var->Set(val);
-		// }
-		// return GetObject(obj, path);
-	}
+	// 	// 	boost::any &a = var->Get()->Get();
+	// 	// 	assert(a.type() == typeid(ilang::Object*));
+	// 	// 	obj = boost::any_cast<ilang::Object*>(a);
+	// 	// }else{
+	// 	// 	// TODO:
+	// 	// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
+	// 	// 	assert(0);
+	// 	// 	//var->Set(val);
+	// 	// }
+	// 	// return GetObject(obj, path);
+	// }
 
-	Handle<Object> ImportScopeFile::GetObject(Handle<Object> o, std::list<std::string> &path) {
-		path.pop_front();
-		if(path.empty()) return o;
-		// TODO:
-		assert(0);
-		// ilang::Variable *var = o->operator[](path.front());
-		// Object *obj;
-		// if(var->isSet()) {
-		// 	boost::any &a = var->Get()->Get();
-		// 	assert(a.type() == typeid(ilang::Object*));
-		// 	obj = boost::any_cast<ilang::Object*>(a);
-		// }else{
-		// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
-		// 	assert(0); // TODO:
-		// 	//var->Set(val);
-		// }
-		// return GetObject(obj, path);
-
-	}
+	// Handle<Object> ImportScopeFile::GetObject(Handle<Object> o, std::list<std::string> &path) {
+	// 	path.pop_front();
+	// 	if(path.empty()) return o;
+	// 	// TODO:
+	// 	assert(0);
+	// 	// ilang::Variable *var = o->operator[](path.front());
+	// 	// Object *obj;
+	// 	// if(var->isSet()) {
+	// 	// 	boost::any &a = var->Get()->Get();
+	// 	// 	assert(a.type() == typeid(ilang::Object*));
+	// 	// 	obj = boost::any_cast<ilang::Object*>(a);
+	// 	// }else{
+	// 	// 	//ValuePass val = ValuePass(new ilang::Value_Old(obj = new ilang::Object));
+	// 	// 	assert(0); // TODO:
+	// 	// 	//var->Set(val);
+	// 	// }
+	// 	// return GetObject(obj, path);
+	// }
 
 	ImportScopeC::ImportScopeC (char *name) { //: m_name(name) {
 		//fs::path p(name);
@@ -268,12 +273,9 @@ namespace ilang {
 		m_members.insert(pair<std::string, ValuePass>(n, val));
 	}
 	void ImportScopeC::load(Handle<Object> obj) {
-		// for(auto it : m_members) {
-		// 	//cout << "load: " << it.first << endl;
-		// 	ilang::Variable *v = obj->operator[](it.first);
-		// 	assert(0); // TODO:
-		// 	//v->Set(it.second);
-		// }
+		for(auto it : m_members) {
+			obj->set(Identifier(it.first), it.second);
+		}
 	}
 
 
@@ -283,7 +285,6 @@ namespace ilang {
 		boost::replace_all(name, ".", "\/");
 		fs::path p = GlobalImportScope.locateFile(name);
 		if(p.empty()) return NULL;
-		//Object *obj = new Object;
 		auto obj = make_handle<Object>();
 		GlobalImportScope.get(obj, p);
 

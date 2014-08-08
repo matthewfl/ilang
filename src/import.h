@@ -1,9 +1,6 @@
 #ifndef _ilang_import
 #define _ilang_import
 
-#include "debug.h"
-#include "variable_new.h"
-
 #include <string>
 #include <vector>
 #include <list>
@@ -11,10 +8,19 @@
 
 #include <boost/filesystem.hpp>
 
+#include "debug.h"
+#include "variable_new.h"
+//#include "object_new.h"
+
 namespace ilang {
-	class Scope;
+//	class Scope;
 	//class FileScope;
-	class Object;
+//	class Object;
+
+	namespace parserNode {
+		class Head;
+	}
+
 	namespace fs = boost::filesystem;
 	class ImportScope;
 	extern std::vector<fs::path> ImportSearchPaths;
@@ -43,12 +49,15 @@ namespace ilang {
 	private:
 		//FileScope *m_Scope;
 		std::list<std::pair<std::list<std::string>, fs::path> > imports;
-		Handle<Object> GetObject(Scope*, std::list<std::string>);
-		Handle<Object> GetObject(Handle<Object> , std::list<std::string>&);
+		parserNode::Head *m_head = NULL;
+		//Handle<Object> GetObject(Scope*, std::list<std::string>);
+		//Handle<Object> GetObject(Handle<Object> , std::list<std::string>&);
+		//Handle<Hashable> GetObject(std::vector<Identifier>);
+		friend class parserNode::Head;
 	public:
 		ImportScopeFile(fs::path p);
 		void push(std::list<std::string> *pre, std::list<std::string> *name);
-		void resolve(Scope*);
+		//void resolve(Scope*);
 
 		void load(Handle<Object>);
 		//void provide(FileScope*);

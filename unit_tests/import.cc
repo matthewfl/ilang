@@ -1,9 +1,32 @@
-#include "base.h"
 #define private public
+#include "base.h"
 #include "import.h"
 #include "function.h"
+#include "object_new.h"
 
 using namespace ilang;
+
+TEST_CASE("basic import C", "[import]") {
+	init();
+	auto obj = ImportGetByName("i.test");
+	REQUIRE(obj);
+	auto ttt = obj->get("ttt");
+	REQUIRE(ttt->type() == typeid(ilang::Function));
+}
+
+TEST_CASE("basic import i", "[import]") {
+	init();
+	SET_FILE("i/something",
+					 sss = { return 1; };
+					 );
+	auto obj = ImportGetByName("i.something");
+	REQUIRE(obj);
+	auto sss = obj->get("sss");
+	REQUIRE(sss->type() == typeid(ilang::Function));
+}
+
+
+
 
 // TEST_CASE("module mapping test", "[import][module][mapping]") {
 // 	init();

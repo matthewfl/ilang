@@ -21,7 +21,7 @@ namespace ilang {
 	//class Scope;
 	//typedef Handle<Scope> ScopePass;
 
-	class Scope : public Hashable, boost::noncopyable {
+	class Scope : public Iterable /* Hashable */, boost::noncopyable {
 	private:
 		std::map<ilang::Identifier, Handle<Variable> > m_vars;
 		Hashable *m_parent;
@@ -45,6 +45,8 @@ namespace ilang {
 		Scope(Context &ctx) : m_parent(ctx.scope), m_ctx(&ctx) { ctx.scope = this; }
 		//Scope(ValuePass p) : m_handle(p), m_parent(p->cast<Hashable*>().get()) {}
 		~Scope();
+		Hashable_iterator begin() override;
+		Hashable_iterator end() override;
 
 		void Debug();
 

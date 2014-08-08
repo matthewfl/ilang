@@ -26,10 +26,16 @@ static void init() {
 	//ilang::Init(0, NULL);
 }
 
-static ilang::parserNode::Head *_build_tree(std::string code) {
+static ilang::parserNode::Head *_build_tree(std::string code, char* fileName=NULL) {
 	FILE *f = fmemopen(const_cast<char*>(code.c_str()), code.size(), "r");
+	ilang::ImportScopeFile *imp = NULL;
+	if(fileName) {
+		imp = new ilang::ImportScopeFile(fileName);
+		// not quite right, but should work ish
+		StaticImportedFiles().insert(std::pair<std::string, ImportScope*>(fileName, imp));
+	}
 
-	ilang::parserNode::Head *content = ilang::parser(f, NULL, "TEST_CONTENT");
+	ilang::parserNode::Head *content = ilang::parser(f, imp, fileName ? fileName : "TEST_CONTENT");
 	fclose(f);
 	return content;
 }
@@ -38,6 +44,12 @@ static ilang::parserNode::Head *_build_tree(std::string code) {
 
 #define PARSE_TREE(...)														\
 	_build_tree( #__VA_ARGS__ )
+
+#define SET_FILE(name, ...)											\
+	do {																					\
+	auto c = _build_tree( #__VA_ARGS__ , name); \
+	c->Link();																	\
+	} while(0);
 
 #define RUN_CODE(X)																\
 	do {																						\

@@ -86,6 +86,17 @@ void Scope::insert(ilang::Identifier i, Handle<Variable> v) {
 	m_vars.insert(pair<Identifier, Handle<Variable> >(i, v));
 }
 
+Hashable_iterator Scope::begin() {
+	assert(!m_parent);
+	return Hashable_iterator(m_vars.begin());
+}
+
+Hashable_iterator Scope::end() {
+	assert(!m_parent);
+	return Hashable_iterator(m_vars.end());
+}
+
+
 void Scope::Debug() {
 	for(auto it : m_vars) {
 		cout << it.first.str() << endl;//" " << it.second->Get()->cast<string>() << endl;

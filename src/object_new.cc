@@ -3,6 +3,7 @@
 #include "error.h"
 #include "value_types.h"
 #include "exception.h"
+#include "parserTree.h"
 
 using namespace ilang;
 using namespace std;

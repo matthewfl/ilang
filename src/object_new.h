@@ -6,14 +6,20 @@
 #include "value.h"
 #include "variable_new.h"
 #include "handle.h"
+#include "context.h"
 #include <map>
 #include <vector>
 
 
 #include <list>
-#include "parserTree.h"
+//#include "parserTree.h"
 
 namespace ilang {
+
+	namespace parserNode {
+		class Node;
+		class Variable;
+	}
 
 	class Object_ish : public Iterable /* Hashable */ {
 	protected:
@@ -52,21 +58,13 @@ namespace ilang {
 
 
 	class Class : public Object_ish {
-		// TODO: iterating over the items including the parents
 	private:
 		std::vector<ValuePass> m_parents;
-		//std::map<ilang::Identifier, ilang::Variable> m_members;
-
-		// std::map<ilang::Identifier, ilang::ValuePass> m_members;
-		// std::map<ilang::Identifier, std::vector<ilang::ValuePass> > m_modifiers;
-	public:
+  public:
 		Class();
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 
 		ValuePass get(Identifier i);
-
-		// Hashable_iterator begin() override;
-		// Hashable_iterator end() override;
 	};
 
 	class Class_instance : public Object_ish {
