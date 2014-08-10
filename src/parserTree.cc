@@ -44,6 +44,11 @@ namespace ilang {
 
 			// 	}
 			// }
+			for(auto it : *Declars) {
+				if(dynamic_cast<AssignExpr*>(it)) {
+					dynamic_cast<AssignExpr*>(it)->PreRegister(ctx);
+				}
+			}
 
 			for(list<Node*>::iterator it = Declars->begin(); it !=	Declars->end(); it++) {
 				debug(-6, "calling run" )
@@ -280,6 +285,12 @@ namespace ilang {
 
 		Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
 			debug(-5, "\t\t\tfunction constructed" );
+			if(params)
+				for(auto it : *params) {
+					// argument list can only be variables
+					assert(dynamic_cast<parserNode::Variable*>(it));
+				}
+
 		}
 		void Function::Run(Context &ctx) {
 			// This is going to have duplicated code with calling function, minus dealing with the arguments
@@ -302,8 +313,7 @@ namespace ilang {
 			debug(-6, "Function get value");
 			errorTrace("Getting value of a function");
 
-			ilang::Function fun(this, ctx);
-			// TODO: call bind??
+			ilang::Function fun(this, ctx); // this calls bind
 			auto ret = valueMaker(fun);
 			return ret;
 		}
@@ -314,10 +324,13 @@ namespace ilang {
 				for(auto it = body->rbegin(); it != body->rend(); it++) {
 					ret = unionSets(ret, (*it)->UndefinedElements());
 				}
-			if(params)
+			if(params) {
 				for(auto it : *params) {
 					ret = unionSets(ret, it->UndefinedElements());
+					ret.erase(dynamic_cast<Variable*>(it)->GetFirstName());
 				}
+			}
+
 			return ret;
 			// TODO: filter out elements that will be forced New, eg variables with types set for them
 		}
@@ -386,7 +399,13 @@ namespace ilang {
 						g->cast<ilang::Function*>()->vvv();
 					}
 				}
-				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mods);
+				//auto pvar = dynamic_cast<Scope*>(ctx.scope)->getVariable(GetFirstName());
+				//auto pvar = forceNew(Identifier(GetFirstName()), mods);
+				//if(!pvar) {
+				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), mods);
+				//} else {
+				//	pvar->SetModifiers(mods);
+				//}
 				assert(var);
 				pvar->Set(var);
 				//ctx.scope->set(Identifier(GetFirstName()), var);
@@ -406,16 +425,6 @@ namespace ilang {
 		ValuePass Variable::GetValue(Context &ctx) {
 			auto ret = ctx.scope->get(Identifier(GetFirstName()));
 			return ret;
-
-			// errorTrace("Getting value of variable: "<<GetFirstName());
-			// ilang::Variable *v = Get(scope);
-			// error(v, "Variable " << GetFirstName() << " Not found"); // maybe an assert, not an error?
-			// //assert(v);
-			// // TODO:
-			// ValuePass p;// = v->Get();
-			// // TODO: fix this to make it correct, if there is no value set to a variable then it is an error atm
-			// error(p, "Variable " << GetFirstName() << " Not found");
-			// return p;
 		}
 		std::string Variable::GetFirstName() {
 			return name->front();
@@ -428,6 +437,10 @@ namespace ilang {
 				ret = unionSets(ret, it->UndefinedElements());
 			}
 			return ret;
+		}
+		void Variable::PreRegister(Context &ctx) {
+			vector<ValuePass> mod;
+			dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mod);
 		}
 
 		void Variable::Print(Printer *p) {
@@ -657,6 +670,9 @@ namespace ilang {
 
 		IdentifierSet AssignExpr::UndefinedElements() {
 			return unionSets(eval->UndefinedElements(), target->UndefinedElements());
+		}
+		void AssignExpr::PreRegister(Context &ctx) {
+			target->PreRegister(ctx);
 		}
 
 		void AssignExpr::Print(Printer *p) {

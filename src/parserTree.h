@@ -255,6 +255,7 @@ namespace ilang {
 			//virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context &ctx);
 		};
 
 
@@ -359,6 +360,7 @@ namespace ilang {
 			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context &ctx);
 		};
 		class MathEquation : public Expression {
 			friend class ilang::Modification;

@@ -59,6 +59,8 @@ public:
 		assert(m_members);
 		for(auto v : *m_members) {
 			assert(v.second);
+			// if the variable isn't set by this point then it must be used
+			// before it is getting referenced.
 			auto val = v.second->Get();
 			assert(val);
 			if(val->type() == typeid(Function)) {
@@ -196,6 +198,7 @@ void Function::bind_self(Hashable *h) {
 }
 
 Function Function::alternate(ilang::ValuePass alt) {
+	// TODO: this is wrong, as there might already be an alternate set
 	assert(alt->type() == typeid(Function));
 	Function ret(*this);
 	ret.m_alternate = alt;

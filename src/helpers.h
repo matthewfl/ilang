@@ -43,6 +43,14 @@ namespace ilang {
 		return ret;
 	}
 
+	template <typename T> std::unordered_set<T> subtractSets(std::unordered_set<T> a, std::unordered_set<T> b) {
+		// a - b
+		for(auto it : b) {
+			a.erase(it);
+		}
+		return a;
+	}
+
 
 }
 

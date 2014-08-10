@@ -22,6 +22,7 @@ namespace ilang {
 		void Set(ilang::ValuePass);
 		ilang::ValuePass &Get() { assert(m_value); return m_value; }
 		void Check(ilang::ValuePass);
+		void SetModifiers(std::vector<ilang::ValuePass> mod);
 	};
 
 	using Variable_ptr = Handle<Variable>;

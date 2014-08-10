@@ -13,3 +13,11 @@ TEST_CASE("Force New", "[scope]") {
 	vector<ValuePass> mods{valueMaker(1), valueMaker(f)};
 	auto v = scope.forceNew("test", mods);
 }
+
+TEST_CASE("Pre register", "[scope]") {
+	RUN_CODE(
+					 main = { test(); };
+					 test = { assert(0); };
+					 );
+	REQUIRE(asserted == 1);
+}

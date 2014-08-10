@@ -39,6 +39,11 @@ void Variable::Check(ValuePass v) {
 }
 
 Variable::Variable(std::vector<ilang::ValuePass> mod) {
+	SetModifiers(mod);
+}
+
+void Variable::SetModifiers(std::vector<ilang::ValuePass> mod) {
+	assert(m_modifiers.empty());
 	m_modifiers.reserve(mod.size());
 	for(auto it : mod) {
 		if(it->type() == typeid(ilang::Class*)) {
@@ -48,4 +53,5 @@ Variable::Variable(std::vector<ilang::ValuePass> mod) {
 			m_modifiers.push_back(it);
 		}
 	}
+
 }
