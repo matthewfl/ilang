@@ -208,11 +208,34 @@ ValuePass Array::get(Identifier i) {
 			assert(0); // TODO: raise an exception or something...
 		}
 		auto v = m_members.at(i.raw());
-		return v->Get();
+		auto val = v->Get();
+		return val;
+		//return v->Get();
 	}
 	if(i == Identifier("length")) {
 		return valueMaker(m_members.size());
 	}
+	if(i == Identifier("push")) {
+		Handle<Array> self(this);
+		Function p([self](Context &ctx, Arguments &args, ValuePass *ret) {
+				auto v = make_handle<Variable>(self->m_modifiers);
+				v->Set(args[0]);
+				self->m_members.push_back(v);
+				*ret = valueMaker(self->m_members.size());
+			});
+		return valueMaker(p);
+	}
+	if(i == Identifier("pop")) {
+		Handle<Array> self(this);
+		Function p([self](Context &ctx, Arguments &args, ValuePass *ret) {
+				auto v = self->m_members.back();
+				self->m_members.pop_back();
+				*ret = v->Get();
+			});
+		return valueMaker(p);
+	}
+
+	error(0, "Array does not have member " << i.str());
 	// TODO: other array methods
 }
 
@@ -230,7 +253,9 @@ bool Array::has(Identifier i) {
 	if(i.raw() < 0x0200000000000000) {
 		return i.raw() < m_members.size();
 	}
-	return i == Identifier("length");
+	return i == Identifier("length") ||
+		i == Identifier("push") ||
+		i == Identifier("pop");
 }
 
 Handle<Variable> Array::getVariable(Identifier i) {

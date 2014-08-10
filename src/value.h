@@ -88,7 +88,7 @@ namespace ilang {
 
 	// TODO: change to raise an exception that is caught
 #define RAISE_ERROR {assert(0);}
-#define RAISE_TYPE_ERROR(typ) { throw BadValueCastType<typ>(); }
+#define RAISE_TYPE_ERROR(typ) { throw BadValueCastType<typ>(type().name()); }
 
 	enum math_ops {
 		OP_add,
@@ -123,7 +123,7 @@ namespace ilang {
 		explicit cast_chooser() {};
 	};
 
-
+	// TODO: change class name
   class Value_new// :
 		//public math_virtuals_mixin//,
 	 //public cast_mixin
@@ -231,30 +231,30 @@ namespace ilang {
 	};
 
 #define VALUE_CAST_CLS_MIXIN(self)																		\
-	virtual int Cast(cast_chooser<int> c) { return self; }							\
-	virtual long Cast(cast_chooser<long> c) { return self; }						\
-	virtual float Cast(cast_chooser<float> c) { return self; }					\
-	virtual double Cast(cast_chooser<double> c) { return self; }				\
-	virtual bool Cast(cast_chooser<bool> c) { return self != 0; }				\
-	virtual std::string Cast(cast_chooser<std::string> c) { std::stringstream ss; ss << self; return ss.str(); }
+	virtual int Cast(cast_chooser<int> c) override { return self; }							\
+	virtual long Cast(cast_chooser<long> c) override { return self; }						\
+	virtual float Cast(cast_chooser<float> c) override { return self; }					\
+	virtual double Cast(cast_chooser<double> c) override { return self; }				\
+	virtual bool Cast(cast_chooser<bool> c) override { return self != 0; }				\
+	virtual std::string Cast(cast_chooser<std::string> c) override { std::stringstream ss; ss << self ; return ss.str(); }
 
 #define VALUE_MATH_CLS_MIXIN(self)																			\
-	virtual ValuePass operator + (ValuePass v) { return v->preform_math_op(OP_add, self); } \
-	virtual ValuePass operator - (ValuePass v) { return v->preform_math_op(OP_substract, self); } \
-	virtual ValuePass operator * (ValuePass v) { return v->preform_math_op(OP_multiply, self); } \
-	virtual ValuePass operator / (ValuePass v) { return v->preform_math_op(OP_devide, self); } \
-	virtual ValuePass preform_math_op(math_ops op, long v);								\
-	virtual ValuePass preform_math_op(math_ops op, double v);							\
-	virtual ValuePass preform_math_op(math_ops op, std::string v);
+	virtual ValuePass operator + (ValuePass v) override { return v->preform_math_op(OP_add, self); } \
+	virtual ValuePass operator - (ValuePass v) override { return v->preform_math_op(OP_substract, self); } \
+	virtual ValuePass operator * (ValuePass v) override { return v->preform_math_op(OP_multiply, self); } \
+	virtual ValuePass operator / (ValuePass v) override { return v->preform_math_op(OP_devide, self); } \
+	virtual ValuePass preform_math_op(math_ops op, long v) override ;								\
+	virtual ValuePass preform_math_op(math_ops op, double v) override ;							\
+	virtual ValuePass preform_math_op(math_ops op, std::string v) override ;
 
 #define VALUE_LOGIC_CLS_MIXIN(self)																			\
-	virtual bool operator < (ValuePass v) { return v->preform_logic_op(OP_lessthan, self); } \
-	virtual bool operator <= (ValuePass v) { return v->preform_logic_op(OP_lessequal, self); } \
-	virtual bool operator == (ValuePass v) { return v->preform_logic_op(OP_equal, self); } \
-	virtual bool preform_logic_op(logic_ops op, long v);									\
-	virtual bool preform_logic_op(logic_ops op, double v);								\
-	virtual bool preform_logic_op(logic_ops op, std::string v);						\
-	virtual bool preform_logic_op(logic_ops op, bool v);
+	virtual bool operator < (ValuePass v) override { return v->preform_logic_op(OP_lessthan, self); } \
+	virtual bool operator <= (ValuePass v) override { return v->preform_logic_op(OP_lessequal, self); } \
+	virtual bool operator == (ValuePass v) override { return v->preform_logic_op(OP_equal, self); } \
+	virtual bool preform_logic_op(logic_ops op, long v) override ;				\
+	virtual bool preform_logic_op(logic_ops op, double v) override ;			\
+	virtual bool preform_logic_op(logic_ops op, std::string v) override ;	\
+	virtual bool preform_logic_op(logic_ops op, bool v) override ;
 
 	class IntType : public Value_new {
 	public:
@@ -307,13 +307,15 @@ namespace ilang {
 		virtual void copyTo(void *d) {
 			new (d) StringType(*this);
 		}
-		std::string Cast(cast_chooser<std::string> c) {
+		std::string Cast(cast_chooser<std::string> c) override {
 			return GetSelf();
+		}
+		Identifier Cast(cast_chooser<Identifier> c) override {
+			return Identifier(GetSelf());
 		}
 	public:
 		VALUE_MATH_CLS_MIXIN(GetSelf());
 		VALUE_LOGIC_CLS_MIXIN(GetSelf());
-		Identifier Cast(cast_chooser<Identifier> c) { return Identifier(GetSelf()); }
 	};
 
 

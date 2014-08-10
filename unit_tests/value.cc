@@ -143,6 +143,17 @@ TEST_CASE("std copy", "[value]") {
 	vec2.insert(vec2.begin(), vec.begin(), vec.end());
 }
 
-TEST_CASE("hashable type", "[value]") {
-	//	auto v = valueMaker(
+TEST_CASE("string cast", "[value]") {
+	auto a = valueMaker(1);
+	auto s = a->cast<std::string>();
+	a = valueMaker(1.1);
+	s = a->cast<std::string>();
+	a = valueMaker("test");
+	s = a->cast<std::string>();
+	a = valueMaker(true);
+	s = a->cast<std::string>();
 }
+
+// TEST_CASE("hashable type", "[value]") {
+// 	//	auto v = valueMaker(
+// }
