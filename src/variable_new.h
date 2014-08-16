@@ -7,6 +7,7 @@
 
 #include "helpers.h"
 #include "handle.h"
+#include "error.h"
 
 namespace ilang {
 	class Variable : public Handle_base {
@@ -20,7 +21,10 @@ namespace ilang {
 		Variable(std::vector<ilang::ValuePass> mod);
 		Variable() {}
 		void Set(ilang::ValuePass);
-		ilang::ValuePass &Get() { assert(m_value); return m_value; }
+		ilang::ValuePass & Get() {
+			error(m_value, "Can't use a variable before it is set");
+			return m_value;
+		}
 		void Check(ilang::ValuePass);
 		void SetModifiers(std::vector<ilang::ValuePass> mod);
 	};

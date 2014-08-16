@@ -149,3 +149,18 @@ TEST_CASE("internal value bind", "[function]") {
 					 );
 	REQUIRE(!asserted);
 }
+
+TEST_CASE("internal dont over force", "[function]") {
+	RUN_CODE(
+					 main = {
+						 gg = {
+							 assert(c == 1);
+							 c = 2;
+						 };
+						 c = 1;
+						 gg();
+						 assert(c == 2);
+					 };
+					 );
+	REQUIRE(!asserted);
+}

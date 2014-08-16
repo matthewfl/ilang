@@ -76,6 +76,7 @@ namespace ilang {
 		}
 
 		void Head::Print(Printer *p) {
+			// TODO: print out the imports
 			for(auto it : *Declars) {
 				it->Print(p);
 				p->p() << ";\n";
@@ -453,7 +454,9 @@ namespace ilang {
 			vector<ValuePass> mod;
 			// this needs to check if it should actually force this to be new
 			// eg opt register it?
-			dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mod);
+			if(!modifiers->empty() || !ctx.scope->has(Identifier(GetFirstName()))) {
+				dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mod);
+			}
 		}
 
 		void Variable::Print(Printer *p) {
