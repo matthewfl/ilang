@@ -100,7 +100,10 @@ public:
 	Handle<Variable> getVariable(Identifier i) {
 		auto it = m_members->find(i);
 		if(it == m_members->end()) {
-			error(m_parent, "unable to find variable " << i.str());
+			if(!m_parent) {
+				//error(m_parent, "unable to find variable " << i.str());
+				return NULL;
+			}
 			return m_parent->getVariable(i);
 		}
 		return it->second;
@@ -159,6 +162,9 @@ IdentifierSet Function::UndefinedElements() {
 	return func->UndefinedElements();
 }
 
+// TODO: there need to be 2 different types of bind
+// 1. bind which only binds non bound variables
+// 2. bind which will override the bind on variables
 
 Function Function::bind(ilang::ValuePass object) {
 	// TODO: make this bind to a value

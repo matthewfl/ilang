@@ -9,8 +9,8 @@ cc = class {
 };
 
 main = {
-	c1 = new(cc);
-	c2 = new(cc);
+	c1 = cc.new();
+	c2 = cc.new();
 	Print(c1, c1.a);
 	assert(c1.a == 1);
 	c1.b(23);

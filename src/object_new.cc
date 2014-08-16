@@ -9,13 +9,18 @@ using namespace ilang;
 using namespace std;
 
 ValuePass Object_ish::get(Identifier i) {
-	auto it = m_members.find(i);
-	assert(it != m_members.end());
-	ValuePass ret = it->second->Get();
-	if(ret->type() == typeid(ilang::Function)) {
-		return valueMaker(ret->cast<ilang::Function*>()->bind(this));
-	}
-	return ret;
+	// auto it = m_members.find(i);
+	// assert(it != m_members.end());
+	// ValuePass ret = it->second->Get();
+	// if(ret->type() == typeid(ilang::Function)) {
+	// 	return valueMaker(ret->cast<ilang::Function*>()->bind(this));
+	// }
+	// return ret;
+
+	auto var = getVariable(i);
+	assert(var);
+	return var->Get();
+
 }
 
 void Object_ish::set(Identifier i, ValuePass v) {

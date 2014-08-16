@@ -1134,8 +1134,11 @@ namespace ilang {
 		}
 		void AssertCall::Print (Printer *p) {
 			p->p() << "assert(";
+			bool first=true;
 			for(Node *it : *params) {
-				it->Print(p); // problem with printing commas between
+				if(!first) { p->p() << ", "; }
+				first = false;
+				it->Print(p);
 			}
 			p->p() << ")";
 		}

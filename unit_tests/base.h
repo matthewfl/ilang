@@ -51,9 +51,9 @@ static ilang::parserNode::Head *_build_tree(std::string code, char* fileName=NUL
 		c->Link();																	\
 	} while(0);
 
-#define RUN_CODE(X)																\
+#define RUN_CODE(...)																\
 	do {																						\
-		ilang::parserNode::Head *c = _build_tree( #X , __FILE__ "/gg.i"); \
+		ilang::parserNode::Head *c = _build_tree( #__VA_ARGS__ , __FILE__ "/gg.i"); \
 		c->Link();																													\
 		c->Run();																														\
 	} while(0);
