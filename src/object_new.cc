@@ -84,6 +84,7 @@ Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode:
 	}
 }
 
+// TODO: this needs to be changed to getVariable
 ValuePass Class::get(Identifier i) {
 	if(has(i)) {
 		return Object_ish::get(i);

@@ -102,6 +102,8 @@ namespace ilang {
 		void bind_self(Hashable*);
 		//Scope m_bound;
 
+		// TODO: this should prob just be a pointer to a function rather than
+		// a ValuePass
 		ValuePass m_alternate; // if the type check fails for this function call alternate
 
 	public:

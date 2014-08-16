@@ -137,15 +137,15 @@ TEST_CASE("internal function", "[function]") {
 // this is vary ambigious, not sure if it should get the value of c or not
 // in python if it is reading the value then it will work, but writing to it doesn't, which seems really strange.
 // I suppose for the time being this can just not work since it seems like a weird edge case anyways
-// TEST_CASE("internal value bind", "[function]") {
-// 	RUN_CODE(
-// 					 main = {
-// 						 gg = {
-// 							 assert(c);
-// 						 };
-// 						 c = 1;
-// 						 gg();
-// 					 };
-// 					 );
-// 	REQUIRE(!asserted);
-// }
+TEST_CASE("internal value bind", "[function]") {
+	RUN_CODE(
+					 main = {
+						 gg = {
+							 assert(c);
+						 };
+						 c = 1;
+						 gg();
+					 };
+					 );
+	REQUIRE(!asserted);
+}

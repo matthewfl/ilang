@@ -296,6 +296,8 @@ namespace ilang {
 			// This is going to have duplicated code with calling function, minus dealing with the arguments
 			Scope local_scope(ctx);
 			//ScopePass local_scope(new Scope(scope));
+			PreRegister(ctx);
+
 			if(body) {
 				for (Node *n : *body) {
 					// TODO: returning block break statement
@@ -333,6 +335,15 @@ namespace ilang {
 
 			return ret;
 			// TODO: filter out elements that will be forced New, eg variables with types set for them
+		}
+
+		void Function::PreRegister(Context &ctx) {
+			if(body) {
+				for(auto it : *body) {
+					auto v = dynamic_cast<AssignExpr*>(it);
+					if(v) v->PreRegister(ctx);
+				}
+			}
 		}
 
 		void Function::Print(Printer *p) {
@@ -440,6 +451,8 @@ namespace ilang {
 		}
 		void Variable::PreRegister(Context &ctx) {
 			vector<ValuePass> mod;
+			// this needs to check if it should actually force this to be new
+			// eg opt register it?
 			dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mod);
 		}
 

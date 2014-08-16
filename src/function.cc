@@ -127,6 +127,7 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 			if(native) {
 				ptr(ctx, args, &ret);
 			}else{
+				func->PreRegister(ctx);
 				if(func->body) {
 					for(auto n : *func->body) {
 						if(ctx.returned) break;
@@ -207,7 +208,12 @@ Function Function::alternate(ilang::ValuePass alt) {
 	// TODO: this is wrong, as there might already be an alternate set
 	assert(alt->type() == typeid(Function));
 	Function ret(*this);
-	ret.m_alternate = alt;
+	if(ret.m_alternate) {
+		auto f = ret.m_alternate->cast<Function*>()->alternate(alt);
+		ret.m_alternate = valueMaker(f);
+	} else {
+		ret.m_alternate = alt;
+	}
 	return ret;
 }
 

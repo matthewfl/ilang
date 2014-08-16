@@ -21,3 +21,16 @@ TEST_CASE("Pre register", "[scope]") {
 					 );
 	REQUIRE(asserted == 1);
 }
+
+TEST_CASE("Pre register in function", "[scope]") {
+	RUN_CODE(
+					 main = {
+						 gg = {|a|
+									 if(a == 0) return 1;
+									 return gg(a - 1);
+						 };
+						 assert(gg(5) == 1);
+					 };
+					 );
+	REQUIRE(asserted == 1);
+}

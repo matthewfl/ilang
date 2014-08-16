@@ -229,6 +229,7 @@ namespace ilang {
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context&);
 		};
 
 
