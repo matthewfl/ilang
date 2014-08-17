@@ -207,10 +207,10 @@ namespace {
 			uv_buf_t *buf = new uv_buf_t[args.size()];
 			writereq->buf = buf;
 			writereq->buf_size = args.size();
-			for(ValuePass val : args) {
+			for(auto val : args) {
 				// create buffers for all the iterms
 				// send to libuv
-				string str = val->cast<string>();
+				string str = val.second->cast<string>();
 				debug(4, "writing req with "<< str );
 				buf[place].len = str.length();
 				buf[place].base = new char[str.length()];

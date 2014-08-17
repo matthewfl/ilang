@@ -112,6 +112,7 @@ TEST_CASE("function combine", "[function]") {
 }
 
 TEST_CASE("internal value", "[function]") {
+	init();
 	RUN_CODE(
 					 main = {
 						 c = 1;
@@ -122,6 +123,7 @@ TEST_CASE("internal value", "[function]") {
 }
 
 TEST_CASE("internal function", "[function]") {
+	init();
 	RUN_CODE(
 					 main = {
 						 gg = {
@@ -138,6 +140,7 @@ TEST_CASE("internal function", "[function]") {
 // in python if it is reading the value then it will work, but writing to it doesn't, which seems really strange.
 // I suppose for the time being this can just not work since it seems like a weird edge case anyways
 TEST_CASE("internal value bind", "[function]") {
+	init();
 	RUN_CODE(
 					 main = {
 						 gg = {
@@ -151,6 +154,7 @@ TEST_CASE("internal value bind", "[function]") {
 }
 
 TEST_CASE("internal dont over force", "[function]") {
+	init();
 	RUN_CODE(
 					 main = {
 						 gg = {
@@ -160,6 +164,21 @@ TEST_CASE("internal dont over force", "[function]") {
 						 c = 1;
 						 gg();
 						 assert(c == 2);
+					 };
+					 );
+	REQUIRE(!asserted);
+}
+
+TEST_CASE("arguments as variale", "[function]") {
+	init();
+	RUN_CODE(
+					 gg = {
+						 return arguments;
+					 };
+					 main = {
+						 qq = gg(1,2,3);
+						 assert(qq.length == 3);
+						 assert(qq[1] == 2);
 					 };
 					 );
 	REQUIRE(!asserted);

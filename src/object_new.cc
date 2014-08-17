@@ -209,7 +209,7 @@ Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserN
 }
 
 ValuePass Array::get(Identifier i) {
-	if(i.raw() < 0x0200000000000000) { // this is an item in the array
+	if(i.isInt()) { // this is an item in the array
 		if(m_members.size() < i.raw()) {
 			assert(0); // TODO: raise an exception or something...
 		}
@@ -246,7 +246,7 @@ ValuePass Array::get(Identifier i) {
 }
 
 void Array::set(Identifier i, ValuePass v) {
-	if(i.raw() >= 0x0200000000000000) {
+	if(!i.isInt()) {
 		assert(0); // trying to set some string type???
 	}
 	// TODO: if member already exists use that variable
@@ -256,7 +256,7 @@ void Array::set(Identifier i, ValuePass v) {
 }
 
 bool Array::has(Identifier i) {
-	if(i.raw() < 0x0200000000000000) {
+	if(i.isInt()) {
 		return i.raw() < m_members.size();
 	}
 	return i == Identifier("length") ||
@@ -265,7 +265,7 @@ bool Array::has(Identifier i) {
 }
 
 Handle<Variable> Array::getVariable(Identifier i) {
-	if(i.raw() >= 0x0200000000000000) {
+	if(!i.isInt()) {
 		assert(0); // well there is basically no variable
 	}
 	if(i.raw() >= m_members.size()) {

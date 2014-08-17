@@ -7,6 +7,9 @@
 #include <functional>
 
 namespace ilang {
+
+	const unsigned long Identifier_max_int = 0x0100000000000000;
+
 	class Identifier {
 	private:
 		unsigned long m_id;
@@ -21,6 +24,7 @@ namespace ilang {
 		std::string str() const;
 		operator std::string() const { return str(); }
 		unsigned long raw() const { return m_id; }
+		bool isInt() const { return m_id < Identifier_max_int; }
 	};
 
 	typedef std::unordered_set<Identifier> IdentifierSet;

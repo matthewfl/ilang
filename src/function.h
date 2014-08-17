@@ -13,6 +13,7 @@
 #include "variable_new.h"
 #include "scope_new.h"
 #include "parserTree.h"
+#include "hashable.h"
 
 
 namespace ilang {
@@ -32,10 +33,13 @@ namespace ilang {
 	// TODO: change this to use std
 	typedef boost::function3<void, Context&, ilang::Arguments&, ValuePass*> Function_ptr;
 
-	class Arguments {
+	class Arguments : public Hashable {
 
-		std::vector<ilang::ValuePass> pargs;
-		std::map<std::string, ilang::ValuePass> kwargs;
+		// std::vector<ilang::ValuePass> pargs;
+		// std::map<std::string, ilang::ValuePass> kwargs;
+
+		std::map<ilang::Identifier, ilang::ValuePass> m_args;
+		unsigned long m_next_identifier = 0;
 
 		template<typename T> void unwrap(T t) {
 			push(valueMaker(t));
@@ -49,33 +53,44 @@ namespace ilang {
 		}
 		void populate(Context &ctx, Function*);
 
-		void injector(std::vector<ilang::ValuePass>::iterator it) {}
-		template<typename T, typename... types> void injector(std::vector<ilang::ValuePass>::iterator it, T &t, types & ... values) {
+		void injector(std::map<Identifier, ValuePass>::iterator it) {}
+		template<typename T, typename... types> void injector(std::map<Identifier, ValuePass>::iterator it, T &t, types & ... values) {
 			assert(it != end());
-			(*it)->inject(t);
+			it->second->inject(t);
 			it++;
 			injector(it, values...);
 		}
 
 		friend class Function;
 	public:
+		void set(Identifier, ilang::ValuePass) override;
+		bool has(Identifier) override;
+		ValuePass get(Identifier i) override;
+
+		Handle<Variable> getVariable(Identifier i);
+
 		void push(ilang::ValuePass);
-		void set(std::string, ilang::ValuePass);
 
-		ValuePass get(std::string);
-		ValuePass get(int);
-		ValuePass operator[](std::string s) { return get(s); }
-		ValuePass operator[](int i) { return get(i); }
+		ValuePass operator[](Identifier i) { return get(i); }
+		ValuePass operator[](unsigned long i) { return get(Identifier(i)); }
 
-		std::vector<ilang::ValuePass>::iterator begin() { return pargs.begin(); }
-		std::vector<ilang::ValuePass>::iterator end() { return pargs.end(); }
+		// ValuePass get(std::string);
+		// ValuePass get(int);
+		// ValuePass operator[](std::string s) { return get(s); }
+		// ValuePass operator[](int i) { return get(i); }
 
+		// std::vector<ilang::ValuePass>::iterator begin() { return pargs.begin(); }
+		// std::vector<ilang::ValuePass>::iterator end() { return pargs.end(); }
+
+		auto begin() { return m_args.begin(); }
+		auto end() { return m_args.end(); }
 
 		size_t size();
 		//template<typename... types> void inject(types... &values) {}
 		// long a; std::string b; args.inject(a, b);
 
 		Arguments();
+		Arguments(const Arguments&);
 		Arguments(std::vector<ValuePass> pargs);
 		template<typename... types> Arguments(types... values) {
 			unwrap(values...);
@@ -113,6 +128,11 @@ namespace ilang {
 			return call(ctx, args);
 		}
 		ilang::ValuePass operator() (ilang::Arguments &args) {
+			Context ctx;
+			return call(ctx, args);
+		}
+		ilang::ValuePass operator() () {
+			Arguments args;
 			Context ctx;
 			return call(ctx, args);
 		}

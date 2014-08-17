@@ -37,7 +37,7 @@ namespace ilang {
 		}
 	}
 	std::string Identifier::str() const {
-		if(m_id < 0x0100000000000000) {
+		if(m_id < Identifier_max_int) {
 			stringstream ss;
 			ss << m_id;
 			return ss.str();

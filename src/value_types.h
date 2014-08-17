@@ -32,6 +32,7 @@ namespace ilang {
 	class Object;
 	class Class;
 	class Class_instance;
+	class Arguments;
 	class HashableType : public Value_new {
 	public:
 		HashableType(Handle<Hashable>);
@@ -84,7 +85,8 @@ namespace ilang {
 		Handle<ilang::Class>, HashableType,
 		Handle<ilang::Class_instance>, HashableType,
 		Handle<ilang::Array>, HashableType,
-		Handle<ilang::Hashable>, HashableType
+		Handle<ilang::Hashable>, HashableType,
+		Handle<ilang::Arguments>, HashableType
 		>();
 }
 

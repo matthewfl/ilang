@@ -8,44 +8,83 @@ using namespace std;
 Arguments::Arguments() {
 }
 
+Arguments::Arguments(const Arguments &o) {
+	m_args = o.m_args;
+	m_next_identifier = o.m_next_identifier;
+}
+
 Arguments::Arguments(std::vector<ValuePass> pargs) {
-	this->pargs = pargs;
+	for(auto it : pargs)
+		push(it);
+	//this->pargs = pargs;
 }
 
 void Arguments::push(ilang::ValuePass value) {
-	pargs.push_back(value);
+	m_args.insert(make_pair(Identifier(m_next_identifier++), value));
+								//pargs.push_back(value);
 }
 
-void Arguments::set(std::string key, ilang::ValuePass value) {
-	kwargs.insert(std::pair<std::string, ValuePass>(key, value));
+void Arguments::set(Identifier key, ilang::ValuePass value) {
+	m_args.insert(make_pair(key, value));
+	//kwargs.insert(std::pair<std::string, ValuePass>(key, value));
 }
 
 void Arguments::populate(Context &ctx, Function *func) {
 	// TODO:
 	if(!func->native && func->func->params) {
 		// there is some function with arguments that can be used to determine what to set values to
+
 		auto it = func->func->params->begin(); // wtf was I thinking
-		for(ValuePass v : pargs) {
-			if(it == func->func->params->end()) break;
-			// this needs better abstraction, as we shouldn't have this parserNode stuff here
-			dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, v, true);
+		auto end = func->func->params->end();
+		for(auto ait : m_args) {
+			if(it == end) break;
+			if(ait.first.isInt()) {
+				dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, ait.second, true);
+			}
 			it++;
 		}
+
+		// for(ValuePass v : pargs) {
+		// 	if(it == func->func->params->end()) break;
+		// 	// this needs better abstraction, as we shouldn't have this parserNode stuff here
+		// 	dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, v, true);
+		// 	it++;
+		// }
 	}
 }
 
-ValuePass Arguments::get(int i) {
-	// TODO: should this raise an exception
-	return i < pargs.size() ? pargs.at(i) : ValuePass();
+ValuePass Arguments::get(Identifier i) {
+	auto it = m_args.find(i);
+	if(it != m_args.end()) {
+		return it->second;
+	}
+	if(i == "length") {
+		return valueMaker(size());
+	}
+	assert(0);
 }
 
-ValuePass Arguments::get(std::string s) {
-	auto f = kwargs.find(s);
-	return f != kwargs.end() ? f->second : ValuePass();
+bool Arguments::has(Identifier i) {
+	return m_args.find(i) != m_args.end();
 }
+
+// ValuePass Arguments::get(int i) {
+// 	// TODO: should this raise an exception
+// 	return i < pargs.size() ? pargs.at(i) : ValuePass();
+// }
+
+// ValuePass Arguments::get(std::string s) {
+// 	auto f = kwargs.find(s);
+// 	return f != kwargs.end() ? f->second : ValuePass();
+// }
 
 size_t Arguments::size() {
-	return pargs.size() + kwargs.size();
+	return m_args.size();
+	//return pargs.size() + kwargs.size();
+}
+
+Handle<Variable> Arguments::getVariable(Identifier i) {
+	return make_variable(get(i));
 }
 
 class ScopeFake : public Hashable {
@@ -123,6 +162,9 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 
 			Scope scope(ctx);
 			args.populate(ctx, this);
+
+			// TODO: use std::move here?
+			ctx.scope->set("arguments", valueMaker(make_handle<Arguments>(args)));
 
 			if(native) {
 				ptr(ctx, args, &ret);
