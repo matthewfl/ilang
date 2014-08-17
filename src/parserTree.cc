@@ -559,6 +559,10 @@ namespace ilang {
 			ValuePass obj_val = Obj->GetValue(ctx);
 			ValuePass key = Lookup->GetValue(ctx);
 			ValuePass ret = obj_val->get(key);
+			// TODO: this should be somewhere else
+			if(ret->type() == typeid(ilang::Function)) {
+				return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
+			}
 			return ret;
 		}
 

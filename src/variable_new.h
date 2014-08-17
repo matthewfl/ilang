@@ -30,6 +30,13 @@ namespace ilang {
 	};
 
 	using Variable_ptr = Handle<Variable>;
+
+	inline Variable_ptr make_variable(const ValuePass &val) {
+		auto var = make_handle<Variable>();
+		var->Set(val);
+		return var;
+	}
+
 }
 
 

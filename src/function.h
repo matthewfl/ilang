@@ -32,7 +32,6 @@ namespace ilang {
 	// TODO: change this to use std
 	typedef boost::function3<void, Context&, ilang::Arguments&, ValuePass*> Function_ptr;
 
-	// TODO: use the new type system to make this easy to work with
 	class Arguments {
 
 		std::vector<ilang::ValuePass> pargs;

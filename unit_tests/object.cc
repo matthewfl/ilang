@@ -117,11 +117,11 @@ TEST_CASE("bind this", "[object]") {
 TEST_CASE("implicit this bind", "[object]") {
 	init();
 	RUN_CODE(
-					 gg = object {
-					   a: 0,
-						 b: { assert(a); }
-					 };
 					 main = {
+						 gg = object {
+					     a: 0,
+						   b: { assert(a); }
+						 };
 						 gg.b();
 					 };
 					 );
