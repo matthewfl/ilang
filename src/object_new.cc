@@ -5,6 +5,8 @@
 #include "exception.h"
 #include "parserTree.h"
 
+//#include <iostream>
+
 using namespace ilang;
 using namespace std;
 
@@ -24,6 +26,7 @@ ValuePass Object_ish::get(Identifier i) {
 }
 
 void Object_ish::set(Identifier i, ValuePass v) {
+	//cout << "set " << i.str() << endl;
 	auto it = m_members.find(i);
 	if(it == m_members.end()) {
 		auto var = make_handle<Variable>();
@@ -39,6 +42,7 @@ bool Object_ish::has(Identifier i) {
 }
 
 Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
+	//cout << "get " << i.str() << endl;
 	if(i == "this") {
 		// can just create a new variable here which holds the reference to
 		// the this ptr
@@ -48,7 +52,7 @@ Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
 		return ret;
 	}
 	auto it = m_members.find(i);
-	assert(it != m_members.end());
+	assert(it != m_members.end());//error(, "unable to find variable " << i.str());
 	return it->second;
 }
 
@@ -75,6 +79,9 @@ Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode:
 		auto ptr = v->cast<Class*>();
 		error(ptr, "Class can not inherit from non class");
 		m_parents.push_back(v);
+		// TODO: wrong
+		// these are inheriting the variables from their parents, which means
+		// the parents values can be set
 		m_members.insert(ptr->begin(), ptr->end());
 	}
 	for(auto it : *obj) {
@@ -93,6 +100,12 @@ ValuePass Class::get(Identifier i) {
 	// 	if(it->has(i)) {
 	// 		return
 	// }
+	auto r = builtInGet(i);
+	assert(r);
+	return r;
+}
+
+ValuePass Class::builtInGet(Identifier i) {
 	if(i == Identifier("new")) {
 		// new function
 		// Calls create to create a new instance of the class,
@@ -159,25 +172,47 @@ ValuePass Class::get(Identifier i) {
 			});
 		return valueMaker(inter);
 	}
-	assert(0); // so, not found
+	return ValuePass();
+	//assert(0); // so, not found
 }
 
 
 
 
-Class_instance::Class_instance(Handle<Class> c) : m_class(c) {}
+Class_instance::Class_instance(Handle<Class> c) : m_class(c) {
+	assert(m_class);
+	m_members.insert(m_class->begin(), m_class->end());
+}
 //Class_instance::Class_instance(C_class *c) : m_ccclas(c) {}
 
 ValuePass Class_instance::get(Identifier i) {
 	if(Object_ish::has(i))
 		return Object_ish::get(i);
-	assert(m_class);
-	return m_class->get(i);
+	auto r = m_class->builtInGet(i);
+	assert(r);
+	return r;
 }
 
+
 bool Class_instance::has(Identifier i) {
-	return Object_ish::has(i) || m_class->has(i);
+	return Object_ish::has(i) ||
+		i == "new" ||
+		i == "create" ||
+		i == "init" ||
+		i == "instance" ||
+		i == "interface";
 }
+
+// Handle<Variable> Class_instance::getVariable(Identifier i) {
+// 	if(Object_ish::has(i)) {
+// 		return Object_ish::getVariable(i);
+// 	}
+// 	auto var = m_class->getVariable(i);
+// 	auto var2 = make_handle<Variable>(*var);
+// 	m_members.insert(make_pair(i, var2));
+// 	return var2;
+// }
+
 
 
 Object::Object() {

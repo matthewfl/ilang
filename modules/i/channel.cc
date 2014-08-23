@@ -48,9 +48,12 @@ namespace {
 			reg("setLimit", &threadChannel::setLimit);
 		}
 	public:
-		threadChannel() {
+		threadChannel(Arguments &args) {
 			Init();
-			m_queue.set_capacity(10);
+			int len = 10;
+			if(args.size() == 1)
+				len = args[0]->cast<int>();
+			m_queue.set_capacity(len);
 		}
 		threadChannel(int size) {
 			Init();

@@ -1,5 +1,5 @@
 'Install:
-	yaourt --needed -S base-devel imake boost bison flex snappy curl libtorrent-rasterbar intel-tbb protobuf
+	yaourt --needed -S base-devel imake boost bison flex snappy curl libtorrent-rasterbar intel-tbb protobuf armadillo
 	make submodule
 	make			OR	make release
 	ln -s i ~/bin			cp i ~/bin

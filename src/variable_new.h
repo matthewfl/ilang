@@ -20,6 +20,7 @@ namespace ilang {
 	public:
 		Variable(std::vector<ilang::ValuePass> mod);
 		Variable() {}
+		Variable(const Variable& v);
 		void Set(ilang::ValuePass);
 		ilang::ValuePass & Get() {
 			error(m_value, "Can't use a variable before it is set");

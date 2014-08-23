@@ -332,40 +332,6 @@ namespace ilang {
 	}
 }
 
-namespace ilang {
-	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) ) {
-		auto fptr = [fun](Context &ctx, Arguments& args, ValuePass *ret) {
-			*ret = (*fun)(args);
-			assert(*ret);
-		};
-		ilang::Function f(fptr);
-		return valueMaker(f);
-	}
-	ValuePass Function_Creater( ValuePass (*fun)(Context&, Arguments&) ) {
-		auto fptr = [fun](Context &ctx, Arguments& args, ValuePass *ret) {
-			*ret = (*fun)(ctx, args);
-			assert(*ret);
-		};
-		ilang::Function f(fptr);
-		return valueMaker(f);
-	}
-	// ValuePass Function_Creater( ValuePass (*fun)(ScopePass, Arguments&) ) {
-	// 	auto fptr = [fun](ScopePass scope, Arguments& args, ValuePass *ret) {
-	// 		*ret = (*fun)(scope, args);
-	// 		assert(*ret);
-	// 	};
-	// 	ilang::Function f(fptr);
-	// 	return valueMaker(f);
-	// }
-	C_Class::~C_Class() {
-		//std::cout << "---------------------deleting C_Class\n";
-		for(auto it : m_members) {
-			delete it.second;
-		}
-	}
-}
-
-
 namespace {
 	using namespace ilang;
 	ValuePass ilang_import_get(Arguments &args) {

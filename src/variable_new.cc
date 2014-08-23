@@ -38,20 +38,31 @@ void Variable::Check(ValuePass v) {
 	}
 }
 
-Variable::Variable(std::vector<ilang::ValuePass> mod) {
-	SetModifiers(mod);
-}
-
 void Variable::SetModifiers(std::vector<ilang::ValuePass> mod) {
 	assert(m_modifiers.empty());
 	m_modifiers.reserve(mod.size());
 	for(auto it : mod) {
-		if(it->type() == typeid(ilang::Class*)) {
+		if(it->type() == typeid(ilang::Hashable*)) {
+			auto n = it->get(Identifier("new"));
+			if(n) {
+				Arguments na;
+				m_modifiers.push_back(n->call(na));
+			} else {
+				m_modifiers.push_back(it);
+			}
 			// create a new instance of the class
-			assert(0);
+			//assert(0);
 		} else {
 			m_modifiers.push_back(it);
 		}
 	}
+}
 
+Variable::Variable(std::vector<ilang::ValuePass> mod) {
+	SetModifiers(mod);
+}
+
+Variable::Variable(const Variable &v) {
+	m_modifiers = v.m_modifiers;
+	m_value = v.m_value;
 }

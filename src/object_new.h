@@ -65,6 +65,7 @@ namespace ilang {
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 
 		ValuePass get(Identifier i);
+		ValuePass builtInGet(Identifier i);
 	};
 
 	class Class_instance : public Object_ish {
@@ -77,6 +78,7 @@ namespace ilang {
 
 		ValuePass get(Identifier i);
 		bool has(Identifier i);
+		//Handle<Variable> getVariable(Identifier i);
 		friend class Class;
 	};
 

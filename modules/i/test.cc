@@ -10,8 +10,9 @@ using namespace ilang;
 
 namespace {
 	ilang::ValuePass ttt (Arguments &args) {
-		cout << "ttt function called" << endl;
-		debug(5, "what");
+		//cout << "ttt function called" << endl;
+		//debug(5, "what");
+		return valueMaker("the ttt function called");
 	}
 
 	using namespace ilang;
@@ -21,7 +22,7 @@ namespace {
 		ValuePass something;
 	public:
 		ilang::ValuePass eeee(Arguments &args) {
-			cout << "calling the eeee function";
+			return valueMaker("the eeee function called");
 		}
 
 		ValuePass set(Arguments &args) {
@@ -35,16 +36,16 @@ namespace {
 
 		//wwww ();
 		//};
-		wwww ()	 {
+		wwww (Arguments &args)	 {
 			reg("eeee", &wwww::eeee);
 			reg("set", &wwww::set);
 			reg("get", &wwww::get);
-			cout << "new class wwww created\n";
+			//cout << "new class wwww created\n";
 			//assert(0);
 			//while(1);
 		}
 		virtual ~wwww () {
-			cout << "test class deleted\n";
+			//cout << "test class deleted\n";
 			//assert(0);
 		}
 	};

@@ -48,6 +48,7 @@ TEST_CASE("Basic class create", "[object]") {
 					 main = {
 						 assert(test.a == 1);
 						 gg = test.new();
+						 assert(gg.a == 1);
 						 assert(test.instance(gg));
 						 assert(test.interface(gg));
 					 };
@@ -126,4 +127,23 @@ TEST_CASE("implicit this bind", "[object]") {
 					 };
 					 );
 	REQUIRE(asserted == 1);
+}
+
+TEST_CASE("setting value of member", "[object]") {
+	init();
+	RUN_CODE(
+					 gg = class {
+					 a: 1,
+					 b: {|gg| a = gg; },
+					 c: { return a; }
+					 };
+					 main = {
+						 g = gg.new();
+						 assert(g.a == 1);
+						 g.b(5);
+						 assert(g.a == 5);
+						 assert(g.c() == 5);
+					 };
+					 );
+	REQUIRE(!asserted);
 }

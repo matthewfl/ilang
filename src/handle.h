@@ -18,7 +18,7 @@ namespace ilang {
 	template <typename T> using Handle = boost::intrusive_ptr<T>;
 	using boost::dynamic_pointer_cast;
 
-	template <typename T, typename... args> Handle<T> make_handle(args... arg) {
+	template <typename T, typename... args> Handle<T> make_handle(args ... arg) {
 		return Handle<T>(new T(arg...));
 	}
 
