@@ -181,7 +181,9 @@ ValuePass Class::builtInGet(Identifier i) {
 
 Class_instance::Class_instance(Handle<Class> c) : m_class(c) {
 	assert(m_class);
-	m_members.insert(m_class->begin(), m_class->end());
+	for(auto it : *m_class) {
+		m_members.insert(make_pair(it.first, make_handle<Variable>(*it.second)));
+	}
 }
 //Class_instance::Class_instance(C_class *c) : m_ccclas(c) {}
 
