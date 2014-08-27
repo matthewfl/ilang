@@ -14,6 +14,7 @@ namespace ilang {
 	private:
 		unsigned long m_id;
 	public:
+		Identifier() : m_id(0) {}
 		Identifier(const char*);
 		Identifier(const std::string);
 		explicit Identifier(unsigned long i) : m_id(i) {}
@@ -26,6 +27,10 @@ namespace ilang {
 		unsigned long raw() const { return m_id; }
 		bool isInt() const { return m_id < Identifier_max_int; }
 	};
+
+	inline Identifier operator "" _id (const char *c) {
+		return Identifier(c);
+	}
 
 	typedef std::unordered_set<Identifier> IdentifierSet;
 	//	typedef std::set<Identifier> IdentifierSet;

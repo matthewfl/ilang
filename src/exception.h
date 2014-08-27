@@ -3,6 +3,8 @@
 
 #include <exception>
 
+#include "valuepass.h"
+
 namespace ilang {
 
 	class Value_new;
@@ -31,6 +33,14 @@ namespace ilang {
 	template <typename T> class BadValueCastType : public BadValueCast {
 	public:
 		BadValueCastType(const char *f) : BadValueCast(const_cast<char*>(f)) {}
+	};
+
+	class InvalidOperation : public Exception {
+	public:
+		virtual const char* what() const throw() override { return "ilang invalid operation"; }
+		ValuePass of;
+		InvalidOperation() {}
+		InvalidOperation(ValuePass f) : of(f) {}
 	};
 
 } // namespace ilang

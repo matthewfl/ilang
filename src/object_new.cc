@@ -245,6 +245,15 @@ Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserN
 	}
 }
 
+Array::Array(std::vector<ValuePass> elems) {
+	m_members.reserve(elems.size());
+	for(auto it : elems) {
+		auto v = make_handle<Variable>();
+		v->Set(it);
+		m_members.push_back(v);
+	}
+}
+
 ValuePass Array::get(Identifier i) {
 	if(i.isInt()) { // this is an item in the array
 		if(m_members.size() < i.raw()) {

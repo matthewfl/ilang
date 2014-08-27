@@ -77,11 +77,12 @@ namespace ilang {
 		const char*, StringType,
 		//char*, StringType,
 		std::string, StringType,
+		Identifier, StringType,  // TODO: change
 		//std::stringstream, StringType
 		ilang::Function, FunctionType,
 		//Handle<ilang::Class>, ClassType,
 		Handle<ilang::Object>, HashableType,
-		Handle<ilang::Object>, HashableType,
+		//Handle<ilang::Object>, HashableType,
 		Handle<ilang::Class>, HashableType,
 		Handle<ilang::Class_instance>, HashableType,
 		Handle<ilang::Array>, HashableType,

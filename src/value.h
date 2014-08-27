@@ -11,7 +11,8 @@
 #include "debug.h"
 
 #include <iostream>
-//using namespace std;
+
+#include "valuepass.h"
 
 #include "exception.h"
 #include "handle.h"
@@ -32,62 +33,8 @@ namespace ilang {
 	typedef Handle<Object> Object_ptr;
 
 
-	class ValuePass {
-  private:
-    char m_data[32]; // TODO: don't hard code the size // sizeof(Value_new), should be 16
-	public:
-		inline Value_new *Get() const {
-			assert(*(long*)m_data);
-			return (Value_new*)m_data;
-		}
-    inline Value_new *operator->() const { return Get(); }
-		inline Value_new &operator*() const { return *Get(); }
-
-    ValuePass() {
-			// TODO: should have something here to make sure there are no problems
-			*(long*)m_data = 0;
-			//new (m_data) Value_new;
-    }
-		template <typename T>ValuePass (T t) {
-			assert(sizeof(T) <= sizeof(m_data));
-			assert(dynamic_cast<Value_new*>(&t));
-			new (m_data) T(t);
-		}
-
-		// TODO: xvalue constructure
-		ValuePass(const ValuePass &x);
-		~ValuePass();
-
-		// copy operator
-		void operator = (const ValuePass &v);
-		void swap(ValuePass &v);
-
-		// proxy functions
-		ValuePass operator + (ValuePass v); // { return *Get() + v; }
-		ValuePass operator - (ValuePass v); // { return *Get() - v; }
-		ValuePass operator * (ValuePass v); // { return *Get() * v; }
-		ValuePass operator / (ValuePass v); // { return *Get() / v; }
-
-		bool operator == (ValuePass v);
-		bool operator != (ValuePass v) { return !operator==(v); }
-		bool operator <= (ValuePass v);
-		bool operator >= (ValuePass v) { return !operator<(v); }
-		bool operator < (ValuePass v);
-		bool operator > (ValuePass v) { return !operator<=(v); }
-
-		operator bool () const { return *(long*)m_data != 0; }
-
-		//ValuePass call(ilang::Arguments &a); // { return Get()->call(a); }
-		//ValuePass operator () (ilang::Arguments &a) { return call(a); }
-		//template<typename... types> ValuePass operator() (types... values);
-
-	};
-
-	//using ValuePass = ValuePass;
-
-
 	// TODO: change to raise an exception that is caught
-#define RAISE_ERROR {assert(0);}
+#define RAISE_ERROR { throw InvalidOperation(ValuePass(this)); }
 #define RAISE_TYPE_ERROR(typ) { throw BadValueCastType<typ>(type().name()); }
 
 	enum math_ops {
@@ -165,6 +112,11 @@ namespace ilang {
 		template <typename T> auto cast() {
 			cast_chooser<T> c;
 			return Cast(c);
+		}
+
+		void inject(ValuePass &v) {
+			ValuePass s(this);
+			v.swap(s);
 		}
 
 		template <typename T> void inject(Handle<T> &t) {
@@ -294,10 +246,11 @@ namespace ilang {
 
 	class StringType : public Value_new {
 	public:
-		StringType(char *str) { m_ptr = new std::string(str); }
+		StringType(const char *str) { m_ptr = new std::string(str); }
 		StringType(std::string str) { m_ptr = new std::string(str); }
 		StringType(StringType &&s) { m_ptr = s.m_ptr; s.m_ptr = NULL; }
 		StringType(StringType const &s) { m_ptr = new std::string(s.GetSelf()); }
+		StringType(Identifier const &i) { m_ptr = new std::string(i.str()); }
 		//StringType(std::stringstream str) { m_ptr = new std::string(str.str()); }
 		~StringType();// { delete (std::string*)m_ptr; }
 
@@ -331,6 +284,15 @@ namespace ilang {
 			//cout << "creating new " << typeid(To).name() << endl;
 			return ValuePass(To(t));
 		}
+		// template<typename T>
+		// static inline
+		// std::enable_if_t<std::is_convertible<typename T::element_type, typename Of::element_type>::value,
+		// 							 ValuePass>
+		// create(T t) {
+		// 	Of f(dynamic_pointer_cast<Of::element_type>(t));
+		// 	return ValuePass(To(f));
+		// }
+
 		template <typename T> inline ValuePass operator () (T t) {
 			return create(t);
 		}

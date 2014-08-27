@@ -8,6 +8,7 @@
 
 #include "ilang.h"
 #include "error.h"
+#include "identifier.h"
 
 #include <map>
 #include <string>
@@ -18,15 +19,20 @@ namespace {
 
 	class Mapper : public ilang::C_Class {
 	private:
-		ValuePass m_objectHold;
-		ilang::Object *m_obj;
-		std::map<std::string, std::vector<ValuePass> > m_emitted;
+		// ValuePass m_objectHold;
+		// ilang::Object *m_obj;
+		Handle<Iterable> m_obj;
+		std::map<Identifier, std::vector<ValuePass> > m_emitted;
 
 		ValuePass EmitFunct(Arguments &args) {
 			error(args.size() == 2, "map.emit expects 2 arguments");
-			error(args[0]->type() == typeid(std::string), "map.emit expects the first argument to be a string");
+			Identifier i;
+			ValuePass v;
+			args.inject(i, v);
+			//error(args[0]->type() == typeid(std::string), "map.emit expects the first argument to be a string");
 
-			m_emitted[args[0]->cast<string>()].push_back(args[1]); // save the emitted element into the map, this will not scale well at the moment.
+			m_emitted[i].push_back(v);
+			//m_emitted[args[0]->cast<string>()].push_back(args[1]); // save the emitted element into the map, this will not scale well at the moment.
 
 			return valueMaker(true);
 		}
@@ -44,9 +50,10 @@ namespace {
 			// }
 
 			ValuePass ret;// = ValuePass(new ilang::Value_Old);
-			Mapper *returnMapper = new Mapper();
+
+			auto returnMapper = Handle<Mapper>(new Mapper);
 			assert(returnMapper != this); // fcking free bugs
-			returnMapper->m_obj = (ilang::Object*)0x2;
+			//			returnMapper->m_obj = (ilang::Object*)0x2;
 			// ilang::Function emitFunct;
 			// emitFunct.native = true;
 			ilang::Function emit_fun([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
@@ -56,12 +63,14 @@ namespace {
 			ValuePass emitFunctVal = valueMaker(emit_fun);
 
 			assert(m_obj);
-			for(auto vals : m_obj->m_members) {
+			for(auto vals : *m_obj) {
 				if(vals.first == "this") continue;
 				auto val = vals.second;
-				// TODO: var->Get()
-				// ValuePass ret = funct(valueMaker(vals.first), 1, emitFunctVal);
+
+				ValuePass ret = funct(valueMaker(vals.first), val->Get(), emitFunctVal);
 			}
+
+			return valueMaker(static_pointer_cast<Hashable>(returnMapper));
 
 			/*
 				#define CALL_WITH(_key, _value)																	\
@@ -96,14 +105,23 @@ namespace {
 
 			//auto obj = make_handle<ilang::Object>(returnMapper);
 
-			return valueMaker(true);//obj);
+			//return valueMaker(true);//obj);
 		}
 
 		ValuePass Get(Arguments &args) {
-			error(args.size() == 1, "map.get expects 1 arugment");
-			error(args[0]->type() == typeid(std::string), "map.get expects a string");
+			Identifier i;
+			args.inject(i);
 
-			return valueMaker(0);
+			auto it = m_emitted.find(i);
+			if(it != m_emitted.end())
+				return it->second[0];
+
+			return valueMaker(false);
+
+			// error(args.size() == 1, "map.get expects 1 arugment");
+			// error(args[0]->type() == typeid(std::string), "map.get expects a string");
+
+			// return valueMaker(0);
 			// TODO;
 			//return ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(m_emitted[
 		}
@@ -120,7 +138,7 @@ namespace {
 			// 	obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(funct.object->Get())));
 			// }
 
-			Mapper *returnMapper = new Mapper();
+			auto returnMapper = Handle<Mapper>(new Mapper);
 			ilang::Function emitFunct([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
 					*ret = returnMapper->EmitFunct(args);
 					assert(*ret);
@@ -136,11 +154,12 @@ namespace {
 
 			for(auto vals : m_emitted) {
 				//auto arr_ = make_handle<ilang::Array>(vals.second);
-				ValuePass arr = valueMaker(true);//arr_); // TODO:
-				CALL_WITH(vals.first, arr);
+				//ValuePass arr = valueMaker(true);//arr_); // TODO:
+				auto arr = make_handle<Array>(vals.second);
+				CALL_WITH(vals.first, valueMaker(arr));
 			}
-
 #undef CALL_WITH
+			return valueMaker(static_pointer_cast<Hashable>(returnMapper));
 		}
 
 		void Init() {
@@ -150,16 +169,20 @@ namespace {
 		}
 
 		Mapper() : m_obj(NULL) {
-			m_obj = (ilang::Object*)1;
+			//			m_obj = (ilang::Object*)1;
 			Init();
 		}
 	public:
-		Mapper(ValuePass _hold, ilang::Object *_obj) :
-			m_objectHold(_hold), m_obj(_obj)
-		{
-			assert(m_obj);
+		// Mapper(ValuePass _hold, ilang::Object *_obj) :
+		// 	m_objectHold(_hold), m_obj(_obj)
+		// {
+		// 	assert(m_obj);
+		// 	Init();
+		// }
+		Mapper(Handle<Iterable> h) : m_obj(h) {
 			Init();
 		}
+
 		~Mapper() {
 
 		}
@@ -168,15 +191,27 @@ namespace {
 	ValuePass createMapper(Arguments &args) {
 		// when the argument is of a class that has not been constructed, then the type is ilang::Class*, after the obhject is constructed then the type is ilang::Object* with a pointer to class
 		error(args.size() == 1, "map.create expects 1 argument");
-		error(args[0]->type() == typeid(ilang::Object*), "map.create expects type of object");
-		ilang::Object *obj = args[0]->cast<Object*>().get(); //boost::any_cast<ilang::Object*>(args[0]->Get());
-		assert(obj);
+		Handle<Hashable> h;
+		args.inject(h);
+		// error(args[0]->type() == typeid(ilang::Hashable*), "map.create expects type of object");
+
+		//		ilang::Object *obj = args[0]->cast<Object*>().get(); //boost::any_cast<ilang::Object*>(args[0]->Get());
+		assert(h);
+		auto i = dynamic_pointer_cast<Iterable>(h);
+		error(i, "item must be iterable");
 		//error(dynamic_cast<ilang::Array*>(obj) == NULL, "map.create does not work on arrays");
 
-		Mapper *map = new Mapper(args[0], obj);
+		// Mapper *map = new Mapper(i);
 
-		//auto obj_ = make_handle<ilang::Object>(map);
-		return valueMaker(false);//obj_);
+		auto map = make_handle<Mapper>(i);
+		auto s = static_pointer_cast<Hashable>(map);
+
+		return valueMaker(s);
+
+		// //Mapper *map = new Mapper(args[0], obj);
+
+		// //auto obj_ = make_handle<ilang::Object>(map);
+		// return valueMaker(false);//obj_);
 
 	}
 

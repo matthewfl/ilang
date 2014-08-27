@@ -16,6 +16,14 @@ ValuePass::ValuePass(const ValuePass &x) {
 	//Get()->type2();
 }
 
+ValuePass::ValuePass(Value_new *v) {
+	v->copyTo(m_data);
+}
+
+// ValuePass::ValuePass(const Value_new &v) {
+// 	v.copyTo(m_data);
+// }
+
 ValuePass::~ValuePass() {
 	if(*(long*)m_data != 0)
 		Get()->~Value_new();

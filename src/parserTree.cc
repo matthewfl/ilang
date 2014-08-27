@@ -494,7 +494,15 @@ namespace ilang {
 				_errors.stream() << "\n\tLooking up FieldAccess where there is an object";
 				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
-				ret = obj_val->get(valueMaker(identifier));
+				try {
+					ret = obj_val->get(valueMaker(identifier));
+				} catch(InvalidOperation e) {
+					if(obj_val->type() == typeid(Hashable*)) {
+						error(0, "Object " << obj_val << "does not have member " << identifier);
+					} else  {
+						error(0, "Attempted to access member on non object type " << obj_val);
+					}
+				}
 				if(ret->type() == typeid(ilang::Function)) {
 					// TODO: should not be doing the bind here.....do before getting the function
 					return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
@@ -511,7 +519,11 @@ namespace ilang {
 			if (Obj) {
 				ValuePass obj_val = Obj->GetValue(ctx);
 				ValuePass key = valueMaker(identifier);
-				obj_val->set(key, val);
+				try {
+					obj_val->set(key, val);
+				} catch(InvalidOperation e) {
+					error(0, "Attempted to set " << key->cast<string>() << " on non object type");
+				}
 			}else{
 				Identifier name(identifier);
 				ctx.scope->set(name, val);
@@ -558,7 +570,16 @@ namespace ilang {
 
 			ValuePass obj_val = Obj->GetValue(ctx);
 			ValuePass key = Lookup->GetValue(ctx);
-			ValuePass ret = obj_val->get(key);
+			ValuePass ret;
+			try {
+				ret = obj_val->get(key);
+			} catch(InvalidOperation e) {
+				if(obj_val->type() == typeid(Hashable*)) {
+					error(0, "Object " << obj_val << " does not have member " << key->cast<string>());
+				} else  {
+					error(0, "Attempted to access member on non object type " << obj_val);
+				}
+			}
 			// TODO: this should be somewhere else
 			if(ret->type() == typeid(ilang::Function)) {
 				return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
@@ -571,13 +592,11 @@ namespace ilang {
 			errorTrace("Setting element using []: " << GetFirstName());
 			ValuePass obj_val = Obj->GetValue(ctx);
 			ValuePass key = Lookup->GetValue(ctx);
-			obj_val->set(key, var);
-			// boost::any & a = obj_val->Get();
-			// error(a.type() == typeid(ilang::Object*), "Not of an object or array type");
-			// ilang::Object *obj = boost::any_cast<ilang::Object*>(a);
-			// ValuePass index = Lookup->GetValue(scope);
-			// ilang::Variable *v = obj->operator[](index);
-			// v->Set(var);
+			try {
+				obj_val->set(key, var);
+			} catch(InvalidOperation e) {
+				error(0, "Attempted to set " << key->cast<string>() << " on non object type");
+			}
 		}
 
 		std::string ArrayAccess::GetFirstName() {

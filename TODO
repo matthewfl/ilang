@@ -92,3 +92,19 @@ We should be able to have "algebric" types by adding functions together, eg if w
 
 8/8/2014
 Better error handling for parser errors
+
+8/24/2014
+Possibly change the syntax for class/objects to look more like the rest of the language with using = and ; instead of : and ,.  Then there could also be support for using something like loops as one would in a function.  eg:
+object {
+			 a = 1;
+			 b = 5;
+			 while(b < a) {
+			      a += 1;
+			 }
+};
+
+maybe some yield-ish support??
+times(5) {
+
+}
+what is the use case for this that actually makes since, would it just allow people to implement their own object/class like systems and then object/classes could be implemented using the same methods
