@@ -108,3 +108,6 @@ times(5) {
 
 }
 what is the use case for this that actually makes since, would it just allow people to implement their own object/class like systems and then object/classes could be implemented using the same methods
+
+8/28/2014
+Create some sort of proxy object concept, so that objects can be represented that are loaded on other machines or backed by something else, eg: db

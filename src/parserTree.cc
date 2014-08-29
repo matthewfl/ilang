@@ -498,7 +498,7 @@ namespace ilang {
 					if(obj_val->type() == typeid(Hashable*)) {
 						error(0, "Object " << obj_val << "does not have member " << name.str());
 					} else  {
-						error(0, "Attempted to access member on non object type " << obj_val);
+						error(0, "Attempted to access member on non object type " << obj_val->type().name());
 					}
 				}
 				if(ret->type() == typeid(ilang::Function)) {
@@ -1253,6 +1253,8 @@ namespace ilang {
 					// return value is ignored
 				});
 			thread.Trigger(NULL);
+
+			return ValuePass();
 		}
 
 		void ThreadGoCall::Print(Printer *p) {

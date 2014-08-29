@@ -72,6 +72,7 @@ namespace ilang {
 				}
 				oldQueueSize = queueSize;
 				if(m_waitingThread == 0) {
+					// TODO: it doesn't make much since to have more threads then cpus given that the threads shouldn't be waiting on io
 					// having a thread waiting means that events should be cleared quickly
 					MoreThreads();
 				}
@@ -225,7 +226,8 @@ namespace ilang {
 			}
 			eve = Thread_current_event.release();
 			// might still want to remove from the hasmap
-			assert(m_eventList.erase(access));
+			bool er = m_eventList.erase(access);
+			assert(er);
 			m_eventsWaiting--;
 			if(eve && eve->done) {
 				// delete the even and the stack
@@ -236,7 +238,7 @@ namespace ilang {
 
 
 	Event::Event(EventPool *pool,	 unsigned long id) : m_pool(pool), m_id(id) {}
-	Event::Event() : m_pool(NULL), m_id(0) {}
+	Event::Event() : m_pool(global_EventPool()), m_id(0) {}
 	void Event::Trigger(void *data) {
 		if(m_pool && m_id) m_pool->TriggerEvent(m_id, data);
 	}

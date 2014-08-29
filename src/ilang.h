@@ -140,7 +140,7 @@ namespace ilang {
 			if(i == "new") {
 				ilang::Function nfun([](Context &ctx, Arguments &args, ValuePass *ret) {
 						auto r = make_handle<cc>(args);
-						*ret = valueMaker(dynamic_pointer_cast<Hashable>(r));
+						*ret = valueMaker(static_pointer_cast<Hashable>(r));
 					});
 				return valueMaker(nfun);
 			}

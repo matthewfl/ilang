@@ -18,6 +18,9 @@ SRCSD=$(addprefix $(SRCDIR)/, $(SRCS))
 MODULESDIR=modules
 MODULESD=$(addprefix $(BUILDDIR)/$(MODULESDIR)/, $(MODULES))
 
+UNITDIR=unit_tests
+UNIT_TEST_OBJS=$(addprefix $(BUILDDIR)/, $(UNIT_TESTS:.cc=.o))
+
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
@@ -89,13 +92,17 @@ $(BUILDDIR)/%.pb.cc: $(SRCDIR)/%.proto
 
 $(BUILDDIR)/database.pb.o: $(BUILDDIR)/database.pb.cc
 
+$(BUILDDIR)/unit_tests/%.o: $(UNITDIR)/%.cc $(UNITDIR)/base.h
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -o $@ -c $<
+
 $(TARGET): $(DEPS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD)
 	$(LD) -o $@ $(LDFLAGS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD) $(LIBS)
 
 modules: $(MODULESD)
 
 clean:
-	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda
+	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda $(UNIT_TEST_OBJS)
 clean-all: clean
 	cd deps/leveldb && make clean
 	cd deps/libuv && make distclean
@@ -118,8 +125,8 @@ check: $(TARGET)
 unit: $(BUILDDIR)/unit
 	./$(BUILDDIR)/unit
 
-$(BUILDDIR)/unit: $(UNIT_TESTS) $(TARGET) $(MODULESD)
-	$(CXX) $(CXXFLAGS) -o $(BUILDDIR)/unit $(UNIT_TESTS) $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
+$(BUILDDIR)/unit: $(UNIT_TEST_OBJS) $(TARGET) $(MODULESD)
+	$(CXX) $(CXXFLAGS) -o $(BUILDDIR)/unit $(UNIT_TEST_OBJS) $(LDFLAGS) $(OBJS) $(MODULESD) $(LIBS)
 
 .PHONY: coverage _coverage-core
 coverage:

@@ -16,7 +16,8 @@ namespace {
 		ilang::Event waiting;
 		ValuePass push(Arguments &args) {
 			error(args.size() == 1, "channel.push expects one argument");
-			m_queue.push(args[0]);
+			auto v = args[0];
+			m_queue.push(v);
 			waiting.Trigger(NULL);
 			return ValuePass();
 		}
@@ -26,7 +27,7 @@ namespace {
 			//m_queue.pop(ret); // blocks until there is something to pop
 			while(!m_queue.try_pop(ret)) {
 				// there was nothing to pop from the queue
-				ilang::global_EventPool()->WaitEvent(waiting);
+				//waiting.Wait();
 			}
 			return ret;
 		}
@@ -68,9 +69,8 @@ namespace {
 			error(args[0]->type() == typeid(long), "channel.create expects 1 argument");
 			channelLength = args[0]->cast<int>();
 		}
-		threadChannel *ch = new threadChannel(channelLength);
-		//auto obj = make_handle<ilang::Object>(ch);
-		return valueMaker(true); //obj);
+		auto ch = make_handle<threadChannel>(channelLength);
+		return valueMaker(static_pointer_cast<Hashable>(ch));
 	}
 
 	ILANG_LIBRARY_NAME("i/channel",
