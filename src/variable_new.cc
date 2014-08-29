@@ -19,14 +19,14 @@ void Variable::Set(ValuePass v) {
 }
 
 void Variable::Check(ValuePass v) {
+	Identifier check("check");
 	for(auto it : m_modifiers) {
 		assert(it);
 		Arguments args(v);
 		ValuePass ret;
 		if(it->type() == typeid(Function)) {
 			ret = it->call(args);
-		}else if(it->type() == typeid(Object*)) {
-			Identifier check("check");
+		}else if(it->type() == typeid(Hashable*)) {
 			auto c = it->get(check);
 			if (c) ret = c->call(args);
 		}else{
@@ -36,6 +36,20 @@ void Variable::Check(ValuePass v) {
 			throw BadTypeCheck();
 		}
 	}
+}
+
+ValuePass Variable::Get() {
+	ValuePass ret;
+	Identifier getting("getting");
+	Arguments na;
+	for(auto it : m_modifiers) {
+		if(it->type() == typeid(Hashable*)) {
+			auto g = it->get(getting);
+			if(g) ret = g->call(na);
+			if(ret) return ret;
+		}
+	}
+	return m_value;
 }
 
 void Variable::SetModifiers(std::vector<ilang::ValuePass> mod) {

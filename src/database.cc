@@ -163,8 +163,8 @@ namespace ilang {
           cout << a.type().name() << endl;
           assert(0);
           // have no idea what this is
-					*/
-		}
+          */
+    }
 
     static storedData * createStoredData(ValuePass a) {
       ilang_db::Entry entry;
@@ -197,389 +197,447 @@ namespace ilang {
       // nothing else should use this at this time
       assert(0);
       }
-			*/
+      */
+    }
+
+  };
+
+  char * DB_createName () {
+    // first char must be -, so that the name would be an ilegal variable name
+    if(DB_name_prefix.empty()) {
+      DB_name_prefix = "-local-db";
+    }
+    if(DB_name_last.empty()) {
+      assert(System_Database);
+      DB_name_last = System_Database->getMeta("Object_counter");
+      if(DB_name_last.empty()) {
+        DB_name_last = "-A";
+      }
+    }
+    int pos=1, len=DB_name_last.size();
+    while(true) {
+      if(DB_name_last[pos] > 250) {
+        DB_name_last[pos] = (char)1;
+        pos++;
+        continue;
+      }else{
+        DB_name_last[pos]++;
+        if(DB_name_last[pos] == '-')
+          DB_name_last[pos]++;
+        break;
+      }
+    }
+    System_Database->setMeta("Object_counter", DB_name_last);
+    //cout << "name: " << DB_name_prefix << " " << DB_name_last << endl << flush;
+    std::string str = DB_name_prefix;
+    str += DB_name_last;
+    str += "-";
+    char *ret = new char[str.size()];
+    strcpy(ret, str.c_str());
+    return ret;
+  }
+
+
+
+  DatabaseFile::DatabaseFile(fs::path path) {
+    // leveldb::Options options;
+    // options.create_if_missing = true;
+    // leveldb::Status status = leveldb::DB::Open(options, path.c_str(), &db);
+    // //cout << "created database " << path << endl;
+    // assert(status.ok());
+  }
+  DatabaseFile::~DatabaseFile() {
+    //delete db;
+  }
+
+  void DatabaseFile::Set(std::string name, storedData *data) {
+    //size_t storedSize = sizeof(storedData);
+    //if(data->type == storedData::String || data->type == storedData::Object) storedSize = sizeof(storedData) + data->string_length;
+    // leveldb::Slice s_data(*data);
+    // storedNameRaw NameStr;
+    // NameStr.type = storedNameRaw::NormalKey;
+    // size_t nameSize = sizeof(storedNameRaw) - 256 /* for char[256] */ + name.size();
+    // strncpy(NameStr.name, name.c_str(), 256);
+    // leveldb::Slice s_name((char*)(&NameStr), nameSize);
+    // db->Put(leveldb::WriteOptions(), s_name, s_data);
+  }
+  storedData *DatabaseFile::Get(std::string name) {
+    // storedNameRaw NameStr;
+    // NameStr.type = storedNameRaw::NormalKey;
+    // size_t nameSize = sizeof(storedNameRaw) - 256 /* for char[256] */ + name.size();
+    // strncpy(NameStr.name, name.c_str(), 256);
+    // leveldb::Slice s_name((char*)(&NameStr), nameSize);
+    // std::string *value = new std::string;
+    // if( db->Get(leveldb::ReadOptions(), s_name, value).ok() ) {
+    //   return value;
+    // }else{
+    //   delete value;
+    //   return NULL;
+    // }
+    return NULL;
+  }
+
+  void DatabaseFile::setMeta(std::string name, std::string data) {
+    // name.insert(0,1,1);
+    // db->Put(leveldb::WriteOptions(), name, data);
+  }
+
+  std::string DatabaseFile::getMeta(std::string name) {
+    // name.insert(0,1,1);
+    // std::string ret;
+    // if(! db->Get(leveldb::ReadOptions(), name, &ret).ok() )
+    //   ret.clear(); // idk if this is needed
+    // return ret;
+  }
+
+  void DatabaseDummy::Set(std::string name, storedData *dat) {
+    // storedData is typedef to a string type
+    _dat[name] = *dat;
+
+  }
+  storedData* DatabaseDummy::Get(std::string name) {
+    auto it = _dat.find(name);
+    if(it == _dat.end())
+      return NULL;
+    std::string *ret = new std::string;
+    *ret = it->second;
+    return ret;
+  }
+  void DatabaseDummy::setMeta(std::string name, std::string dat) {
+    _meta[name] = dat;
+  }
+  std::string DatabaseDummy::getMeta(std::string name) {
+    return _meta[name];
+  }
+
+
+  // class Database_variable : public Variable_modifier {
+  // private:
+  //   //Variable *var;
+  //   bool recursion_block;
+  //   std::string name;
+  //   ValuePass toSet;
+  //   bool hasRead;
+  // public:
+  //   bool Check(Variable *self, const boost::any &a) {
+  //     // should block types that are not allowed in the database
+  //     // return a.type() != typeid(ilang::Class*) && a.type() != typeid(ilang::Function_ptr);
+  //     return true;
+  //   }
+  //   Database_variable(Variable *var, std::string _name): name(_name), hasRead(false), recursion_block(false) {
+  //     //cout << "new database variable created " << name << endl;
+  //     storedData *dat = System_Database->Get(name);
+  //     if(dat) {
+  //       toSet = DB_serializer::readStoredData(dat);
+  //       delete dat;
+  //       //_var->Set(toSet);
+  //     }
+  //   }
+  //   void Set(Variable *var, const boost::any &a) {
+  //     //cout << "setting data for variable " << name << endl;
+  //     if(recursion_block) return; // to pervent the system from recursion
+  //     //if(!hasRead) return;
+  //     if(toSet) { // replace the default value
+  //       //cout << "setting defualt value for " << name << endl;
+  //       if(!hasRead) {
+  //         //Variable *vvv = var;
+  //         //var = NULL;
+  //         recursion_block = true;
+  //         // TODO:
+  //         //var->Set(toSet);
+  //         recursion_block = false;
+  //         //var = vvv;
+  //       }
+  //       toSet = ValuePass();
+  //       if(!hasRead) return;
+  //     }
+  //     storedData *dat = DB_serializer::createStoredData(a);
+
+  //     System_Database->Set(name, dat);
+  //     delete dat;
+  //   }
+  //   void Read(Variable *var, ValuePass &val) {
+  //     if(toSet)
+  //       val = toSet;
+  //     hasRead = true;
+  //   }
+  // };
+
+  // class Database_variable_wrap : public Variable_modifier {
+  // public:
+  //  bool Check(Variable *self, const boost::any &a) { return true; }
+  //  Handle<Variable_modifier> new_variable(Variable *self, std::string name) {
+  //    assert(System_Database);
+  //    Handle<Variable_modifier> p ( new Database_variable(self, name) );
+  //    return p;
+  //  }
+  // };
+
+
+  // ILANG_VARIABLE_MODIFIER(DB, Database_variable_wrap);
+  // ILANG_VARIABLE_MODIFIER(Db, Database_variable_wrap);
+  // ILANG_VARIABLE_MODIFIER(Database, Database_variable_wrap);
+
+
+  class Database_modifier : public C_Class {
+	private:
+		std::string name;
+
+		ValuePass check(Arguments &args) {
+			ValuePass v = args[0];
+			if(v->type() == typeid(ilang::Function*)) {
+				return valueMaker(false);
+			}
+			if(v->type() == typeid(ilang::Hashable*)) {
+				auto h = v->cast<Hashable*>();
+				if(dynamic_pointer_cast<Class>(h)) { return valueMaker(false); }
+				if(dynamic_pointer_cast<Class_instance>(h)) { return valueMaker(false); }
+			}
+			return valueMaker(true);
+		}
+		ValuePass setting(Arguments &args) {
+
+			return ValuePass();
 		}
 
-	};
+		ValuePass getting(Arguments &args) {
+			return valueMaker(123);
+		}
 
-    char * DB_createName () {
-      // first char must be -, so that the name would be an ilegal variable name
-      if(DB_name_prefix.empty()) {
-        DB_name_prefix = "-local-db";
+		ValuePass new_call(Arguments &args) {
+			Handle<Hashable> h(this);
+			return valueMaker(h);
+		}
+
+		void Init() {
+			reg("check", &Database_modifier::check);
+			reg("setting", &Database_modifier::setting);
+			reg("getting", &Database_modifier::getting);
+			reg("new", &Database_modifier::new_call);
+		}
+	public:
+		Database_modifier(Arguments &args) {
+			args.inject(name);
+			Init();
+		}
+  };
+
+	void Database_register_function (Context &ctx, Arguments &args, ValuePass *ret) {
+		auto d = make_handle<Database_modifier>(args);
+		*ret = valueMaker(static_pointer_cast<Hashable>(d));
+	}
+
+	struct Database_modifier_register {
+		Database_modifier_register() {
+			//global_scope_register("DB", ilang::Class_Creater<Database_modifier>());
+			ilang::Function regf(Database_register_function);
+			global_scope_register("DB", valueMaker(regf));
+		}
+	} __database_modifier_register;
+
+  // I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
+  // if programmers couldn't break it, what fun would there be
+  namespace {
+    ValuePass DB_metaSet(Arguments &args) {
+      error(args.size() == 2, "db.metaSet takes 2 arguments");
+      error(args[0]->type() == typeid(string), "First argument to db.metaSet should be a string");
+      error(args[1]->type() == typeid(string), "Second argument to db.metaSet should be a string");
+      System_Database->setMeta(args[0]->cast<string>(), args[1]->cast<string>());
+      return ValuePass();
+    }
+    ValuePass DB_metaGet(Arguments &args) {
+      error(args.size() == 1, "db.metaGet takes 1 argument");
+      error(args[0]->type() == typeid(string), "First argument to db.metaGet must should be a string");
+      return valueMaker(System_Database->getMeta(args[0]->cast<string>()));
+    }
+  }
+  ILANG_LIBRARY_NAME("i/db",
+                     ILANG_FUNCTION("metaSet", DB_metaSet)
+                     ILANG_FUNCTION("metaGet", DB_metaGet)
+                     );
+
+}
+
+// for loading json data into and out of the database
+namespace ilang {
+  using namespace boost::property_tree;
+  /*
+    void createStoredDataFromJSON(ptree tree, ilang_db::Entry &entry) {
+    cout << 'z' << tree.size();
+    if(tree.get_value_optional<int>() != boost::optional<int>()) {
+    cout << 'a';
+    }else if(tree.get_value_optional<long>() != boost::optional<long>()) {
+    cout << 'b';
+    }else if(tree.get_value_optional<double>() != boost::optional<double>()) {
+    cout << 'c';
+    }else if(tree.get_value_optional<float>() != boost::optional<float>()) {
+    cout << 'd';
+    }
+    // else if(tree.get_value_optional<std::string>() != boost::optional<std::string>()) {
+    //   cout << 'e';
+    //   cout << tree.get_value_optional<std::string>() << endl;
+    // }
+    else{
+    cout << 'f';
+
+    for(auto it : tree) {
+    cout << it.first << typeid(it.first).name() << it.first.empty() << endl ;
+    createStoredDataFromJSON(it.second, entry);
+    //createStoredDataFromJSON
+    }
+    }
+
+    }
+  */
+
+  void loadTree (ptree &pt, ilang_db::Entry &entry) {
+    if (pt.empty()) {
+#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
+      cerr << ggg(bool) << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
+      cerr << "\""<< pt.data()<< "\"";
+#define load_type(type, db_name, db_type)                   \
+      try {                                                 \
+        entry.set_##db_name##_dat(pt.get_value< type >());  \
+          entry.set_type( ilang_db::Entry::db_type );       \
+          return;                                           \
+      } catch (boost::property_tree::ptree_bad_data e) {    \
+                                                            \
       }
-      if(DB_name_last.empty()) {
-        assert(System_Database);
-        DB_name_last = System_Database->getMeta("Object_counter");
-        if(DB_name_last.empty()) {
-          DB_name_last = "-A";
-        }
-      }
-      int pos=1, len=DB_name_last.size();
-      while(true) {
-        if(DB_name_last[pos] > 250) {
-          DB_name_last[pos] = (char)1;
-          pos++;
-          continue;
+
+
+      // TODO: something better, as atm the int 1 is parsed as a bool
+      // this means that bools will become ints as either 0 or 1
+      //load_type(bool, bool, Bool);
+
+      load_type(long, integer, Integer);
+      load_type(int, integer, Integer);
+      load_type(double, float, Float);
+      load_type(float, float, Float);
+      load_type(std::string, string, String);
+      assert(0); // wtf
+#undef load_type
+      // if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
+      //  entry.set_type(ilang_db::Entry::Bool);
+      //  entry.set_bool_dat(pt.get_value<bool>());
+      // } else if(pt.get_value_optional<long>() != boost::optional<long>()) {
+      //  entry.set_type(ilang_db::Entry::Integer);
+      //  entry.set_integer_dat(pt.get_value<long>());
+      // }else if(pt.get_value_optional<double>() != boost::optional<double>()) {
+      //  entry.set_type(ilang_db::Entry::Float);
+      //  entry.set_float_dat(pt.get_value<double>());
+      // }else if(pt.get_value_optional<std::string>() != boost::optional<std::string>()) {
+      //  entry.set_type(ilang_db::Entry::String);
+      //  entry.set_string_dat(pt.get_value<std::string>());
+      // }else{
+      //  assert(0); // wtf
+      // }
+    } else {
+      //if (level) cerr << endl;
+      bool arr = pt.begin()->first.empty();
+      entry.set_type(arr ? ilang_db::Entry::Array : ilang_db::Entry::Object);
+      char *name = DB_createName();
+      entry.set_object_id(name);
+      ilang_db::Entry arr_contents;
+      arr_contents.set_type(ilang_db::Entry::Array_contents);
+      // if there is no first element, then what? that makes this an empty object? as we don't have null
+      //cerr << arr << "{" << endl;
+      for (ptree::iterator pos = pt.begin(); pos != pt.end(); pos++) {
+        ilang_db::Entry sub_entry;
+        std::string dat;
+        if(arr) {
+          // TODO: check that this only happens for arrays
+          char *sub_name = DB_createName();
+          arr_contents.add_array_dat(sub_name);
+          loadTree(pos->second, sub_entry);
+          sub_entry.SerializeToString(&dat);
+          System_Database->Set(sub_name, &dat);
+          delete sub_name;
         }else{
-          DB_name_last[pos]++;
-          if(DB_name_last[pos] == '-')
-            DB_name_last[pos]++;
-          break;
+          string sub_name = name;
+          sub_name += pos->first;
+          loadTree(pos->second, sub_entry);
+          sub_entry.SerializeToString(&dat);
+          System_Database->Set(sub_name, &dat);
         }
+        //cerr << "\"" << pos->first << "\": ";
+        //loadTree(pos->second, sub_entry);//, level + 1);
+        // ++pos;
+        // if (pos != pt.end()) {
+        //   cerr << ",";
+        // }
+        //cerr << endl;
       }
-      System_Database->setMeta("Object_counter", DB_name_last);
-      //cout << "name: " << DB_name_prefix << " " << DB_name_last << endl << flush;
-      std::string str = DB_name_prefix;
-      str += DB_name_last;
-      str += "-";
-      char *ret = new char[str.size()];
-      strcpy(ret, str.c_str());
-      return ret;
-    }
-
-
-
-    DatabaseFile::DatabaseFile(fs::path path) {
-      leveldb::Options options;
-      options.create_if_missing = true;
-      leveldb::Status status = leveldb::DB::Open(options, path.c_str(), &db);
-      //cout << "created database " << path << endl;
-      assert(status.ok());
-    }
-    DatabaseFile::~DatabaseFile() {
-      delete db;
-    }
-
-    void DatabaseFile::Set(std::string name, storedData *data) {
-      //size_t storedSize = sizeof(storedData);
-      //if(data->type == storedData::String || data->type == storedData::Object) storedSize = sizeof(storedData) + data->string_length;
-      leveldb::Slice s_data(*data);
-      storedNameRaw NameStr;
-      NameStr.type = storedNameRaw::NormalKey;
-      size_t nameSize = sizeof(storedNameRaw) - 256 /* for char[256] */ + name.size();
-      strncpy(NameStr.name, name.c_str(), 256);
-      leveldb::Slice s_name((char*)(&NameStr), nameSize);
-      db->Put(leveldb::WriteOptions(), s_name, s_data);
-    }
-    storedData *DatabaseFile::Get(std::string name) {
-      storedNameRaw NameStr;
-      NameStr.type = storedNameRaw::NormalKey;
-      size_t nameSize = sizeof(storedNameRaw) - 256 /* for char[256] */ + name.size();
-      strncpy(NameStr.name, name.c_str(), 256);
-      leveldb::Slice s_name((char*)(&NameStr), nameSize);
-      std::string *value = new std::string;
-      if( db->Get(leveldb::ReadOptions(), s_name, value).ok() ) {
-        return value;
-      }else{
-        delete value;
-        return NULL;
+      if(arr) {
+        std::string dat;
+        arr_contents.SerializeToString(&dat);
+        System_Database->Set(name, &dat);
       }
+
+      //cerr << " }";
+      delete name; // should change to std::string ?
     }
+  }
 
-    void DatabaseFile::setMeta(std::string name, std::string data) {
-      name.insert(0,1,1);
-      db->Put(leveldb::WriteOptions(), name, data);
+
+  int DatabaseLoad(string name, FILE *file) {
+    char buffer[256];
+    //std::string str;
+    //boost::property_tree::basic
+    //basic_ptree tree;
+    stringstream str;
+    ptree tree;
+
+    while( fgets(buffer, 256, file) != NULL ) {
+      str << buffer;
     }
+    read_json(str, tree);
 
-    std::string DatabaseFile::getMeta(std::string name) {
-      name.insert(0,1,1);
-      std::string ret;
-      if(! db->Get(leveldb::ReadOptions(), name, &ret).ok() )
-        ret.clear(); // idk if this is needed
-      return ret;
-    }
+    // for(auto it : tree) {
+    //   cout << it.first << ' ' << it.second.data() << endl;
+    // }
 
-    void DatabaseDummy::Set(std::string name, storedData *dat) {
-      // storedData is typedef to a string type
-      _dat[name] = *dat;
+    ilang_db::Entry entry;
 
-    }
-    storedData* DatabaseDummy::Get(std::string name) {
-      auto it = _dat.find(name);
-      if(it == _dat.end())
-        return NULL;
-      std::string *ret = new std::string;
-      *ret = it->second;
-      return ret;
-    }
-    void DatabaseDummy::setMeta(std::string name, std::string dat) {
-      _meta[name] = dat;
-    }
-    std::string DatabaseDummy::getMeta(std::string name) {
-      return _meta[name];
-    }
+    loadTree(tree, entry);
 
+    std::string dat;
+    entry.SerializeToString(&dat);
+    System_Database->Set(name, &dat);
+    // ilang_db::Entry entry;
+    // createStoredDataFromJSON(tree, entry);
 
-    // class Database_variable : public Variable_modifier {
-    // private:
-    //   //Variable *var;
-    //   bool recursion_block;
-    //   std::string name;
-    //   ValuePass toSet;
-    //   bool hasRead;
-    // public:
-    //   bool Check(Variable *self, const boost::any &a) {
-    //     // should block types that are not allowed in the database
-    //     // return a.type() != typeid(ilang::Class*) && a.type() != typeid(ilang::Function_ptr);
-    //     return true;
-    //   }
-    //   Database_variable(Variable *var, std::string _name): name(_name), hasRead(false), recursion_block(false) {
-    //     //cout << "new database variable created " << name << endl;
-    //     storedData *dat = System_Database->Get(name);
-    //     if(dat) {
-    //       toSet = DB_serializer::readStoredData(dat);
-    //       delete dat;
-    //       //_var->Set(toSet);
-    //     }
-    //   }
-    //   void Set(Variable *var, const boost::any &a) {
-    //     //cout << "setting data for variable " << name << endl;
-    //     if(recursion_block) return; // to pervent the system from recursion
-    //     //if(!hasRead) return;
-    //     if(toSet) { // replace the default value
-    //       //cout << "setting defualt value for " << name << endl;
-    //       if(!hasRead) {
-    //         //Variable *vvv = var;
-    //         //var = NULL;
-    //         recursion_block = true;
-    //         // TODO:
-    //         //var->Set(toSet);
-    //         recursion_block = false;
-    //         //var = vvv;
-    //       }
-    //       toSet = ValuePass();
-    //       if(!hasRead) return;
-    //     }
-    //     storedData *dat = DB_serializer::createStoredData(a);
-
-    //     System_Database->Set(name, dat);
-    //     delete dat;
-    //   }
-    //   void Read(Variable *var, ValuePass &val) {
-    //     if(toSet)
-    //       val = toSet;
-    //     hasRead = true;
-    //   }
-    // };
-
-    // class Database_variable_wrap : public Variable_modifier {
-    // public:
-    //  bool Check(Variable *self, const boost::any &a) { return true; }
-    //  Handle<Variable_modifier> new_variable(Variable *self, std::string name) {
-    //    assert(System_Database);
-    //    Handle<Variable_modifier> p ( new Database_variable(self, name) );
-    //    return p;
-    //  }
-    // };
-
-
-    // ILANG_VARIABLE_MODIFIER(DB, Database_variable_wrap);
-    // ILANG_VARIABLE_MODIFIER(Db, Database_variable_wrap);
-    // ILANG_VARIABLE_MODIFIER(Database, Database_variable_wrap);
-
-    // I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
-    // if programmers couldn't break it, what fun would there be
-    namespace {
-      ValuePass DB_metaSet(Arguments &args) {
-        error(args.size() == 2, "db.metaSet takes 2 arguments");
-        error(args[0]->type() == typeid(string), "First argument to db.metaSet should be a string");
-        error(args[1]->type() == typeid(string), "Second argument to db.metaSet should be a string");
-        System_Database->setMeta(args[0]->cast<string>(), args[1]->cast<string>());
-        return ValuePass();
-      }
-      ValuePass DB_metaGet(Arguments &args) {
-        error(args.size() == 1, "db.metaGet takes 1 argument");
-        error(args[0]->type() == typeid(string), "First argument to db.metaGet must should be a string");
-        return valueMaker(System_Database->getMeta(args[0]->cast<string>()));
-      }
-    }
-    ILANG_LIBRARY_NAME("i/db",
-                       ILANG_FUNCTION("metaSet", DB_metaSet)
-                       ILANG_FUNCTION("metaGet", DB_metaGet)
-                       );
 
   }
 
-  // for loading json data into and out of the database
-    namespace ilang {
-      using namespace boost::property_tree;
-      /*
-        void createStoredDataFromJSON(ptree tree, ilang_db::Entry &entry) {
-        cout << 'z' << tree.size();
-        if(tree.get_value_optional<int>() != boost::optional<int>()) {
-        cout << 'a';
-        }else if(tree.get_value_optional<long>() != boost::optional<long>()) {
-        cout << 'b';
-        }else if(tree.get_value_optional<double>() != boost::optional<double>()) {
-        cout << 'c';
-        }else if(tree.get_value_optional<float>() != boost::optional<float>()) {
-        cout << 'd';
-        }
-        // else if(tree.get_value_optional<std::string>() != boost::optional<std::string>()) {
-        //   cout << 'e';
-        //   cout << tree.get_value_optional<std::string>() << endl;
-        // }
-        else{
-        cout << 'f';
+  int DatabaseDump(string name, FILE *file) {
+    storedData *data = ilang::System_Database->Get(name);
+    assert(data);
+    ValuePass value = DB_serializer::readStoredData(data);
+    std::stringstream ss;
+    // TODO:
+    //value->toJSON(ss);
+    cout << ss;
 
-        for(auto it : tree) {
-        cout << it.first << typeid(it.first).name() << it.first.empty() << endl ;
-        createStoredDataFromJSON(it.second, entry);
-        //createStoredDataFromJSON
-        }
-        }
-
-        }
-      */
-
-      void loadTree (ptree &pt, ilang_db::Entry &entry) {
-        if (pt.empty()) {
-#define ggg(tt) (pt.get_value_optional< tt >() != boost::optional< tt >())
-          cerr << ggg(bool) << ggg(long) << ggg(int) << ggg(double) << ggg(float) << ggg(std::string) << endl;
-          cerr << "\""<< pt.data()<< "\"";
-#define load_type(type, db_name, db_type)                       \
-          try {                                                 \
-            entry.set_##db_name##_dat(pt.get_value< type >());  \
-              entry.set_type( ilang_db::Entry::db_type );       \
-              return;                                           \
-          } catch (boost::property_tree::ptree_bad_data e) {    \
-                                                                \
-          }
+  }
+}
 
 
-          // TODO: something better, as atm the int 1 is parsed as a bool
-          // this means that bools will become ints as either 0 or 1
-          //load_type(bool, bool, Bool);
+// namespace ilang {
+//   void Array::RefreshDB() {
+//     if(!DB_name) return;
 
-          load_type(long, integer, Integer);
-          load_type(int, integer, Integer);
-          load_type(double, float, Float);
-          load_type(float, float, Float);
-          load_type(std::string, string, String);
-          assert(0); // wtf
-#undef load_type
-          // if(pt.get_value_optional<bool>() != boost::optional<bool>()) {
-          //  entry.set_type(ilang_db::Entry::Bool);
-          //  entry.set_bool_dat(pt.get_value<bool>());
-          // } else if(pt.get_value_optional<long>() != boost::optional<long>()) {
-          //  entry.set_type(ilang_db::Entry::Integer);
-          //  entry.set_integer_dat(pt.get_value<long>());
-          // }else if(pt.get_value_optional<double>() != boost::optional<double>()) {
-          //  entry.set_type(ilang_db::Entry::Float);
-          //  entry.set_float_dat(pt.get_value<double>());
-          // }else if(pt.get_value_optional<std::string>() != boost::optional<std::string>()) {
-          //  entry.set_type(ilang_db::Entry::String);
-          //  entry.set_string_dat(pt.get_value<std::string>());
-          // }else{
-          //  assert(0); // wtf
-          // }
-        } else {
-          //if (level) cerr << endl;
-          bool arr = pt.begin()->first.empty();
-          entry.set_type(arr ? ilang_db::Entry::Array : ilang_db::Entry::Object);
-          char *name = DB_createName();
-          entry.set_object_id(name);
-          ilang_db::Entry arr_contents;
-          arr_contents.set_type(ilang_db::Entry::Array_contents);
-          // if there is no first element, then what? that makes this an empty object? as we don't have null
-          //cerr << arr << "{" << endl;
-          for (ptree::iterator pos = pt.begin(); pos != pt.end(); pos++) {
-            ilang_db::Entry sub_entry;
-            std::string dat;
-            if(arr) {
-              // TODO: check that this only happens for arrays
-              char *sub_name = DB_createName();
-              arr_contents.add_array_dat(sub_name);
-              loadTree(pos->second, sub_entry);
-              sub_entry.SerializeToString(&dat);
-              System_Database->Set(sub_name, &dat);
-              delete sub_name;
-            }else{
-              string sub_name = name;
-              sub_name += pos->first;
-              loadTree(pos->second, sub_entry);
-              sub_entry.SerializeToString(&dat);
-              System_Database->Set(sub_name, &dat);
-            }
-            //cerr << "\"" << pos->first << "\": ";
-            //loadTree(pos->second, sub_entry);//, level + 1);
-            // ++pos;
-            // if (pos != pt.end()) {
-            //   cerr << ",";
-            // }
-            //cerr << endl;
-          }
-          if(arr) {
-            std::string dat;
-            arr_contents.SerializeToString(&dat);
-            System_Database->Set(name, &dat);
-          }
-
-          //cerr << " }";
-          delete name; // should change to std::string ?
-        }
-      }
-
-
-      int DatabaseLoad(string name, FILE *file) {
-        char buffer[256];
-        //std::string str;
-        //boost::property_tree::basic
-        //basic_ptree tree;
-        stringstream str;
-        ptree tree;
-
-        while( fgets(buffer, 256, file) != NULL ) {
-          str << buffer;
-        }
-        read_json(str, tree);
-
-        // for(auto it : tree) {
-        //   cout << it.first << ' ' << it.second.data() << endl;
-        // }
-
-        ilang_db::Entry entry;
-
-        loadTree(tree, entry);
-
-        std::string dat;
-        entry.SerializeToString(&dat);
-        System_Database->Set(name, &dat);
-        // ilang_db::Entry entry;
-        // createStoredDataFromJSON(tree, entry);
-
-
-      }
-
-      int DatabaseDump(string name, FILE *file) {
-        storedData *data = ilang::System_Database->Get(name);
-        assert(data);
-        ValuePass value = DB_serializer::readStoredData(data);
-        std::stringstream ss;
-        // TODO:
-        //value->toJSON(ss);
-        cout << ss;
-
-      }
-    }
-
-
-  // namespace ilang {
-  //   void Array::RefreshDB() {
-  //     if(!DB_name) return;
-
-  //     using namespace ilang_db;
-  //     Entry arr_contents;
-  //     arr_contents.set_type(Entry::Array_contents);
-  //     for(int i=0; i < members.size(); i++) {
-  //       char *name = DB_createName();
-  //       arr_contents.add_array_dat(name);
-  //       storedData *dat;
-  //       System_Database->Set(name, dat =  DB_serializer::createStoredData(members[i]->Get()));
-  //       delete dat;
-  //     }
-  //     std::string str_arr_contents;
-  //     arr_contents.SerializeToString(&str_arr_contents);
-  //     System_Database->Set(DB_name, &str_arr_contents);
-  //   }
-  // }
+//     using namespace ilang_db;
+//     Entry arr_contents;
+//     arr_contents.set_type(Entry::Array_contents);
+//     for(int i=0; i < members.size(); i++) {
+//       char *name = DB_createName();
+//       arr_contents.add_array_dat(name);
+//       storedData *dat;
+//       System_Database->Set(name, dat =  DB_serializer::createStoredData(members[i]->Get()));
+//       delete dat;
+//     }
+//     std::string str_arr_contents;
+//     arr_contents.SerializeToString(&str_arr_contents);
+//     System_Database->Set(DB_name, &str_arr_contents);
+//   }
+// }

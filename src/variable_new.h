@@ -22,10 +22,10 @@ namespace ilang {
 		Variable() {}
 		Variable(const Variable& v);
 		void Set(ilang::ValuePass);
-		ilang::ValuePass & Get() {
-			error(m_value, "Can't use a variable before it is set");
-			return m_value;
-		}
+		ilang::ValuePass Get();//  {
+		// 	error(m_value, "Can't use a variable before it is set");
+		// 	return m_value;
+		// }
 		void Check(ilang::ValuePass);
 		void SetModifiers(std::vector<ilang::ValuePass> mod);
 	};

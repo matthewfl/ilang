@@ -111,3 +111,6 @@ what is the use case for this that actually makes since, would it just allow peo
 
 8/28/2014
 Create some sort of proxy object concept, so that objects can be represented that are loaded on other machines or backed by something else, eg: db
+
+8/29/2014
+change to use berkeley db, when the system starts supporting distribuited, it will have units of code which will each be able to have their own dbs

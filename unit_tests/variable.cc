@@ -26,3 +26,36 @@ TEST_CASE("Builtin variable modifiers", "[variable]") {
 						 ) ;
 		, BadType) ;
 }
+
+
+TEST_CASE("modifiers call", "[variable]") {
+	init();
+	RUN_CODE(
+					 GreaterThan = {|a| return {|b| return b > a; }; };
+					 GreaterThan(10) test = 15;
+					 main = {};
+					 );
+}
+
+TEST_CASE("Class modofier", "[variable]") {
+	init();
+	RUN_CODE(
+					 test = class {
+					 check: {|a|
+								 assert(a == 5);
+							   this.b = a + 1;
+					 },
+					 setting: {|a|
+								 assert(a == 5);
+					 },
+					 getting: {
+								 return this.b;
+					 }
+					 };
+					 test qwer = 5;
+					 main = {
+						 assert(qwer == 6);
+					 };
+					 );
+	REQUIRE(!asserted);
+}

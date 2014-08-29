@@ -66,6 +66,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %right LowerThanElse
 %right T_else
 %left ';'
+%right ModListPrec
 %right LowerThanEqual
 %left '='
 %left T_plusEqual T_subEqual T_mulEqual T_divEqual
@@ -149,7 +150,7 @@ Class		:	T_class '{' ObjectList OptComma '}'	{ $$ = new Class(new std::list<Node
 		|	T_class	'(' ParamList OptComma ')' '{' ObjectList OptComma '}'	{ $$ = new Class($3, $7); }
 		;
 
-Array		:	'[' ModifierList OptComma '|' ParamList OptComma ']'	{ $$ = new Array($5, $2); }
+Array		:	'[' ModifierList '|' ParamList OptComma ']'	{ $$ = new Array($4, $2); }
 		| 	'[' ParamList OptComma ']'				{ $$ = new Array($2, NULL); }
 		;
 
@@ -177,7 +178,8 @@ ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
 		;
 
 Args		:	ModifierList Identifier		{ $$ = new Variable(Identifier($2), $1); }
-|	Identifier			{ $$ = new Variable(Identifier($1), NULL); }
+		|	Identifier			{ $$ = new Variable(Identifier($1), NULL); }
+		;
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
                 |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }
@@ -190,7 +192,7 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	Expr '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
+Call		:	ExprType '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
 		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
 		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
@@ -220,10 +222,10 @@ Expr_		:	ExprType
 		|	Expr T_and Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::And); }
 		|	Expr T_or Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($1), dynamic_cast<Value*>($3), LogicExpression::Or); }
 		|	'!' Expr			{ $$ = new LogicExpression(dynamic_cast<Value*>($2), NULL, LogicExpression::Not); }
-		|	Variable T_plusEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::add); }
-		|	Variable T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
-		|	Variable T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
-		|	Variable T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
+		|	LValue T_plusEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::add); }
+		|	LValue T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
+		|	LValue T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
+		|	LValue T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
 		;
 
 /* ExprType is something that can be used for the type checking */

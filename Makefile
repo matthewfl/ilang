@@ -24,7 +24,7 @@ UNIT_TEST_OBJS=$(addprefix $(BUILDDIR)/, $(UNIT_TESTS:.cc=.o))
 INCLUDEDIR=include
 
 # turn off all warnings so I can more easily view the errors, these need to be turn back on latter
-CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(SRCDIR)/ -I$(BUILDDIR)/ -Ideps/leveldb/include -Ideps/catch
+CXXFLAGS_BASE=-DILANG_VERSION=\"$(shell git describe --always --long --dirty --abbrev=12)\" -std=c++1y -Wall -w -I$(SRCDIR)/ -I$(BUILDDIR)/ -Ideps/catch
 CXXFLAGS= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES= -ggdb -O0 -DILANG_STATIC_LIBRARY $(CXXFLAGS_BASE)
 CXXFLAGS_MODULES_LINK=
@@ -40,12 +40,10 @@ PROTOC= protoc
 # settings for building deps
 glogLib=./deps/glog/.libs/libglog.a
 #LIBS+= $(glogLib)
-leveldb=./deps/leveldb/libleveldb.a
-LIBS+=$(leveldb)
 libuv=./deps/libuv/libuv.a
 LIBS+=$(libuv) -lrt
 
-DEPS=$(leveldb) $(libuv)
+DEPS=$(libuv)
 #$(glogLib)
 
 #libs for modules
@@ -104,7 +102,6 @@ modules: $(MODULESD)
 clean:
 	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda $(UNIT_TEST_OBJS)
 clean-all: clean
-	cd deps/leveldb && make clean
 	cd deps/libuv && make distclean
 	rm -rf DB/
 
@@ -149,9 +146,6 @@ $(glogLib): ./deps/glog/build/base/g.ogleinit.h
 	cd deps/glog && ./configure
 	cd deps/glog && make
 
-$(leveldb): ./deps/leveldb/include/leveldb/db.h
-	cd deps/leveldb && make
-
 $(libuv): ./deps/libuv/include/uv.h
 	cd deps/libuv && make
 
@@ -172,13 +166,9 @@ build/import.o: src/parser.h src/function.h src/ilang.h src/value_types.h
 build/parser.o: src/parser.h src/debug.h
 build/database.o: src/database.h src/debug.h src/variable_new.h src/value.h
 build/database.o: src/valuepass.h src/exception.h src/handle.h src/identifier.h
-build/database.o: src/helpers.h src/error.h deps/leveldb/include/leveldb/db.h
-build/database.o: deps/leveldb/include/leveldb/iterator.h
-build/database.o: deps/leveldb/include/leveldb/slice.h
-build/database.o: deps/leveldb/include/leveldb/status.h
-build/database.o: deps/leveldb/include/leveldb/options.h src/ilang.h
-build/database.o: src/import.h src/context.h src/object_new.h src/hashable.h
-build/database.o: src/function.h src/scope_new.h src/parserTree.h src/print.h
+build/database.o: src/helpers.h src/error.h src/ilang.h src/import.h
+build/database.o: src/context.h src/object_new.h src/hashable.h src/function.h
+build/database.o: src/scope_new.h src/parserTree.h src/print.h
 build/database.o: src/value_types.h build/database.pb.h
 build/error.o: src/error.h
 build/print.o: src/print.h src/debug.h
@@ -187,11 +177,6 @@ build/init.o: src/value.h src/valuepass.h src/exception.h src/handle.h
 build/init.o: src/identifier.h src/helpers.h src/error.h src/context.h
 build/init.o: src/object_new.h src/hashable.h src/function.h src/scope_new.h
 build/init.o: src/parserTree.h src/print.h src/value_types.h src/database.h
-build/init.o: deps/leveldb/include/leveldb/db.h
-build/init.o: deps/leveldb/include/leveldb/iterator.h
-build/init.o: deps/leveldb/include/leveldb/slice.h
-build/init.o: deps/leveldb/include/leveldb/status.h
-build/init.o: deps/leveldb/include/leveldb/options.h
 build/thread.o: src/thread.h src/debug.h deps/libuv/include/uv.h
 build/thread.o: deps/libuv/include/uv-private/uv-unix.h
 build/thread.o: deps/libuv/include/uv-private/ngx-queue.h
@@ -234,9 +219,5 @@ build/c_class.o: src/parserTree.h src/print.h src/value_types.h
 build/main.o: src/parser.h src/debug.h src/import.h src/variable_new.h
 build/main.o: src/value.h src/valuepass.h src/exception.h src/handle.h
 build/main.o: src/identifier.h src/helpers.h src/error.h src/context.h
-build/main.o: src/database.h deps/leveldb/include/leveldb/db.h
-build/main.o: deps/leveldb/include/leveldb/iterator.h
-build/main.o: deps/leveldb/include/leveldb/slice.h
-build/main.o: deps/leveldb/include/leveldb/status.h
-build/main.o: deps/leveldb/include/leveldb/options.h src/parserTree.h
-build/main.o: src/scope_new.h src/hashable.h src/print.h src/thread.h
+build/main.o: src/database.h src/parserTree.h src/scope_new.h src/hashable.h
+build/main.o: src/print.h src/thread.h

@@ -63,6 +63,19 @@ namespace ilang {
 				});
 			set(name, valueMaker(f));
 		}
+		template <typename cls> void reg(Identifier name, ValuePass (cls::*fun)(Context &ctx, Arguments &args)) {
+			assert(!has(name));
+			// TODO: this breaks the reference counting, as it needs to know when this function was returned
+			//cls *self = (cls*)this;
+			Handle<cls> self((cls*)this);
+			//Handle<cls> self((cls*)this);
+			ilang::Function f([fun, self](Context &ctx, Arguments &args, ValuePass *ret) {
+					*ret = (self.get() ->* fun)(ctx, args);
+					//assert(*ret);
+				});
+			set(name, valueMaker(f));
+		}
+
 
 		static bool interface(ValuePass v);
 		static bool instance(ValuePass v);

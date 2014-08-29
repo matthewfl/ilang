@@ -1,4 +1,4 @@
-DB arr_test = [];
+DB("arr_test") arr_test = [];
 
 
 main = {

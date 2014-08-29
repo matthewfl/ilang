@@ -4,8 +4,6 @@
 #include "debug.h"
 #include "variable_new.h"
 
-#include "leveldb/db.h"
-
 #include <boost/filesystem.hpp>
 #include <stdio.h>
 #include <map>
@@ -80,7 +78,7 @@ namespace ilang {
 	};
 	class DatabaseFile : public Database {
 	protected:
-		leveldb::DB *db;
+		//leveldb::DB *db;
 	public:
 		DatabaseFile (fs::path);
 		~DatabaseFile();
