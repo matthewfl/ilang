@@ -242,17 +242,19 @@ namespace ilang {
 
 			// TODO: variables won't have access list for names
 			// just a single item, otherwise it is a field access
-			std::list<std::string> *name;
+			//std::list<std::string> *name;
 		protected:
+			Identifier name;
 			std::list<Node*> *modifiers;
 		public:
-			Variable (std::list<std::string> *n, std::list<Node*> *mod);
+			Variable (Identifier n, std::list<Node*> *mod);
 			void Run(Context&);
 			virtual void Set(Context&, ValuePass var, bool force = false);
 			// not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
 			virtual ilang::Variable * Get(Context&);
 			ValuePass GetValue(Context&);
-			virtual std::string GetFirstName();
+			Identifier GetName() const { return name; }
+			//virtual std::string GetFirstName();
 			//virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
@@ -263,16 +265,16 @@ namespace ilang {
 		class FieldAccess : public Variable {
 			friend class ilang::Modification;
 		private:
-			std::string identifier;
+			//Identifier identifier;
 			Value *Obj;
 		public:
-			FieldAccess(Node*, std::string);
+			FieldAccess(Node*, Identifier);
 			//void Run(Scope*);
 			//void Set(Scope*, ValuePass var);
 			void Set(Context&, ValuePass val, bool force = false);
 			ilang::Variable * Get(Context&);
 			ValuePass GetValue(Context&);
-			virtual std::string GetFirstName();
+			//virtual Identifier GetFirstName();
 			//virtual ValuePass CallFun (Context&, std::vector<ValuePass> &par);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;

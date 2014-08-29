@@ -225,7 +225,7 @@ Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> 
 	Context ctx_to;
 	ctx_to.scope = this;
 	for(auto it : *obj) {
-		error(!has(Identifier(it.first->GetFirstName())), "setting variable twice in object");
+		error(!has(it.first->GetName()), "setting variable twice in object");
 		assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 		ValuePass val = dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(ctx);
 		it.first->Set(ctx_to, val);

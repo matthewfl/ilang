@@ -49,15 +49,15 @@ namespace ilang {
 		// for ilang files
 	private:
 		//FileScope *m_Scope;
-		std::list<std::pair<std::list<std::string>, fs::path> > imports;
+		std::list<std::pair<std::vector<Identifier>, fs::path> > imports;
 		parserNode::Head *m_head = NULL;
-		Handle<Hashable> GetObject(Context &ctx, std::list<std::string>);
-		Handle<Hashable> GetObject(Handle<Hashable> , std::list<std::string>&);
+		Handle<Hashable> GetObject(Context &ctx, std::vector<Identifier>);
+		Handle<Hashable> GetObject(Handle<Hashable>, std::vector<Identifier>&);
 		//Handle<Hashable> GetObject(std::vector<Identifier>);
 		friend class parserNode::Head;
 	public:
 		ImportScopeFile(fs::path p);
-		void push(std::list<std::string> *pre, std::list<std::string> *name);
+		void push(std::vector<Identifier> *pre, std::vector<Identifier> *name);
 		void resolve(Context &ctx);
 
 		void load(Handle<Hashable>);

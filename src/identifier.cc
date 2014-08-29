@@ -20,8 +20,19 @@ namespace {
 }
 
 namespace ilang {
-	Identifier::Identifier(const char *str) : Identifier(std::string(str)) {}
+	Identifier::Identifier(const char *str) {
+		if(str) {
+			m_id = lookup(str);
+		}
+	}
 	Identifier::Identifier(const std::string str) {
+			m_id = lookup(str);
+	}
+	std::string Identifier::str() const {
+		return lookup(m_id);
+	}
+
+	unsigned long Identifier::lookup(std::string str) {
 		// TODO: for shorter strings just store there values in the identifier
 		// if(str.size() <= 7) {
 		// 	m_id = (*((unsigned long*)str.c_str())) + 0x0100000000000000;
@@ -31,15 +42,16 @@ namespace ilang {
 		if(it == get_identifier_map()->end()) {
 			unsigned long next_identifier = ++starting_identifier;
 			get_identifier_map()->insert(std::pair<string, unsigned long>(str, next_identifier));
-			m_id = next_identifier;
+			return next_identifier;
 		}else{
-			m_id = it->second;
+			return it->second;
 		}
 	}
-	std::string Identifier::str() const {
-		if(m_id < Identifier_max_int) {
+
+	std::string Identifier::lookup(unsigned long id) {
+		if(id < Identifier_max_int) {
 			stringstream ss;
-			ss << m_id;
+			ss << id;
 			return ss.str();
 		}
 		// if(m_id < 0x0200000000000000) {
@@ -48,7 +60,7 @@ namespace ilang {
 		// }
 		// this is slow as it gets
 		for(auto it : *get_identifier_map()) {
-			if(it.second == m_id)
+			if(it.second == id)
 				return it.first;
 		}
 		return "-Not found???-";

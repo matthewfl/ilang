@@ -16,6 +16,7 @@ using namespace ilang::parserNode;
 #include <list>
 #include <map>
 using namespace std;
+using ilang::Identifier;
 
 //struct yyltype;
 //struct yyltype yylloc;
@@ -25,7 +26,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   using namespace std;
   //cerr << "error: " << msg << endl << yylloc.first_line;
   parser_handle->error_count++;
-  cerr << "\33[0;31error @" << loc->first_line << ": " << msg << "\33[0m\n"; 
+  cerr << "\33[0;31error @" << loc->first_line << ": " << msg << "\33[0m\n";
 }
 
 #define YYDEBUG 1
@@ -44,9 +45,11 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 
 
 %union {
-  char Identifier[128];
+  //char Identifier[128];
+  unsigned long identifier;
   int count;
   char *string;
+  std::vector<ilang::Identifier> *identifier_list;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
   std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *object_map;
@@ -75,14 +78,14 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %left '(' ')'
 %left '.' '['
 
-%token <Identifier> T_Identifier
+%token <identifier> T_Identifier
 %token <count> T_break T_return T_continue
 %token <string> T_StringConst
 %token <intNumber> T_IntConst
 %token <floatNumber> T_FloatConst
 
-%type <string_list> AccessList ImportLoc
-%type <Identifier> Identifier
+%type <identifier_list> ImportLoc
+%type <identifier> Identifier
 %type <node> Function Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
@@ -101,29 +104,25 @@ Import		:	T_import ImportLoc			{ assert(parser_handle->import); parser_handle->i
 		|	T_from	ImportLoc T_import ImportLoc	{ assert(parser_handle->import); parser_handle->import->push($2, $4); }
 		;
 
-ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back($3); }
-		|	T_Identifier			{ ($$=new std::list<std::string>)->push_back($1); }
+ImportLoc	:	ImportLoc '.' T_Identifier 	{ ($$=$1)->push_back(Identifier($3)); }
+		|	T_Identifier			{ ($$=new std::vector<ilang::Identifier>)->push_back(Identifier($1)); }
 		;
 
 ProgramList	:	ProgramList Expr ';'		{ ($$=$1)->push_back($2); }
 		|	Expr ';'			{ ($$=new list<Node*>)->push_back($1); }
 		;
 
-Variable	:	ModifierList Identifier		{ $$ = new Variable(new list<string>{$2}, $1); }
+Variable	:	ModifierList Identifier		{ $$ = new Variable(Identifier($2), $1); }
 		|	LValue
 		;
 
-LValue		:	Identifier			{ $$ = new FieldAccess(NULL, $1); }
-		|	ExprType '.' Identifier		{ $$ = new FieldAccess($1, $3); }
+LValue		:	Identifier			{ $$ = new FieldAccess(NULL, Identifier($1)); }
+		|	ExprType '.' Identifier		{ $$ = new FieldAccess($1, Identifier($3)); }
 		|	ExprType '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
 ModifierList	:	ModifierList ExprType %prec ModListPrec	{ ($$ = $1)->push_back($2); }
 		|	ExprType %prec ModListPrec	{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
-		;
-
-AccessList	:	AccessList '.' Identifier	{ ($$ = $1)->push_back($3); }
-		|	Identifier			{ ($$ = new list<string>)->push_back($1);}
 		;
 
 Stmt		: 	Expr ';'
@@ -177,8 +176,8 @@ ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
 		|	ArgsList ',' Args		{ ($$=$1)->push_back($3); }
 		;
 
-Args		:	ModifierList Identifier		{ list<string> *n = new list<string>; n->push_back($2); $$ = new Variable(n, $1); }
-		|	Identifier			{ $$ = new FieldAccess(NULL, $1); }
+Args		:	ModifierList Identifier		{ $$ = new Variable(Identifier($2), $1); }
+|	Identifier			{ $$ = new Variable(Identifier($1), NULL); }
 
 Stmts           :       Stmts Stmt                      { ($$=$1)->push_back($2); }
                 |       Stmt                            { ($$ = new list<Node*>)->push_back($1); }

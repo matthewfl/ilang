@@ -8,6 +8,8 @@
 #include "parser.tab.hh"
 #include "string.h"
 
+#include "identifier.h"
+
 //#include "parser.h"
 
 #include <iostream>
@@ -77,7 +79,7 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 
 
 
-{IDENTIFIER}		{ strcpy(yylval->Identifier, yytext); return T_Identifier; }
+{IDENTIFIER}		{ ilang::Identifier id(yytext); yylval->identifier = id.raw(); return T_Identifier; }
 
 \"([^"\n]|\\\")*?\"		{ int len = strlen(yytext); yylval->string = new char[(len-1)]; strncpy(yylval->string, yytext+1, len-2); yylval->string[len-2]='\0'; return T_StringConst; }
 \"{3}([.\n]*?)\"{3}		{ int len = strlen(yytext); yylval->string = new char[(len-5)]; strncpy(yylval->string, yytext+3, len-6); yylval->string[len-6]='\0'; return T_StringConst; }

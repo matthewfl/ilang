@@ -330,7 +330,7 @@ namespace ilang {
 			if(params) {
 				for(auto it : *params) {
 					ret = unionSets(ret, it->UndefinedElements());
-					ret.erase(dynamic_cast<Variable*>(it)->GetFirstName());
+					ret.erase(dynamic_cast<Variable*>(it)->GetName());
 				}
 			}
 
@@ -377,9 +377,10 @@ namespace ilang {
 			p->p() << "}";
 		}
 
-		Variable::Variable (list<string> *n, list<Node*> *mod):
+		Variable::Variable (Identifier n, list<Node*> *mod):
 			name(n), modifiers(mod) {
-			if(!name) name = new list<string>;
+			// how did this ever not have a name?
+			//if(!name) name = new list<string>;
 			if(!modifiers) modifiers = new list<Node*>;
 			for(auto it : *modifiers) {
 				assert(dynamic_cast<parserNode::Value*>(it));
@@ -393,7 +394,7 @@ namespace ilang {
 			//scope->forceNew(GetFirstName(), *modifiers);
 		}
 		void Variable::Set (Context &ctx, ValuePass var, bool force) {
-			errorTrace("Setting value of variable: " << GetFirstName());
+			errorTrace("Setting value of variable: " << name.str());
 			if(force || !modifiers->empty()) {
 				assert(ctx.scope);
 				assert(dynamic_cast<Scope*>(ctx.scope));
@@ -414,7 +415,7 @@ namespace ilang {
 				//auto pvar = dynamic_cast<Scope*>(ctx.scope)->getVariable(GetFirstName());
 				//auto pvar = forceNew(Identifier(GetFirstName()), mods);
 				//if(!pvar) {
-				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), mods);
+				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(name, mods);
 				//} else {
 				//	pvar->SetModifiers(mods);
 				//}
@@ -425,7 +426,7 @@ namespace ilang {
 				//assert(0); // TODO:
 				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
-				ctx.scope->set(Identifier(GetFirstName()), var);
+				ctx.scope->set(name, var);
 			}
 		}
 		ilang::Variable * Variable::Get(Context &ctx) {
@@ -435,16 +436,17 @@ namespace ilang {
 		}
 
 		ValuePass Variable::GetValue(Context &ctx) {
-			auto ret = ctx.scope->get(Identifier(GetFirstName()));
+			// TODO: maybe change it so variables are only on the lhs
+			auto ret = ctx.scope->get(name);
 			return ret;
 		}
-		std::string Variable::GetFirstName() {
-			return name->front();
-		}
+		// std::string Variable::GetFirstName() {
+		// 	return name->front();
+		// }
 
 		IdentifierSet Variable::UndefinedElements() {
 			IdentifierSet ret;
-			ret.insert(Identifier(GetFirstName()));
+			ret.insert(name);
 			for(auto it : *modifiers) {
 				ret = unionSets(ret, it->UndefinedElements());
 			}
@@ -454,8 +456,8 @@ namespace ilang {
 			vector<ValuePass> mod;
 			// this needs to check if it should actually force this to be new
 			// eg opt register it?
-			if(!modifiers->empty() || !ctx.scope->has(Identifier(GetFirstName()))) {
-				dynamic_cast<Scope*>(ctx.scope)->forceNew(Identifier(GetFirstName()), mod);
+			if(!modifiers->empty() || !ctx.scope->has(name)) {
+				dynamic_cast<Scope*>(ctx.scope)->forceNew(name, mod);
 			}
 		}
 
@@ -466,16 +468,12 @@ namespace ilang {
 					p->p() << " ";
 				}
 			}
-			bool first=true;
-			for(std::string it : *name) {
-				p->p() << (first ? "" : ".") << it;
-				first = false;
-			}
+			p->p() << name.str();
 		}
 
 
 
-		FieldAccess::FieldAccess (Node *obj, std::string id) :Variable(NULL, NULL), identifier(id), Obj(NULL) {
+		FieldAccess::FieldAccess (Node *obj, Identifier id) : Variable(id, NULL), Obj(NULL) {
 			if(obj) {
 				assert(dynamic_cast<Value*>(obj));
 				Obj = dynamic_cast<Value*>(obj);
@@ -488,17 +486,17 @@ namespace ilang {
 		}
 
 		ValuePass FieldAccess::GetValue(Context &ctx) {
-			errorTrace("FieldAccess on " << GetFirstName());
+			errorTrace("FieldAccess on " << name.str());
 			ValuePass ret;
 			if(Obj) {
 				_errors.stream() << "\n\tLooking up FieldAccess where there is an object";
 				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
 				try {
-					ret = obj_val->get(valueMaker(identifier));
+					ret = obj_val->get(name);
 				} catch(InvalidOperation e) {
 					if(obj_val->type() == typeid(Hashable*)) {
-						error(0, "Object " << obj_val << "does not have member " << identifier);
+						error(0, "Object " << obj_val << "does not have member " << name.str());
 					} else  {
 						error(0, "Attempted to access member on non object type " << obj_val);
 					}
@@ -509,36 +507,36 @@ namespace ilang {
 				}
 				return ret;
 			}else{
-				ret = ctx.scope->get(Identifier(identifier));
+				ret = ctx.scope->get(name);
 				return ret;
 			}
 		}
 
 		void FieldAccess::Set(Context &ctx, ValuePass val, bool force) {
-			errorTrace("Setting value of variable : " << GetFirstName());
+			errorTrace("Setting value of variable : " << name.str());
 			if (Obj) {
 				ValuePass obj_val = Obj->GetValue(ctx);
-				ValuePass key = valueMaker(identifier);
+				//ValuePass key = valueMaker(identifier);
 				try {
-					obj_val->set(key, val);
+					obj_val->set(name, val);
 				} catch(InvalidOperation e) {
-					error(0, "Attempted to set " << key->cast<string>() << " on non object type");
+					error(0, "Attempted to set " << name.str() << " on non object type");
 				}
 			}else{
-				Identifier name(identifier);
+				//Identifier name(identifier);
 				ctx.scope->set(name, val);
 			}
 		}
 
-		std::string FieldAccess::GetFirstName() {
-			return identifier;
-		}
+		// Identifier FieldAccess::GetFirstName() {
+		// 	return identifier;
+		// }
 
 		IdentifierSet FieldAccess::UndefinedElements() {
 			if(Obj)
 				return Obj->UndefinedElements();
 			IdentifierSet ret;
-			ret.insert(Identifier(GetFirstName()));
+			ret.insert(name);
 			return ret;
 		}
 
@@ -547,7 +545,7 @@ namespace ilang {
 				Obj->Print(p);
 				p->p() << ".";
 			}
-			p->p() << identifier;
+			p->p() << name.str();
 		}
 
 
@@ -995,7 +993,7 @@ namespace ilang {
 			}
 			ret.erase("this");
 			for(auto it : *objects) {
-				ret.erase(Identifier(it.first->GetFirstName()));
+				ret.erase(it.first->GetName());
 			}
 			return ret;
 		}
@@ -1033,7 +1031,7 @@ namespace ilang {
 			}
 			ret.erase("this");
 			for(auto it : *objects) {
-				ret.erase(Identifier(it.first->GetFirstName()));
+				ret.erase(it.first->GetName());
 			}
 			return ret;
 		}

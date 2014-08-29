@@ -13,11 +13,13 @@ namespace ilang {
 	class Identifier {
 	private:
 		unsigned long m_id;
+		static std::string lookup(unsigned long id);
+		static unsigned long lookup(std::string);
 	public:
 		Identifier() : m_id(0) {}
 		Identifier(const char*);
 		Identifier(const std::string);
-		explicit Identifier(unsigned long i) : m_id(i) {}
+		explicit Identifier(const unsigned long i) : m_id(i) {}
 		Identifier(const Identifier &i) : m_id(i.m_id) {}
 		bool operator==(const Identifier i) const { return m_id == i.m_id; }
 		bool operator<(const Identifier i) const { return m_id < i.m_id; }

@@ -107,13 +107,13 @@ namespace ilang {
 
 	ImportScopeFile::ImportScopeFile(fs::path p) : ImportScope(&GlobalImportScope, p) {}
 
-	void ImportScopeFile::push(std::list<std::string> *pre, std::list<std::string> *name) {
+	void ImportScopeFile::push(std::vector<Identifier> *pre, std::vector<Identifier> *name) {
 		string str;
 		fs::path p;
 		if(pre) {
 			for(auto it : *pre) {
 				if(!str.empty()) str += "/";
-				str += it;
+				str += it.str();
 			}
 			// first look for the file name
 			// TODO: put this back in when the import system is advance enough to be able to handel importing individual items in
@@ -122,7 +122,7 @@ namespace ilang {
 			//if(p.empty()) {
 			for(auto it : *name) {
 				if(!str.empty()) str += "/";
-				str +=	it;
+				str +=	it.str();
 			}
 			look = str;
 			p = locateFile(look);
@@ -137,7 +137,7 @@ namespace ilang {
 			p = locateFile(look);
 		}
 		assert(! p.empty() ); // not able to find the file that is getting imported
-		imports.push_back(pair<std::list<std::string>, fs::path>(*name, p));
+		imports.push_back(pair<std::vector<Identifier>, fs::path>(*name, p));
 		delete name;
 	}
 
@@ -230,7 +230,7 @@ namespace ilang {
 	// 	// }
 	// }
 
-	Handle<Hashable> ImportScopeFile::GetObject(Context &ctx, std::list<std::string> path) {
+	Handle<Hashable> ImportScopeFile::GetObject(Context &ctx, std::vector<Identifier> path) {
 		ValuePass obj;
 		Handle<Hashable> o;
 		if(ctx.scope->has(path.front())) {
@@ -245,8 +245,8 @@ namespace ilang {
 		return GetObject(o, path);
 	}
 
-	Handle<Hashable> ImportScopeFile::GetObject(Handle<Hashable> obj, std::list<std::string> &path) {
-		path.pop_front();
+	Handle<Hashable> ImportScopeFile::GetObject(Handle<Hashable> obj, std::vector<Identifier> &path) {
+		path.erase(path.begin());
 		if(path.empty()) return obj;
 		ValuePass val;
 		Handle<Hashable> nex;
