@@ -17,8 +17,8 @@ namespace {
 		ValuePass push(Arguments &args) {
 			error(args.size() == 1, "channel.push expects one argument");
 			auto v = args[0];
-			m_queue.push(v);
 			waiting.Trigger(NULL);
+			m_queue.push(v);
 			return ValuePass();
 		}
 		ValuePass pop(Arguments &args) {
@@ -27,7 +27,8 @@ namespace {
 			//m_queue.pop(ret); // blocks until there is something to pop
 			while(!m_queue.try_pop(ret)) {
 				// there was nothing to pop from the queue
-				//waiting.Wait();
+				if(m_queue.capacity() != 0) // if zero size then we spin on the queue otherwise the push call blocks?
+					waiting.Wait();
 			}
 			return ret;
 		}

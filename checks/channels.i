@@ -2,13 +2,14 @@ from i import channel
 
 global_count = 0;
 
-ret_ch = channel.create(0);
+ret_ch = channel.create(1);
 
 runner1 = {
 	|ch|
 	//Print("From thread 1\n");
         assert(ch.pop() == 123);
-	assert(global_count == 0);
+	Print("Got message\n");
+        assert(global_count == 0);
 	global_count = 1;
 	ret_ch.push(333);
 };
@@ -24,8 +25,8 @@ runner2 = {
 
 
 main = {
-	ch1 = channel.create(0);
-	ch2 = channel.create(0);
+	ch1 = channel.create(1);
+	ch2 = channel.create(1);
 	Print("Starting threads\n");
         go(runner1, ch1);
 	go(runner2, ch2);
