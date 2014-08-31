@@ -160,7 +160,7 @@ VALUE_LOGIC_OPS_STRING(bool)
 
 
 
-const std::type_info &FunctionType::type() { return typeid(ilang::Function); }
+const std::type_info &FunctionType::type() { return typeid(ilang::Function); }  // TODO: this should really be Function*
 FunctionType::FunctionType(const ilang::Function &f) {
 	const_cast<ilang::Function*>(&f)->vvv();
 	m_ptr = new ilang::Function(f);

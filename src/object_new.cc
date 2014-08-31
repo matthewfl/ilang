@@ -20,7 +20,10 @@ ValuePass Object_ish::get(Identifier i) {
 	// return ret;
 
 	auto var = getVariable(i);
-	assert(var);
+	if(!var) {
+		return ValuePass();
+	}
+	//assert(var);
 	return var->Get();
 
 }
@@ -52,8 +55,11 @@ Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
 		return ret;
 	}
 	auto it = m_members.find(i);
-	assert(it != m_members.end());//error(, "unable to find variable " << i.str());
-	return it->second;
+	if(it == m_members.end())
+		return NULL;
+	//assert(it != m_members.end());//error(, "unable to find variable " << i.str());
+	return make_handle<BoundVariable>(it->second, valueMaker(Handle<Hashable>(this)));
+	//return it->second;
 }
 
 Hashable_iterator Object_ish::begin() {

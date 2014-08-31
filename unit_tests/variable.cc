@@ -37,7 +37,7 @@ TEST_CASE("modifiers call", "[variable]") {
 					 );
 }
 
-TEST_CASE("Class modofier", "[variable]") {
+TEST_CASE("Class modifier", "[variable]") {
 	init();
 	RUN_CODE(
 					 test = class {

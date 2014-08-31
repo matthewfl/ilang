@@ -501,10 +501,10 @@ namespace ilang {
 						error(0, "Attempted to access member on non object type " << obj_val->type().name());
 					}
 				}
-				if(ret->type() == typeid(ilang::Function)) {
-					// TODO: should not be doing the bind here.....do before getting the function
-					return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
-				}
+				// if(ret->type() == typeid(ilang::Function)) {
+				// 	// TODO: should not be doing the bind here.....do before getting the function
+				// 	return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
+				// }
 				return ret;
 			}else{
 				ret = ctx.scope->get(name);
@@ -579,9 +579,9 @@ namespace ilang {
 				}
 			}
 			// TODO: this should be somewhere else
-			if(ret->type() == typeid(ilang::Function)) {
-				return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
-			}
+			// if(ret->type() == typeid(ilang::Function)) {
+			// 	return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
+			// }
 			return ret;
 		}
 

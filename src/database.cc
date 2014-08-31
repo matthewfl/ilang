@@ -57,7 +57,7 @@ namespace ilang {
         std::vector<ValuePass> arr_members;
         arr_members.reserve(entry->array_dat_size());
         for(int i=0; i < entry->array_dat_size(); i++) {
-          ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
+					ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
           arr_members.push_back(gg);
         }
         //auto arr = make_handle<ilang::Array>(arr_members);
@@ -78,6 +78,27 @@ namespace ilang {
 
     static void createStoredData(ValuePass a, ilang_db::Entry *entry) {
       using namespace ilang_db;
+			if(a->type() == typeid(long)) {
+				entry->set_type(ilang_db::Entry::Integer);
+				entry->set_integer_dat(a->cast<long>());
+			} else if(a->type() == typeid(double)) {
+				entry->set_type(Entry::Float);
+				entry->set_float_dat(a->cast<double>());
+			} else if(a->type() == typeid(bool)) {
+				entry->set_type(Entry::Bool);
+				entry->set_bool_dat(a->cast<bool>());
+			} else if(a->type() == typeid(std::string)) {
+				entry->set_type(Entry::String);
+				entry->set_string_dat(a->cast<std::string>());
+			} else if(a->type() == typeid(Hashable*)) {
+				Handle<Hashable> h = a->cast<Hashable*>();
+				if(dynamic_pointer_cast<Object>(h)) {
+					// it is an object
+				} else if(dynamic_pointer_cast<Array>(h)) {
+
+				}
+				assert(0);
+			}
       // rewrite this function
       /*  entry->Clear();
           if(a.type() == typeid(ilang::Object*)) {
@@ -382,6 +403,7 @@ namespace ilang {
   class Database_modifier : public C_Class {
 	private:
 		std::string name;
+		bool inited = false;
 
 		ValuePass check(Arguments &args) {
 			ValuePass v = args[0];
@@ -396,12 +418,30 @@ namespace ilang {
 			return valueMaker(true);
 		}
 		ValuePass setting(Arguments &args) {
-
+			if(!inited) {
+				inited = true;
+				storedData *dat = System_Database->Get(name);
+				if(dat) {
+					// if the value already exists in the db, ignore the first attempt to set it,
+					// as that is considered the default value
+					delete dat;
+					return ValuePass();
+				}
+			}
+			storedData *dat = DB_serializer::createStoredData(args[0]);
+			System_Database->Set(name, dat);
+			delete dat;
 			return ValuePass();
 		}
 
 		ValuePass getting(Arguments &args) {
-			return valueMaker(123);
+			storedData *dat = System_Database->Get(name);
+			if(dat) {
+				ValuePass ret = DB_serializer::readStoredData(dat);
+				delete dat;
+				return ret;
+			}
+			return ValuePass();
 		}
 
 		ValuePass new_call(Arguments &args) {

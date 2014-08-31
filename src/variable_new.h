@@ -10,6 +10,8 @@
 #include "error.h"
 
 namespace ilang {
+
+	// TODO: make this into a variable instance and have an variable interface
 	class Variable : public Handle_base {
 	private:
 
@@ -21,13 +23,13 @@ namespace ilang {
 		Variable(std::vector<ilang::ValuePass> mod);
 		Variable() {}
 		Variable(const Variable& v);
-		void Set(ilang::ValuePass);
-		ilang::ValuePass Get();//  {
+		virtual void Set(ilang::ValuePass);
+		virtual ilang::ValuePass Get();//  {
 		// 	error(m_value, "Can't use a variable before it is set");
 		// 	return m_value;
 		// }
-		void Check(ilang::ValuePass);
-		void SetModifiers(std::vector<ilang::ValuePass> mod);
+		virtual void Check(ilang::ValuePass);
+		virtual void SetModifiers(std::vector<ilang::ValuePass> mod);
 	};
 
 	using Variable_ptr = Handle<Variable>;
@@ -37,6 +39,18 @@ namespace ilang {
 		var->Set(val);
 		return var;
 	}
+
+	class BoundVariable : public Variable {
+	private:
+		Variable_ptr m_parent;
+		ValuePass m_bound;
+	public:
+		BoundVariable(Variable_ptr p, ValuePass b) : m_parent(p), m_bound(b) {}
+		void Set(ValuePass) override;
+		ValuePass Get() override;
+		void Check(ValuePass) override;
+		void SetModifiers(std::vector<ValuePass>) override;
+	};
 
 }
 

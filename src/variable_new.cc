@@ -1,6 +1,7 @@
 #include "variable_new.h"
 #include "function.h"
 #include "exception.h"
+#include "value_types.h"
 
 using namespace ilang;
 
@@ -36,6 +37,14 @@ void Variable::Check(ValuePass v) {
 			throw BadTypeCheck();
 		}
 	}
+	Identifier setting("setting");
+	Arguments args(v);
+	for(auto it : m_modifiers) {
+		if(it->type() == typeid(Hashable*)) {
+			auto s = it->get(setting);
+			if(s) s->call(args);
+		}
+	}
 }
 
 ValuePass Variable::Get() {
@@ -49,6 +58,7 @@ ValuePass Variable::Get() {
 			if(ret) return ret;
 		}
 	}
+	assert(m_value);
 	return m_value;
 }
 
@@ -79,4 +89,25 @@ Variable::Variable(std::vector<ilang::ValuePass> mod) {
 Variable::Variable(const Variable &v) {
 	m_modifiers = v.m_modifiers;
 	m_value = v.m_value;
+}
+
+
+void BoundVariable::Set(ValuePass v) {
+	m_parent->Set(v);
+}
+
+void BoundVariable::Check(ValuePass v) {
+	m_parent->Check(v);
+}
+
+void BoundVariable::SetModifiers(std::vector<ValuePass> vec) {
+	m_parent->SetModifiers(vec);
+}
+
+ValuePass BoundVariable::Get() {
+	ValuePass ret = m_parent->Get();
+	if(ret->type() == typeid(Function)) {
+		return valueMaker(ret->cast<Function*>()->bind(m_bound));
+	}
+	return ret;
 }

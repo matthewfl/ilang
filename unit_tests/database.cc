@@ -16,8 +16,18 @@ TEST_CASE("Basic creating db variable", "[database]") {
 	RUN_CODE(
 					 DB("j") Int j = 0;
 					 main = {
+						 assert(j == 0);
+						 j = 1;
 					 };
 					 );
+	REQUIRE(!asserted);
+	RUN_CODE(
+					 DB("j") Int j = 5;
+					 main = {
+						 assert(j == 1);
+					 };
+					 );
+	REQUIRE(!asserted);
 	REQUIRE(ilang::System_Database->Get("j") != NULL);
 	reset();
 }

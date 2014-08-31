@@ -29,7 +29,6 @@ namespace ilang {
 	class Hashable;
 	class Array;
 	class Object;
-	class Object;
 	class Class;
 	class Class_instance;
 	class Arguments;
