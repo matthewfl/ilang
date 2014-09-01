@@ -21,6 +21,24 @@ namespace ilang {
   std::string DB_name_prefix;
   std::string DB_name_last;
 
+	class DB_serializer;
+
+	class Database_Object : public Hashable {
+	private:
+		friend class DB_serializer;
+		string name;
+	public:
+		Database_Object(string n) : name(n) {}
+		ValuePass get(Identifier i);
+		void set(Identifier i, ValuePass v);
+		bool has(Identifier i) {
+			auto v = get(i);
+			return (bool) v;
+
+		}
+		Handle<Variable> getVariable(Identifier i) { assert(0); } // hm...
+	};
+
   class DB_serializer {
     // this is a dummy class to make friends with other data types
     // so we can access there internals
@@ -40,12 +58,14 @@ namespace ilang {
       case Entry::String:
         return valueMaker(entry->string_dat());
       case Entry::Object: {
+				auto obj = make_handle<Database_Object>(entry->object_id());
+				return valueMaker(static_pointer_cast<Hashable>(obj));
         //ilang::Object *obj = new ilang::Object;
-        auto obj = make_handle<ilang::Object>();
+        //auto obj = make_handle<ilang::Object>();
         // TODO: some way to back objects using the database
         //obj->DB_name = new char[entry->object_id().size()+1];
         //memcpy(obj->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
-        return valueMaker(obj);
+        //return valueMaker(obj);
       }
       case Entry::Array: {
         ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
@@ -94,12 +114,24 @@ namespace ilang {
 				entry->set_string_dat(a->cast<std::string>());
 			} else if(a->type() == typeid(Hashable*)) {
 				Handle<Hashable> h = a->cast<Hashable*>();
-				if(dynamic_pointer_cast<Object>(h)) {
+				if(dynamic_pointer_cast<Database_Object>(h)) {
+					entry->set_type(Entry::Object);
+					entry->set_object_id(dynamic_pointer_cast<Database_Object>(h)->name);
+				} else if(dynamic_pointer_cast<Object>(h)) {
 					// it is an object
+					entry->set_type(Entry::Object);
+					std::string n = DB_createName();
+					entry->set_object_id(n);
+					auto o = dynamic_pointer_cast<Object>(h);
+					for(auto it : *o) {
+						storedData *ld = createStoredData(it.second->Get());
+						System_Database->Set(n + it.first.str(), ld);
+						delete ld;
+					}
 				} else if(dynamic_pointer_cast<Array>(h)) {
-
-				}
-				assert(0);
+					assert(0);
+				} else
+					assert(0);
 			}
       // rewrite this function
       /*  entry->Clear();
@@ -196,33 +228,6 @@ namespace ilang {
       entry.SerializeToString(ret);
       return ret;
     }
-
-    static void refreshStoredData(const boost::any &a) {
-      using namespace ilang_db;
-      /*if(a.type() == typeid(ilang::Array*)) {
-      // TODO: fix to reuse names
-      ilang::Array *arr = boost::any_cast<ilang::Array*>(a);
-      assert(arr->DB_name);
-      Entry arr_contents;
-      arr_contents.set_type(Entry::Array_contents);
-
-      for(int i=0; i < arr->members.size(); i++) {
-      char *name = DB_createName();
-      arr_contents.add_array_dat(name);
-      storedData *dat;
-      System_Database->Set(name, dat = createStoredData(arr->members[i]->Get()));
-      delete dat;
-      }
-      std::string str_arr_contents;
-      arr_contents.SerializeToString(&str_arr_contents);
-      System_Database->Set(arr->DB_name, &str_arr_contents);
-      }else{
-      // nothing else should use this at this time
-      assert(0);
-      }
-      */
-    }
-
   };
 
   char * DB_createName () {
@@ -260,6 +265,20 @@ namespace ilang {
     return ret;
   }
 
+	ValuePass Database_Object::get(Identifier i) {
+		std::string n = name + i.str();
+		storedData *d = System_Database->Get(n);
+		if(d)
+			return DB_serializer::readStoredData(d);
+		assert(0);
+		return ValuePass();
+	}
+	void Database_Object::set(Identifier i, ValuePass v) {
+		std::string n = name + i.str();
+		storedData *d = DB_serializer::createStoredData(v);
+		System_Database->Set(n, d);
+		delete d;
+	}
 
 
   // DatabaseFile::DatabaseFile(fs::path path) {
@@ -316,6 +335,7 @@ namespace ilang {
 
 	DatabaseFile::DatabaseFile(fs::path path) {
 		db = new Db(NULL, 0);
+		cout << "path: " << path.c_str() << endl;
 		db->open(NULL,
 						 path.c_str(),
 						 NULL,
@@ -641,24 +661,3 @@ namespace ilang {
 
   }
 }
-
-
-// namespace ilang {
-//   void Array::RefreshDB() {
-//     if(!DB_name) return;
-
-//     using namespace ilang_db;
-//     Entry arr_contents;
-//     arr_contents.set_type(Entry::Array_contents);
-//     for(int i=0; i < members.size(); i++) {
-//       char *name = DB_createName();
-//       arr_contents.add_array_dat(name);
-//       storedData *dat;
-//       System_Database->Set(name, dat =  DB_serializer::createStoredData(members[i]->Get()));
-//       delete dat;
-//     }
-//     std::string str_arr_contents;
-//     arr_contents.SerializeToString(&str_arr_contents);
-//     System_Database->Set(DB_name, &str_arr_contents);
-//   }
-// }

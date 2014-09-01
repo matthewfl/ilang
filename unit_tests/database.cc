@@ -31,3 +31,18 @@ TEST_CASE("Basic creating db variable", "[database]") {
 	REQUIRE(ilang::System_Database->Get("j") != NULL);
 	reset();
 }
+
+TEST_CASE("objects in the database", "[database]") {
+	init();
+	RUN_CODE(
+					 DB("j") j = object {
+					 a: 1,
+					 b: 2
+					 };
+					 main = {
+						 assert(j.a == 1);
+					 };
+					 );
+	REQUIRE(!asserted);
+	reset();
+}

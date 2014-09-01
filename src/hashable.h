@@ -19,7 +19,7 @@ namespace ilang {
 		//virtual void set_no_check(ilang::Identifier i, ValuePass v) { set(i, v); }
 	  virtual bool has(ilang::Identifier)=0;
 		virtual Handle<Variable> getVariable(ilang::Identifier)=0;
-		virtual ~Hashable(){};
+		virtual ~Hashable() {}
 	};
 
 	class Hashable_iterator : public std::iterator<std::output_iterator_tag, std::pair<ilang::Identifier, ilang::Handle<ilang::Variable>>> {
