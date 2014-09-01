@@ -8,8 +8,8 @@ build/*
 *.a
 *.so
 *.io
-*/DB/*
-DB/*
+*/ilang_db.db
+ilang_db.db
 *.gcov
 *.gcno
 *.gcda

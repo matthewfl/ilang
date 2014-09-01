@@ -44,6 +44,9 @@
  * O: Object member
  */
 
+// berkeley db
+class Db;
+
 namespace ilang {
 	namespace fs = boost::filesystem;
 
@@ -76,18 +79,36 @@ namespace ilang {
 
 		virtual ~Database() {};
 	};
+
+	// legacy leveldb database
+	// class DatabaseFile : public Database {
+	// protected:
+	// 	//leveldb::DB *db;
+	// public:
+	// 	DatabaseFile (fs::path);
+	// 	~DatabaseFile();
+	// 	void Set(std::string name, storedData *data);
+	// 	storedData *Get(std::string name);
+
+	// 	void setMeta(std::string name, std::string data);
+	// 	std::string getMeta(std::string name);
+	// };
+
+
 	class DatabaseFile : public Database {
 	protected:
-		//leveldb::DB *db;
+		Db *db;
 	public:
-		DatabaseFile (fs::path);
+		DatabaseFile(fs::path);
 		~DatabaseFile();
 		void Set(std::string name, storedData *data);
 		storedData *Get(std::string name);
 
 		void setMeta(std::string name, std::string data);
-		std::string getMeta(std::string name);
+		std::string getMeta(std::string);
 	};
+
+
 	class DatabaseDummy : public Database {
 	public:
 		std::map<std::string, std::string> _dat;

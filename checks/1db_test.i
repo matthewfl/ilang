@@ -1,4 +1,4 @@
-Db("cc") cc = 1;
+DB("cc") cc = 1;
 
 main = {
 	cc = 2;

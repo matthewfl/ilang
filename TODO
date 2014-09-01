@@ -114,3 +114,15 @@ Create some sort of proxy object concept, so that objects can be represented tha
 
 8/29/2014
 change to use berkeley db, when the system starts supporting distribuited, it will have units of code which will each be able to have their own dbs
+
+8/31/2014
+Assuming that support for using ones own {} with some function calling, then there could be some table like interface like:
+DB("name") something = Database.table {
+					 Database.name("column_name") Int Database.index random = null; // default value
+					 Database.unique Database.autoinc another = null;
+};
+
+something.find(`random, 123);
+
+
+thinking that the json loading/dumping of data is too specific of a use case, and there should be possibly some better way to dealing with the data

@@ -31,19 +31,3 @@ TEST_CASE("Basic creating db variable", "[database]") {
 	REQUIRE(ilang::System_Database->Get("j") != NULL);
 	reset();
 }
-
-// TEST_CASE("DB, writing and reading", "[database]") {
-// 	init();
-// 	RUN_CODE(
-// 					 DB Int j = 1;
-// 					 main = {};
-// 					 );
-// 	RUN_CODE(
-// 					 DB Int j = 0;
-// 					 main = {
-// 						 assert(j);
-// 					 };
-// 					 );
-// 	REQUIRE(!asserted);
-// 	reset();
-// }

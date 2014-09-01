@@ -70,7 +70,7 @@ int main (int argc, char **argv) {
 
 	char *main_file = NULL;
 	boost::filesystem::path db_path = boost::filesystem::current_path();
-	db_path += "/DB/";
+	db_path += "/ilang_db.db";
 
 	for(int i=1;i<argc;i++) {
 		if(*argv[i] == '-') {

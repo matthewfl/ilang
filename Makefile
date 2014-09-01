@@ -3,7 +3,7 @@ TARGET= i
 # currently not in system: netowrk.cc modification.cc
 # main.cc added in manually so it isn't included when unit testing
 SRCS= parserTree.cc import.cc parser.cc database.cc error.cc print.cc init.cc thread.cc function.cc value.cc identifier.cc object_new.cc variable_new.cc scope_new.cc variable_modifiers.cc c_class.cc
-LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar -lprotobuf
+LIBS= -lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -ltorrent-rasterbar -lprotobuf -ldb_cxx
 UNIT_TESTS=$(wildcard unit_tests/*.cc)
 #LIBS= /usr/lib/libboost_filesystem.a /usr/lib/libboost_system.a /usr/lib/libboost_thread.a -lsnappy -lpthread
 
