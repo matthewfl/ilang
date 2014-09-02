@@ -29,14 +29,14 @@ namespace ilang {
 		string name;
 	public:
 		Database_Object(string n) : name(n) {}
-		ValuePass get(Identifier i);
-		void set(Identifier i, ValuePass v);
-		bool has(Identifier i) {
-			auto v = get(i);
+		ValuePass get(Context &ctx, Identifier i) override;
+		void set(Context &ctx, Identifier i, ValuePass v) override;
+		bool has(Context &ctx, Identifier i) {
+			auto v = get(ctx, i);
 			return (bool) v;
 
 		}
-		Handle<Variable> getVariable(Identifier i) { assert(0); } // hm...
+		Handle<Variable> getVariable(Context &ctx, Identifier i) { assert(0); } // hm...
 	};
 
   class DB_serializer {
@@ -98,7 +98,7 @@ namespace ilang {
       return readStoredData(&entry);
     }
 
-    static void createStoredData(ValuePass a, ilang_db::Entry *entry) {
+    static void createStoredData(Context &ctx, ValuePass a, ilang_db::Entry *entry) {
       using namespace ilang_db;
 			if(a->type() == typeid(long)) {
 				entry->set_type(ilang_db::Entry::Integer);
@@ -124,7 +124,7 @@ namespace ilang {
 					entry->set_object_id(n);
 					auto o = dynamic_pointer_cast<Object>(h);
 					for(auto it : *o) {
-						storedData *ld = createStoredData(it.second->Get());
+						storedData *ld = createStoredData(ctx, it.second->Get(ctx));
 						System_Database->Set(n + it.first.str(), ld);
 						delete ld;
 					}
@@ -221,9 +221,9 @@ namespace ilang {
           */
     }
 
-    static storedData * createStoredData(ValuePass a) {
+    static storedData * createStoredData(Context &ctx, ValuePass a) {
       ilang_db::Entry entry;
-      createStoredData(a, &entry);
+      createStoredData(ctx, a, &entry);
       std::string *ret = new std::string;
       entry.SerializeToString(ret);
       return ret;
@@ -265,7 +265,7 @@ namespace ilang {
     return ret;
   }
 
-	ValuePass Database_Object::get(Identifier i) {
+	ValuePass Database_Object::get(Context &ctx, Identifier i) {
 		std::string n = name + i.str();
 		storedData *d = System_Database->Get(n);
 		if(d)
@@ -273,9 +273,9 @@ namespace ilang {
 		assert(0);
 		return ValuePass();
 	}
-	void Database_Object::set(Identifier i, ValuePass v) {
+	void Database_Object::set(Context &ctx, Identifier i, ValuePass v) {
 		std::string n = name + i.str();
-		storedData *d = DB_serializer::createStoredData(v);
+		storedData *d = DB_serializer::createStoredData(ctx, v);
 		System_Database->Set(n, d);
 		delete d;
 	}
@@ -406,7 +406,7 @@ namespace ilang {
 		std::string name;
 		bool inited = false;
 
-		ValuePass check(Arguments &args) {
+		ValuePass check(Context &ctx, Arguments &args) {
 			ValuePass v = args[0];
 			if(v->type() == typeid(ilang::Function*)) {
 				return valueMaker(false);
@@ -418,7 +418,7 @@ namespace ilang {
 			}
 			return valueMaker(true);
 		}
-		ValuePass setting(Arguments &args) {
+		ValuePass setting(Context &ctx, Arguments &args) {
 			if(!inited) {
 				inited = true;
 				storedData *dat = System_Database->Get(name);
@@ -429,13 +429,13 @@ namespace ilang {
 					return ValuePass();
 				}
 			}
-			storedData *dat = DB_serializer::createStoredData(args[0]);
+			storedData *dat = DB_serializer::createStoredData(ctx, args[0]);
 			System_Database->Set(name, dat);
 			delete dat;
 			return ValuePass();
 		}
 
-		ValuePass getting(Arguments &args) {
+		ValuePass getting(Context &ctx, Arguments &args) {
 			storedData *dat = System_Database->Get(name);
 			if(dat) {
 				ValuePass ret = DB_serializer::readStoredData(dat);
@@ -445,7 +445,7 @@ namespace ilang {
 			return ValuePass();
 		}
 
-		ValuePass new_call(Arguments &args) {
+		ValuePass new_call(Context &ctx, Arguments &args) {
 			Handle<Hashable> h(this);
 			return valueMaker(h);
 		}
@@ -457,14 +457,14 @@ namespace ilang {
 			reg("new", &Database_modifier::new_call);
 		}
 	public:
-		Database_modifier(Arguments &args) {
+		Database_modifier(Context &ctx, Arguments &args) {
 			args.inject(name);
 			Init();
 		}
   };
 
 	void Database_register_function (Context &ctx, Arguments &args, ValuePass *ret) {
-		auto d = make_handle<Database_modifier>(args);
+		auto d = make_handle<Database_modifier>(ctx, args);
 		*ret = valueMaker(static_pointer_cast<Hashable>(d));
 	}
 
@@ -479,14 +479,14 @@ namespace ilang {
   // I am not sure if I want the system to be able to access the meta data that is held, but for the time being I guess this is ok
   // if programmers couldn't break it, what fun would there be
   namespace {
-    ValuePass DB_metaSet(Arguments &args) {
+    ValuePass DB_metaSet(Context &ctx, Arguments &args) {
       error(args.size() == 2, "db.metaSet takes 2 arguments");
       error(args[0]->type() == typeid(string), "First argument to db.metaSet should be a string");
       error(args[1]->type() == typeid(string), "Second argument to db.metaSet should be a string");
       System_Database->setMeta(args[0]->cast<string>(), args[1]->cast<string>());
       return ValuePass();
     }
-    ValuePass DB_metaGet(Arguments &args) {
+    ValuePass DB_metaGet(Context &ctx, Arguments &args) {
       error(args.size() == 1, "db.metaGet takes 1 argument");
       error(args[0]->type() == typeid(string), "First argument to db.metaGet must should be a string");
       return valueMaker(System_Database->getMeta(args[0]->cast<string>()));

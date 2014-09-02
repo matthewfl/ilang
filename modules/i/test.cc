@@ -9,7 +9,7 @@ using namespace std;
 using namespace ilang;
 
 namespace {
-	ilang::ValuePass ttt (Arguments &args) {
+	ilang::ValuePass ttt (Context &ctx, Arguments &args) {
 		//cout << "ttt function called" << endl;
 		//debug(5, "what");
 		return valueMaker("the ttt function called");
@@ -21,22 +21,22 @@ namespace {
 	private:
 		ValuePass something;
 	public:
-		ilang::ValuePass eeee(Arguments &args) {
+		ilang::ValuePass eeee(Context &ctx, Arguments &args) {
 			return valueMaker("the eeee function called");
 		}
 
-		ValuePass set(Arguments &args) {
+		ValuePass set(Context &ctx, Arguments &args) {
 			assert(args.size() == 1);
 			something = args[0];
 			return ValuePass();
 		}
-		ValuePass get(Arguments &args) {
+		ValuePass get(Context &ctx, Arguments &args) {
 			return something;
 		}
 
 		//wwww ();
 		//};
-		wwww (Arguments &args)	 {
+		wwww (Context &ctx, Arguments &args)	 {
 			reg("eeee", &wwww::eeee);
 			reg("set", &wwww::set);
 			reg("get", &wwww::get);

@@ -33,6 +33,7 @@ namespace ilang {
 	// TODO: change this to use std
 	typedef boost::function3<void, Context&, ilang::Arguments&, ValuePass*> Function_ptr;
 
+	// TODO: refactor this into being a tuple system, which can then be reused elsewhere
 	class Arguments : public Hashable {
 
 		// std::vector<ilang::ValuePass> pargs;
@@ -63,16 +64,17 @@ namespace ilang {
 
 		friend class Function;
 	public:
-		void set(Identifier, ilang::ValuePass) override;
-		bool has(Identifier) override;
-		ValuePass get(Identifier i) override;
+		void set(Context &ctx, Identifier, ilang::ValuePass) override;
+		bool has(Context &ctx, Identifier) override;
+		ValuePass get(Context &ctx, Identifier i) override;
 
-		Handle<Variable> getVariable(Identifier i);
+		Handle<Variable> getVariable(Context &ctx, Identifier i);
 
 		void push(ilang::ValuePass);
 
-		ValuePass operator[](Identifier i) { return get(i); }
-		ValuePass operator[](unsigned long i) { return get(Identifier(i)); }
+		// hm...constructing the context here
+		ValuePass operator[](Identifier i) { Context ctx; return get(ctx, i); }
+		ValuePass operator[](unsigned long i) { Context ctx; return get(ctx, Identifier(i)); }
 
 		// ValuePass get(std::string);
 		// ValuePass get(int);
@@ -122,18 +124,15 @@ namespace ilang {
 
 	public:
 		void vvv();
-		template <typename... types> ilang::ValuePass operator() (types... values) {
+		template <typename... types> ilang::ValuePass operator() (Context &ctx, types... values) {
 			Arguments args(values...);
-			Context ctx;
 			return call(ctx, args);
 		}
-		ilang::ValuePass operator() (ilang::Arguments &args) {
-			Context ctx;
+		ilang::ValuePass operator() (Context &ctx, ilang::Arguments &args) {
 			return call(ctx, args);
 		}
-		ilang::ValuePass operator() () {
+		ilang::ValuePass operator() (Context &ctx) {
 			Arguments args;
-			Context ctx;
 			return call(ctx, args);
 		}
 		ilang::ValuePass call(Context&, ilang::Arguments&);

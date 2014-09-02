@@ -10,7 +10,7 @@ TEST_CASE("basic import C", "[import]") {
 	init();
 	auto obj = ImportGetByName("i.test");
 	REQUIRE(obj);
-	auto ttt = obj->get("ttt");
+	auto ttt = obj->get(ctx, "ttt");
 	REQUIRE(ttt->type() == typeid(ilang::Function));
 }
 
@@ -21,7 +21,7 @@ TEST_CASE("basic import i", "[import]") {
 					 );
 	auto obj = ImportGetByName("i.something");
 	REQUIRE(obj);
-	auto sss = obj->get("sss");
+	auto sss = obj->get(ctx, "sss");
 	REQUIRE(sss->type() == typeid(ilang::Function));
 }
 

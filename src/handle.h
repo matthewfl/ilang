@@ -19,7 +19,7 @@ namespace ilang {
 	using boost::dynamic_pointer_cast;
 	using boost::static_pointer_cast;
 
-	template <typename T, typename... args> Handle<T> make_handle(args ... arg) {
+	template <typename T, typename... args> Handle<T> make_handle(args &... arg) {
 		return Handle<T>(new T(arg...));
 	}
 

@@ -20,23 +20,25 @@ namespace ilang {
 		std::vector<ilang::ValuePass> m_modifiers;
 		ilang::ValuePass m_value;
 	public:
-		Variable(std::vector<ilang::ValuePass> mod);
+		Variable(Context &ctx, std::vector<ilang::ValuePass> mod);
 		Variable() {}
 		Variable(const Variable& v);
-		virtual void Set(ilang::ValuePass);
-		virtual ilang::ValuePass Get();//  {
+		virtual void Set(Context &ctx, ilang::ValuePass);
+		virtual ilang::ValuePass Get(Context &ctx);//  {
 		// 	error(m_value, "Can't use a variable before it is set");
 		// 	return m_value;
 		// }
-		virtual void Check(ilang::ValuePass);
-		virtual void SetModifiers(std::vector<ilang::ValuePass> mod);
+		virtual void Check(Context &ctx, ilang::ValuePass);
+		virtual void SetModifiers(Context &ctx, std::vector<ilang::ValuePass> mod);
 	};
 
 	using Variable_ptr = Handle<Variable>;
 
 	inline Variable_ptr make_variable(const ValuePass &val) {
+		Context ctx;
+		// there are no modifiers, so the context won't be used...
 		auto var = make_handle<Variable>();
-		var->Set(val);
+		var->Set(ctx, val);
 		return var;
 	}
 
@@ -46,10 +48,10 @@ namespace ilang {
 		ValuePass m_bound;
 	public:
 		BoundVariable(Variable_ptr p, ValuePass b) : m_parent(p), m_bound(b) {}
-		void Set(ValuePass) override;
-		ValuePass Get() override;
-		void Check(ValuePass) override;
-		void SetModifiers(std::vector<ValuePass>) override;
+		void Set(Context &ctx,ValuePass) override;
+		ValuePass Get(Context &ctx) override;
+		void Check(Context &ctx, ValuePass) override;
+		void SetModifiers(Context &ctx, std::vector<ValuePass>) override;
 	};
 
 }

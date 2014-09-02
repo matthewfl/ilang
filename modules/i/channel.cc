@@ -14,14 +14,14 @@ namespace {
 	private:
 		tbb::concurrent_bounded_queue<ValuePass> m_queue;
 		ilang::Event waiting;
-		ValuePass push(Arguments &args) {
+		ValuePass push(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "channel.push expects one argument");
 			auto v = args[0];
 			waiting.Trigger(NULL);
 			m_queue.push(v);
 			return ValuePass();
 		}
-		ValuePass pop(Arguments &args) {
+		ValuePass pop(Context &ctx, Arguments &args) {
 			error(args.size() == 0, "channel.pop expects zero arguments");
 			ValuePass ret;
 			//m_queue.pop(ret); // blocks until there is something to pop
@@ -32,12 +32,12 @@ namespace {
 			}
 			return ret;
 		}
-		ValuePass size(Arguments &args) {
+		ValuePass size(Context &ctx, Arguments &args) {
 			error(args.size() == 0, "channel.size expects zero arguments");
 			long size = m_queue.size();
 			return valueMaker(size);
 		}
-		ValuePass setLimit(Arguments &args) {
+		ValuePass setLimit(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "channel.setLimit expects one argument");
 			error(args[0]->type() == typeid(long), "channel.setLimit expects a number");
 			m_queue.set_capacity(args[0]->cast<long>());
@@ -50,7 +50,7 @@ namespace {
 			reg("setLimit", &threadChannel::setLimit);
 		}
 	public:
-		threadChannel(Arguments &args) {
+		threadChannel(Context &ctx, Arguments &args) {
 			Init();
 			int len = 10;
 			if(args.size() == 1)
@@ -63,7 +63,7 @@ namespace {
 		}
 	};
 
-	ValuePass createChannel(Arguments &args) {
+	ValuePass createChannel(Context &ctx, Arguments &args) {
 		error(args.size() <= 1, "channel.create expects 1 or no arguments");
 		int channelLength = 10;
 		if(args.size()) {

@@ -14,11 +14,11 @@ TEST_CASE("Basic function calling", "[function]") {
 												 );
 	tree->Link();
 	// omg, this seems bad
-	auto fun_ = tree->GetScope()->get("fun");
+	auto fun_ = tree->GetScope()->get(ctx, "fun");
 	REQUIRE(fun_->type() == typeid(ilang::Function));
 	REQUIRE(typeid(fun_->cast<ilang::Function*>()) == typeid(ilang::Function*));
 	auto fun = *fun_->cast<ilang::Function*>();
-	fun();
+	fun(ctx);
 	REQUIRE(asserted);
 }
 
@@ -30,7 +30,7 @@ TEST_CASE("basic native function", "[function]") {
 	};
 
 	ilang::Function f(fptr);
-	ValuePass ret = f();
+	ValuePass ret = f(ctx);
 
 	REQUIRE(called);
 }
@@ -45,10 +45,10 @@ TEST_CASE("function passing arguments", "[function]") {
 												 );
 	tree->Link();
 
-	ValuePass fun_ = tree->GetScope()->get("fun");
+	ValuePass fun_ = tree->GetScope()->get(ctx, "fun");
 	ilang::Function fun = *fun_->cast<ilang::Function*>();
 
-	fun(valueMaker(1));
+	fun(ctx, valueMaker(1));
 	REQUIRE(!asserted);
 }
 
@@ -68,10 +68,10 @@ TEST_CASE("function run", "[function]") {
 
 	tree->Link();
 
-	ValuePass fun_ = tree->GetScope()->get("fun");
+	ValuePass fun_ = tree->GetScope()->get(ctx, "fun");
 	ilang::Function fun = *fun_->cast<ilang::Function*>();
 
-	fun();
+	fun(ctx);
 	REQUIRE(asserted);
 }
 
@@ -86,7 +86,7 @@ TEST_CASE("function undefined elements", "[function]") {
 												 };
 												 );
 	tree->Link();
-	ValuePass fun_ = tree->GetScope()->get("fun");
+	ValuePass fun_ = tree->GetScope()->get(ctx, "fun");
 	ilang::Function fun = *fun_->cast<ilang::Function*>();
 	auto undef = fun.UndefinedElements();
 	REQUIRE(undef.find("asdf") != undef.end());

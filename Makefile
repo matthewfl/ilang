@@ -103,7 +103,7 @@ clean:
 	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda $(UNIT_TEST_OBJS)
 clean-all: clean
 	cd deps/libuv && make distclean
-	rm -rf DB/
+	rm -rf ilang_db.db
 
 depend:
 	makedepend -Y -- $(CXXFLAGS) -- $(SRCSD) src/main.cc

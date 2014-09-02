@@ -11,8 +11,11 @@
 #include "import.h"
 #include "parserTree.h"
 #include "parser.h"
+#include "context.h"
 
 using namespace ilang;
+
+static Context ctx;
 
 static void init_db() {
 	ilang::System_Database = new ilang::DatabaseDummy;

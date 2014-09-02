@@ -64,11 +64,11 @@ namespace {
 		static int header_value_cb(http_parser *parser, const char *dat, size_t length);
 
 
-		ValuePass isRunning(Arguments &args);
-		ValuePass setListen(Arguments &args);
-		ValuePass startListen(Arguments &args);
-		ValuePass stopListen(Arguments &args);
-		ValuePass waitEnd(Arguments &args);
+		ValuePass isRunning(Context &ctx, Arguments &args);
+		ValuePass setListen(Context &ctx, Arguments &args);
+		ValuePass startListen(Context &ctx, Arguments &args);
+		ValuePass stopListen(Context &ctx, Arguments &args);
+		ValuePass waitEnd(Context &ctx, Arguments &args);
 		void Init();
 
 	public:
@@ -95,12 +95,12 @@ namespace {
 
 
 
-		ValuePass getUrl (Arguments &args) {
+		ValuePass getUrl (Context &ctx, Arguments &args) {
 			error(args.size() == 0, "httpd.request.url expects no arguments");
 			return valueMaker(url);
 		}
 
-		ValuePass getHeader (Arguments &args) {
+		ValuePass getHeader (Context &ctx, Arguments &args) {
 			error(args.size() == 1, "httpd.request.header expects 1 argument");
 			error(args[0]->type() == typeid(std::string), "httpd.request.header expects a string type");
 			string s = args[0]->cast<std::string>();
@@ -110,7 +110,7 @@ namespace {
 			return valueMaker(headers[s]);
 		}
 
-		ValuePass writeHead(Arguments &args) {
+		ValuePass writeHead(Context &ctx, Arguments &args) {
 			debug(4, "in write head\n");
 			// eg: writeHead(302, "Location: http://......", "Content-type: text/plain", .....);
 			//close_mutex.lock_shared();
@@ -184,13 +184,13 @@ namespace {
 			return ValuePass();
 		}
 
-		ValuePass writeReq(Arguments &args) {
+		ValuePass writeReq(Context &ctx, Arguments &args) {
 			debug(4, "in write req\n")
 				//close_mutex.lock_shared();
 				error(args.size() >= 1, "httpd.request.write expects at least one argument");
 			if(headWritten == false) {
 				Arguments headArgs;
-				ValuePass ii = writeHead(headArgs);
+				ValuePass ii = writeHead(ctx, headArgs);
 			}
 
 			struct writeReq {
@@ -235,9 +235,9 @@ namespace {
 			return valueMaker(true);
 		}
 
-		ValuePass endReq(Arguments &args) {
+		ValuePass endReq(Context &ctx, Arguments &args) {
 			if(args.size() != 0) {
-				ValuePass ii = writeReq(args);
+				ValuePass ii = writeReq(ctx, args);
 			}
 			close();
 			return ValuePass();
@@ -393,7 +393,8 @@ namespace {
 			}else */
 		// need to create a thread here and execuit the code
 
-		ValuePass ret = func(params);
+		Context ctx; // this is a callback so there isn't really any context
+		ValuePass ret = func(ctx, params);
 		// if(func.object) {
 		// 	assert(func.object->Get().type() == typeid(ilang::Object*));
 		// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
@@ -436,12 +437,12 @@ namespace {
 
 		}*/
 
-	ValuePass Server::isRunning(Arguments &args) {
+	ValuePass Server::isRunning(Context &ctx, Arguments &args) {
 		error(args.size() == 0, "httpd.running does not take any arguments");
 		return valueMaker(listening);
 	}
 
-	ValuePass Server::setListen(Arguments &args) {
+	ValuePass Server::setListen(Context &ctx, Arguments &args) {
 		error(args.size() == 1, "http.setListen takes 1 argument");
 		error(args[0]->type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
 
@@ -451,7 +452,7 @@ namespace {
 		return ValuePass();
 	}
 
-	ValuePass Server::startListen(Arguments &args) {
+	ValuePass Server::startListen(Context &ctx, Arguments &args) {
 		error(args.size() <= 1, "httpd.start takes one argument");
 		error(listening == false, "httpd already listening");
 
@@ -471,7 +472,7 @@ namespace {
 		return valueMaker(bool(r==0));
 
 	}
-	ValuePass Server::stopListen(Arguments &args) {
+	ValuePass Server::stopListen(Context &ctx, Arguments &args) {
 		error(args.size()== 0, "httpd.stop takes no arguments");
 		error(listening == true, "httpd not listening");
 
@@ -481,7 +482,7 @@ namespace {
 		return ValuePass();
 	}
 
-	ValuePass Server::waitEnd(Arguments &args) {
+	ValuePass Server::waitEnd(Context &ctx, Arguments &args) {
 		assert(0);
 	}
 
@@ -521,7 +522,7 @@ namespace {
 	// Server end
 
 
-	ValuePass createServer(Arguments &args) {
+	ValuePass createServer(Context &ctx, Arguments &args) {
 		error(args.size() == 2, "httpd.create takes 2 arguments");
 		error(args[0]->type() == typeid(long), "httpd.create 1st argument is a port number");
 		error(args[1]->type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");

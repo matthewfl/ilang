@@ -61,10 +61,10 @@ namespace ilang {
 			vector<ValuePass> v;
 			ValuePass ret;
 			//scope->Debug();
-			ValuePass main = scope->get(Identifier("main"));
+			ValuePass main = scope->get(ctx, Identifier("main"));
 			error(main, "main function not found");
 			ilang::Arguments args;
-			main->call(args);
+			main->call(ctx, args);
 
 			//ilang::Variable * find = scope->lookup("main");
 			//error(find, "main function not found");
@@ -415,18 +415,18 @@ namespace ilang {
 				//auto pvar = dynamic_cast<Scope*>(ctx.scope)->getVariable(GetFirstName());
 				//auto pvar = forceNew(Identifier(GetFirstName()), mods);
 				//if(!pvar) {
-				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(name, mods);
+				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(ctx, name, mods);
 				//} else {
 				//	pvar->SetModifiers(mods);
 				//}
 				assert(var);
-				pvar->Set(var);
+				pvar->Set(ctx, var);
 				//ctx.scope->set(Identifier(GetFirstName()), var);
 
 				//assert(0); // TODO:
 				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
-				ctx.scope->set(name, var);
+				ctx.scope->set(ctx, name, var);
 			}
 		}
 		ilang::Variable * Variable::Get(Context &ctx) {
@@ -437,7 +437,7 @@ namespace ilang {
 
 		ValuePass Variable::GetValue(Context &ctx) {
 			// TODO: maybe change it so variables are only on the lhs
-			auto ret = ctx.scope->get(name);
+			auto ret = ctx.scope->get(ctx, name);
 			return ret;
 		}
 		// std::string Variable::GetFirstName() {
@@ -456,8 +456,8 @@ namespace ilang {
 			vector<ValuePass> mod;
 			// this needs to check if it should actually force this to be new
 			// eg opt register it?
-			if(!modifiers->empty() || !ctx.scope->has(name)) {
-				dynamic_cast<Scope*>(ctx.scope)->forceNew(name, mod);
+			if(!modifiers->empty() || !ctx.scope->has(ctx, name)) {
+				dynamic_cast<Scope*>(ctx.scope)->forceNew(ctx, name, mod);
 			}
 		}
 
@@ -493,7 +493,7 @@ namespace ilang {
 				ValuePass obj_val = Obj->GetValue(ctx);
 				assert(obj_val);
 				try {
-					ret = obj_val->get(name);
+					ret = obj_val->get(ctx, name);
 				} catch(InvalidOperation e) {
 					if(obj_val->type() == typeid(Hashable*)) {
 						error(0, "Object " << obj_val << "does not have member " << name.str());
@@ -507,7 +507,7 @@ namespace ilang {
 				// }
 				return ret;
 			}else{
-				ret = ctx.scope->get(name);
+				ret = ctx.scope->get(ctx, name);
 				return ret;
 			}
 		}
@@ -518,13 +518,13 @@ namespace ilang {
 				ValuePass obj_val = Obj->GetValue(ctx);
 				//ValuePass key = valueMaker(identifier);
 				try {
-					obj_val->set(name, val);
+					obj_val->set(ctx, name, val);
 				} catch(InvalidOperation e) {
 					error(0, "Attempted to set " << name.str() << " on non object type");
 				}
 			}else{
 				//Identifier name(identifier);
-				ctx.scope->set(name, val);
+				ctx.scope->set(ctx, name, val);
 			}
 		}
 
@@ -570,7 +570,7 @@ namespace ilang {
 			ValuePass key = Lookup->GetValue(ctx);
 			ValuePass ret;
 			try {
-				ret = obj_val->get(key);
+				ret = obj_val->get(ctx, key);
 			} catch(InvalidOperation e) {
 				if(obj_val->type() == typeid(Hashable*)) {
 					error(0, "Object " << obj_val << " does not have member " << key->cast<string>());
@@ -591,7 +591,7 @@ namespace ilang {
 			ValuePass obj_val = Obj->GetValue(ctx);
 			ValuePass key = Lookup->GetValue(ctx);
 			try {
-				obj_val->set(key, var);
+				obj_val->set(ctx, key, var);
 			} catch(InvalidOperation e) {
 				error(0, "Attempted to set " << key->cast<string>() << " on non object type");
 			}
@@ -634,7 +634,7 @@ namespace ilang {
 				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(ctx));
 			}
 
-			ValuePass ret = func->call(args);
+			ValuePass ret = func->call(ctx, args);
 			return ret;
 		}
 

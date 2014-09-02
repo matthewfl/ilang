@@ -8,8 +8,10 @@ namespace ilang {
 	struct Context {
 		ValuePass *returned = NULL;
 		Hashable *scope = NULL;
+		Context *parent = NULL;
+		Context(Context &p) : parent(&p) {}
+		Context() {}
 	};
-
 }
 
 #endif // _ilang_context

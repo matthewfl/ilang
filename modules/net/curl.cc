@@ -11,7 +11,7 @@ namespace {
 		ret->append(data, size * nmemb);
 		return size * nmemb;
 	}
-	ValuePass simpleGet(Arguments &args) {
+	ValuePass simpleGet(Context &ctx, Arguments &args) {
 		CURL *curl;
 		CURLcode res;
 		char bufferError[CURL_ERROR_SIZE];

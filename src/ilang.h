@@ -40,7 +40,8 @@
 namespace ilang {
 	// used to create wrapper for C++ classes
 	// other helpers for wrappers in import.cc
-	ValuePass Function_Creater( ValuePass (*fun)(Arguments&) );
+	// doesn't make since to not take a context anymore
+	//ValuePass Function_Creater( ValuePass (*fun)(Arguments&) );
 	//ValuePass Function_Creater( ValuePass (*fun)(Scope*, Arguments&) );
 	ValuePass Function_Creater( ValuePass (*fun)(Context&, Arguments&) );
 
@@ -51,20 +52,24 @@ namespace ilang {
 	public:
 		C_Class();
 		virtual ~C_Class();
-		template <typename cls> void reg(Identifier name, ValuePass (cls::*fun)(Arguments &args)) {
-			assert(!has(name));
-			// TODO: this breaks the reference counting, as it needs to know when this function was returned
-			//cls *self = (cls*)this;
-			Handle<cls> self((cls*)this);
-			//Handle<cls> self((cls*)this);
-			ilang::Function f([fun, self](Context &ctx, Arguments &args, ValuePass *ret) {
-					*ret = (self.get() ->* fun)(args);
-					//assert(*ret);
-				});
-			set(name, valueMaker(f));
-		}
+		// doesn't make since to have a function which doesn't take a context now
+		// template <typename cls> void reg(Identifier name, ValuePass (cls::*fun)(Arguments &args)) {
+		// 	//assert(!has(name));
+		// 	assert(m_members.find(name) == m_members.end());
+		// 	// TODO: this breaks the reference counting, as it needs to know when this function was returned
+		// 	//cls *self = (cls*)this;
+		// 	Handle<cls> self((cls*)this);
+		// 	//Handle<cls> self((cls*)this);
+		// 	ilang::Function f([fun, self](Context &ctx, Arguments &args, ValuePass *ret) {
+		// 			*ret = (self.get() ->* fun)(args);
+		// 			//assert(*ret);
+		// 		});
+		// 	// TODO: fix this
+		// 	Context ctx;
+		// 	set(ctx, name, valueMaker(f));
+		// }
 		template <typename cls> void reg(Identifier name, ValuePass (cls::*fun)(Context &ctx, Arguments &args)) {
-			assert(!has(name));
+			assert(m_members.find(name) == m_members.end());
 			// TODO: this breaks the reference counting, as it needs to know when this function was returned
 			//cls *self = (cls*)this;
 			Handle<cls> self((cls*)this);
@@ -73,7 +78,9 @@ namespace ilang {
 					*ret = (self.get() ->* fun)(ctx, args);
 					//assert(*ret);
 				});
-			set(name, valueMaker(f));
+			// TODO: fix this, and save the functions elsewhere
+			Context ctx;
+			set(ctx, name, valueMaker(f));
 		}
 
 
@@ -149,10 +156,10 @@ namespace ilang {
 		// 	//return new Object(new cc);
 		// }
 
-		ValuePass get(Identifier i) {
+		ValuePass get(Context &ctx, Identifier i) override {
 			if(i == "new") {
 				ilang::Function nfun([](Context &ctx, Arguments &args, ValuePass *ret) {
-						auto r = make_handle<cc>(args);
+						auto r = make_handle<cc>(ctx, args);
 						*ret = valueMaker(static_pointer_cast<Hashable>(r));
 					});
 				return valueMaker(nfun);

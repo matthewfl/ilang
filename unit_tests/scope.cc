@@ -11,7 +11,7 @@ TEST_CASE("Force New", "[scope]") {
 	Scope scope(ctx);
 	ilang::Function f;
 	vector<ValuePass> mods{valueMaker(1), valueMaker(f)};
-	auto v = scope.forceNew("test", mods);
+	auto v = scope.forceNew(ctx, "test", mods);
 }
 
 TEST_CASE("Pre register", "[scope]") {

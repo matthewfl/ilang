@@ -186,8 +186,7 @@ FunctionType::~FunctionType() {
 void FunctionType::copyTo(void *d) {
 	new (d) FunctionType(*this);
 }
-ValuePass FunctionType::call(ilang::Arguments &args) {
-	Context ctx;
+ValuePass FunctionType::call(Context &ctx, ilang::Arguments &args) {
 	ilang::ValuePass gg = ((ilang::Function*)m_ptr)->call(ctx, args);
 	return gg;
 }
@@ -226,11 +225,11 @@ Handle<Class> HashableType::Cast(cast_chooser<Class*> c) {
 void HashableType::copyTo(void *d) {
 	new (d) HashableType(*this);
 }
-ValuePass HashableType::get(Identifier key) {
-	return (*(Handle<Hashable>*)m_ptr)->get(key);
+ValuePass HashableType::get(Context &ctx, Identifier key) {
+	return (*(Handle<Hashable>*)m_ptr)->get(ctx, key);
 }
-void HashableType::set(Identifier key, ValuePass value) {
-	(*(Handle<Hashable>*)m_ptr)->set(key, value);
+void HashableType::set(Context &ctx, Identifier key, ValuePass value) {
+	(*(Handle<Hashable>*)m_ptr)->set(ctx, key, value);
 }
 
 ClassType::ClassType(Handle<Class> c) {

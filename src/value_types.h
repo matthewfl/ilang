@@ -16,9 +16,9 @@ namespace ilang {
 		//FunctionType(FunctionType &&);
 		~FunctionType();
 
-		virtual void copyTo(void *d);
-		virtual const std::type_info &type();
-		virtual ValuePass call(ilang::Arguments &args);
+		virtual void copyTo(void *d) override;
+		virtual const std::type_info &type() override;
+		virtual ValuePass call(Context &ctx, ilang::Arguments &args) override;
 
 		virtual ValuePass operator + (ValuePass v) override;
 
@@ -49,8 +49,8 @@ namespace ilang {
 		virtual Handle<Hashable> Cast(cast_chooser<Hashable*>);
 		virtual Handle<Class> Cast(cast_chooser<Class*>); // TODO: make an new type??
 
-		ValuePass get(Identifier key);
-		void set(Identifier key, ValuePass value);
+		ValuePass get(Context &ctx, Identifier key) override;
+		void set(Context &ctx, Identifier key, ValuePass value) override;
 	};
 
 	// TODO: remove?, class type isn't used
@@ -65,6 +65,12 @@ namespace ilang {
 		virtual void copyTo(void *d);
 		virtual Handle<Class> Cast(cast_chooser<ilang::Class*>);
 	};
+
+	// class VariableType : public Value_new {
+	// 	// special values that control the scopes etc of variables
+	// public:
+	// 	VariableType
+	// };
 
 	static auto valueMaker = _valueMaker<
 		int, IntType,

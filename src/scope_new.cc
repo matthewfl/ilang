@@ -17,70 +17,70 @@ Scope::~Scope() {
 // 	return NULL;
 // }
 
-Handle<Variable> Scope::forceNew(ilang::Identifier i, std::vector<ValuePass> modifiers) {
+Handle<Variable> Scope::forceNew(Context &ctx, ilang::Identifier i, std::vector<ValuePass> modifiers) {
 	//assert(m_vars.find(i) == m_vars.end());
 	for(auto it : modifiers) { assert(it); }
 	Handle<Variable> var;
 	auto it = m_vars.find(i);
 	if(it != m_vars.end()) {
 		var = it->second;
-		var->SetModifiers(modifiers);
+		var->SetModifiers(ctx, modifiers);
 	} else {
-		var = make_handle<ilang::Variable>(modifiers);
+		var = make_handle<ilang::Variable>(ctx, modifiers);
 		m_vars.insert(pair<Identifier, Handle<Variable> >(i, var));
 	}
 	return var;
 }
 
-ValuePass Scope::get(ilang::Identifier i) {
+ValuePass Scope::get(Context &ctx, ilang::Identifier i) {
 	//cout << "Getting " << i.str() << endl;
 	ValuePass ret;
 	auto it = m_vars.find(i);
 	if(it != m_vars.end()) {
-		ret = it->second->Get();
+		ret = it->second->Get(ctx);
 	} else {
 		if(!m_parent) {
 			// just use the global scope if there is no parent
 			ret = global_scope_lookup(i);
 		} else
-			ret = m_parent->get(i);
+			ret = m_parent->get(ctx, i);
 	}
 	assert(ret); // TODO: remove, just return an empty object
 	return ret;
 }
 
-void Scope::set(ilang::Identifier i, ValuePass v) {
+void Scope::set(Context &ctx, ilang::Identifier i, ValuePass v) {
 	// TODO: optimize this??
 	//cout << "Setting " << i.str() << endl;
 	assert(v);
-	if(m_parent && m_parent->has(i)) {
-		m_parent->set(i, v);
+	if(m_parent && m_parent->has(ctx, i)) {
+		m_parent->set(ctx, i, v);
 		return;
 	}
 	auto it = m_vars.find(i);
 	if(it != m_vars.end()) {
-		it->second->Set(v);
+		it->second->Set(ctx, v);
 		return;
 	}
-	auto var = forceNew(i, {});
-	var->Set(v);
+	auto var = forceNew(ctx, i, {});
+	var->Set(ctx, v);
 }
 
-bool Scope::has(ilang::Identifier i) {
-	return m_vars.find(i) != m_vars.end() || m_parent && m_parent->has(i);
+bool Scope::has(Context &ctx, ilang::Identifier i) {
+	return m_vars.find(i) != m_vars.end() || m_parent && m_parent->has(ctx, i);
 }
 
-Handle<Variable> Scope::getVariable(ilang::Identifier i) {
+Handle<Variable> Scope::getVariable(Context &ctx, ilang::Identifier i) {
 	// TODO: this needs to call parent scopes, so that bind can bind to higher scopes..
 	auto it = m_vars.find(i);
 	if(it == m_vars.end()) {
 		if(m_parent) {
-			return m_parent->getVariable(i);
+			return m_parent->getVariable(ctx, i);
 		} else {
 			ValuePass g = global_scope_lookup(i);
 			if(g) {
 				auto var = make_handle<Variable>();
-				var->Set(g);
+				var->Set(ctx, g);
 				return var;
 			}
 			return Handle<Variable>();

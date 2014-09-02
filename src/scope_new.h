@@ -32,13 +32,13 @@ namespace ilang {
 		//ilang::Variable * _lookup(ilang::Identifier);
 	public:
 		//ilang::Variable * lookup(ilang::Identifier);
-		Handle<Variable> forceNew(ilang::Identifier, std::vector<ValuePass> modifiers);
+		Handle<Variable> forceNew(Context &ctx, ilang::Identifier, std::vector<ValuePass> modifiers);
 
 		// Hashable
-		ValuePass get(ilang::Identifier);
-		void set(ilang::Identifier, ValuePass);
-		bool has(ilang::Identifier);
-		Handle<Variable> getVariable(ilang::Identifier);
+		ValuePass get(Context &ctx, ilang::Identifier);
+		void set(Context &ctx, ilang::Identifier, ValuePass);
+		bool has(Context &ctx, ilang::Identifier);
+		Handle<Variable> getVariable(Context &ctx, ilang::Identifier);
 		void insert(ilang::Identifier, Handle<Variable>);
 
 		//Scope(Hashable *h) : m_parent(h) {}

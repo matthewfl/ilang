@@ -24,7 +24,7 @@ namespace {
 		Handle<Iterable> m_obj;
 		std::map<Identifier, std::vector<ValuePass> > m_emitted;
 
-		ValuePass EmitFunct(Arguments &args) {
+		ValuePass EmitFunct(Context &ctx, Arguments &args) {
 			error(args.size() == 2, "map.emit expects 2 arguments");
 			Identifier i;
 			ValuePass v;
@@ -37,7 +37,7 @@ namespace {
 			return valueMaker(true);
 		}
 
-		ValuePass MapAction(Arguments &args) {
+		ValuePass MapAction(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "map.map expects 1 argument");
 			error(args[0]->type() == typeid(ilang::Function), "map.map expects a function");
 			error(m_obj, "There is no object to map on");
@@ -57,7 +57,7 @@ namespace {
 			// ilang::Function emitFunct;
 			// emitFunct.native = true;
 			ilang::Function emit_fun([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
-					*ret = returnMapper->EmitFunct(args);
+					*ret = returnMapper->EmitFunct(ctx, args);
 					assert(*ret);
 				});
 			ValuePass emitFunctVal = valueMaker(emit_fun);
@@ -67,7 +67,7 @@ namespace {
 				if(vals.first == "this") continue;
 				auto val = vals.second;
 
-				ValuePass ret = funct(valueMaker(vals.first), val->Get(), emitFunctVal);
+				ValuePass ret = funct(ctx, valueMaker(vals.first), val->Get(ctx), emitFunctVal);
 			}
 
 			return valueMaker(static_pointer_cast<Hashable>(returnMapper));
@@ -108,7 +108,7 @@ namespace {
 			//return valueMaker(true);//obj);
 		}
 
-		ValuePass Get(Arguments &args) {
+		ValuePass Get(Context &ctx, Arguments &args) {
 			Identifier i;
 			args.inject(i);
 
@@ -126,7 +126,7 @@ namespace {
 			//return ValuePass(new ilang::Value_Old((ilang::Object*) new ilang::Array(m_emitted[
 		}
 
-		ValuePass Reduce(Arguments &args) {
+		ValuePass Reduce(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "map.reduce expects 1 argument");
 			error(args[0]->type() == typeid(ilang::Function), "map.reduce expects a function");
 			error(!m_obj, "can not reduce directly on an object"); // TODO: remove this constrain
@@ -140,14 +140,14 @@ namespace {
 
 			auto returnMapper = Handle<Mapper>(new Mapper);
 			ilang::Function emitFunct([returnMapper](Context &ctx, Arguments &args, ValuePass *ret) {
-					*ret = returnMapper->EmitFunct(args);
+					*ret = returnMapper->EmitFunct(ctx, args);
 					assert(*ret);
 				});
 			ValuePass emitFunctVal = valueMaker(emitFunct);
 
 #define CALL_WITH(_key, _value)																					\
 			{																																	\
-				ValuePass ret = funct(valueMaker( _key ), _value, emitFunctVal); \
+				ValuePass ret = funct(ctx, valueMaker( _key ), _value, emitFunctVal); \
 			}
 
 			ValuePass ret;
@@ -188,7 +188,7 @@ namespace {
 		}
 	};
 
-	ValuePass createMapper(Arguments &args) {
+	ValuePass createMapper(Context &ctx, Arguments &args) {
 		// when the argument is of a class that has not been constructed, then the type is ilang::Class*, after the obhject is constructed then the type is ilang::Object* with a pointer to class
 		error(args.size() == 1, "map.create expects 1 argument");
 		Handle<Hashable> h;

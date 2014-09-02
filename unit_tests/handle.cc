@@ -13,8 +13,9 @@ public:
 
 TEST_CASE("handle reference count", "[handle]") {
 	int c = 0;
+	int *cc = &c;
 	{
-		auto gg = make_handle<Handle_test>(&c);
+		auto gg = make_handle<Handle_test>(cc);
 		REQUIRE(c == 1);
 		REQUIRE(gg->ptr_count == 1);
 	}

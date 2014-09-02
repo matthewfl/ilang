@@ -104,8 +104,9 @@ TEST_CASE("function type", "[value]") {
 		});
 	auto v = valueMaker(f);
 
+	Context ctx;
 	ilang::Arguments args;
-	ValuePass ret = v->call(args);
+	ValuePass ret = v->call(ctx, args);
 	REQUIRE(called);
 }
 

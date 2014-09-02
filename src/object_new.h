@@ -26,10 +26,10 @@ namespace ilang {
 		std::map<Identifier, Handle<Variable> > m_members;
 		Object_ish() {}
 	public:
-		ValuePass get(ilang::Identifier) override;
-		void set(ilang::Identifier, ValuePass) override;
-		bool has(ilang::Identifier) override;
-		Handle<Variable> getVariable(ilang::Identifier) override;
+		ValuePass get(Context &ctx, ilang::Identifier) override;
+		void set(Context &ctx, ilang::Identifier, ValuePass) override;
+		bool has(Context &ctx, ilang::Identifier) override;
+		Handle<Variable> getVariable(Context &ctx, ilang::Identifier) override;
 		Hashable_iterator begin() override;
 		Hashable_iterator end() override;
 		virtual ~Object_ish() {}
@@ -64,8 +64,8 @@ namespace ilang {
 		Class();
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
 
-		ValuePass get(Identifier i);
-		ValuePass builtInGet(Identifier i);
+		ValuePass get(Context &ctx, Identifier i);
+		ValuePass builtInGet(Context &ctx, Identifier i);
 	};
 
 	class Class_instance : public Object_ish {
@@ -76,8 +76,8 @@ namespace ilang {
 		Class_instance(Handle<Class> c);
 		//Class_instance(C_Class *c);
 
-		ValuePass get(Identifier i);
-		bool has(Identifier i);
+		ValuePass get(Context &ctx, Identifier i) override;
+		bool has(Context &ctx, Identifier i) override;
 		//Handle<Variable> getVariable(Identifier i);
 		friend class Class;
 	};
@@ -98,10 +98,10 @@ namespace ilang {
 	public:
 		Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserNode::Node*> *elems, Context &ctx);
 		Array(std::vector<ValuePass> elems);
-		ValuePass get(Identifier) override;
-		void set(Identifier, ValuePass) override;
-		bool has(Identifier) override;
-		Handle<Variable> getVariable(Identifier);
+		ValuePass get(Context &ctx, Identifier) override;
+		void set(Context &ctx, Identifier, ValuePass) override;
+		bool has(Context &ctx, Identifier) override;
+		Handle<Variable> getVariable(Context &ctx, Identifier);
 	};
 
 }

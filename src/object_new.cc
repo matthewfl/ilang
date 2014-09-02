@@ -10,7 +10,7 @@
 using namespace ilang;
 using namespace std;
 
-ValuePass Object_ish::get(Identifier i) {
+ValuePass Object_ish::get(Context &ctx, Identifier i) {
 	// auto it = m_members.find(i);
 	// assert(it != m_members.end());
 	// ValuePass ret = it->second->Get();
@@ -19,46 +19,47 @@ ValuePass Object_ish::get(Identifier i) {
 	// }
 	// return ret;
 
-	auto var = getVariable(i);
+	auto var = getVariable(ctx, i);
 	if(!var) {
 		return ValuePass();
 	}
 	//assert(var);
-	return var->Get();
+	return var->Get(ctx);
 
 }
 
-void Object_ish::set(Identifier i, ValuePass v) {
+void Object_ish::set(Context &ctx, Identifier i, ValuePass v) {
 	//cout << "set " << i.str() << endl;
 	auto it = m_members.find(i);
 	if(it == m_members.end()) {
 		auto var = make_handle<Variable>();
-		var->Set(v);
+		var->Set(ctx, v);
 		m_members.insert(pair<Identifier, Handle<Variable> >(i, var));
 	} else {
-		it->second->Set(v);
+		it->second->Set(ctx, v);
 	}
 }
 
-bool Object_ish::has(Identifier i) {
+bool Object_ish::has(Context &ctx, Identifier i) {
 	return m_members.find(i) != m_members.end();
 }
 
-Handle<Variable> Object_ish::getVariable(ilang::Identifier i) {
+Handle<Variable> Object_ish::getVariable(Context &ctx, ilang::Identifier i) {
 	//cout << "get " << i.str() << endl;
 	if(i == "this") {
 		// can just create a new variable here which holds the reference to
 		// the this ptr
 		auto ptr = Handle<Hashable>(this);
 		auto ret = make_handle<Variable>();
-		ret->Set(valueMaker(ptr));
+		ret->Set(ctx, valueMaker(ptr));
 		return ret;
 	}
 	auto it = m_members.find(i);
 	if(it == m_members.end())
 		return NULL;
 	//assert(it != m_members.end());//error(, "unable to find variable " << i.str());
-	return make_handle<BoundVariable>(it->second, valueMaker(Handle<Hashable>(this)));
+	auto bd = valueMaker(Handle<Hashable>(this));
+	return make_handle<BoundVariable>(it->second, bd);
 	//return it->second;
 }
 
@@ -98,30 +99,30 @@ Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode:
 }
 
 // TODO: this needs to be changed to getVariable
-ValuePass Class::get(Identifier i) {
-	if(has(i)) {
-		return Object_ish::get(i);
+ValuePass Class::get(Context &ctx, Identifier i) {
+	if(has(ctx, i)) {
+		return Object_ish::get(ctx, i);
 	}
 	// for(auto it : m_parents) {
 	// 	if(it->has(i)) {
 	// 		return
 	// }
-	auto r = builtInGet(i);
+	auto r = builtInGet(ctx, i);
 	assert(r);
 	return r;
 }
 
-ValuePass Class::builtInGet(Identifier i) {
+ValuePass Class::builtInGet(Context &ctx, Identifier i) {
 	if(i == Identifier("new")) {
 		// new function
 		// Calls create to create a new instance of the class,
 		// and then calls init to set up the class with the passed arguments
-		ValuePass create_fun = get(Identifier("create"));
+		ValuePass create_fun = get(ctx, Identifier("create"));
 		ilang::Function n([create_fun](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
 				ilang::Arguments na;
-				*ret = create_fun->call(na);
-				auto init = (*ret)->get(Identifier("init"));
-				ValuePass ir = init->call(args);
+				*ret = create_fun->call(ctx, na);
+				auto init = (*ret)->get(ctx, Identifier("init"));
+				ValuePass ir = init->call(ctx, args);
 			});
 		return valueMaker(n);
 	}
@@ -163,12 +164,12 @@ ValuePass Class::builtInGet(Identifier i) {
 				args.inject(hash);
 				try {
 					for(auto it : *cls) {
-						ValuePass v = hash->get(it.first);
+						ValuePass v = hash->get(ctx, it.first);
 						if(!v) {
 							*ret = valueMaker(false);
 							return;
 						}
-						it.second->Check(v);
+						it.second->Check(ctx, v);
 					}
 				} catch(BadType &e) {
 					*ret = valueMaker(false);
@@ -193,17 +194,19 @@ Class_instance::Class_instance(Handle<Class> c) : m_class(c) {
 }
 //Class_instance::Class_instance(C_class *c) : m_ccclas(c) {}
 
-ValuePass Class_instance::get(Identifier i) {
-	if(Object_ish::has(i))
-		return Object_ish::get(i);
-	auto r = m_class->builtInGet(i);
+ValuePass Class_instance::get(Context &ctx, Identifier i) {
+	if(Object_ish::has(ctx, i))
+		return Object_ish::get(ctx, i);
+	auto r = m_class->builtInGet(ctx, i);
 	assert(r);
+	error(r, "Class does not have member " << i.str());
+
 	return r;
 }
 
 
-bool Class_instance::has(Identifier i) {
-	return Object_ish::has(i) ||
+bool Class_instance::has(Context &ctx, Identifier i) {
+	return Object_ish::has(ctx, i) ||
 		i == "new" ||
 		i == "create" ||
 		i == "init" ||
@@ -228,10 +231,10 @@ Object::Object() {
 }
 
 Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx) : Object_ish() {
-	Context ctx_to;
+	Context ctx_to(ctx);
 	ctx_to.scope = this;
 	for(auto it : *obj) {
-		error(!has(it.first->GetName()), "setting variable twice in object");
+		error(!has(ctx, it.first->GetName()), "setting variable twice in object");
 		assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 		ValuePass val = dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(ctx);
 		it.first->Set(ctx_to, val);
@@ -245,8 +248,8 @@ Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserN
 	}
 	m_members.reserve(elems->size());
 	for(auto it : *elems) {
-		auto var = make_handle<Variable>(m_modifiers);
-		var->Set(dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
+		auto var = make_handle<Variable>(ctx, m_modifiers);
+		var->Set(ctx, dynamic_cast<parserNode::Value*>(it)->GetValue(ctx));
 		m_members.push_back(var);
 	}
 }
@@ -254,19 +257,19 @@ Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserN
 Array::Array(std::vector<ValuePass> elems) {
 	m_members.reserve(elems.size());
 	for(auto it : elems) {
-		auto v = make_handle<Variable>();
-		v->Set(it);
-		m_members.push_back(v);
+		//auto v = make_handle<Variable>();
+		//v->Set(ctx, it);
+		m_members.push_back(make_variable(it));
 	}
 }
 
-ValuePass Array::get(Identifier i) {
+ValuePass Array::get(Context &ctx, Identifier i) {
 	if(i.isInt()) { // this is an item in the array
 		if(m_members.size() < i.raw()) {
 			assert(0); // TODO: raise an exception or something...
 		}
 		auto v = m_members.at(i.raw());
-		auto val = v->Get();
+		auto val = v->Get(ctx);
 		return val;
 		//return v->Get();
 	}
@@ -276,8 +279,8 @@ ValuePass Array::get(Identifier i) {
 	if(i == Identifier("push")) {
 		Handle<Array> self(this);
 		Function p([self](Context &ctx, Arguments &args, ValuePass *ret) {
-				auto v = make_handle<Variable>(self->m_modifiers);
-				v->Set(args[0]);
+				auto v = make_handle<Variable>(ctx, self->m_modifiers);
+				v->Set(ctx, args[0]);
 				self->m_members.push_back(v);
 				*ret = valueMaker(self->m_members.size());
 			});
@@ -288,7 +291,7 @@ ValuePass Array::get(Identifier i) {
 		Function p([self](Context &ctx, Arguments &args, ValuePass *ret) {
 				auto v = self->m_members.back();
 				self->m_members.pop_back();
-				*ret = v->Get();
+				*ret = v->Get(ctx);
 			});
 		return valueMaker(p);
 	}
@@ -297,17 +300,17 @@ ValuePass Array::get(Identifier i) {
 	// TODO: other array methods
 }
 
-void Array::set(Identifier i, ValuePass v) {
+void Array::set(Context &ctx, Identifier i, ValuePass v) {
 	if(!i.isInt()) {
 		assert(0); // trying to set some string type???
 	}
 	// TODO: if member already exists use that variable
-	auto h = make_handle<Variable>(m_modifiers);
-	h->Set(v);
+	auto h = make_handle<Variable>(ctx, m_modifiers);
+	h->Set(ctx, v);
 	m_members[i.raw()] = h;
 }
 
-bool Array::has(Identifier i) {
+bool Array::has(Context &ctx, Identifier i) {
 	if(i.isInt()) {
 		return i.raw() < m_members.size();
 	}
@@ -316,7 +319,7 @@ bool Array::has(Identifier i) {
 		i == Identifier("pop");
 }
 
-Handle<Variable> Array::getVariable(Identifier i) {
+Handle<Variable> Array::getVariable(Context &ctx, Identifier i) {
 	if(!i.isInt()) {
 		assert(0); // well there is basically no variable
 	}

@@ -17,6 +17,7 @@
 #include "exception.h"
 #include "handle.h"
 #include "identifier.h"
+#include "context.h"
 
 
 namespace ilang {
@@ -162,18 +163,18 @@ namespace ilang {
 
 		// callable mixins
 	public:
-		virtual ValuePass call(ilang::Arguments &args) RAISE_ERROR;
+		virtual ValuePass call(Context &ctx, ilang::Arguments &args) RAISE_ERROR;
 
 		// hashable/array mixin
 	public:
-		virtual ValuePass get(ValuePass key) {
-			return get(key->cast<Identifier>());
+		virtual ValuePass get(Context &ctx, ValuePass key) {
+			return get(ctx, key->cast<Identifier>());
 		}
-		virtual ValuePass get(Identifier key) RAISE_ERROR;
-		virtual void set(ValuePass key, ValuePass value) {
-			set(key->cast<Identifier>(), value);
+		virtual ValuePass get(Context &ctx, Identifier key) RAISE_ERROR;
+		virtual void set(Context &ctx, ValuePass key, ValuePass value) {
+			set(ctx, key->cast<Identifier>(), value);
 		}
-		virtual void set(Identifier key, ValuePass value) RAISE_ERROR;
+		virtual void set(Context &ctx, Identifier key, ValuePass value) RAISE_ERROR;
 
 		// helpers
 	public:

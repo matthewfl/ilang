@@ -24,7 +24,7 @@ void Arguments::push(ilang::ValuePass value) {
 								//pargs.push_back(value);
 }
 
-void Arguments::set(Identifier key, ilang::ValuePass value) {
+void Arguments::set(Context &ctx, Identifier key, ilang::ValuePass value) {
 	m_args.insert(make_pair(key, value));
 	//kwargs.insert(std::pair<std::string, ValuePass>(key, value));
 }
@@ -53,7 +53,7 @@ void Arguments::populate(Context &ctx, Function *func) {
 	}
 }
 
-ValuePass Arguments::get(Identifier i) {
+ValuePass Arguments::get(Context &ctx, Identifier i) {
 	auto it = m_args.find(i);
 	if(it != m_args.end()) {
 		return it->second;
@@ -64,7 +64,7 @@ ValuePass Arguments::get(Identifier i) {
 	assert(0);
 }
 
-bool Arguments::has(Identifier i) {
+bool Arguments::has(Context &ctx, Identifier i) {
 	return m_args.find(i) != m_args.end();
 }
 
@@ -83,8 +83,8 @@ size_t Arguments::size() {
 	//return pargs.size() + kwargs.size();
 }
 
-Handle<Variable> Arguments::getVariable(Identifier i) {
-	return make_variable(get(i));
+Handle<Variable> Arguments::getVariable(Context &ctx, Identifier i) {
+	return make_variable(get(ctx, i));
 }
 
 class ScopeFake : public Hashable {
@@ -100,7 +100,7 @@ public:
 			assert(v.second);
 			// if the variable isn't set by this point then it must be used
 			// before it is getting referenced.
-			auto val = v.second->Get();
+			auto val = v.second->Get(ctx);
 			assert(val);
 			if(val->type() == typeid(Function)) {
 				val->cast<Function*>()->vvv();
@@ -111,45 +111,46 @@ public:
 		assert(m_ctx->scope == this);
 		m_ctx->scope = m_parent;
 	}
-	void set(Identifier i, ValuePass v) {
+	void set(Context &ctx, Identifier i, ValuePass v) {
 		auto it = m_members->find(i);
 		if(it == m_members->end()) {
 			error(m_parent, "unable to find variable " << i.str());
-			return m_parent->set(i, v);
+			return m_parent->set(ctx, i, v);
 		}
-		it->second->Set(v);
+		it->second->Set(ctx, v);
 	}
-	ValuePass get(Identifier i) {
+	ValuePass get(Context &ctx, Identifier i) {
 		auto it = m_members->find(i);
 		if(it == m_members->end()) {
-			error(m_parent, "unable to find variable " << i.str())
-			return m_parent->get(i);
+			error(m_parent, "unable to find variable " << i.str());
+			return m_parent->get(ctx, i);
 		}
 		//		Function fun;
 		//return valueMaker(fun);
-		ValuePass ret = it->second->Get();
+		ValuePass ret = it->second->Get(ctx);
 		if(ret->type() == typeid(Function)) {
 			ret->cast<ilang::Function*>()->vvv();
 		}
 		return ret;
 	}
-	bool has(Identifier i) {
-		return m_members->find(i) != m_members->end() || m_parent && m_parent->has(i);
+	bool has(Context &ctx, Identifier i) {
+		return m_members->find(i) != m_members->end() || m_parent && m_parent->has(ctx, i);
 	}
-	Handle<Variable> getVariable(Identifier i) {
+	Handle<Variable> getVariable(Context &ctx, Identifier i) {
 		auto it = m_members->find(i);
 		if(it == m_members->end()) {
 			if(!m_parent) {
 				//error(m_parent, "unable to find variable " << i.str());
 				return NULL;
 			}
-			return m_parent->getVariable(i);
+			return m_parent->getVariable(ctx, i);
 		}
 		return it->second;
 	}
 };
 
 void Function::vvv() {
+	// TODO: remove
 	assert((native && ptr) || ((long)func > 0x1000));
 }
 
@@ -164,7 +165,7 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 			args.populate(ctx, this);
 
 			// TODO: use std::move here?
-			ctx.scope->set("arguments", valueMaker(make_handle<Arguments>(args)));
+			ctx.scope->set(ctx, "arguments", valueMaker(make_handle<Arguments>(args)));
 
 			if(native) {
 				ptr(ctx, args, &ret);
@@ -191,7 +192,7 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 	} catch(BadType &e) {
 		// should this only apply to when checking the arguments??
 		if(m_alternate) {
-			ret = m_alternate->call(args);
+			ret = m_alternate->call(ctx, args);
 		} else {
 			throw;
 		}
@@ -226,11 +227,12 @@ Function Function::bind(Hashable* h) {
 }
 
 void Function::bind_self(Hashable *h) {
+	Context ctx; // the context isn't going to be used since it is just getting the variable references
 	auto unbound = UndefinedElements();
 	for(auto it : unbound) {
 		//cout << "looking to bind: " << it.str() << endl ;
 		if(m_bound.find(it) == m_bound.end()) {
-			auto vptr = h->getVariable(it);
+			auto vptr = h->getVariable(ctx, it);
 			if(vptr) {
 				m_bound.insert(pair<Identifier, Handle<Variable> >(it, vptr));
 				//cout << "was able to bind\n";
