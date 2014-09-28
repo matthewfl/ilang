@@ -44,3 +44,9 @@ ILANG_VARIABLE_CHECKER(Array) {
 	auto h = var->cast<Hashable*>();
 	return dynamic_cast<Array*>(h.get());
 }
+
+struct variable_scope_modifiers {
+	variable_scope_modifiers() {
+		::ilang::global_scope_register("Local", ValuePass(VariableType(VariableType::t_local)));
+	}
+} _variable_scope_modifiers;

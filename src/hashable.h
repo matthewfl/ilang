@@ -19,7 +19,7 @@ namespace ilang {
 		virtual void set(Context &ctx, ilang::Identifier, ValuePass)=0;
 		//virtual void check(ilang::Identifier i, ValuePass v) {}
 		//virtual void set_no_check(ilang::Identifier i, ValuePass v) { set(i, v); }
-	  virtual bool has(Context &ctx, ilang::Identifier)=0;
+		virtual bool has(Context &ctx, ilang::Identifier)=0;
 		virtual Handle<Variable> getVariable(Context &ctx, ilang::Identifier)=0;
 		virtual ~Hashable() {}
 	};

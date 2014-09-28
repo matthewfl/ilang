@@ -77,7 +77,9 @@ void Variable::SetModifiers(Context &ctx, std::vector<ilang::ValuePass> mod) {
 			}
 			// create a new instance of the class
 			//assert(0);
-		} else {
+		} else if(it->type() == typeid(VariableType)) {
+			// ignore, as atm only deals with the placement of the variables in the scopes
+		}else {
 			m_modifiers.push_back(it);
 		}
 	}

@@ -55,6 +55,8 @@ OPERATOR	([-+/*%=.,;:!<>()[\]{}\|])
 "object"		{ return T_object; }
 "assert"		{ return T_assert; }
 "go"			{ return T_go; }
+"Local"			{ return T_local; }
+"Dynamic"		{ return T_dynamic; }
 
 "break"			{ yylval->count=1; return T_break; }
 "return"		{ yylval->count=1; return T_return; }

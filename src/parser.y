@@ -59,7 +59,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   double floatNumber;
 }
 
-%token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go
+%token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go T_local T_dynamic
 %token T_eq T_ne T_le T_ge T_and T_or
 %token T_plusEqual T_subEqual T_mulEqual T_divEqual
 
@@ -87,7 +87,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 
 %type <identifier_list> ImportLoc
 %type <identifier> Identifier
-%type <node> Function Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args
+%type <node> Function Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -122,8 +122,13 @@ LValue		:	Identifier			{ $$ = new FieldAccess(NULL, Identifier($1)); }
 		|	ExprType '[' Expr ']'		{ $$ = new ArrayAccess($1, $3); }
 		;
 
-ModifierList	:	ModifierList ExprType %prec ModListPrec	{ ($$ = $1)->push_back($2); }
-		|	ExprType %prec ModListPrec	{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
+ModifierList	:	ModifierList ModifierType %prec ModListPrec	{ ($$ = $1)->push_back($2); }
+		|	ModifierType %prec ModListPrec			{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
+		;
+
+ModifierType	:	ExprType
+		|	T_local				{ $$ = new VariableScopeModifier(ilang::VariableType::t_local); }
+		|	T_dynamic			{ $$ = new VariableScopeModifier(ilang::VariableType::t_dynamic); }
 		;
 
 Stmt		: 	Expr ';'
@@ -142,8 +147,8 @@ ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
 		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
 		;
 
-Object		:	T_object '{' ObjectList OptComma '}'	{ $$ = new Object($3); }
-		|	T_object '{' '}'			{ $$ = new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); }
+Object		:	T_object '{' ObjectList OptComma '}'	{ $$ = NULL; /*new Object($3);*/ }
+		|	T_object '{' '}'			{ $$ = NULL; /*new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); */ }
 		;
 
 Class		:	T_class '{' ObjectList OptComma '}'	{ $$ = new Class(new std::list<Node*>, $3); }

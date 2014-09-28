@@ -14,6 +14,7 @@
 #include "import.h"
 #include "print.h"
 #include "value.h"
+#include "value_types.h"
 
 /* There is a problem with the scope getting possibly deleted if a function gets ruturned from a function
  * and it is using the closure, the solution is to change the scope to use a smart pointer to be passed around
@@ -96,13 +97,16 @@ namespace ilang {
 		};
 
 		class Variable;
+		class Function;
 
 		class Object : public Value {
 			friend class ilang::Modification;
 		private:
-			std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			//std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			parserNode::Function *function;
 		public:
-			Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+			Object(parserNode::Function *func);
+			//Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
@@ -232,6 +236,16 @@ namespace ilang {
 			void PreRegister(Context&);
 		};
 
+		class VariableScopeModifier : public Constant {
+		private:
+			friend class Variable;
+			VariableType::types type;
+		public:
+			VariableScopeModifier(VariableType::types t) : type(t) {}
+			ValuePass GetValue(Context &);
+			void Print(Printer*);
+
+		};
 
 		class Variable : public Value {
 			friend class ilang::Modification;
@@ -246,6 +260,7 @@ namespace ilang {
 		protected:
 			Identifier name;
 			std::list<Node*> *modifiers;
+			VariableType type = VariableType::t_normal;
 		public:
 			Variable (Identifier n, std::list<Node*> *mod);
 			void Run(Context&);

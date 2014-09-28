@@ -66,11 +66,18 @@ namespace ilang {
 		virtual Handle<Class> Cast(cast_chooser<ilang::Class*>);
 	};
 
-	// class VariableType : public Value_new {
-	// 	// special values that control the scopes etc of variables
-	// public:
-	// 	VariableType
-	// };
+	class VariableType : public Value_new {
+		// special values that control the scopes etc of variables
+	public:
+		enum types {
+			t_normal,
+			t_local,
+			t_dynamic
+		};
+		virtual const std::type_info &type() override;
+		types getType();
+		VariableType(types t);
+	};
 
 	static auto valueMaker = _valueMaker<
 		int, IntType,

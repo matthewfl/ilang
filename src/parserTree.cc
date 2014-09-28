@@ -377,14 +377,37 @@ namespace ilang {
 			p->p() << "}";
 		}
 
+		ValuePass VariableScopeModifier::GetValue(Context &ctx) {
+			return ValuePass(VariableType(type));
+		}
+
+		void VariableScopeModifier::Print(Printer *p) {
+			switch(type) {
+			case VariableType::t_local:
+				p->p() << "Local";
+				break;
+			case VariableType::t_dynamic:
+				p->p() << "Dynamic";
+				break;
+			}
+		}
+
 		Variable::Variable (Identifier n, list<Node*> *mod):
 			name(n), modifiers(mod) {
 			// how did this ever not have a name?
 			//if(!name) name = new list<string>;
+			//assert(modifiers);
+
+			// TODO: remove this crutch
 			if(!modifiers) modifiers = new list<Node*>;
 			for(auto it : *modifiers) {
 				assert(dynamic_cast<parserNode::Value*>(it));
+				auto p = dynamic_cast<parserNode::VariableScopeModifier*>(it);
+				if(p) {
+						type = p->type;
+				}
 			}
+
 			//cout << "\t\t\t" << name << "\n";
 		}
 		void Variable::Run (Context &ctx) {
@@ -456,6 +479,7 @@ namespace ilang {
 			vector<ValuePass> mod;
 			// this needs to check if it should actually force this to be new
 			// eg opt register it?
+
 			if(!modifiers->empty() || !ctx.scope->has(ctx, name)) {
 				dynamic_cast<Scope*>(ctx.scope)->forceNew(ctx, name, mod);
 			}
@@ -944,23 +968,35 @@ namespace ilang {
 		}
 
 
-		Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj)
-		{
+		// Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj)
+		// {
+
+		// }
+		Object::Object(parserNode::Function *func) : function(func) {
 			// object created later so we are just going to store the informationa atm
 		}
+
 		void Object::Run(Context &ctx) {
+			Context obj_ctx(ctx);
+			Scope obj_scope(obj_ctx);
+			function->Run(obj_ctx);
 			// could possibly go through all the elements and call run
 			// should this assert that the types on the return match??
-			for(auto it : *objects) {
-				it.second->Run(ctx);
-			}
+			// for(auto it : *objects) {
+			// 	it.second->Run(ctx);
+			// }
 		}
 		ValuePass Object::GetValue(Context &ctx) {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
 			errorTrace("Creating object");
 			debug(-6, "Object getting value");
-			auto obj = make_handle<ilang::Object>(objects, ctx);
-			return valueMaker(obj);
+			Context obj_ctx(ctx);
+			Scope obj_scope(obj_ctx);
+
+
+			assert(0);
+			//auto obj = make_handle<ilang::Object>(objects, ctx);
+			//return valueMaker(obj);
 			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
 			//auto obj = make_handle<ilang::Object>(objects, ctx);
 			//return valueMaker(obj);
@@ -969,33 +1005,40 @@ namespace ilang {
 		}
 
 		void Object::Print(Printer *p) {
-			p->p() << "object { ";
-			p->up();
-			bool first=true;
-			for(auto it : *objects) {
-				if(!first) p->p() << ", ";
-				p->line();
-				it.first->Print(p);
-				p->p() << ": ";
-				it.second->Print(p);
-				first = false;
-			}
-			p->down();
-			p->line() << "}";
+			p->p() << "object ";
+			function->Print(p);
+			// p->p() << "object { ";
+			// p->up();
+			// bool first=true;
+			// for(auto it : *objects) {
+			// 	if(!first) p->p() << ", ";
+			// 	p->line();
+			// 	it.first->Print(p);
+			// 	p->p() << ": ";
+			// 	it.second->Print(p);
+			// 	first = false;
+			// }
+			// p->down();
+			// p->line() << "}";
 		}
 
 		IdentifierSet Object::UndefinedElements() {
-			IdentifierSet ret;
-			//std::vector<Identifier> ret;
-			for(auto it : *objects) {
-				auto o = it.second->UndefinedElements();
-				ret.insert(o.begin(), o.end());
-			}
+			auto ret = function->UndefinedElements();
 			ret.erase("this");
-			for(auto it : *objects) {
-				ret.erase(it.first->GetName());
-			}
 			return ret;
+
+			// IdentifierSet ret;
+			// //std::vector<Identifier> ret;
+
+			// for(auto it : *objects) {
+			// 	auto o = it.second->UndefinedElements();
+			// 	ret.insert(o.begin(), o.end());
+			// }
+			// ret.erase("this");
+			// for(auto it : *objects) {
+			// 	ret.erase(it.first->GetName());
+			// }
+			// return ret;
 		}
 
 		Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj): parents(p), objects(obj)

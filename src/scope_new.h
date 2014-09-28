@@ -24,11 +24,12 @@ namespace ilang {
 	class Scope : public Iterable /* Hashable */, boost::noncopyable {
 	private:
 		std::map<ilang::Identifier, Handle<Variable> > m_vars;
-		Hashable *m_parent;
+
 		//ValuePass m_returned;
 		//ValuePass m_handle;
-		Context *m_ctx;
 	protected:
+		Hashable *m_parent;
+		Context *m_ctx;
 		//ilang::Variable * _lookup(ilang::Identifier);
 	public:
 		//ilang::Variable * lookup(ilang::Identifier);
@@ -49,7 +50,14 @@ namespace ilang {
 		Hashable_iterator end() override;
 
 		void Debug();
+	};
 
+	class LocalScope : public Scope {
+	protected:
+		Hashable *m_local_parent;
+	public:
+		//LocalScope(Context &ctx) : m_parent(ctx.scope), m_local_parent(ctx.local_scope), m_ctx(&ctx) { ctx.local_scope = this; }
+		//~LocalScope();
 	};
 
 

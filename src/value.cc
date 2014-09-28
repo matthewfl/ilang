@@ -248,3 +248,15 @@ void ClassType::copyTo(void *d) {
 Handle<Class> ClassType::Cast(cast_chooser<Class*> c) {
 	return *(Handle<Class>*)m_ptr;
 }
+
+VariableType::VariableType(types t) {
+	m_int = t;
+}
+
+const std::type_info & VariableType::type() {
+	return typeid(VariableType);
+}
+
+VariableType::types VariableType::getType() {
+	return (types) m_int;
+}
