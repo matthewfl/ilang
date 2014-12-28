@@ -1,5 +1,5 @@
 cc = class {
-	a:1 // can not have an empty class
+	a = 1; // can not have an empty class
 };
 
 arr = [];

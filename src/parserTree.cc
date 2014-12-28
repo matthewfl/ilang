@@ -321,6 +321,16 @@ namespace ilang {
 			return ret;
 		}
 
+		void Function::Constructor(Context &ctx) {
+			PreRegister(ctx);
+			if(body) {
+				for(Node *n : *body) {
+					n->Run(ctx);
+					if(ctx.returned) break;
+				}
+			}
+		}
+
 		IdentifierSet Function::UndefinedElements() {
 			IdentifierSet ret;
 			if(body)
@@ -993,6 +1003,11 @@ namespace ilang {
 			Context obj_ctx(ctx);
 			Scope obj_scope(obj_ctx);
 
+			function->Constructor(obj_ctx);
+			auto obj = make_handle<ilang::Object>(obj_scope, ctx);
+			return valueMaker(obj);
+
+
 
 			assert(0);
 			//auto obj = make_handle<ilang::Object>(objects, ctx);
@@ -1041,23 +1056,28 @@ namespace ilang {
 			// return ret;
 		}
 
-		Class::Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj): parents(p), objects(obj)
-		{
+		Class::Class(std::list<Node*> *p, parserNode::Function *func) : function(func), parents(p) {
 			assert(p);
-			assert(obj);
+			assert(func);
 			for(auto it : *parents) {
 				assert(dynamic_cast<parserNode::Value*>(it));
 			}
 		}
 		void Class::Run(Context &ctx) {
-			for(auto it : *objects) {
-				it.second->Run(ctx);
-			}
+			function->Run(ctx);
 		}
 		ValuePass Class::GetValue(Context &ctx) {
 			errorTrace("Creating class");
-			 auto cls = make_handle<ilang::Class>(parents, objects, ctx);
-			return valueMaker(cls);
+			Context cls_ctx(ctx);
+			Scope cls_scope(cls_ctx);
+
+			function->Constructor(cls_ctx);
+			auto obj = make_handle<ilang::Class>(parents, cls_scope, ctx);
+			return valueMaker(obj);
+
+			//auto cls = make_handle<ilang::Class>(parents, objects, ctx);
+			//return valueMaker(cls);
+
 			//ilang::Class *c = new ilang::Class(parents, objects, scope);
 			//ilang::Value_Old *val = new ilang::Value_Old(c);
 			//return ValuePass(val);
@@ -1067,14 +1087,22 @@ namespace ilang {
 		IdentifierSet Class::UndefinedElements() {
 			// Class should check that everything links up when they are created in the new call
 			// would be nice to be able to support some static checking on this
-			IdentifierSet ret;
-			for(auto it : *objects) {
-				auto o = it.second->UndefinedElements();
-				ret.insert(o.begin(), o.end());
-			}
-			ret.erase("this");
-			for(auto it : *objects) {
-				ret.erase(it.first->GetName());
+			// IdentifierSet ret;
+			// for(auto it : *objects) {
+			// 	auto o = it.second->UndefinedElements();
+			// 	ret.insert(o.begin(), o.end());
+			// }
+			// ret.erase("this");
+			// for(auto it : *objects) {
+			// 	ret.erase(it.first->GetName());
+			// }
+
+			//return ret;
+
+			IdentifierSet ret = function->UndefinedElements();
+			for(auto it : *parents) {
+				IdentifierSet other = it->UndefinedElements();
+				ret.insert(other.begin(), other.end());
 			}
 			return ret;
 		}
@@ -1093,18 +1121,19 @@ namespace ilang {
 				p->p() << ") ";
 			}
 			p->up();
-			p->p() << "{";
-			bool first=true;
-			for(auto it : *objects) {
-				if(!first) p->p() << ", ";
-				p->line();
-				it.first->Print(p);
-				p->p() << ": ";
-				it.second->Print(p);
-				first = false;
-			}
-			p->down();
-			p->line() << "}";
+			function->Print(p);
+			// p->p() << "{";
+			// bool first=true;
+			// for(auto it : *objects) {
+			// 	if(!first) p->p() << ", ";
+			// 	p->line();
+			// 	it.first->Print(p);
+			// 	p->p() << ": ";
+			// 	it.second->Print(p);
+			// 	first = false;
+			// }
+			// p->down();
+			// p->line() << "}";
 		}
 
 		Array::Array (std::list<Node*> *e, std::list<Node*> *m) : elements(e), modifiers(m) {

@@ -226,15 +226,22 @@ Function Function::bind(Hashable* h) {
 	return ret;
 }
 
-void Function::bind_self(Hashable *h) {
+Function Function::rebind(Hashable *h) {
+	Function ret(*this);
+	ret.bind_self(h, true);
+	return ret;
+}
+
+void Function::bind_self(Hashable *h, bool rebind) {
 	Context ctx; // the context isn't going to be used since it is just getting the variable references
 	auto unbound = UndefinedElements();
 	for(auto it : unbound) {
 		//cout << "looking to bind: " << it.str() << endl ;
-		if(m_bound.find(it) == m_bound.end()) {
+		if(rebind || m_bound.find(it) == m_bound.end()) {
 			auto vptr = h->getVariable(ctx, it);
 			if(vptr) {
-				m_bound.insert(pair<Identifier, Handle<Variable> >(it, vptr));
+				m_bound[it] = vptr; // want to overwrite elements already in map possibly
+				//m_bound.insert(pair<Identifier, Handle<Variable> >(it, vptr));
 				//cout << "was able to bind\n";
 			} else {
 				//cout << "did not get var\n";
@@ -247,6 +254,7 @@ void Function::bind_self(Hashable *h) {
 		m_alternate = temp;
 	}
 }
+
 
 Function Function::alternate(ilang::ValuePass alt) {
 	// TODO: this is wrong, as there might already be an alternate set

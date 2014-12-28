@@ -1,8 +1,8 @@
 gg = object {
-        test: {
+        test = {
                 return this.q;
-        },
-        q: 123
+        };
+        q = 123;
 };
 
 main = {

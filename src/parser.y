@@ -87,7 +87,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 
 %type <identifier_list> ImportLoc
 %type <identifier> Identifier
-%type <node> Function Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType
+%type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
@@ -126,7 +126,7 @@ ModifierList	:	ModifierList ModifierType %prec ModListPrec	{ ($$ = $1)->push_bac
 		|	ModifierType %prec ModListPrec			{ ($$ = new list<ilang::parserNode::Node*>)->push_back($1); }
 		;
 
-ModifierType	:	ExprType
+ModifierType	:	ExprType %prec ModListPrec
 		|	T_local				{ $$ = new VariableScopeModifier(ilang::VariableType::t_local); }
 		|	T_dynamic			{ $$ = new VariableScopeModifier(ilang::VariableType::t_dynamic); }
 		;
@@ -147,12 +147,11 @@ ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
 		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
 		;
 
-Object		:	T_object '{' ObjectList OptComma '}'	{ $$ = NULL; /*new Object($3);*/ }
-		|	T_object '{' '}'			{ $$ = NULL; /*new Object(new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>); */ }
+Object		:	T_object FunctionBasic			{ $$ = new Object(dynamic_cast<Function*>($2)); }
 		;
 
-Class		:	T_class '{' ObjectList OptComma '}'	{ $$ = new Class(new std::list<Node*>, $3); }
-		|	T_class	'(' ParamList OptComma ')' '{' ObjectList OptComma '}'	{ $$ = new Class($3, $7); }
+Class		:	T_class FunctionBasic			{ $$ = new Class(new std::list<Node*>, dynamic_cast<Function*>($2)); }
+		|	T_class	'(' ParamList OptComma ')' FunctionBasic	{ $$ = new Class($3, dynamic_cast<Function*>($6)); }
 		;
 
 Array		:	'[' ModifierList '|' ParamList OptComma ']'	{ $$ = new Array($4, $2); }
@@ -171,9 +170,13 @@ ForStmt		:	T_for '(' Expr ';' Expr ';' Expr ')' Stmt	{ $$ = new ForStmt($3, $5, 
 
 ReturnStmt	:	T_return Expr ';'		{ $$ = new ReturnStmt($2); }
 		|	T_return ';'			{ $$ = new ReturnStmt(NULL); }
+		;
 
-Function	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
+FunctionBasic	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		|	'{' Stmts '}'			{ $$ = new Function(NULL, $2); }
+		;
+
+Function	:	FunctionBasic
 		|	'{' '|' ArgsList OptComma '|' Stmts '}'	{ $$ = new Function($3, $6); }
 		|	'{' '|' ArgsList OptComma '|' '}'	{ $$ = new Function($3, NULL); }
 		;

@@ -118,9 +118,11 @@ namespace ilang {
 		private:
 			std::list<Node*> *parents;
 			// NOTE: only useful for iterating over, as pointer type for key
-			std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			//std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			parserNode::Function *function;
 		public:
-			Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+			//Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
+			Class(std::list<Node*> *p, parserNode::Function *func);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer *p);
@@ -228,6 +230,7 @@ namespace ilang {
 		public:
 			Function(std::list<Node*> *p, std::list<Node*> *b);
 			void Run(Context&);
+			void Constructor(Context&);
 			//void Call(std::vector<ilang::Value_Old*>);
 			//void Call(Context& _scope_made, Context& _scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
 			ValuePass GetValue(Context&);

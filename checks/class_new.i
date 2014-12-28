@@ -1,5 +1,5 @@
 test = class {
-        a: 1
+        a = 1;
 };
 
 main = {

@@ -3,8 +3,8 @@
 TEST_CASE("basic map reduce", "[mapreduce][module]") {
 	RUN_CODE(
 					 a = object {
-					 a: 1,
-					 b: 2
+						 a = 1;
+						 b = 2;
 					 };
 					 main = {
 						 import("i.map").create(a).map({});

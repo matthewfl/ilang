@@ -1,11 +1,11 @@
 cc = class {
- a: 1,
- b: {|gg|
-		 a = gg;
-	},
- c: {
-	 return a;
- }
+ a = 1;
+ b = {|gg|
+         a = gg;
+        };
+ c = {
+        return a;
+ };
 };
 
 main = {

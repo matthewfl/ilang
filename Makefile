@@ -100,7 +100,7 @@ $(TARGET): $(DEPS) $(OBJS) $(BUILDDIR)/main.o $(MODULESD)
 modules: $(MODULESD)
 
 clean:
-	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda $(UNIT_TEST_OBJS)
+	@rm -rf $(OBJS) $(TARGET) $(BUILDDIR)/parser.* $(BUILDDIR)/lex.yy.cc $(BUILDDIR)/src $(BUILDDIR)/database.pb* $(MODULESD) $(BUILDDIR)/$(MODULESDIR) **/*.gcov **/*.gcno **/*.gcda *.gcov *.gcno *.gcda $(UNIT_TEST_OBJS) build/unit
 clean-all: clean
 	cd deps/libuv && make distclean
 	rm -rf ilang_db.db
@@ -156,25 +156,25 @@ build/parserTree.o: src/parserTree.h src/handle.h src/context.h
 build/parserTree.o: src/variable_new.h src/debug.h src/value.h src/valuepass.h
 build/parserTree.o: src/exception.h src/identifier.h src/helpers.h src/error.h
 build/parserTree.o: src/scope_new.h src/hashable.h src/import.h src/print.h
-build/parserTree.o: src/parser.h src/object_new.h src/function.h src/thread.h
-build/parserTree.o: src/value_types.h
+build/parserTree.o: src/value_types.h src/parser.h src/object_new.h
+build/parserTree.o: src/function.h src/thread.h
 build/import.o: src/import.h src/debug.h src/variable_new.h src/value.h
 build/import.o: src/valuepass.h src/exception.h src/handle.h src/identifier.h
-build/import.o: src/helpers.h src/error.h src/context.h src/scope_new.h
+build/import.o: src/context.h src/helpers.h src/error.h src/scope_new.h
 build/import.o: src/hashable.h src/object_new.h src/parserTree.h src/print.h
-build/import.o: src/parser.h src/function.h src/ilang.h src/value_types.h
+build/import.o: src/value_types.h src/parser.h src/function.h src/ilang.h
 build/parser.o: src/parser.h src/debug.h
 build/database.o: src/database.h src/debug.h src/variable_new.h src/value.h
 build/database.o: src/valuepass.h src/exception.h src/handle.h src/identifier.h
-build/database.o: src/helpers.h src/error.h src/ilang.h src/import.h
-build/database.o: src/context.h src/object_new.h src/hashable.h src/function.h
+build/database.o: src/context.h src/helpers.h src/error.h src/ilang.h
+build/database.o: src/import.h src/object_new.h src/hashable.h src/function.h
 build/database.o: src/scope_new.h src/parserTree.h src/print.h
 build/database.o: src/value_types.h build/database.pb.h
 build/error.o: src/error.h
 build/print.o: src/print.h src/debug.h
 build/init.o: src/ilang.h src/import.h src/debug.h src/variable_new.h
 build/init.o: src/value.h src/valuepass.h src/exception.h src/handle.h
-build/init.o: src/identifier.h src/helpers.h src/error.h src/context.h
+build/init.o: src/identifier.h src/context.h src/helpers.h src/error.h
 build/init.o: src/object_new.h src/hashable.h src/function.h src/scope_new.h
 build/init.o: src/parserTree.h src/print.h src/value_types.h src/database.h
 build/thread.o: src/thread.h src/debug.h deps/libuv/include/uv.h
@@ -186,38 +186,39 @@ build/function.o: src/identifier.h src/helpers.h src/error.h src/scope_new.h
 build/function.o: src/hashable.h src/parserTree.h src/import.h src/print.h
 build/function.o: src/value_types.h
 build/value.o: src/value.h src/debug.h src/valuepass.h src/exception.h
-build/value.o: src/handle.h src/identifier.h src/value_types.h src/hashable.h
-build/value.o: src/variable_new.h src/helpers.h src/error.h src/function.h
-build/value.o: src/context.h src/scope_new.h src/parserTree.h src/import.h
+build/value.o: src/handle.h src/identifier.h src/context.h src/value_types.h
+build/value.o: src/hashable.h src/variable_new.h src/helpers.h src/error.h
+build/value.o: src/function.h src/scope_new.h src/parserTree.h src/import.h
 build/value.o: src/print.h src/object_new.h
 build/identifier.o: src/identifier.h
 build/object_new.o: src/object_new.h src/hashable.h src/identifier.h
 build/object_new.o: src/value.h src/debug.h src/valuepass.h src/exception.h
-build/object_new.o: src/handle.h src/variable_new.h src/helpers.h src/error.h
-build/object_new.o: src/context.h src/function.h src/scope_new.h
-build/object_new.o: src/parserTree.h src/import.h src/print.h src/value_types.h
+build/object_new.o: src/handle.h src/context.h src/variable_new.h src/helpers.h
+build/object_new.o: src/error.h src/function.h src/scope_new.h src/parserTree.h
+build/object_new.o: src/import.h src/print.h src/value_types.h
 build/variable_new.o: src/variable_new.h src/debug.h src/value.h
 build/variable_new.o: src/valuepass.h src/exception.h src/handle.h
-build/variable_new.o: src/identifier.h src/helpers.h src/error.h src/function.h
-build/variable_new.o: src/context.h src/scope_new.h src/hashable.h
+build/variable_new.o: src/identifier.h src/context.h src/helpers.h src/error.h
+build/variable_new.o: src/function.h src/scope_new.h src/hashable.h
 build/variable_new.o: src/parserTree.h src/import.h src/print.h
+build/variable_new.o: src/value_types.h
 build/scope_new.o: src/scope_new.h src/identifier.h src/handle.h src/hashable.h
 build/scope_new.o: src/value.h src/debug.h src/valuepass.h src/exception.h
-build/scope_new.o: src/variable_new.h src/helpers.h src/error.h src/context.h
+build/scope_new.o: src/context.h src/variable_new.h src/helpers.h src/error.h
 build/variable_modifiers.o: src/variable_modifiers.h src/ilang.h src/import.h
 build/variable_modifiers.o: src/debug.h src/variable_new.h src/value.h
 build/variable_modifiers.o: src/valuepass.h src/exception.h src/handle.h
-build/variable_modifiers.o: src/identifier.h src/helpers.h src/error.h
-build/variable_modifiers.o: src/context.h src/object_new.h src/hashable.h
+build/variable_modifiers.o: src/identifier.h src/context.h src/helpers.h
+build/variable_modifiers.o: src/error.h src/object_new.h src/hashable.h
 build/variable_modifiers.o: src/function.h src/scope_new.h src/parserTree.h
 build/variable_modifiers.o: src/print.h src/value_types.h
 build/c_class.o: src/ilang.h src/import.h src/debug.h src/variable_new.h
 build/c_class.o: src/value.h src/valuepass.h src/exception.h src/handle.h
-build/c_class.o: src/identifier.h src/helpers.h src/error.h src/context.h
+build/c_class.o: src/identifier.h src/context.h src/helpers.h src/error.h
 build/c_class.o: src/object_new.h src/hashable.h src/function.h src/scope_new.h
 build/c_class.o: src/parserTree.h src/print.h src/value_types.h
 build/main.o: src/parser.h src/debug.h src/import.h src/variable_new.h
 build/main.o: src/value.h src/valuepass.h src/exception.h src/handle.h
-build/main.o: src/identifier.h src/helpers.h src/error.h src/context.h
+build/main.o: src/identifier.h src/context.h src/helpers.h src/error.h
 build/main.o: src/database.h src/parserTree.h src/scope_new.h src/hashable.h
-build/main.o: src/print.h src/thread.h
+build/main.o: src/print.h src/value_types.h src/thread.h

@@ -41,16 +41,16 @@ TEST_CASE("Class modifier", "[variable]") {
 	init();
 	RUN_CODE(
 					 test = class {
-					 check: {|a|
+					 check = {|a|
 								 assert(a == 5);
 							   this.b = a + 1;
-					 },
-					 setting: {|a|
+					 };
+					 setting = {|a|
 								 assert(a == 5);
-					 },
-					 getting: {
+					 };
+					 getting = {
 								 return this.b;
-					 }
+					 };
 					 };
 					 test qwer = 5;
 					 main = {

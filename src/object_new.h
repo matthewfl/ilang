@@ -63,6 +63,7 @@ namespace ilang {
   public:
 		Class();
 		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+		Class(std::list<ilang::parserNode::Node*> *p, Iterable &iter, Context &ctx);
 
 		ValuePass get(Context &ctx, Identifier i);
 		ValuePass builtInGet(Context &ctx, Identifier i);
@@ -89,6 +90,8 @@ namespace ilang {
 	public:
 		Object();
 		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+		Object(Iterable &iter, Context &ctx);
+
 	};
 
 

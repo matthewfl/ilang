@@ -36,8 +36,8 @@ TEST_CASE("objects in the database", "[database]") {
 	init();
 	RUN_CODE(
 					 DB("j") j = object {
-					 a: 1,
-					 b: 2
+						 a = 1;
+						 b = 3;
 					 };
 					 main = {
 						 assert(j.a == 1);

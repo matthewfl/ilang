@@ -106,7 +106,7 @@ namespace ilang {
 	};
 
 
-	class Function {
+	class Function final {
 	private:
 		bool native = false;
 		Function_ptr ptr;
@@ -115,7 +115,7 @@ namespace ilang {
 		friend class Arguments;
 		//Context ctx;
 		std::map<ilang::Identifier, Handle<Variable> > m_bound;
-		void bind_self(Hashable*);
+		void bind_self(Hashable*, bool rebind = false);
 		//Scope m_bound;
 
 		// TODO: this should prob just be a pointer to a function rather than
@@ -142,6 +142,7 @@ namespace ilang {
 		Function bind(ilang::ValuePass); // bind to an object
 		Function bind(Context &ctx);
 		Function bind(Hashable*);
+		Function rebind(Hashable*);
 
 		Function alternate(ilang::ValuePass);
 

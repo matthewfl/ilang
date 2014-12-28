@@ -24,7 +24,10 @@ ValuePass Object_ish::get(Context &ctx, Identifier i) {
 		return ValuePass();
 	}
 	//assert(var);
-	return var->Get(ctx);
+	ValuePass ret = var->Get(ctx);
+	if(ret->type() == typeid(Function))
+		return valueMaker(ret->cast<Function*>()->rebind(this));
+	return ret;
 
 }
 
@@ -95,6 +98,25 @@ Class::Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode:
 		// TODO: if there is no default value being set
 		assert(it.second);
 		it.first->Set(self, dynamic_cast<parserNode::Value*>(it.second)->GetValue(ctx), true);
+	}
+}
+
+Class::Class(std::list<ilang::parserNode::Node*> *p, Iterable &iter, Context &ctx) {
+	m_parents.reserve(p->size());
+	Context self;
+	self.scope = this;
+	for(auto it : *p) {
+		auto v = dynamic_cast<parserNode::Value*>(it)->GetValue(ctx);
+		auto ptr = v->cast<Class*>();
+		error(ptr, "Class can not inherit from non class");
+		m_parents.push_back(v);
+		// TODO: wrong
+		// these are inheriting the variables from their parents, which means
+		// the parents values can be set
+		m_members.insert(ptr->begin(), ptr->end());
+	}
+	for(auto it : iter) {
+		m_members.insert(make_pair(it.first, it.second));
 	}
 }
 
@@ -189,6 +211,7 @@ ValuePass Class::builtInGet(Context &ctx, Identifier i) {
 Class_instance::Class_instance(Handle<Class> c) : m_class(c) {
 	assert(m_class);
 	for(auto it : *m_class) {
+		// should bind the item here??
 		m_members.insert(make_pair(it.first, make_handle<Variable>(*it.second)));
 	}
 }
@@ -238,6 +261,12 @@ Object::Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> 
 		assert(dynamic_cast<ilang::parserNode::Value*>(it.second));
 		ValuePass val = dynamic_cast<ilang::parserNode::Value*>(it.second)->GetValue(ctx);
 		it.first->Set(ctx_to, val);
+	}
+}
+
+Object::Object(Iterable &iter, Context &ctx) {
+	for(auto it : iter) {
+		m_members.insert(make_pair(it.first, it.second));
 	}
 }
 
