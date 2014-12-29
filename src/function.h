@@ -1,11 +1,8 @@
 #ifndef _ilang_function
 #define _ilang_function
 
-// TODO: make this functions created using this interface so that the system will have an easily way to create functions that are called rather than having
-
 #include <vector>
 
-//#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 #include "context.h"
@@ -17,10 +14,6 @@
 
 
 namespace ilang {
-	//class Scope;
-	// First, scope that is running in, arguments passed, return value
-	//typedef boost::function<void (Scope*, std::vector<ValuePass>, ValuePass*)> Function_ptr;
-	//typedef ValuePass* ValuePass_ptr;
 	class Function;
 	class Arguments;
 	class Object;
@@ -35,9 +28,6 @@ namespace ilang {
 
 	// TODO: refactor this into being a tuple system, which can then be reused elsewhere
 	class Arguments : public Hashable {
-
-		// std::vector<ilang::ValuePass> pargs;
-		// std::map<std::string, ilang::ValuePass> kwargs;
 
 		std::map<ilang::Identifier, ilang::ValuePass> m_args;
 		unsigned long m_next_identifier = 0;
@@ -76,20 +66,10 @@ namespace ilang {
 		ValuePass operator[](Identifier i) { Context ctx; return get(ctx, i); }
 		ValuePass operator[](unsigned long i) { Context ctx; return get(ctx, Identifier(i)); }
 
-		// ValuePass get(std::string);
-		// ValuePass get(int);
-		// ValuePass operator[](std::string s) { return get(s); }
-		// ValuePass operator[](int i) { return get(i); }
-
-		// std::vector<ilang::ValuePass>::iterator begin() { return pargs.begin(); }
-		// std::vector<ilang::ValuePass>::iterator end() { return pargs.end(); }
-
 		auto begin() { return m_args.begin(); }
 		auto end() { return m_args.end(); }
 
 		size_t size();
-		//template<typename... types> void inject(types... &values) {}
-		// long a; std::string b; args.inject(a, b);
 
 		Arguments();
 		Arguments(const Arguments&);
@@ -99,9 +79,9 @@ namespace ilang {
 		}
 
 		template <typename... types> void inject(types & ... values) {
+		// int a; std::stinrg b; args.inject(a, b);
 			injector(begin(), values...);
 		}
-		// int a; std::stinrg b; args.inject(a, b);
 
 	};
 
@@ -110,20 +90,16 @@ namespace ilang {
 	private:
 		bool native = false;
 		Function_ptr ptr;
-		//		ValuePass object_scope = ValuePass();
 		ilang::parserNode::Function *func = NULL;
 		friend class Arguments;
-		//Context ctx;
 		std::map<ilang::Identifier, Handle<Variable> > m_bound;
 		void bind_self(Hashable*, bool rebind = false);
-		//Scope m_bound;
 
 		// TODO: this should prob just be a pointer to a function rather than
 		// a ValuePass
 		ValuePass m_alternate; // if the type check fails for this function call alternate
 
 	public:
-		void vvv();
 		template <typename... types> ilang::ValuePass operator() (Context &ctx, types... values) {
 			Arguments args(values...);
 			return call(ctx, args);
@@ -147,7 +123,7 @@ namespace ilang {
 		Function alternate(ilang::ValuePass);
 
 		Function(const Function &func);
-		Function(ilang::parserNode::Function *f, Context &ctx); //, Function_ptr _ptr);
+		Function(ilang::parserNode::Function *f, Context &ctx);
 		Function(Function_ptr _ptr);
 		Function();
 		~Function();

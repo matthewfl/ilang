@@ -14,9 +14,6 @@ namespace ilang {
 	// TODO: make this into a variable instance and have an variable interface
 	class Variable : public Handle_base {
 	private:
-
-		//std::vector<ilang::Function> m_modifiers_set;
-		//std::vector<ilang::Function> m_modifiers_get;
 		std::vector<ilang::ValuePass> m_modifiers;
 		ilang::ValuePass m_value;
 	public:
@@ -24,10 +21,7 @@ namespace ilang {
 		Variable() {}
 		Variable(const Variable& v);
 		virtual void Set(Context &ctx, ilang::ValuePass);
-		virtual ilang::ValuePass Get(Context &ctx);//  {
-		// 	error(m_value, "Can't use a variable before it is set");
-		// 	return m_value;
-		// }
+		virtual ilang::ValuePass Get(Context &ctx);
 		virtual void Check(Context &ctx, ilang::ValuePass);
 		virtual void SetModifiers(Context &ctx, std::vector<ilang::ValuePass> mod);
 	};

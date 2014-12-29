@@ -8,15 +8,6 @@ Scope::~Scope() {
 	m_ctx->scope = m_parent;
 }
 
-// ilang::Variable * Scope::_lookup(ilang::Identifier i) {
-// 	auto it = m_vars.find(i);
-// 	if(it != m_vars.end())
-// 		return &m_vars.second;
-// 	//if(parent)
-// 	//return parent->_lookup(i);
-// 	return NULL;
-// }
-
 Handle<Variable> Scope::forceNew(Context &ctx, ilang::Identifier i, std::vector<ValuePass> modifiers) {
 	//assert(m_vars.find(i) == m_vars.end());
 	for(auto it : modifiers) { assert(it); }
@@ -33,7 +24,6 @@ Handle<Variable> Scope::forceNew(Context &ctx, ilang::Identifier i, std::vector<
 }
 
 ValuePass Scope::get(Context &ctx, ilang::Identifier i) {
-	//cout << "Getting " << i.str() << endl;
 	ValuePass ret;
 	auto it = m_vars.find(i);
 	if(it != m_vars.end()) {
@@ -51,7 +41,6 @@ ValuePass Scope::get(Context &ctx, ilang::Identifier i) {
 
 void Scope::set(Context &ctx, ilang::Identifier i, ValuePass v) {
 	// TODO: optimize this??
-	//cout << "Setting " << i.str() << endl;
 	assert(v);
 	if(m_parent && m_parent->has(ctx, i)) {
 		m_parent->set(ctx, i, v);
@@ -103,10 +92,10 @@ Hashable_iterator Scope::end() {
 	return Hashable_iterator(m_vars.end());
 }
 
-
 void Scope::Debug() {
+	Context ctx; // hopefully not used
 	for(auto it : m_vars) {
-		cout << it.first.str() << endl;//" " << it.second->Get()->cast<string>() << endl;
+		cerr << it.first.str() << ": " << it.second->Get(ctx)->cast<std::string>() << endl;
 	}
 }
 

@@ -2,7 +2,6 @@
 #define _ilang_identifier
 
 #include <string>
-//#include <set>
 #include <unordered_set>
 #include <functional>
 
@@ -30,13 +29,12 @@ namespace ilang {
 		bool isInt() const { return m_id < Identifier_max_int; }
 	};
 
+
 	inline Identifier operator "" _id (const char *c) {
 		return Identifier(c);
 	}
 
 	typedef std::unordered_set<Identifier> IdentifierSet;
-	//	typedef std::set<Identifier> IdentifierSet;
-
 }
 
 

@@ -134,9 +134,6 @@ int main (int argc, char **argv) {
 	// for setting up the import search path
 	ilang::Init(argc, argv);
 
-	//	boost::filesystem::path a("/another");
-	//cout << ilang::GlobalImportScope.locateFile(a) << endl;
-
 
 	ilang::ImportScopeFile *mainImport = new ilang::ImportScopeFile(main_file);
 
@@ -161,13 +158,6 @@ int main (int argc, char **argv) {
 		ilang::Printer pp;
 		base->Print(&pp);
 	}
-
-	/*{ ilang::error_trace ee("running main file");
-		base->Run();
-		}*/
-
-	//ilang::global_EventPool = new ilang::EventPool;
-	//ilang::ThreadPool threads(&events);
 
 	ilang::Event rootEvent = ilang::global_EventPool()->CreateEvent([base](void *data) {
 			base->Run();

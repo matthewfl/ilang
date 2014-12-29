@@ -7,7 +7,7 @@
 
 namespace ilang {
 
-	class Value_new;
+	class Value;
 
 	class Exception : public std::exception {
 	public:

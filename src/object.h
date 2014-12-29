@@ -1,18 +1,18 @@
 #ifndef _ilang_object
 #define _ilang_object
 
+#include <list>
+#include <map>
+#include <vector>
+
+
 #include "hashable.h"
 #include "identifier.h"
 #include "value.h"
 #include "variable.h"
 #include "handle.h"
 #include "context.h"
-#include <map>
-#include <vector>
 
-
-#include <list>
-//#include "parserTree.h"
 
 namespace ilang {
 
@@ -35,28 +35,6 @@ namespace ilang {
 		virtual ~Object_ish() {}
 	};
 
-	// class C_Class : public Object_ish {
-	// private:
-	// 	//std::map<Identifier, ilang::Variable> m_members;
-	// 	std::weak_ptr<C_Class> m_self;
-	// protected:
-	// 	C_Class() {}
-	// 	virtual ~C_Class() {}
-	// 	template<typename cls> void reg(Identifier id, ValuePass (cls::*fun)(ilang::Arguments &args) ) {
-	// 		assert(m_members.find(id) == m_members.end());
-	// 		cls *self = (cls*)this;
-	// 		ilang::Function f([fun, self](Context &ctx, ilang::Arguments &args, ValuePass *ret) {
-	// 				*ret = (self ->* fun)(args);
-	// 				assert(*ret);
-	// 			});
-	// 		auto var = make_handle<Variable>();
-	// 		var->Set(valueMaker(f));
-	// 		m_members.insert(std::pair<Identifier, Handle<Variable> >(id, var));
-	// 	}
-
-	// };
-
-
 	class Class : public Object_ish {
 	private:
 		std::vector<ValuePass> m_parents;
@@ -72,21 +50,15 @@ namespace ilang {
 	class Class_instance : public Object_ish {
 	private:
 		Handle<Class> m_class;
-		//	C_Class *m_cclass = NULL;
 	public:
 		Class_instance(Handle<Class> c);
-		//Class_instance(C_Class *c);
 
 		ValuePass get(Context &ctx, Identifier i) override;
 		bool has(Context &ctx, Identifier i) override;
-		//Handle<Variable> getVariable(Identifier i);
 		friend class Class;
 	};
 
 	class Object : public Object_ish {
-	private:
-		//ValuePass m_cls_handle;
-		//std::map<ilang::Identifier, ilang::ValuePass> m_objs;
 	public:
 		Object();
 		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);

@@ -9,11 +9,10 @@
 namespace ilang {
 
 	class Function;
-	class FunctionType : public Value_new {
+	class FunctionType : public Value {
 	public:
 		FunctionType(const ilang::Function &f);
 		FunctionType(const FunctionType &);
-		//FunctionType(FunctionType &&);
 		~FunctionType();
 
 		virtual void copyTo(void *d) override;
@@ -32,15 +31,13 @@ namespace ilang {
 	class Class;
 	class Class_instance;
 	class Arguments;
-	class HashableType : public Value_new {
+	class HashableType : public Value {
 	public:
 		HashableType(Handle<Hashable>);
 		template<typename T> HashableType(Handle<T> t) {
 			auto h = dynamic_pointer_cast<Hashable>(t);
 			m_ptr = new Handle<Hashable>(h);
 		}
-		//HashableType(Handle<Object>);
-		//HashableType(Handle<Array>);
 		HashableType(const HashableType&);
 		~HashableType();
 
@@ -55,7 +52,7 @@ namespace ilang {
 
 	// TODO: remove?, class type isn't used
 	class Class;
-	class ClassType : public Value_new {
+	class ClassType : public Value {
 	public:
 		ClassType(Handle<Class>);
 		ClassType(const ClassType&);
@@ -66,7 +63,7 @@ namespace ilang {
 		virtual Handle<Class> Cast(cast_chooser<ilang::Class*>);
 	};
 
-	class VariableType : public Value_new {
+	class VariableType : public Value {
 		// special values that control the scopes etc of variables
 	public:
 		enum types {

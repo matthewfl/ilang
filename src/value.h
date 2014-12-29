@@ -22,7 +22,7 @@
 
 namespace ilang {
 
-	class Value_new;
+	class Value;
 	class Function;
 	class Arguments;
 	class Object;
@@ -34,7 +34,6 @@ namespace ilang {
 	typedef Handle<Object> Object_ptr;
 
 
-	// TODO: change to raise an exception that is caught
 #define RAISE_ERROR { throw InvalidOperation(ValuePass(this)); }
 #define RAISE_TYPE_ERROR(typ) { throw BadValueCastType<typ>(type().name()); }
 
@@ -51,30 +50,12 @@ namespace ilang {
 		OP_equal
 	};
 
-
-	// class callable_virtals_mixin {
-	// public:
-	// 	virtual ValuePass call(ilang::Arguments &a) RAISE_ERROR;
-	// 	//ValuePass call(std::vector<ValuePass> &a); // TODO:
-	// };
-
-
-	// class hashable_virtuals_mixin {
-	// public:
-	// 	virtual ValuePass get(ilang::Identifier &i) RAISE_ERROR;
-	// 	virtual void set(ilang::Identifier &i, ValuePass &v) RAISE_ERROR;
-
-	// };
-
 	template <typename T> class cast_chooser {
-		friend class Value_new;
+		friend class Value;
 		explicit cast_chooser() {};
 	};
 
-	// TODO: change class name
-  class Value_new// :
-		//public math_virtuals_mixin//,
-	 //public cast_mixin
+	class Value
 	{
 		friend class ValuePass;
 	public:  // yolo
@@ -89,11 +70,11 @@ namespace ilang {
 		};
 
   public:
-		virtual ~Value_new() {}
+		virtual ~Value() {}
 		virtual const std::type_info &type()=0;
 
 	protected:
-		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value_new)); }
+		virtual void copyTo(void *d) { memcpy(d, this, sizeof(Value)); }
 
 		// cast mixins
 		virtual int Cast(cast_chooser<int> c) RAISE_TYPE_ERROR(int);
@@ -209,7 +190,7 @@ namespace ilang {
 	virtual bool preform_logic_op(logic_ops op, std::string v) override ;	\
 	virtual bool preform_logic_op(logic_ops op, bool v) override ;
 
-	class IntType : public Value_new {
+	class IntType : public Value {
 	public:
 		IntType(long i) { m_int = i; }
 		virtual const std::type_info &type() { return typeid(long); }
@@ -223,7 +204,7 @@ namespace ilang {
 		Identifier Cast(cast_chooser<Identifier> c) { return Identifier(m_int); }
 	};
 
-	class FloatType : public Value_new {
+	class FloatType : public Value {
 	public:
 		FloatType(double f) { m_float = f; }
 		virtual const std::type_info &type() { return typeid(double); }
@@ -235,7 +216,7 @@ namespace ilang {
 		VALUE_LOGIC_CLS_MIXIN(m_float);
 	};
 
-	class BoolType : public Value_new {
+	class BoolType : public Value {
 	public:
 		BoolType(bool b) { m_bool = b; }
 		const std::type_info &type() { return typeid(bool); }
@@ -245,7 +226,7 @@ namespace ilang {
 		VALUE_LOGIC_CLS_MIXIN(m_bool);
 	};
 
-	class StringType : public Value_new {
+	class StringType : public Value {
 	public:
 		StringType(const char *str) { m_ptr = new std::string(str); }
 		StringType(std::string str) { m_ptr = new std::string(str); }
@@ -273,26 +254,16 @@ namespace ilang {
 	};
 
 
-
 	// I suppose there is no need for this as there could just be a single function
 	// with overloaded parameters
 
-	template<typename Of, typename To, typename... Others> struct _valueMaker { //: _valueMaker<Others...> {
+	template<typename Of, typename To, typename... Others> struct _valueMaker {
 		template <typename T> static inline ValuePass create(T t) {
 			return _valueMaker<Others...>::create(t);
 		}
 		static inline ValuePass create(Of t) {
-			//cout << "creating new " << typeid(To).name() << endl;
 			return ValuePass(To(t));
 		}
-		// template<typename T>
-		// static inline
-		// std::enable_if_t<std::is_convertible<typename T::element_type, typename Of::element_type>::value,
-		// 							 ValuePass>
-		// create(T t) {
-		// 	Of f(dynamic_pointer_cast<Of::element_type>(t));
-		// 	return ValuePass(To(f));
-		// }
 
 		template <typename T> inline ValuePass operator () (T t) {
 			return create(t);

@@ -23,7 +23,6 @@ namespace ilang {
 		Head::Head(list<Node*> *declars, ImportScopeFile *import): Import(import), Declars(declars) {
 			debug(-5, "head " << declars->size() );
 			debug(-5, "running ++++++++++++++++++++++++++++++++++++++++++++" );
-			//	scope=NULL;
 		}
 
 		Head::~Head() {
@@ -39,13 +38,6 @@ namespace ilang {
 				Import->m_head = this;
 				Import->resolve(ctx);
 			}
-
-			// int unbound_statements = Declars->size();
-			// while(unbound_statements) {
-			// 	for(auto it : *Declars) {
-
-			// 	}
-			// }
 			for(auto it : *Declars) {
 				if(dynamic_cast<AssignExpr*>(it)) {
 					dynamic_cast<AssignExpr*>(it)->PreRegister(ctx);
@@ -67,14 +59,6 @@ namespace ilang {
 			error(main, "main function not found");
 			ilang::Arguments args;
 			main->call(ctx, args);
-
-			//ilang::Variable * find = scope->lookup("main");
-			//error(find, "main function not found");
-			//auto main = boost::any_cast<ilang::Function>(find->Get()->Get());
-			//main(); // call the main function
-
-			//.ptr(passScope, v, &ret);
-			//boost::any_cast<ilang::Function_ptr>(scope->lookup("main")->Get()->Get())(scope, v, &ret);
 		}
 
 		void Head::Print(Printer *p) {
@@ -152,8 +136,7 @@ namespace ilang {
 		IfStmt::IfStmt (Node *test_, Node* True_, Node* False_): True(True_), False(False_) {
 			Value *t = dynamic_cast<Value*>(test_);
 			error(t, "If statement does not contain a test");
-			//assert(t);
-			test=t;
+			test = t;
 		}
 		void IfStmt::Run(Context &ctx) {
 			ValuePass search = test->GetValue(ctx);
@@ -191,7 +174,6 @@ namespace ilang {
 		ForStmt::ForStmt (Node *pre_, Node *test_, Node *each_, Node *exe_) :pre(pre_), each(each_), exe(exe_) {
 			Value *t = dynamic_cast<Value*>(test_);
 			error(t, "Test in for statment is not a test");
-			//assert(t);
 			test = t;
 		}
 		void ForStmt::Run(Context &ctx) {
@@ -227,8 +209,7 @@ namespace ilang {
 		WhileStmt::WhileStmt (Node *test_, Node *exe_): exe(exe_) {
 			Value *t=dynamic_cast<Value*>(test_);
 			error(t, "Test in while Statement is not a test");
-			//assert(t);
-			test=t;
+			test = t;
 		}
 		void WhileStmt::Run(Context &ctx) {
 			// note to self: must recall GetValue each time as it is what is actually doing the updating
@@ -237,7 +218,6 @@ namespace ilang {
 				exe->Run(ctx);
 				ValuePass n = test->GetValue(ctx);
 				t = n;
-				//test->GetValue(scope)->Print();
 			}
 		}
 
@@ -259,7 +239,6 @@ namespace ilang {
 			if(r) {
 				ret = dynamic_cast<Value*>(r);
 				error(ret, "Return is not given a value");
-				///assert(ret);
 			}else
 				ret = NULL;
 		}
@@ -298,20 +277,14 @@ namespace ilang {
 		void Function::Run(Context &ctx) {
 			// This is going to have duplicated code with calling function, minus dealing with the arguments
 			Scope local_scope(ctx);
-			//ScopePass local_scope(new Scope(scope));
 			PreRegister(ctx);
 
 			if(body) {
 				for (Node *n : *body) {
-					// TODO: returning block break statement
 					n->Run(ctx);
 					if(ctx.returned) break;
 				}
 			}
-
-
-			//vector<ValuePass> p;
-			//Call(scope, ScopePass(), p);
 		}
 		ValuePass Function::GetValue(Context &ctx) {
 			// this need to track the scope at this point so that it could be use later in the funciton
@@ -406,10 +379,6 @@ namespace ilang {
 
 		Variable::Variable (Identifier n, list<Node*> *mod):
 			name(n), modifiers(mod) {
-			// how did this ever not have a name?
-			//if(!name) name = new list<string>;
-			//assert(modifiers);
-
 			// TODO: remove this crutch
 			if(!modifiers) modifiers = new list<Node*>;
 			for(auto it : *modifiers) {
@@ -419,47 +388,27 @@ namespace ilang {
 						type = p->type;
 				}
 			}
-
-			//cout << "\t\t\t" << name << "\n";
 		}
 		void Variable::Run (Context &ctx) {
 			// iirc this does not happen as the syntax does not allow for variables to be created without a default value
 			error(0, "Variables must always have some value set to them");
-			//debug(-6,"\t\t\tSetting variable: " << name->front());
-			//scope->forceNew(GetFirstName(), *modifiers);
 		}
 		void Variable::Set (Context &ctx, ValuePass var, bool force) {
 			errorTrace("Setting value of variable: " << name.str());
 			if(force || !modifiers->empty()) {
 				assert(ctx.scope);
 				assert(dynamic_cast<Scope*>(ctx.scope));
-				// TODO: TODO: this is wrong, need to set the modifiers
+				// TODO: this is wrong, need to set the modifiers
 				std::vector<ValuePass> mods;
 				mods.reserve(modifiers->size());
 				for(auto it : *modifiers) {
 					auto g = dynamic_cast<parserNode::Value*>(it)->GetValue(ctx);
 					assert(g);
-					if(g->type() == typeid(ilang::Function)) {
-						g->cast<ilang::Function*>()->vvv();
-					}
 					mods.push_back(g);
-					if(g->type() == typeid(ilang::Function)) {
-						g->cast<ilang::Function*>()->vvv();
-					}
 				}
-				//auto pvar = dynamic_cast<Scope*>(ctx.scope)->getVariable(GetFirstName());
-				//auto pvar = forceNew(Identifier(GetFirstName()), mods);
-				//if(!pvar) {
 				auto pvar = dynamic_cast<Scope*>(ctx.scope)->forceNew(ctx, name, mods);
-				//} else {
-				//	pvar->SetModifiers(mods);
-				//}
 				assert(var);
 				pvar->Set(ctx, var);
-				//ctx.scope->set(Identifier(GetFirstName()), var);
-
-				//assert(0); // TODO:
-				//dynamic_cast<Scope*>(ctx.scope)->forceNew(GetFirstName(), *modifiers);
 			} else {
 				ctx.scope->set(ctx, name, var);
 			}
@@ -475,9 +424,6 @@ namespace ilang {
 			auto ret = ctx.scope->get(ctx, name);
 			return ret;
 		}
-		// std::string Variable::GetFirstName() {
-		// 	return name->front();
-		// }
 
 		IdentifierSet Variable::UndefinedElements() {
 			IdentifierSet ret;
@@ -487,6 +433,7 @@ namespace ilang {
 			}
 			return ret;
 		}
+
 		void Variable::PreRegister(Context &ctx) {
 			vector<ValuePass> mod;
 			// this needs to check if it should actually force this to be new
@@ -537,10 +484,6 @@ namespace ilang {
 						error(0, "Attempted to access member on non object type " << obj_val->type().name());
 					}
 				}
-				// if(ret->type() == typeid(ilang::Function)) {
-				// 	// TODO: should not be doing the bind here.....do before getting the function
-				// 	return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
-				// }
 				return ret;
 			}else{
 				ret = ctx.scope->get(ctx, name);
@@ -552,21 +495,15 @@ namespace ilang {
 			errorTrace("Setting value of variable : " << name.str());
 			if (Obj) {
 				ValuePass obj_val = Obj->GetValue(ctx);
-				//ValuePass key = valueMaker(identifier);
 				try {
 					obj_val->set(ctx, name, val);
 				} catch(InvalidOperation e) {
 					error(0, "Attempted to set " << name.str() << " on non object type");
 				}
 			}else{
-				//Identifier name(identifier);
 				ctx.scope->set(ctx, name, val);
 			}
 		}
-
-		// Identifier FieldAccess::GetFirstName() {
-		// 	return identifier;
-		// }
 
 		IdentifierSet FieldAccess::UndefinedElements() {
 			if(Obj)
@@ -614,10 +551,6 @@ namespace ilang {
 					error(0, "Attempted to access member on non object type " << obj_val);
 				}
 			}
-			// TODO: this should be somewhere else
-			// if(ret->type() == typeid(ilang::Function)) {
-			// 	return valueMaker(ret->cast<ilang::Function*>()->bind(obj_val));
-			// }
 			return ret;
 		}
 
@@ -658,7 +591,6 @@ namespace ilang {
 		}
 		ValuePass Call::GetValue (Context &ctx) {
 			errorTrace("Calling function");
-			// new stuff
 
 			ValuePass func = calling->GetValue(ctx);
 
@@ -732,7 +664,6 @@ namespace ilang {
 			ValuePass v = eval->GetValue(ctx);
 
 			target->Set(ctx, v);
-			//	scope->Debug();
 		}
 		ValuePass AssignExpr::GetValue (Context &ctx) {
 			errorTrace("Assignment expression with gettin value");
@@ -832,9 +763,11 @@ namespace ilang {
 			case Not:
 				left->Run(ctx);
 				// no right
+				break;
 			default:
 				left->Run(ctx);
 				right->Run(ctx);
+				break;
 			}
 		}
 		ValuePass LogicExpression::GetValue(Context &ctx) {
@@ -850,11 +783,7 @@ namespace ilang {
 			ValuePass right = this->right->GetValue(ctx);
 			switch(Act) {
 			case And:
-				if(left->isTrue())
-					if(right->isTrue())
-						return valueMaker(true);
-				return valueMaker(false);
-				break;
+				return valueMaker(left->isTrue() && right->isTrue());
 			case Or:
 				return valueMaker(left->isTrue() || right->isTrue());
 			case Equal:
@@ -980,10 +909,6 @@ namespace ilang {
 		}
 
 
-		// Object::Object (std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj) : objects(obj)
-		// {
-
-		// }
 		Object::Object(parserNode::Function *func) : function(func) {
 			// object created later so we are just going to store the informationa atm
 		}
@@ -992,11 +917,6 @@ namespace ilang {
 			Context obj_ctx(ctx);
 			Scope obj_scope(obj_ctx);
 			function->Run(obj_ctx);
-			// could possibly go through all the elements and call run
-			// should this assert that the types on the return match??
-			// for(auto it : *objects) {
-			// 	it.second->Run(ctx);
-			// }
 		}
 		ValuePass Object::GetValue(Context &ctx) {
 			// will create a new object and return that as when the object is evualiated we do not want to be returing the same old thing
@@ -1008,54 +928,17 @@ namespace ilang {
 			function->Constructor(obj_ctx);
 			auto obj = make_handle<ilang::Object>(obj_scope, ctx);
 			return valueMaker(obj);
-
-
-
-			assert(0);
-			//auto obj = make_handle<ilang::Object>(objects, ctx);
-			//return valueMaker(obj);
-			// can use scope.get() to access the pointer as the scope is not keep around after the class/object is created
-			//auto obj = make_handle<ilang::Object>(objects, ctx);
-			//return valueMaker(obj);
-			//ilang::Value_Old *val = new ilang::Value_Old(obj);
-			//return ValuePass(val);
 		}
 
 		void Object::Print(Printer *p) {
 			p->p() << "object ";
 			function->Print(p);
-			// p->p() << "object { ";
-			// p->up();
-			// bool first=true;
-			// for(auto it : *objects) {
-			// 	if(!first) p->p() << ", ";
-			// 	p->line();
-			// 	it.first->Print(p);
-			// 	p->p() << ": ";
-			// 	it.second->Print(p);
-			// 	first = false;
-			// }
-			// p->down();
-			// p->line() << "}";
 		}
 
 		IdentifierSet Object::UndefinedElements() {
 			auto ret = function->UndefinedElements();
 			ret.erase("this");
 			return ret;
-
-			// IdentifierSet ret;
-			// //std::vector<Identifier> ret;
-
-			// for(auto it : *objects) {
-			// 	auto o = it.second->UndefinedElements();
-			// 	ret.insert(o.begin(), o.end());
-			// }
-			// ret.erase("this");
-			// for(auto it : *objects) {
-			// 	ret.erase(it.first->GetName());
-			// }
-			// return ret;
 		}
 
 		Class::Class(std::list<Node*> *p, parserNode::Function *func) : function(func), parents(p) {
@@ -1076,31 +959,10 @@ namespace ilang {
 			function->Constructor(cls_ctx);
 			auto obj = make_handle<ilang::Class>(parents, cls_scope, ctx);
 			return valueMaker(obj);
-
-			//auto cls = make_handle<ilang::Class>(parents, objects, ctx);
-			//return valueMaker(cls);
-
-			//ilang::Class *c = new ilang::Class(parents, objects, scope);
-			//ilang::Value_Old *val = new ilang::Value_Old(c);
-			//return ValuePass(val);
 		}
 
 
 		IdentifierSet Class::UndefinedElements() {
-			// Class should check that everything links up when they are created in the new call
-			// would be nice to be able to support some static checking on this
-			// IdentifierSet ret;
-			// for(auto it : *objects) {
-			// 	auto o = it.second->UndefinedElements();
-			// 	ret.insert(o.begin(), o.end());
-			// }
-			// ret.erase("this");
-			// for(auto it : *objects) {
-			// 	ret.erase(it.first->GetName());
-			// }
-
-			//return ret;
-
 			IdentifierSet ret = function->UndefinedElements();
 			for(auto it : *parents) {
 				IdentifierSet other = it->UndefinedElements();
@@ -1124,18 +986,6 @@ namespace ilang {
 			}
 			p->up();
 			function->Print(p);
-			// p->p() << "{";
-			// bool first=true;
-			// for(auto it : *objects) {
-			// 	if(!first) p->p() << ", ";
-			// 	p->line();
-			// 	it.first->Print(p);
-			// 	p->p() << ": ";
-			// 	it.second->Print(p);
-			// 	first = false;
-			// }
-			// p->down();
-			// p->line() << "}";
 		}
 
 		Array::Array (std::list<Node*> *e, std::list<Node*> *m) : elements(e), modifiers(m) {
@@ -1161,11 +1011,6 @@ namespace ilang {
 
 			auto arr = make_handle<ilang::Array>(modifiers, elements, ctx);
 			return valueMaker(arr);
-			//auto arr = make_handle<ilang::Array>(elements, modifiers, ctx);
-			//return valueMaker(arr);
-			//ilang::Object *arr = new ilang::Array(elements, modifiers, scope);
-			//ilang::Value_Old *val = new ilang::Value_Old(arr);
-			//return ValuePass(val);
 		}
 
 		IdentifierSet Array::UndefinedElements() {
@@ -1196,31 +1041,6 @@ namespace ilang {
 			}
 			p->p() << "]";
 		}
-
-		// NewCall::NewCall(std::list<Node*> *args): Call(NULL, args) {
-		// 	// might change the grammer to reflect that this needs one element
-		// 	// might in the future allow for arguments to be passed to classes when they are getting constructed through additional arguments
-
-		// 	error(args->size() == 1, "New only takes one argument");
-		// 	error(dynamic_cast<Value*>(args->front()), "First argument to New needs to be a Value");
-		// }
-		// ValuePass NewCall::GetValue(Context &ctx) {
-		// 	errorTrace("New Call");
-		// 	assert(0); // TODO:
-		// 	// ValuePass a = dynamic_cast<Value*>(params->front())->GetValue(scope);
-		// 	// error(a->Get().type() == typeid(ilang::Class*), "Can not create something with new that is not a class");
-		// 	// ilang::Value_Old *val = new ilang::Value_Old( boost::any_cast<ilang::Class*>(a->Get())->NewClass(a) ); // returns an Object*
-		// 	// //ilang::Value_Old *val = new ilang::Value_Old( new ilang::Object(a) );
-		// 	// // TODO: make this call an init function that is defined in the class
-		// 	// // does this need to call the init function, as default values can be set and no arguments can be passed when the new function is called
-		// 	// return ValuePass(val);
-		// }
-
-		// void NewCall::Print (Printer *p) {
-		// 	p->p() << "new(";
-		// 	params->front()->Print(p);
-		// 	p->p() << ")";
-		// }
 
 		AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
 			for(auto it : *args) {
@@ -1261,15 +1081,12 @@ namespace ilang {
 
 		ValuePass ImportCall::GetValue(Context &ctx) {
 			ValuePass val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
-			//error(val->Get().type() == typeid(std::string), "import() expects a string");
-			std::string name = val->cast<std::string>(); //boost::any_cast<std::string>(val->Get());
+			std::string name = val->cast<std::string>();
 
 			auto obj = ImportGetByName(name);
 			if(!obj) return valueMaker(false);
 
-			//if(obj == NULL) return ValuePass(new ilang::Value_Old(false));
-
-			return valueMaker(obj); //ValuePass(new ilang::Value_Old(obj));
+			return valueMaker(obj);
 
 		}
 
@@ -1305,26 +1122,10 @@ namespace ilang {
 			}
 			assert(ilang::global_EventPool());
 			Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
-
 					Context ctx;
 					const_cast<ilang::Function*>(&calling)->call(ctx, *arguments);
 
 					delete arguments;
-
-
-					// ValuePass ret = ValuePass(new ilang::Value_Old);
-
-					// if(calling.object) {
-					// 	assert(calling.object->Get().type() == typeid(ilang::Object*));
-
-					// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(calling.object->Get())));
-					// 	calling.ptr(obj_scope, *arguments, &ret);
-					// }else{
-					// 	calling.ptr(ScopePass(), *arguments, &ret);
-					// }
-					// delete arguments;
-
-					// return value is ignored
 				});
 			thread.Trigger(NULL);
 

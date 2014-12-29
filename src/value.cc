@@ -8,25 +8,19 @@ using namespace ilang;
 using namespace std;
 
 ValuePass::ValuePass(const ValuePass &x) {
-	//x->type2();
 	if(*(long*)x.m_data != 0)
 		x->copyTo(m_data);
 	else
 		*(long*)m_data = 0;
-	//Get()->type2();
 }
 
-ValuePass::ValuePass(Value_new *v) {
+ValuePass::ValuePass(Value *v) {
 	v->copyTo(m_data);
 }
 
-// ValuePass::ValuePass(const Value_new &v) {
-// 	v.copyTo(m_data);
-// }
-
 ValuePass::~ValuePass() {
 	if(*(long*)m_data != 0)
-		Get()->~Value_new();
+		Get()->~Value();
 	*(long*)m_data = 0;
 }
 
@@ -162,24 +156,13 @@ VALUE_LOGIC_OPS_STRING(bool)
 
 const std::type_info &FunctionType::type() { return typeid(ilang::Function); }  // TODO: this should really be Function*
 FunctionType::FunctionType(const ilang::Function &f) {
-	const_cast<ilang::Function*>(&f)->vvv();
 	m_ptr = new ilang::Function(f);
-	((ilang::Function*)m_ptr)->vvv();
 }
 FunctionType::FunctionType(const FunctionType &f) {
-	const_cast<ilang::Function*>((ilang::Function*)f.m_ptr)->vvv();
 	auto fp = (ilang::Function*)f.m_ptr;
-	fp->vvv();
 	m_ptr = new ilang::Function(*fp);
-	fp->vvv();
-	((ilang::Function*)m_ptr)->vvv();
 }
-// FunctionType::FunctionType(FunctionType &&f) {
-// 	m_ptr = f.m_ptr;
-// 	f.m_ptr = NULL;
-// }
 FunctionType::~FunctionType() {
-	//cout << "delete " << this << endl << flush;
 	delete (ilang::Function*)m_ptr;
 	m_ptr = NULL;
 }
@@ -200,14 +183,6 @@ ValuePass FunctionType::operator + (ValuePass v) {
 HashableType::HashableType(Handle<Hashable> h) {
 	m_ptr = new Handle<Hashable>(h);
 }
-// HashableType::HashableType(Handle<Object> o) {
-// 	auto h = std::dynamic_pointer_cast<Hashable>(o);
-// 	m_ptr = new Handle<Hashable>(h);
-// }
-// HashableType::HashableType(Handle<Array> a) {
-// 	auto h = std::dynamic_pointer_cast<Hashable>(a);
-// 	m_ptr = new Handle<Hashable>(h);
-// }
 HashableType::HashableType(const HashableType &h) {
 	m_ptr = new Handle<Hashable>(*(Handle<Hashable>*)h.m_ptr);
 }

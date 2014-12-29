@@ -48,5 +48,7 @@ ILANG_VARIABLE_CHECKER(Array) {
 struct variable_scope_modifiers {
 	variable_scope_modifiers() {
 		::ilang::global_scope_register("Local", ValuePass(VariableType(VariableType::t_local)));
+		::ilang::global_scope_register("Dynamic", ValuePass(VariableType(VariableType::t_dynamic)));
+		::ilang::global_scope_register("Var", ValuePass(VariableType(VariableType::t_normal)));
 	}
 } _variable_scope_modifiers;

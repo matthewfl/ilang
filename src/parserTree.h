@@ -5,8 +5,6 @@
 #include <map>
 #include <string>
 
-//#include <boost/Handle.hpp>
-
 #include "handle.h"
 #include "context.h"
 #include "variable.h"
@@ -32,11 +30,8 @@ namespace ilang {
 
 		using std::vector;
 		using std::list;
+		using ilang::ValuePass;
 
-		//using boost::Handle;
-		//typedef boost::Handle<ilang::Value_Old> ValuePass;
-		using ilang::ValuePass; // defined in variable.h
-		//using ilang::ValuePass;
 		class Node {
 			friend class ilang::Modification;
 		private:
@@ -60,7 +55,6 @@ namespace ilang {
 			friend class ilang::Modification;
 			friend class ImportCall;
 		private:
-			// also head by smart point so do not need to delete
 			Context ctx;
 			Scope *scope = NULL;
 			ImportScopeFile *Import;
@@ -80,7 +74,6 @@ namespace ilang {
 			friend class ilang::Modification;
 		public:
 			virtual ValuePass GetValue(Context&)=0;
-			//virtual ValuePass CallFun(Context&, std::vector<ValuePass> &par); // I feel a little funny about having this here, but this should be the right place
 		};
 		class Constant : public Value {
 			friend class ilang::Modification;
@@ -102,11 +95,9 @@ namespace ilang {
 		class Object : public Value {
 			friend class ilang::Modification;
 		private:
-			//std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
 			parserNode::Function *function;
 		public:
 			Object(parserNode::Function *func);
-			//Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
@@ -117,11 +108,8 @@ namespace ilang {
 			friend class ilang::Modification;
 		private:
 			std::list<Node*> *parents;
-			// NOTE: only useful for iterating over, as pointer type for key
-			//std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
 			parserNode::Function *function;
 		public:
-			//Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
 			Class(std::list<Node*> *p, parserNode::Function *func);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
@@ -145,7 +133,6 @@ namespace ilang {
 		class StringConst : public Constant {
 			friend class ilang::Modification;
 		private:
-			//char *string;
 			std::string string;
 		public:
 			StringConst(char *str);
@@ -231,8 +218,6 @@ namespace ilang {
 			Function(std::list<Node*> *p, std::list<Node*> *b);
 			void Run(Context&);
 			void Constructor(Context&);
-			//void Call(std::vector<ilang::Value_Old*>);
-			//void Call(Context& _scope_made, Context& _scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
@@ -247,7 +232,6 @@ namespace ilang {
 			VariableScopeModifier(VariableType::types t) : type(t) {}
 			ValuePass GetValue(Context &);
 			void Print(Printer*);
-
 		};
 
 		class Variable : public Value {
@@ -257,9 +241,6 @@ namespace ilang {
 			friend class ::ilang::Object;
 			friend class ::ilang::Class;
 
-			// TODO: variables won't have access list for names
-			// just a single item, otherwise it is a field access
-			//std::list<std::string> *name;
 		protected:
 			Identifier name;
 			std::list<Node*> *modifiers;
@@ -272,8 +253,6 @@ namespace ilang {
 			virtual ilang::Variable * Get(Context&);
 			ValuePass GetValue(Context&);
 			Identifier GetName() const { return name; }
-			//virtual std::string GetFirstName();
-			//virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
 			void PreRegister(Context &ctx);
@@ -283,17 +262,12 @@ namespace ilang {
 		class FieldAccess : public Variable {
 			friend class ilang::Modification;
 		private:
-			//Identifier identifier;
 			Value *Obj;
 		public:
 			FieldAccess(Node*, Identifier);
-			//void Run(Scope*);
-			//void Set(Scope*, ValuePass var);
 			void Set(Context&, ValuePass val, bool force = false);
 			ilang::Variable * Get(Context&);
 			ValuePass GetValue(Context&);
-			//virtual Identifier GetFirstName();
-			//virtual ValuePass CallFun (Context&, std::vector<ValuePass> &par);
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
 		};
@@ -331,16 +305,9 @@ namespace ilang {
 			friend class ilang::Modification;
 		public:
 			PrintCall(std::list<Node*> *args);
-			ValuePass GetValue (Context&); // returns null
+			ValuePass GetValue (Context&);
 			void Print(Printer*);
 		};
-		// class NewCall : public Call {
-		// 	friend class ilang::Modification;
-		// public:
-		// 	NewCall(std::list<Node*> *args);
-		// 	ValuePass GetValue(Context&);
-		// 	void Print(Printer*);
-		// };
 
 		class AssertCall : public Call {
 			friend class ilang::Modification;

@@ -11,19 +11,10 @@ using namespace ilang;
 using namespace std;
 
 ValuePass Object_ish::get(Context &ctx, Identifier i) {
-	// auto it = m_members.find(i);
-	// assert(it != m_members.end());
-	// ValuePass ret = it->second->Get();
-	// if(ret->type() == typeid(ilang::Function)) {
-	// 	return valueMaker(ret->cast<ilang::Function*>()->bind(this));
-	// }
-	// return ret;
-
 	auto var = getVariable(ctx, i);
 	if(!var) {
 		return ValuePass();
 	}
-	//assert(var);
 	ValuePass ret = var->Get(ctx);
 	if(ret->type() == typeid(Function))
 		return valueMaker(ret->cast<Function*>()->rebind(this));
@@ -32,7 +23,6 @@ ValuePass Object_ish::get(Context &ctx, Identifier i) {
 }
 
 void Object_ish::set(Context &ctx, Identifier i, ValuePass v) {
-	//cout << "set " << i.str() << endl;
 	auto it = m_members.find(i);
 	if(it == m_members.end()) {
 		auto var = make_handle<Variable>();
@@ -48,10 +38,7 @@ bool Object_ish::has(Context &ctx, Identifier i) {
 }
 
 Handle<Variable> Object_ish::getVariable(Context &ctx, ilang::Identifier i) {
-	//cout << "get " << i.str() << endl;
 	if(i == "this") {
-		// can just create a new variable here which holds the reference to
-		// the this ptr
 		auto ptr = Handle<Hashable>(this);
 		auto ret = make_handle<Variable>();
 		ret->Set(ctx, valueMaker(ptr));
@@ -60,10 +47,8 @@ Handle<Variable> Object_ish::getVariable(Context &ctx, ilang::Identifier i) {
 	auto it = m_members.find(i);
 	if(it == m_members.end())
 		return NULL;
-	//assert(it != m_members.end());//error(, "unable to find variable " << i.str());
 	auto bd = valueMaker(Handle<Hashable>(this));
 	return make_handle<BoundVariable>(it->second, bd);
-	//return it->second;
 }
 
 Hashable_iterator Object_ish::begin() {
@@ -125,10 +110,6 @@ ValuePass Class::get(Context &ctx, Identifier i) {
 	if(has(ctx, i)) {
 		return Object_ish::get(ctx, i);
 	}
-	// for(auto it : m_parents) {
-	// 	if(it->has(i)) {
-	// 		return
-	// }
 	auto r = builtInGet(ctx, i);
 	assert(r);
 	return r;
@@ -215,7 +196,6 @@ Class_instance::Class_instance(Handle<Class> c) : m_class(c) {
 		m_members.insert(make_pair(it.first, make_handle<Variable>(*it.second)));
 	}
 }
-//Class_instance::Class_instance(C_class *c) : m_ccclas(c) {}
 
 ValuePass Class_instance::get(Context &ctx, Identifier i) {
 	if(Object_ish::has(ctx, i))
@@ -236,17 +216,6 @@ bool Class_instance::has(Context &ctx, Identifier i) {
 		i == "instance" ||
 		i == "interface";
 }
-
-// Handle<Variable> Class_instance::getVariable(Identifier i) {
-// 	if(Object_ish::has(i)) {
-// 		return Object_ish::getVariable(i);
-// 	}
-// 	auto var = m_class->getVariable(i);
-// 	auto var2 = make_handle<Variable>(*var);
-// 	m_members.insert(make_pair(i, var2));
-// 	return var2;
-// }
-
 
 
 Object::Object() {
@@ -286,8 +255,6 @@ Array::Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserN
 Array::Array(std::vector<ValuePass> elems) {
 	m_members.reserve(elems.size());
 	for(auto it : elems) {
-		//auto v = make_handle<Variable>();
-		//v->Set(ctx, it);
 		m_members.push_back(make_variable(it));
 	}
 }
@@ -295,12 +262,12 @@ Array::Array(std::vector<ValuePass> elems) {
 ValuePass Array::get(Context &ctx, Identifier i) {
 	if(i.isInt()) { // this is an item in the array
 		if(m_members.size() < i.raw()) {
-			assert(0); // TODO: raise an exception or something...
+			error(0, "array out of bound, length: " << m_members.size() << " and requesting element: " << i.raw());
+			//assert(0); // TODO: raise an exception or something...
 		}
 		auto v = m_members.at(i.raw());
 		auto val = v->Get(ctx);
 		return val;
-		//return v->Get();
 	}
 	if(i == Identifier("length")) {
 		return valueMaker(m_members.size());
@@ -331,6 +298,7 @@ ValuePass Array::get(Context &ctx, Identifier i) {
 
 void Array::set(Context &ctx, Identifier i, ValuePass v) {
 	if(!i.isInt()) {
+		error(0, "can not set non numeric type of " << i.str() << " to array type");
 		assert(0); // trying to set some string type???
 	}
 	// TODO: if member already exists use that variable

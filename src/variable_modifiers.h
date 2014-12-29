@@ -7,20 +7,6 @@
 #include "value_types.h"
 #include "error.h"
 
-// namespace ilang {
-// 	class Variable_modifier : public C_Class {
-// 	public:
-
-// 	};
-// }
-
-// #define ILANG_VARIABLE_MODIFIER(name, obj)															\
-// 	namespace { struct _ILANG_VAR_MOD_##name {														\
-// 			_ILANG_VAR_MOD_##name () {																				\
-// 				::ilang::global_scope_register(Identifier( #name ),							\
-// 			}} _ILANG_VAR_MOD_##name##_run;																		\
-// 	}
-
 #define ILANG_VARIABLE_CHECKER(name)																		\
 	static bool _ilang_variable_checker_fun_##name (ilang::ValuePass var) ; \
 	namespace { struct _ILANG_VAR_CHK_##name {														\

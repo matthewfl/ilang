@@ -8,13 +8,6 @@
 
 
 namespace ilang {
-	// using std::make_handle;
-	// using Handle;
-	// using std::dynamic_pointer_cast;
-
-	// template <typename T> using Handle = Handle<T>;
-
-	//template <typename T> using make_handle = make_handle<T>;
 	template <typename T> using Handle = boost::intrusive_ptr<T>;
 	using boost::dynamic_pointer_cast;
 	using boost::static_pointer_cast;

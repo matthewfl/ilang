@@ -37,14 +37,6 @@ void Variable::Check(Context &ctx, ValuePass v) {
 			throw BadTypeCheck();
 		}
 	}
-	// Identifier setting("setting");
-	// Arguments args(v);
-	// for(auto it : m_modifiers) {
-	// 	if(it->type() == typeid(Hashable*)) {
-	// 		auto s = it->get(setting);
-	// 		if(s) s->call(ctx, args);
-	// 	}
-	// }
 }
 
 ValuePass Variable::Get(Context &ctx) {
@@ -110,6 +102,7 @@ void BoundVariable::SetModifiers(Context &ctx, std::vector<ValuePass> vec) {
 ValuePass BoundVariable::Get(Context &ctx) {
 	ValuePass ret = m_parent->Get(ctx);
 	if(ret->type() == typeid(Function)) {
+		// should this bind or rebind?, does this interface even make since?
 		return valueMaker(ret->cast<Function*>()->bind(m_bound));
 	}
 	return ret;

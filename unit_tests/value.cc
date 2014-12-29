@@ -49,7 +49,7 @@ TEST_CASE("basic type", "[value]") {
 }
 
 TEST_CASE("basic vtable", "[value]") {
-	Value_new *v = new IntType(4);
+	Value *v = new IntType(4);
 	REQUIRE(v->type() == typeid(long));
 	delete v;
 }

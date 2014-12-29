@@ -60,28 +60,21 @@ namespace ilang {
       case Entry::Object: {
 				auto obj = make_handle<Database_Object>(entry->object_id());
 				return valueMaker(static_pointer_cast<Hashable>(obj));
-        //ilang::Object *obj = new ilang::Object;
-        //auto obj = make_handle<ilang::Object>();
-        // TODO: some way to back objects using the database
-        //obj->DB_name = new char[entry->object_id().size()+1];
-        //memcpy(obj->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
-        //return valueMaker(obj);
       }
       case Entry::Array: {
         ValuePass arr = readStoredData(System_Database->Get(entry->object_id()));
+				assert(0);
         // TODO: ehhhhh
-        //ilang::Array *a = static_cast<ilang::Array*>(boost::any_cast<ilang::Object*>(arr->Get()));
-        //a->DB_name = new char[entry->object_id().size()+1];
-        //memcpy(a->DB_name, entry->object_id().c_str(), entry->object_id().size()+1);
         return arr;
       }
       case Entry::Array_contents: {
-        std::vector<ValuePass> arr_members;
-        arr_members.reserve(entry->array_dat_size());
-        for(int i=0; i < entry->array_dat_size(); i++) {
-					ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
-          arr_members.push_back(gg);
-        }
+				assert(0);
+				// std::vector<ValuePass> arr_members;
+        // arr_members.reserve(entry->array_dat_size());
+        // for(int i=0; i < entry->array_dat_size(); i++) {
+				// 	ValuePass gg = readStoredData(System_Database->Get(entry->array_dat(i)));
+        //   arr_members.push_back(gg);
+        // }
         //auto arr = make_handle<ilang::Array>(arr_members);
         //ilang::Array *arr = new ilang::Array(arr_members);
         return valueMaker(true); //arr);
@@ -128,10 +121,11 @@ namespace ilang {
 						System_Database->Set(n + it.first.str(), ld);
 						delete ld;
 					}
+					// TODO: support having classes have their own seralizer for going into/out of the db
 				} else if(dynamic_pointer_cast<Array>(h)) {
 					assert(0);
 				} else
-					assert(0);
+					error(0, "type " << a->type().name() << " not allowed in the database\n");
 			}
       // rewrite this function
       /*  entry->Clear();
