@@ -1,5 +1,5 @@
-#ifndef _ilang_scope_new
-#define _ilang_scope_new
+#ifndef _ilang_scope
+#define _ilang_scope
 
 #include <map>
 #include <vector>
@@ -10,7 +10,7 @@
 #include "handle.h"
 #include "hashable.h"
 #include "context.h"
-#include "variable_new.h"
+#include "variable.h"
 #include "handle.h"
 
 #include "helpers.h"
@@ -68,4 +68,4 @@ namespace ilang {
 }
 
 
-#endif // _ilang_scope_new
+#endif // _ilang_scope

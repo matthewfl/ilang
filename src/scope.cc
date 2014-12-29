@@ -1,4 +1,4 @@
-#include "scope_new.h"
+#include "scope.h"
 
 using namespace ilang;
 using namespace std;

@@ -1,5 +1,5 @@
-#ifndef _ilang_new_variable
-#define _ilang_new_variable
+#ifndef _ilang_variable
+#define _ilang_variable
 
 #include "debug.h"
 #include "value.h"
@@ -56,6 +56,4 @@ namespace ilang {
 
 }
 
-
-
-#endif
+#endif // _ilang_variable

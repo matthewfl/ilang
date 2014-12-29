@@ -2,7 +2,7 @@
 #include "base.h"
 #include "import.h"
 #include "function.h"
-#include "object_new.h"
+#include "object.h"
 
 using namespace ilang;
 

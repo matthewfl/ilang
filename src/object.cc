@@ -1,4 +1,4 @@
-#include "object_new.h"
+#include "object.h"
 #include "function.h"
 #include "error.h"
 #include "value_types.h"

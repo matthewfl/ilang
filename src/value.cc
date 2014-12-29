@@ -2,7 +2,7 @@
 #include "value_types.h"
 #include "function.h"
 #include "hashable.h"
-#include "object_new.h"
+#include "object.h"
 
 using namespace ilang;
 using namespace std;

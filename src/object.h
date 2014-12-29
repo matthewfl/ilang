@@ -1,10 +1,10 @@
-#ifndef _ilang_new_object
-#define _ilang_new_object
+#ifndef _ilang_object
+#define _ilang_object
 
 #include "hashable.h"
 #include "identifier.h"
 #include "value.h"
-#include "variable_new.h"
+#include "variable.h"
 #include "handle.h"
 #include "context.h"
 #include <map>
@@ -109,4 +109,4 @@ namespace ilang {
 
 }
 
-#endif // _ilang_new_object
+#endif // _ilang_object

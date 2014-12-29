@@ -2,7 +2,7 @@
 #define _ilang_databsae
 
 #include "debug.h"
-#include "variable_new.h"
+#include "variable.h"
 
 #include <boost/filesystem.hpp>
 #include <stdio.h>

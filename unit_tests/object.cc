@@ -1,5 +1,5 @@
 #include "base.h"
-#include "object_new.h"
+#include "object.h"
 #include "function.h"
 #include "value_types.h"
 

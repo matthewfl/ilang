@@ -1,20 +1,22 @@
-#include "import.h"
-#include "scope_new.h"
-#include "variable_new.h"
-#include "object_new.h"
-#include "parserTree.h"
-#include "parser.h"
-#include "function.h"
-#include "error.h"
-
 #include <stdio.h>
 //#include <dlfcn.h>
 #include <boost/algorithm/string/replace.hpp>
 
 #include <iostream>
-using namespace std;
+
+#include "import.h"
+#include "scope.h"
+#include "variable.h"
+#include "object.h"
+#include "parserTree.h"
+#include "parser.h"
+#include "function.h"
+#include "error.h"
 
 #include "ilang.h"
+
+using namespace std;
+
 
 namespace ilang {
 	std::vector<boost::filesystem::path> ImportSearchPaths;

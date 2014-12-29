@@ -1,5 +1,5 @@
 #include "ilang.h"
-#include "variable_new.h"
+#include "variable.h"
 #include "error.h"
 #include "thread.h"
 

@@ -2,7 +2,7 @@
 
 #define private public
 #define protected public
-#include "object_new.h"
+#include "object.h"
 #undef private
 #undef protected
 

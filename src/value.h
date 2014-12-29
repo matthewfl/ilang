@@ -8,9 +8,9 @@
 #include <memory>
 #include <string.h>
 
-#include "debug.h"
-
 #include <iostream>
+
+#include "debug.h"
 
 #include "valuepass.h"
 

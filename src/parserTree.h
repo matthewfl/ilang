@@ -9,8 +9,8 @@
 
 #include "handle.h"
 #include "context.h"
-#include "variable_new.h"
-#include "scope_new.h"
+#include "variable.h"
+#include "scope.h"
 #include "import.h"
 #include "print.h"
 #include "value.h"

@@ -10,8 +10,8 @@
 
 #include "context.h"
 
-#include "variable_new.h"
-#include "scope_new.h"
+#include "variable.h"
+#include "scope.h"
 #include "parserTree.h"
 #include "hashable.h"
 

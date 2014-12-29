@@ -1,5 +1,5 @@
 #include "base.h"
-#include "scope_new.h"
+#include "scope.h"
 #include "function.h"
 #include "value_types.h"
 

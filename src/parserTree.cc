@@ -1,17 +1,19 @@
-#include "parserTree.h"
-#include "parser.h"
-#include "scope_new.h"
-#include "object_new.h"
-#include "function.h"
-#include "thread.h"
-#include "debug.h"
-#include "error.h"
-#include "value_types.h"
-
 // for string escape
 #include <boost/algorithm/string.hpp>
 
 #include <iostream>
+
+#include "parserTree.h"
+#include "parser.h"
+//#include "scope.h"
+#include "object.h"
+#include "function.h"
+#include "thread.h"
+#include "debug.h"
+#include "error.h"
+//#include "value_types.h"
+
+
 using namespace std;
 
 extern "C" int ilang_Assert_fails;

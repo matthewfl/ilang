@@ -1,7 +1,7 @@
 #include "ilang.h"
 #include "error.h"
 #include "function.h"
-#include "object_new.h"
+#include "object.h"
 #include "debug.h"
 
 //#include <boost/thread/shared_mutex.hpp>

@@ -2,8 +2,8 @@
 #define _ilang_variable_modifiers
 
 #include "ilang.h"
-#include "scope_new.h"
-#include "variable_new.h"
+#include "scope.h"
+#include "variable.h"
 #include "value_types.h"
 #include "error.h"
 

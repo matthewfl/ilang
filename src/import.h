@@ -9,14 +9,10 @@
 #include <boost/filesystem.hpp>
 
 #include "debug.h"
-#include "variable_new.h"
-//#include "object_new.h"
+#include "variable.h"
 #include "context.h"
 
 namespace ilang {
-//	class Scope;
-	//class FileScope;
-//	class Object;
 
 	namespace parserNode {
 		class Head;
