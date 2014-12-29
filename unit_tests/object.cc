@@ -41,6 +41,7 @@ TEST_CASE("Basic interaction with class", "[object]") {
 }
 
 TEST_CASE("Basic class create", "[object]") {
+	init();
 	RUN_CODE(
 					 test = class {
 						 a = 1;

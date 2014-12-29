@@ -13,3 +13,4 @@ ilang_db.db
 *.gcov
 *.gcno
 *.gcda
+.deps

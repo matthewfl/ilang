@@ -5,13 +5,16 @@ FILES=*.i
 BFILES=*.i.bad
 SHFILES=*.sh
 FAILED=""
+I=../i
 
-rm -rf DB/
+alias i=$I
+
+rm -rf DB/ ilang_db.db
 
 for f in $FILES; do
 	echo "RUNNING $f"
 	echo "RUNNING $f" > .running
-	if ../i $f; then
+	if i $f; then
 		echo -e "\e[00;32mOK $f\e[00m"
 	else
 		echo -e "\e[00;31mERROR $f\e[00m"
@@ -23,7 +26,7 @@ done
 for f in $BFILES; do
 	echo "RUNNING $f"
 	echo "RUNNING $f" > .running
-	if ../i $f; then
+	if i $f; then
 		echo -e "\e[00;31mERROR $f\e[00m"
 		code=$(( $code + 1 ))
 		FAILED="$FAILED\t$f\n"
@@ -32,7 +35,7 @@ for f in $BFILES; do
 	fi
 done
 
-alias i='../i'
+
 
 for f in $SHFILES; do
 	echo "RUNNING $f"
