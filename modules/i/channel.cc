@@ -3,6 +3,8 @@
 #include "error.h"
 #include "thread.h"
 
+#include "handle.h"
+
 #include <tbb/concurrent_queue.h>
 
 namespace {
@@ -12,32 +14,34 @@ namespace {
 	private:
 		tbb::concurrent_bounded_queue<ValuePass> m_queue;
 		ilang::Event waiting;
-		ValuePass push(vector<ValuePass> &args) {
+		ValuePass push(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "channel.push expects one argument");
-			m_queue.push(args[0]);
+			auto v = args[0];
 			waiting.Trigger(NULL);
-			return ValuePass(new ilang::Value);
+			m_queue.push(v);
+			return ValuePass();
 		}
-		ValuePass pop(vector<ValuePass> &args) {
+		ValuePass pop(Context &ctx, Arguments &args) {
 			error(args.size() == 0, "channel.pop expects zero arguments");
 			ValuePass ret;
 			//m_queue.pop(ret); // blocks until there is something to pop
 			while(!m_queue.try_pop(ret)) {
 				// there was nothing to pop from the queue
-				ilang::global_EventPool()->WaitEvent(waiting);
+				if(m_queue.capacity() != 0) // if zero size then we spin on the queue otherwise the push call blocks?
+					waiting.Wait();
 			}
 			return ret;
 		}
-		ValuePass size(vector<ValuePass> &args) {
+		ValuePass size(Context &ctx, Arguments &args) {
 			error(args.size() == 0, "channel.size expects zero arguments");
 			long size = m_queue.size();
-			return ValuePass(new ilang::Value(size));
+			return valueMaker(size);
 		}
-		ValuePass setLimit(vector<ValuePass> &args) {
+		ValuePass setLimit(Context &ctx, Arguments &args) {
 			error(args.size() == 1, "channel.setLimit expects one argument");
-			error(args[0]->Get().type() == typeid(long), "channel.setLimit expects a number");
-			m_queue.set_capacity(boost::any_cast<long>(args[0]->Get()));
-			return ValuePass(new ilang::Value);
+			error(args[0]->type() == typeid(long), "channel.setLimit expects a number");
+			m_queue.set_capacity(args[0]->cast<long>());
+			return ValuePass();
 		}
 		void Init() {
 			reg("push", &threadChannel::push);
@@ -46,9 +50,12 @@ namespace {
 			reg("setLimit", &threadChannel::setLimit);
 		}
 	public:
-		threadChannel() {
+		threadChannel(Context &ctx, Arguments &args) {
 			Init();
-			m_queue.set_capacity(10);
+			int len = 10;
+			if(args.size() == 1)
+				len = args[0]->cast<int>();
+			m_queue.set_capacity(len);
 		}
 		threadChannel(int size) {
 			Init();
@@ -56,14 +63,15 @@ namespace {
 		}
 	};
 
-	ValuePass createChannel(std::vector<ValuePass> &args) {
+	ValuePass createChannel(Context &ctx, Arguments &args) {
 		error(args.size() <= 1, "channel.create expects 1 or no arguments");
 		int channelLength = 10;
 		if(args.size()) {
-			error(args[0]->Get().type() == typeid(long), "channel.create expects 1 argument");
+			error(args[0]->type() == typeid(long), "channel.create expects 1 argument");
+			channelLength = args[0]->cast<int>();
 		}
-		threadChannel *ch = new threadChannel(channelLength);
-		return ValuePass(new ilang::Value(new ilang::Object(ch)));
+		auto ch = make_handle<threadChannel>(channelLength);
+		return valueMaker(static_pointer_cast<Hashable>(ch));
 	}
 
 	ILANG_LIBRARY_NAME("i/channel",

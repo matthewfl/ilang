@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <stdio.h>
+#include "debug.h"
 
 // copied from http://flex.sourceforge.net/manual/Reentrant-Functions.html
 #define yyscan_t void*
@@ -32,10 +33,21 @@ namespace ilang {
 		ilang::parser_data data;
 		data.import = import;
 		data.fileName = name;
+		data.head = NULL;
 		yylex_init(&scanner);
 		yyset_in(file, scanner);
 		yyparse(scanner, &data);
 		yylex_destroy(scanner);
+		assert(data.error_count == 0);
 		return data.head;
 	}
 } // namespace ilang
+
+// #include <iostream>
+// #include "parser.tab.hh"
+
+// void yyerror(YYLTYPE *loc, void *, ilang::parser_data*, const char *msg) {
+//   using namespace std;
+//   //cerr << "error: " << msg << endl << yylloc.first_line;
+//   cerr << "error: " << msg << endl << loc->first_line;
+// }

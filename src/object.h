@@ -1,85 +1,84 @@
 #ifndef _ilang_object
 #define _ilang_object
 
-#include <string>
-#include <vector>
+#include <list>
 #include <map>
+#include <vector>
+
+
+#include "hashable.h"
+#include "identifier.h"
+#include "value.h"
 #include "variable.h"
-#include "parserTree.h"
-#include "scope.h"
+#include "handle.h"
+#include "context.h"
+
 
 namespace ilang {
-	class Object;
-	class Class {
-	private:
-		std::vector<Class*> parents;
-		std::map<std::string, ilang::Variable*> members;
+
+	namespace parserNode {
+		class Node;
+		class Variable;
+	}
+
+	class Object_ish : public Iterable /* Hashable */ {
+	protected:
+		std::map<Identifier, Handle<Variable> > m_members;
+		Object_ish() {}
 	public:
-		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, ScopePass);
-		virtual Object* NewClass(ValuePass self);
-		ilang::Variable * operator[](std::string name);
-		ilang::Variable * operator[](ValuePass);
-		virtual ~Class();
-	};
-	class ObjectScope;
-	//typedef std::string storedData;
-	class DB_serializer;
-	class C_Class;
-	class Object {
-	private:
-		friend class ObjectScope;
-		friend class DB_serializer;
-		//friend storedData *DB_createStoredData(const boost::any&);
-		//friend ValuePass DB_readStoredData(storedData*);
-		ValuePass baseClassValue; // kept so the smart pointer to know that something is using it
-		Class *baseClass;
-		C_Class *C_baseClass;
-		std::map<std::string, ilang::Variable*> members;
-		void Debug();
-		char *DB_name;
-	public:
-		Object(Class*, ValuePass);
-		Object(C_Class *base);
-		Object();
-		virtual ~Object();
-		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>*, ScopePass);
-		virtual ilang::Variable * operator [] (std::string name);
-		virtual ilang::Variable * operator [] (ValuePass);
-	};
-	class Array : public Object {
-		//friend storedData *DB_createStoredData(const boost::any&);
-		//friend ValuePass DB_readStoredData(storedData*);
-		friend class DB_serializer;
-		friend class Value;
-		std::vector<ilang::Variable*> members;
-		std::list<std::string> *modifiers;
-		ilang::Variable *mem_length;
-		ilang::Variable *mem_push;
-		ilang::Variable *mem_pop;
-		ilang::Variable *mem_insert;
-		ilang::Variable *mem_remove;
-		void Init();
-		void RefreshDB();
-		char *DB_name;
-	public:
-		Array(std::list<ilang::parserNode::Node*>*, std::list<std::string>*, ScopePass);
-		Array(std::vector<ValuePass> &);
-		Array();
-		ilang::Variable * operator[] (std::string name);
-		ilang::Variable * operator[] (ValuePass);
-		virtual ~Array();
+		ValuePass get(Context &ctx, ilang::Identifier) override;
+		void set(Context &ctx, ilang::Identifier, ValuePass) override;
+		bool has(Context &ctx, ilang::Identifier) override;
+		Handle<Variable> getVariable(Context &ctx, ilang::Identifier) override;
+		Hashable_iterator begin() override;
+		Hashable_iterator end() override;
+		virtual ~Object_ish() {}
 	};
 
-	class ScopeObject : public Object {
+	class Class : public Object_ish {
 	private:
-		Scope *scope;
-		bool Isolate;
-	public:
-		// isolate causes variables that are modified to be put into their own copy of the object rather than the scope
-		ScopeObject(Scope*, bool isolate=true);
-		ilang::Variable * operator[] (std::string name);
-		ilang::Variable * operator[] (ValuePass);
+		std::vector<ValuePass> m_parents;
+  public:
+		Class();
+		Class(std::list<ilang::parserNode::Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+		Class(std::list<ilang::parserNode::Node*> *p, Iterable &iter, Context &ctx);
+
+		ValuePass get(Context &ctx, Identifier i);
+		ValuePass builtInGet(Context &ctx, Identifier i);
 	};
+
+	class Class_instance : public Object_ish {
+	private:
+		Handle<Class> m_class;
+	public:
+		Class_instance(Handle<Class> c);
+
+		ValuePass get(Context &ctx, Identifier i) override;
+		bool has(Context &ctx, Identifier i) override;
+		friend class Class;
+	};
+
+	class Object : public Object_ish {
+	public:
+		Object();
+		Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj, Context &ctx);
+		Object(Iterable &iter, Context &ctx);
+
+	};
+
+
+	class Array : public Hashable {
+		std::vector<Handle<Variable> > m_members;
+		std::vector<ValuePass> m_modifiers;
+	public:
+		Array(std::list<ilang::parserNode::Node*> *mods, std::list<ilang::parserNode::Node*> *elems, Context &ctx);
+		Array(std::vector<ValuePass> elems);
+		ValuePass get(Context &ctx, Identifier) override;
+		void set(Context &ctx, Identifier, ValuePass) override;
+		bool has(Context &ctx, Identifier) override;
+		Handle<Variable> getVariable(Context &ctx, Identifier);
+	};
+
 }
 
 #endif // _ilang_object

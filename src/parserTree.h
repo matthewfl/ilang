@@ -5,12 +5,14 @@
 #include <map>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
+#include "handle.h"
+#include "context.h"
 #include "variable.h"
 #include "scope.h"
 #include "import.h"
 #include "print.h"
+#include "value.h"
+#include "value_types.h"
 
 /* There is a problem with the scope getting possibly deleted if a function gets ruturned from a function
  * and it is using the closure, the solution is to change the scope to use a smart pointer to be passed around
@@ -21,25 +23,31 @@ namespace ilang {
 	class Object;
 	class Class;
 	class Modification;
+	class Function;
+	class Arguments;
+
 	namespace parserNode {
+
+		using std::vector;
 		using std::list;
-		using boost::shared_ptr;
-		//typedef boost::shared_ptr<ilang::Value> ValuePass;
-		using ilang::ValuePass; // defined in variable.h
+		using ilang::ValuePass;
+
 		class Node {
 			friend class ilang::Modification;
 		private:
-			unsigned long _node_id;
-			Node *_parent;
+			//unsigned long _node_id;
+			//Node *_parent;
 		protected:
-			void _setParent(Node*);
+			//void _setParent(Node*);
 		public:
 			Node();
-			const unsigned long getID() { return _node_id; }
-			const Node * getParent() { return _parent; }
-			virtual void Run(ScopePass)=0;
+			//const unsigned long getID() { return _node_id; }
+			//const Node * getParent() { return _parent; }
+			virtual void Run(Context&)=0;
 			void randomsdafasdf(){} // take this out eventually, fixed some random compiler bug or something
 			virtual void Print(Printer*) =0;
+
+			virtual IdentifierSet UndefinedElements()=0;
 			//virtual void setParent(Node*) =0;
 		};
 
@@ -47,13 +55,13 @@ namespace ilang {
 			friend class ilang::Modification;
 			friend class ImportCall;
 		private:
-			// also head by smart point so do not need to delete
-			FileScope *scope;
-			ScopePass passScope;
+			Context ctx;
+			Scope *scope = NULL;
 			ImportScopeFile *Import;
 			std::list<Node*> *Declars;
 		public:
 			Head(std::list<Node*>*, ImportScopeFile*);
+			~Head();
 			void Link();
 			void Run();
 			Scope *GetScope ();
@@ -65,13 +73,13 @@ namespace ilang {
 		class Value : public Node {
 			friend class ilang::Modification;
 		public:
-			virtual ValuePass GetValue(ScopePass)=0;
-			//virtual ValuePass CallFun(ScopePass, std::vector<ValuePass> &par); // I feel a little funny about having this here, but this should be the right place
+			virtual ValuePass GetValue(Context&)=0;
 		};
 		class Constant : public Value {
 			friend class ilang::Modification;
 		public:
-			void Run(ScopePass);
+			void Run(Context&);
+			IdentifierSet UndefinedElements() override;
 		};
 
 
@@ -82,51 +90,53 @@ namespace ilang {
 		};
 
 		class Variable;
+		class Function;
 
 		class Object : public Value {
 			friend class ilang::Modification;
 		private:
-			std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			parserNode::Function *function;
 		public:
-			Object(std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
-			void Run(ScopePass);
-			ValuePass GetValue(ScopePass);
+			Object(parserNode::Function *func);
+			void Run(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements();
 		};
 
 		class Class : public Value {
 			friend class ilang::Modification;
 		private:
 			std::list<Node*> *parents;
-			// NOTE: only useful for iterating over, as pointer type for key
-			std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *objects;
+			parserNode::Function *function;
 		public:
-			Class(std::list<Node*> *p, std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *obj);
-			void Run(ScopePass);
-			ValuePass GetValue(ScopePass);
+			Class(std::list<Node*> *p, parserNode::Function *func);
+			void Run(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer *p);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Array : public Value {
 			friend class ilang::Modification;
 		private:
 			std::list<Node*> *elements;
-			std::list<std::string> *modifiers;
+			std::list<Node*> *modifiers;
 		public:
-			Array(std::list<Node*> *e, std::list<std::string> *m);
-			void Run(ScopePass);
-			ValuePass GetValue(ScopePass);
+			Array(std::list<Node*> *e, std::list<Node*> *m);
+			void Run(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class StringConst : public Constant {
 			friend class ilang::Modification;
 		private:
-			//char *string;
 			std::string string;
 		public:
 			StringConst(char *str);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
 
@@ -136,7 +146,7 @@ namespace ilang {
 			long num;
 		public:
 			IntConst(long n);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer *p);
 		};
 		class FloatConst : public Constant {
@@ -145,7 +155,7 @@ namespace ilang {
 			double num;
 		public:
 			FloatConst(double d);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
 
@@ -157,8 +167,9 @@ namespace ilang {
 			Node *True, *False;
 		public:
 			IfStmt(Node*, Node*, Node*);
-			void Run(ScopePass);
+			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class WhileStmt : public Node {
 			friend class ilang::Modification;
@@ -167,8 +178,9 @@ namespace ilang {
 			Node *exe;
 		public:
 			WhileStmt(Node*, Node*);
-			void Run(ScopePass);
+			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class ForStmt : public Node {
 			friend class ilang::Modification;
@@ -179,8 +191,9 @@ namespace ilang {
 			Node *exe;
 		public:
 			ForStmt(Node*, Node*, Node*, Node*);
-			void Run(ScopePass);
+			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class ReturnStmt : public Node {
@@ -189,24 +202,37 @@ namespace ilang {
 			Value *ret;
 		public:
 			ReturnStmt(Node*);
-			void Run(ScopePass);
+			void Run(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Function : public Value {
 			friend class ilang::Modification;
+			friend class ilang::Function;
+			friend class ilang::Arguments;
 		private:
 			std::list<Node*> *body;
 			std::list<Node*> *params;
 		public:
 			Function(std::list<Node*> *p, std::list<Node*> *b);
-			void Run(ScopePass);
-			//void Call(std::vector<ilang::Value*>);
-			void Call(ScopePass _scope_made, ScopePass _scope_self, std::vector<ValuePass>&, ValuePass *_ret=NULL);
-			ValuePass GetValue(ScopePass);
+			void Run(Context&);
+			void Constructor(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context&);
 		};
 
+		class VariableScopeModifier : public Constant {
+		private:
+			friend class Variable;
+			VariableType::types type;
+		public:
+			VariableScopeModifier(VariableType::types t) : type(t) {}
+			ValuePass GetValue(Context &);
+			void Print(Printer*);
+		};
 
 		class Variable : public Value {
 			friend class ilang::Modification;
@@ -215,37 +241,35 @@ namespace ilang {
 			friend class ::ilang::Object;
 			friend class ::ilang::Class;
 
-			std::list<std::string> *name;
 		protected:
-			std::list<std::string> *modifiers;
+			Identifier name;
+			std::list<Node*> *modifiers;
+			VariableType type = VariableType::t_normal;
 		public:
-			Variable (std::list<std::string> *n, std::list<std::string> *mod);
-			void Run(ScopePass);
-			virtual void Set(ScopePass, ValuePass var, bool force = false);
+			Variable (Identifier n, std::list<Node*> *mod);
+			void Run(Context&);
+			virtual void Set(Context&, ValuePass var, bool force = false);
 			// not sure if I want to make this virtual, but I believe that this will be the most effective way to make this work easily
-			virtual ilang::Variable * Get(ScopePass);
-			ValuePass GetValue(ScopePass);
-			virtual std::string GetFirstName();
-			//virtual ValuePass CallFun (Scope*, std::vector<ValuePass> &par);
+			virtual ilang::Variable * Get(Context&);
+			ValuePass GetValue(Context&);
+			Identifier GetName() const { return name; }
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context &ctx);
 		};
 
 
 		class FieldAccess : public Variable {
 			friend class ilang::Modification;
 		private:
-			std::string identifier;
 			Value *Obj;
 		public:
-			FieldAccess(Node*, std::string);
-			//void Run(Scope*);
-			//void Set(Scope*, ValuePass var);
-			void Set(ScopePass, ValuePass var, bool force = false);
-			ilang::Variable * Get(ScopePass);
-			ValuePass GetValue(ScopePass);
-			virtual std::string GetFirstName();
-			//virtual ValuePass CallFun (ScopePass, std::vector<ValuePass> &par);
+			FieldAccess(Node*, Identifier);
+			void Set(Context&, ValuePass val, bool force = false);
+			ilang::Variable * Get(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class ArrayAccess : public Variable {
@@ -255,11 +279,13 @@ namespace ilang {
 			Value *Lookup;
 		public:
 			ArrayAccess(Node*, Node*);
-			ilang::Variable * Get(ScopePass);
-			ValuePass GetValue(ScopePass);
-			void Set(ScopePass, ValuePass var, bool force = false); // forced is ignored as it makes no since
+			ilang::Variable * Get(Context&);
+			ValuePass GetValue(Context&);
+			void Set(Context&, ValuePass var, bool force = false); // forced is ignored as it makes no since
 			virtual std::string GetFirstName();
 			void Print(Printer*);
+
+			IdentifierSet UndefinedElements() override;
 		};
 
 		class Call : public Value {
@@ -270,22 +296,16 @@ namespace ilang {
 			std::list<Node*> *params;
 		public:
 			Call(Value *call, std::list<Node*> *args);
-			void Run(ScopePass);
-			ValuePass GetValue(ScopePass);
+			void Run(Context&);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		};
 		class PrintCall : public Call {
 			friend class ilang::Modification;
 		public:
 			PrintCall(std::list<Node*> *args);
-			ValuePass GetValue (ScopePass); // returns null
-			void Print(Printer*);
-		};
-		class NewCall : public Call {
-			friend class ilang::Modification;
-		public:
-			NewCall(std::list<Node*> *args);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue (Context&);
 			void Print(Printer*);
 		};
 
@@ -296,7 +316,7 @@ namespace ilang {
 			std::string fileName;
 		public:
 			AssertCall(int line, const char *name, std::list<Node*> *args);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
 
@@ -304,7 +324,7 @@ namespace ilang {
 			friend class ilang::Modification;
 		public:
 			ImportCall(std::list<Node*> *args);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
 
@@ -312,7 +332,7 @@ namespace ilang {
 			friend class ilang::Modification;
 		public:
 			ThreadGoCall(std::list<Node*> *args);
-			ValuePass GetValue(ScopePass);
+			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
 
@@ -324,9 +344,11 @@ namespace ilang {
 			Value *eval;
 		public:
 			AssignExpr (Variable *target, Value *value);
-			void Run(ScopePass scope);
-			ValuePass GetValue(ScopePass scope);
+			void Run(Context& scope);
+			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
+			void PreRegister(Context &ctx);
 		};
 		class MathEquation : public Expression {
 			friend class ilang::Modification;
@@ -339,9 +361,10 @@ namespace ilang {
 				uMinus
 			};
 			MathEquation(Value *l, Value *r, action a);
-			void Run(ScopePass sope);
-			ValuePass GetValue(ScopePass scope);
+			void Run(Context& sope);
+			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Value *left, *right;
 			action Act;
@@ -361,9 +384,10 @@ namespace ilang {
 				Not
 			};
 			LogicExpression(Value *l, Value *r, action a);
-			void Run(ScopePass scope);
-			ValuePass GetValue(ScopePass scope);
+			void Run(Context& scope);
+			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Value *left, *right;
 			action Act;
@@ -379,9 +403,10 @@ namespace ilang {
 				divide
 			};
 			SingleExpression(Variable *target, Value *value, action a);
-			void Run(ScopePass scope);
-			ValuePass GetValue(ScopePass scope);
+			void Run(Context& scope);
+			ValuePass GetValue(Context& scope);
 			void Print(Printer*);
+			IdentifierSet UndefinedElements() override;
 		private:
 			Variable *m_target;
 			Value *m_value;

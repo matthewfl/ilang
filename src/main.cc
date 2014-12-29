@@ -34,6 +34,7 @@ void show_help_info(char *name) {
 			 << "VERSION: " << ILANG_VERSION << "\n";
 }
 
+extern "C" int ilang_Assert_fails = 0;
 extern "C" int Debug_level=0;
 extern "C" int get_Debug_level() {
 	return Debug_level;
@@ -69,7 +70,7 @@ int main (int argc, char **argv) {
 
 	char *main_file = NULL;
 	boost::filesystem::path db_path = boost::filesystem::current_path();
-	db_path += "/DB/";
+	db_path += "/ilang_db.db";
 
 	for(int i=1;i<argc;i++) {
 		if(*argv[i] == '-') {
@@ -133,9 +134,6 @@ int main (int argc, char **argv) {
 	// for setting up the import search path
 	ilang::Init(argc, argv);
 
-	//	boost::filesystem::path a("/another");
-	//cout << ilang::GlobalImportScope.locateFile(a) << endl;
-
 
 	ilang::ImportScopeFile *mainImport = new ilang::ImportScopeFile(main_file);
 
@@ -147,21 +145,19 @@ int main (int argc, char **argv) {
 	}
 	ilang::parserNode::Head *base = ilang::parser(f, mainImport, main_file);
 	fclose(f);
+	if(!base) {
+		cout << "There was a syntax error\n";
+		return 1;
+	}
+	assert(!base->GetScope()); // we should not have a scope before we attempt linking
 	{ ilang::error_trace ee("linking main file");
 		base->Link();
 	}
 
-	/*	{ ilang::error_trace ee("Printing main parse");
-			ilang::Printer pp;
-			base->Print(&pp);
-			}*/
-
-	/*{ ilang::error_trace ee("running main file");
-		base->Run();
-		}*/
-
-	//ilang::global_EventPool = new ilang::EventPool;
-	//ilang::ThreadPool threads(&events);
+	{ ilang::error_trace ee("Printing main parse");
+		ilang::Printer pp;
+		base->Print(&pp);
+	}
 
 	ilang::Event rootEvent = ilang::global_EventPool()->CreateEvent([base](void *data) {
 			base->Run();

@@ -11,7 +11,7 @@ namespace {
 		ret->append(data, size * nmemb);
 		return size * nmemb;
 	}
-	ValuePass simpleGet(vector<ValuePass> &args) {
+	ValuePass simpleGet(Context &ctx, Arguments &args) {
 		CURL *curl;
 		CURLcode res;
 		char bufferError[CURL_ERROR_SIZE];
@@ -19,12 +19,12 @@ namespace {
 		std::string ret;
 
 		assert(args.size() == 1);
-		assert(args[0]->Get().type() == typeid(std::string));
+		assert(args[0]->type() == typeid(std::string));
 
 		curl = curl_easy_init();
 		assert(curl);
 		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, bufferError);
-		curl_easy_setopt(curl, CURLOPT_URL, boost::any_cast<std::string>(args[0]->Get()).c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, args[0]->cast<std::string>().c_str());
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, simpleGetCallback);
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)&ret);
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
@@ -34,10 +34,10 @@ namespace {
 		curl_easy_cleanup(curl);
 
 		if(res == CURLE_OK) {
-			return ValuePass(new ilang::Value(ret));
+			return valueMaker(ret);
 		}else{
 			std::cerr << "curl error: " << bufferError << endl;
-			return ValuePass(new ilang::Value(false));
+			return valueMaker(false);
 		}
 	}
 }

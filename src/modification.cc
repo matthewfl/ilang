@@ -14,7 +14,7 @@ namespace ilang {
 		errorTrace("Modification::FigureType");
 		assert(node);
 		using namespace ilang::parserNode;
-		if(dynamic_cast<ilang::parserNode::Value*>(node)) {
+		if(dynamic_cast<ilang::parserNode::Value_Old*>(node)) {
 			if(dynamic_cast<Constant*>(node)) {
 				m_masterType = constant_t;
 				if(dynamic_cast<StringConst*>(node)) {
@@ -115,11 +115,12 @@ namespace ilang {
 		cout << "Creating new modification with " << val->Get().type().name() << endl;
 		if(val->Get().type() == typeid(ilang::Function)) {
 			Function fun =	boost::any_cast<ilang::Function>(val->Get());
-			if(fun.native) {
+			// TODO: omg
+			//			if(fun.native) {
 				error(0, "Can not perform modification of native function");
-			}
-			m_node = dynamic_cast<parserNode::Node*>(fun.func);
-			FigureType(m_node);
+				//}
+				//m_node = dynamic_cast<parserNode::Node*>(fun.func);
+				//FigureType(m_node);
 		}else if(val->Get().type() == typeid(ilang::Class*)) {
 			ilang::Class *cla = boost::any_cast<ilang::Class*>(val->Get());
 			//assert(0); // not written yet
@@ -222,8 +223,8 @@ namespace {
 			error(args[0]->Get().type() == typeid(ModData), "mod.manager.type expectes given type to be of mod.type.*");
 			ModData d = boost::any_cast<ModData>(args[0]->Get());
 			error(d.type == ModData::map_type_t, "mod.manager.type expectes given type to be of mod.type.*");
-			if(!mod) return ValuePass(new ilang::Value(bool( d.map_type == Modification::unknown_t )));
-			return ValuePass(new ilang::Value(bool( mod->isType(d.map_type) )));
+			if(!mod) return ValuePass(new ilang::Value_Old(bool( d.map_type == Modification::unknown_t )));
+			return ValuePass(new ilang::Value_Old(bool( mod->isType(d.map_type) )));
 		}
 		ilang::ValuePass scopeList(Scope *scope, std::vector<ilang::ValuePass> &args) {
 			error(args.size() == 0, "mod.manager.list does not take any arguments");
@@ -234,12 +235,12 @@ namespace {
 			for(auto it : mods) {
 				Modification *m = it;
 
-				ret.push_back(ValuePass(new ilang::Value(new Object(new Modification_manager(m)))));
+				ret.push_back(ValuePass(new ilang::Value_Old(new Object(new Modification_manager(m)))));
 			}
 			//mod->get
 
 			ilang::Object *ret_arr = new ilang::Array(ret);
-			return ValuePass(new ilang::Value(ret_arr));
+			return ValuePass(new ilang::Value_Old(ret_arr));
 		}
 
 		ilang::ValuePass map(Scope *scope, std::vector<ilang::ValuePass> &args) {
@@ -249,43 +250,43 @@ namespace {
 			ilang::Function *func = boost::any_cast<ilang::Function>(& args[0]->Get());
 
 			vector<Modification*> list = mod->getList();
-			ValuePass ret = ValuePass(new ilang::Value);
+			ValuePass ret = ValuePass(new ilang::Value_Old);
 
-			if(func->object) {
-				ValuePass ret = ValuePass(new ilang::Value);
+			/*if(func->object) {
+				ValuePass ret = ValuePass(new ilang::Value_Old);
 				assert(func->object->Get().type() == typeid(ilang::Object*));
 				ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func->object->Get())));
 				for(Modification *it : list) {
 					vector<ValuePass> param;
-					ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
+					ilang::Value_Old * val = new ilang::Value_Old(new Object(new Modification_manager(it)));
 					param.push_back(ValuePass(val));
 					func->ptr(obj_scope, param, &ret);
 					if(ret->isTrue()) break;
-				}
+					}*/
 			}else if(func->native) {
 				// why would we have a native function here
 				error(0, "Modification.each with a native function, not done stuff");
 			}else{
-				ValuePass ret = ValuePass(new ilang::Value);
+				ValuePass ret = ValuePass(new ilang::Value_Old);
 				for(Modification *it : list) {
 					vector<ValuePass> param;
-					ilang::Value * val = new ilang::Value(new Object(new Modification_manager(it)));
+					ilang::Value_Old * val = new ilang::Value_Old(new Object(new Modification_manager(it)));
 					param.push_back(ValuePass(val));
 					func->ptr(ScopePass(), param, &ret);
 					if(ret->isTrue()) break;
 				}
 			}
-			return ValuePass(new ilang::Value);
+			return ValuePass(new ilang::Value_Old);
 		}
 
 		ilang::ValuePass print(Scope *scope, std::vector<ilang::ValuePass> &args) {
 			error(args.size() == 0, "print does not take any arguments");
-			return ValuePass(new ilang::Value(std::string(mod->print())));
+			return ValuePass(new ilang::Value_Old(std::string(mod->print())));
 		}
 
 		ilang::ValuePass getName(Scope *scope, std::vector<ilang::ValuePass> &args) {
 			error(args.size() == 0, "getName does not take arguments");
-			return ValuePass(new ilang::Value(mod->getName()));
+			return ValuePass(new ilang::Value_Old(mod->getName()));
 		}
 	private:
 		void Init () {
@@ -322,7 +323,7 @@ namespace {
 				FileScope *s = Modification::getFileScope(scope);
 				Modification *m = new Modification(s);
 				//Modification_manager m;
-				ilang::Value * val = new ilang::Value(new Object(new Modification_manager(m)));
+				ilang::Value_Old * val = new ilang::Value_Old(new Object(new Modification_manager(m)));
 				return ValuePass(val);
 				//Scope *looking = scope;
 				//while(looking->parent) looking = looking->parent;
@@ -338,7 +339,7 @@ namespace {
 		errorTrace("mod createNode");
 		error(args.size() == 1, "mod.node expects 1 argument");
 		Modification *m = new Modification(args[0]);
-		ilang::Value * val = new ilang::Value(new Object(new Modification_manager(m)));
+		ilang::Value_Old * val = new ilang::Value_Old(new Object(new Modification_manager(m)));
 		return ValuePass(val);
 
 	}
@@ -351,43 +352,43 @@ ILANG_LIBRARY_NAME("i/mod",
 									 ILANG_FUNCTION("file", FileTree);
 									 ILANG_FUNCTION("node", createNode);
 									 ILANG_FUNCTION("of", createNode);
-									 import->Set("self", ValuePass(new ilang::Value(ModData("self_file"))));
-									 import->Set("stop", ValuePass(new ilang::Value(ModData("stop"))));
+									 import->Set("self", ValuePass(new ilang::Value_Old(ModData("self_file"))));
+									 import->Set("stop", ValuePass(new ilang::Value_Old(ModData("stop"))));
 									 Object * type_obj = new Object;
-									 type_obj->operator[]("Unknown")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
-									 type_obj->operator[]("File")->Set(ValuePass(new ilang::Value(ModData(Modification::file_t))));
+									 type_obj->operator[]("Unknown")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::unknown_t))));
+									 type_obj->operator[]("File")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::file_t))));
 									 type_obj->operator[]("Value")->Set(ValuePass(new ilang::Value(ModData(Modification::value_t))));
-									 type_obj->operator[]("Expression")->Set(ValuePass(new ilang::Value(ModData(Modification::unknown_t))));
-									 type_obj->operator[]("Constant")->Set(ValuePass(new ilang::Value(ModData(Modification::constant_t))));
+									 type_obj->operator[]("Expression")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::unknown_t))));
+									 type_obj->operator[]("Constant")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::constant_t))));
 
-									 type_obj->operator[]("Function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
-									 type_obj->operator[]("Object")->Set(ValuePass(new ilang::Value(ModData(Modification::object_t))));
-									 type_obj->operator[]("Class")->Set(ValuePass(new ilang::Value(ModData(Modification::class_t))));
-									 type_obj->operator[]("Array")->Set(ValuePass(new ilang::Value(ModData(Modification::array_t))));
-									 type_obj->operator[]("StringConst")->Set(ValuePass(new ilang::Value(ModData(Modification::stringConst_t))));
-									 type_obj->operator[]("IntConst")->Set(ValuePass(new ilang::Value(ModData(Modification::intConst_t))));
-									 type_obj->operator[]("FloatConst")->Set(ValuePass(new ilang::Value(ModData(Modification::floatConst_t))));
+									 type_obj->operator[]("Function")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::function_t))));
+									 type_obj->operator[]("Object")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::object_t))));
+									 type_obj->operator[]("Class")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::class_t))));
+									 type_obj->operator[]("Array")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::array_t))));
+									 type_obj->operator[]("StringConst")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::stringConst_t))));
+									 type_obj->operator[]("IntConst")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::intConst_t))));
+									 type_obj->operator[]("FloatConst")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::floatConst_t))));
 
-									 type_obj->operator[]("If")->Set(ValuePass(new ilang::Value(ModData(Modification::ifStmt_t))));
-									 type_obj->operator[]("For")->Set(ValuePass(new ilang::Value(ModData(Modification::forStmt_t))));
-									 type_obj->operator[]("While")->Set(ValuePass(new ilang::Value(ModData(Modification::whileStmt_t))));
-									 type_obj->operator[]("Return")->Set(ValuePass(new ilang::Value(ModData(Modification::returnStmt_t))));
+									 type_obj->operator[]("If")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::ifStmt_t))));
+									 type_obj->operator[]("For")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::forStmt_t))));
+									 type_obj->operator[]("While")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::whileStmt_t))));
+									 type_obj->operator[]("Return")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::returnStmt_t))));
 
-									 type_obj->operator[]("Variable")->Set(ValuePass(new ilang::Value(ModData(Modification::variable_t))));
-									 type_obj->operator[]("FieldAccess")->Set(ValuePass(new ilang::Value(ModData(Modification::fieldAccess_t))));
-									 type_obj->operator[]("ArrayAccess")->Set(ValuePass(new ilang::Value(ModData(Modification::arrayAccess_t))));
+									 type_obj->operator[]("Variable")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::variable_t))));
+									 type_obj->operator[]("FieldAccess")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::fieldAccess_t))));
+									 type_obj->operator[]("ArrayAccess")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::arrayAccess_t))));
 
-									 type_obj->operator[]("Call")->Set(ValuePass(new ilang::Value(ModData(Modification::call_t))));
-									 type_obj->operator[]("NewCall")->Set(ValuePass(new ilang::Value(ModData(Modification::newCall_t))));
-									 type_obj->operator[]("PrintCall")->Set(ValuePass(new ilang::Value(ModData(Modification::printCall_t))));
+									 type_obj->operator[]("Call")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::call_t))));
+									 type_obj->operator[]("NewCall")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::newCall_t))));
+									 type_obj->operator[]("PrintCall")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::printCall_t))));
 
-									 type_obj->operator[]("AssignExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::assignExpr_t))));
-									 type_obj->operator[]("MathExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::mathExpr_t))));
-									 type_obj->operator[]("LogicExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::logicExpr_t))));
-									 type_obj->operator[]("SingleExpression")->Set(ValuePass(new ilang::Value(ModData(Modification::singleExpr_t))));
+									 type_obj->operator[]("AssignExpression")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::assignExpr_t))));
+									 type_obj->operator[]("MathExpression")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::mathExpr_t))));
+									 type_obj->operator[]("LogicExpression")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::logicExpr_t))));
+									 type_obj->operator[]("SingleExpression")->Set(ValuePass(new ilang::Value_Old(ModData(Modification::singleExpr_t))));
 									 //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 									 //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 									 //type_obj->operator[]("function")->Set(ValuePass(new ilang::Value(ModData(Modification::function_t))));
 
-									 import->Set("type", ValuePass(new ilang::Value(type_obj)));
+									 import->Set("type", ValuePass(new ilang::Value_Old(type_obj)));
 									 )

@@ -1,8 +1,12 @@
-Db test = [];//[1,2];
-
+from i import map
 main = {
-        a = [ 1,2,3 ];
-        //test = a;
-        //Print(a);
-        Print(test);
+        gg = object { a: 1 };
+        q = map.create(gg);
+        q.map({|key, value, emit|
+                Print(key);
+                emit(key, [value, 123]);
+        }).reduce({|key, values, emit|
+                Print(key);
+                Print(values);
+        });
 };

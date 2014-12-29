@@ -13,11 +13,12 @@
 
 namespace {
 	using namespace ilang;
+	using namespace std;
 
 	boost::mutex Eval_mutex;
 	ValuePass Eval_FunctionPass;
 
-	ValuePass evalFunction(std::vector<ValuePass> &args) {
+	ValuePass evalFunction(Context &ctx, Arguments &args) {
 		// arguments: ([optional args string], code string)
 		// return function with code as body
 		error(args.size() != 0, "eval requires at least 1 argument");
@@ -36,10 +37,10 @@ namespace {
 		std::string code = "_eval_worked = import(\"i.eval\")._eval_loader( { \n";
 		if(args.size() == 2) {
 			code += "|";
-			code += arg->str();
+			code += arg->cast<string>();
 			code += "| \n";
 		}
-		code += str->str();
+		code += str->cast<string>();
 		code += "} );\n";
 		// Use fmemopen to create a FILE* to pass to the parser
 
@@ -63,13 +64,13 @@ namespace {
 
 	}
 
-	ValuePass evalLoader(std::vector<ValuePass> &args) {
+	ValuePass evalLoader(Context &ctx, Arguments &args) {
 		error(args.size() == 1, "eval loader not ment to be called directly");
 		//error(args[0]->Get().type() == typeid(long), "eval loader not ment to be called directly");
 
 		Eval_FunctionPass = args[0];
 
-		return ValuePass(new ilang::Value(true));
+		return valueMaker(true);
 	}
 
 

@@ -1,79 +1,121 @@
 #include "scope.h"
-#include "debug.h"
 
-#include "object.h"
+using namespace ilang;
+using namespace std;
 
+Scope::~Scope() {
+	assert(m_ctx->scope == this);
+	m_ctx->scope = m_parent;
+}
+
+Handle<Variable> Scope::forceNew(Context &ctx, ilang::Identifier i, std::vector<ValuePass> modifiers) {
+	//assert(m_vars.find(i) == m_vars.end());
+	for(auto it : modifiers) { assert(it); }
+	Handle<Variable> var;
+	auto it = m_vars.find(i);
+	if(it != m_vars.end()) {
+		var = it->second;
+		var->SetModifiers(ctx, modifiers);
+	} else {
+		var = make_handle<ilang::Variable>(ctx, modifiers);
+		m_vars.insert(pair<Identifier, Handle<Variable> >(i, var));
+	}
+	return var;
+}
+
+ValuePass Scope::get(Context &ctx, ilang::Identifier i) {
+	ValuePass ret;
+	auto it = m_vars.find(i);
+	if(it != m_vars.end()) {
+		ret = it->second->Get(ctx);
+	} else {
+		if(!m_parent) {
+			// just use the global scope if there is no parent
+			ret = global_scope_lookup(i);
+		} else
+			ret = m_parent->get(ctx, i);
+	}
+	assert(ret); // TODO: remove, just return an empty object
+	return ret;
+}
+
+void Scope::set(Context &ctx, ilang::Identifier i, ValuePass v) {
+	// TODO: optimize this??
+	assert(v);
+	if(m_parent && m_parent->has(ctx, i)) {
+		m_parent->set(ctx, i, v);
+		return;
+	}
+	auto it = m_vars.find(i);
+	if(it != m_vars.end()) {
+		it->second->Set(ctx, v);
+		return;
+	}
+	auto var = forceNew(ctx, i, {});
+	var->Set(ctx, v);
+}
+
+bool Scope::has(Context &ctx, ilang::Identifier i) {
+	return m_vars.find(i) != m_vars.end() || m_parent && m_parent->has(ctx, i);
+}
+
+Handle<Variable> Scope::getVariable(Context &ctx, ilang::Identifier i) {
+	// TODO: this needs to call parent scopes, so that bind can bind to higher scopes..
+	auto it = m_vars.find(i);
+	if(it == m_vars.end()) {
+		if(m_parent) {
+			return m_parent->getVariable(ctx, i);
+		} else {
+			ValuePass g = global_scope_lookup(i);
+			if(g) {
+				auto var = make_handle<Variable>();
+				var->Set(ctx, g);
+				return var;
+			}
+			return Handle<Variable>();
+		}
+	}
+	return it->second;
+}
+
+void Scope::insert(ilang::Identifier i, Handle<Variable> v) {
+	m_vars.insert(pair<Identifier, Handle<Variable> >(i, v));
+}
+
+Hashable_iterator Scope::begin() {
+	assert(!m_parent);
+	return Hashable_iterator(m_vars.begin());
+}
+
+Hashable_iterator Scope::end() {
+	assert(!m_parent);
+	return Hashable_iterator(m_vars.end());
+}
+
+void Scope::Debug() {
+	Context ctx; // hopefully not used
+	for(auto it : m_vars) {
+		cerr << it.first.str() << ": " << it.second->Get(ctx)->cast<std::string>() << endl;
+	}
+}
+
+static std::map<ilang::Identifier, ilang::ValuePass> *global_scope = NULL;
 
 namespace ilang {
-	using namespace std;
-	ilang::Variable * Scope::_lookup (string &name) {
-		auto it = vars.find(name);
-		if(it != vars.end())
-			return it->second;
-		assert(parent);
-		return parent->_lookup(name);
+
+	ValuePass global_scope_lookup(ilang::Identifier i) {
+		if(!global_scope)
+			global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
+		auto it = global_scope->find(i);
+		if(it == global_scope->end())
+			return ValuePass();
+		return it->second;
 	}
 
-	ilang::Variable * Scope::lookup (string name) {
-		ilang::Variable * f = _lookup(name);
-		if(f) return f;
-		list<string> mod;
-		f = new ilang::Variable(name, mod);
-		vars.insert(pair<string, ilang::Variable*>(name, f));
-		return f;
-	}
-
-	ilang::Variable * Scope::forceNew (string name, std::list<std::string> &modifiers) {
-		assert(vars.find(name) == vars.end());
-		ilang::Variable *v = new ilang::Variable(name, modifiers);
-		vars.insert(pair<string, ilang::Variable*>(name, v));
-		return v;
-	}
-
-	int Scope::Debug() {
-		return 0;
-		debug_break(return 0;)
-			int indent=1;
-		if(parent) indent = parent->Debug();
-		for(pair<const string, ilang::Variable*> i : vars) {
-			for(int i=0;i<indent;++i) cout << "\t";
-			cout << i.first << "\t" << i.second->Get() << endl;
-		}
-
-		return indent+1;
-	}
-
-
-	Scope::Scope(ScopePass p): parent(p) {}
-	Scope::~Scope() {
-		for(auto it : vars) {
-			delete it.second;
-		}
-	}
-
-	ilang::FileScope * Scope::fileScope() {
-		if(parent) return parent->fileScope();
-		assert(dynamic_cast<FileScope*>(this));
-		return dynamic_cast<FileScope*>(this);
-	}
-
-	ilang::Variable * FileScope::_lookup (string &name) {
-		//TODO: make this check to see if it can't find it
-		return vars.find(name)->second; // there is nothing higher that can be looked at
-	}
-
-	ObjectScope::ObjectScope (Object *o) : Scope(ScopePass()), obj(o) {}
-	ilang::Variable * ObjectScope::_lookup(std::string &name) {
-		auto it = obj->members.find(name);
-		if(it == obj->members.end()) {
-			ilang::Variable *var;
-			if(obj->baseClass) {
-				var = obj->baseClass->operator[](name);
-				if(var) return var;
-			}
-			return NULL;
-		}
-		return (it->second);
+	void global_scope_register(ilang::Identifier i, ValuePass v) {
+		if(!global_scope)
+			global_scope = new std::map<ilang::Identifier, ilang::ValuePass>();
+		global_scope->insert(std::pair<ilang::Identifier, ilang::ValuePass>(i, v));
 	}
 
 }

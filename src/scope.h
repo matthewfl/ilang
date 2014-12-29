@@ -2,96 +2,50 @@
 #define _ilang_scope
 
 #include <map>
-#include <string>
-#include "variable.h"
-
-#include <boost/shared_ptr.hpp>
+#include <vector>
 #include <boost/utility.hpp>
 
 
+#include "identifier.h"
+#include "handle.h"
+#include "hashable.h"
+#include "context.h"
+#include "variable.h"
+#include "handle.h"
+
+#include "helpers.h"
+
+
 namespace ilang {
-	using boost::shared_ptr;
 
-	class Scope;
-	typedef boost::shared_ptr<ilang::Scope> ScopePass;
-	//typedef Scope* ScopePass;
-
-	class FileScope;
-	class Modification;
-	template <typename ReturnHook> class FunctionScope;
-	class Scope : boost::noncopyable {
-		friend class Modification;
-	protected:
-		template <typename ReturnHook> friend class FunctionScope;
-		std::map<std::string, ilang::Variable*> vars;
-		ScopePass parent;
-		virtual ilang::Variable * _lookup (std::string &name);
-	public:
-		ilang::Variable * lookup (std::string name);
-		ilang::Variable * forceNew (std::string name, std::list<std::string> &modifiers);
-		ilang::FileScope * fileScope ();
-		virtual void ParentReturn(ValuePass *val) { assert(parent); parent->ParentReturn(val); }
-		Scope(ScopePass parent);
-		virtual ~Scope();
-
-		int Debug();
-	};
-	class ImportScopeFile;
-	namespace parserNode {
-		class Head;
-	}
-	class FileScope : public Scope {
+	class Scope : public Iterable /* Hashable */, boost::noncopyable {
 	private:
-		friend class ImportScopeFile;
-		friend class Modification;
-		parserNode::Head *head;
+		std::map<ilang::Identifier, Handle<Variable> > m_vars;
 	protected:
-		virtual ilang::Variable * _lookup (std::string &name);
+		Hashable *m_parent;
+		Context *m_ctx;
 	public:
-		FileScope(parserNode::Head *h): Scope(ScopePass()), head(h) {}
-		inline parserNode::Head *getHead() { return head; }
+		Handle<Variable> forceNew(Context &ctx, ilang::Identifier, std::vector<ValuePass> modifiers);
+
+		// Hashable
+		ValuePass get(Context &ctx, ilang::Identifier);
+		void set(Context &ctx, ilang::Identifier, ValuePass);
+		bool has(Context &ctx, ilang::Identifier);
+		Handle<Variable> getVariable(Context &ctx, ilang::Identifier);
+		void insert(ilang::Identifier, Handle<Variable>);
+
+		Scope(Context &ctx) : m_parent(ctx.scope), m_ctx(&ctx) { ctx.scope = this; }
+		~Scope();
+		Hashable_iterator begin() override;
+		Hashable_iterator end() override;
+
+		void Debug();
 	};
 
-	template <typename ReturnHook> class FunctionScope : public Scope {
-		friend class Modification;
-	public:
-		FunctionScope(ScopePass s, ScopePass other, ReturnHook h) : Scope(s), hook(h), objs(other) {}
-		void ParentReturn(ValuePass *r) { hook(r); }
-	private:
-		ReturnHook hook;
-		ScopePass objs;
-	protected:
-		virtual ilang::Variable * _lookup(std::string &name) { // the joy of template programming
-			auto it = vars.find(name);
-			if(it != vars.end())
-				return it->second;
-			if(objs) {
-				ilang::Variable *v;
-				v = objs->_lookup(name);
-				if(v) return v;
-			}
-			assert(parent);
-			return parent->_lookup(name);
-		}
-	};
+	ValuePass global_scope_lookup(ilang::Identifier i);
+	void global_scope_register(ilang::Identifier i, ValuePass v);
 
-	/*	class ClassScope : public Scope {
-			public:
-			ClassScope(Scope *s) : Scope(s) {}
-			};*/
+}
 
-	class Object;
-	class ObjectScope : public Scope {
-		friend class Modification;
-	private:
-		ValuePass hold;
-		Object *obj;
-	protected:
-		virtual ilang::Variable * _lookup(std::string &name);
-	public:
-		ObjectScope(Object*); // TODO: fix this to have the valuePass
-	};
-
-}; // namespace ilang
 
 #endif // _ilang_scope

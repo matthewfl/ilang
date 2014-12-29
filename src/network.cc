@@ -49,14 +49,14 @@ namespace {
 	};
 	struct ilang_torrent_plugin : libtorrent::torrent_plugin {
 		virtual ~ilang_torrent_plugin() {}
-		virtual boost::shared_ptr<peer_plugin> new_connection(peer_connection *con) {
-			return boost::shared_ptr<peer_plugin>(new ilang_peer_plugin);
+		virtual boost::Handle<peer_plugin> new_connection(peer_connection *con) {
+			return boost::Handle<peer_plugin>(new ilang_peer_plugin);
 		}
 	};
 	struct ilang_plugin : libtorrent::plugin {
 		virtual ~ilang_plugin() {};
-		virtual boost::shared_ptr<torrent_plugin> new_torrent(torrent *t, void *user) {
-			return boost::shared_ptr<torrent_plugin>(new ilang_torrent_plugin);
+		virtual boost::Handle<torrent_plugin> new_torrent(torrent *t, void *user) {
+			return boost::Handle<torrent_plugin>(new ilang_torrent_plugin);
 		}
 	};
 

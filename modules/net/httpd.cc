@@ -64,11 +64,11 @@ namespace {
 		static int header_value_cb(http_parser *parser, const char *dat, size_t length);
 
 
-		ValuePass isRunning(Scope *scope, vector<ValuePass> &args);
-		ValuePass setListen(Scope *scope, vector<ValuePass> &args);
-		ValuePass startListen(Scope *scope, vector<ValuePass> &args);
-		ValuePass stopListen(Scope *scope, vector<ValuePass> &args);
-		ValuePass waitEnd(Scope *scope, vector<ValuePass> &args);
+		ValuePass isRunning(Context &ctx, Arguments &args);
+		ValuePass setListen(Context &ctx, Arguments &args);
+		ValuePass startListen(Context &ctx, Arguments &args);
+		ValuePass stopListen(Context &ctx, Arguments &args);
+		ValuePass waitEnd(Context &ctx, Arguments &args);
 		void Init();
 
 	public:
@@ -95,33 +95,33 @@ namespace {
 
 
 
-		ValuePass getUrl (vector<ValuePass> &args) {
+		ValuePass getUrl (Context &ctx, Arguments &args) {
 			error(args.size() == 0, "httpd.request.url expects no arguments");
-			return ValuePass(new ilang::Value(url));
+			return valueMaker(url);
 		}
 
-		ValuePass getHeader (vector<ValuePass> &args) {
+		ValuePass getHeader (Context &ctx, Arguments &args) {
 			error(args.size() == 1, "httpd.request.header expects 1 argument");
-			error(args[0]->Get().type() == typeid(std::string), "httpd.request.header expects a string type");
-			string s = boost::any_cast<std::string>(args[0]->Get());
+			error(args[0]->type() == typeid(std::string), "httpd.request.header expects a string type");
+			string s = args[0]->cast<std::string>();
 			boost::algorithm::to_lower(s);
 
 			// read data from the header and return it back
-			return ValuePass(new ilang::Value(headers[s]));
+			return valueMaker(headers[s]);
 		}
 
-		ValuePass writeHead(vector<ValuePass> &args) {
+		ValuePass writeHead(Context &ctx, Arguments &args) {
 			debug(4, "in write head\n");
 			// eg: writeHead(302, "Location: http://......", "Content-type: text/plain", .....);
 			//close_mutex.lock_shared();
 			int code = 200;
 			if(args.size() >= 1) {
-				error(args[0]->Get().type() == typeid(long), "httpd.request.writeHead expects a responce code for the first argument");
-				code = boost::any_cast<long>(args[0]->Get());
+				error(args[0]->type() == typeid(long), "httpd.request.writeHead expects a responce code for the first argument");
+				code = args[0]->cast<int>();
 				error(code < 1000 && code > 99, "Http code expects to be between 100 and 999");
 			}
 			for(int i=1;i<args.size();i++) {
-				error(args[i]->Get().type() == typeid(std::string), "httpd.request.writeHead expects a string for the 2+ arguments");
+				error(args[i]->type() == typeid(std::string), "httpd.request.writeHead expects a string for the 2+ arguments");
 			}
 
 			struct headWriteReq {
@@ -155,7 +155,7 @@ namespace {
 			status_code.copy(buf[0].base, status_code.length());
 			int place=1;
 			for(;place<args.size();place++) {
-				string str = args[place]->str();
+				string str = args[place]->cast<string>();
 				str += "\r\n";
 				buf[place].len = str.length();
 				buf[place].base = new char[str.length()];
@@ -181,16 +181,16 @@ namespace {
 
 			debug(4, "end of write head\n") ;
 
-			return ValuePass(new ilang::Value);
+			return ValuePass();
 		}
 
-		ValuePass writeReq(vector<ValuePass> &args) {
+		ValuePass writeReq(Context &ctx, Arguments &args) {
 			debug(4, "in write req\n")
 				//close_mutex.lock_shared();
 				error(args.size() >= 1, "httpd.request.write expects at least one argument");
 			if(headWritten == false) {
-				vector<ValuePass> headArgs;
-				ValuePass ii = writeHead(headArgs);
+				Arguments headArgs;
+				ValuePass ii = writeHead(ctx, headArgs);
 			}
 
 			struct writeReq {
@@ -207,10 +207,10 @@ namespace {
 			uv_buf_t *buf = new uv_buf_t[args.size()];
 			writereq->buf = buf;
 			writereq->buf_size = args.size();
-			for(ValuePass val : args) {
+			for(auto val : args) {
 				// create buffers for all the iterms
 				// send to libuv
-				string str = val->str();
+				string str = val.second->cast<string>();
 				debug(4, "writing req with "<< str );
 				buf[place].len = str.length();
 				buf[place].base = new char[str.length()];
@@ -232,15 +232,15 @@ namespace {
 							 });
 
 			debug(4, "end of write req");
-			return ValuePass(new ilang::Value(true));
+			return valueMaker(true);
 		}
 
-		ValuePass endReq(vector<ValuePass> &args) {
+		ValuePass endReq(Context &ctx, Arguments &args) {
 			if(args.size() != 0) {
-				ValuePass ii = writeReq(args);
+				ValuePass ii = writeReq(ctx, args);
 			}
 			close();
-			return ValuePass(new ilang::Value);
+			return ValuePass();
 		}
 
 		void Init() {
@@ -382,22 +382,26 @@ namespace {
 		Request *req = (Request*) parser->data;
 		debug(4, "got to point where headers are done" );
 		// believe that request is ready at this point
-		ValuePass rr = ValuePass(new ilang::Value(new ilang::Object(req)));
+		//auto rr_ = make_handle<ilang::Object>(req);
+		ValuePass rr = valueMaker(true);
 		// at this point Request will be deleted when rr is lost
 		vector<ValuePass> params = {rr};
-		ValuePass ret = ValuePass(new ilang::Value);
+		//ValuePass ret = ValuePass(new ilang::Value);
 		Function & func = req->parent->callback;
 		/*if(callback->native) {
 			function->ptr(NULL, params, &ret);
 			}else */
 		// need to create a thread here and execuit the code
-		if(func.object) {
-			assert(func.object->Get().type() == typeid(ilang::Object*));
-			ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
-			func.ptr(obj_scope, params, &ret);
-		}else{
-			func.ptr(ScopePass(), params, &ret);
-		}
+
+		Context ctx; // this is a callback so there isn't really any context
+		ValuePass ret = func(ctx, params);
+		// if(func.object) {
+		// 	assert(func.object->Get().type() == typeid(ilang::Object*));
+		// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
+		// 	func.ptr(obj_scope, params, &ret);
+		// }else{
+		// 	func.ptr(ScopePass(), params, &ret);
+		// }
 
 		// ignore the return type here
 
@@ -433,28 +437,28 @@ namespace {
 
 		}*/
 
-	ValuePass Server::isRunning(Scope *scope, vector<ValuePass> &args) {
+	ValuePass Server::isRunning(Context &ctx, Arguments &args) {
 		error(args.size() == 0, "httpd.running does not take any arguments");
-		return ValuePass(new ilang::Value(listening));
+		return valueMaker(listening);
 	}
 
-	ValuePass Server::setListen(Scope *scope, vector<ValuePass> &args) {
+	ValuePass Server::setListen(Context &ctx, Arguments &args) {
 		error(args.size() == 1, "http.setListen takes 1 argument");
-		error(args[0]->Get().type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
+		error(args[0]->type() == typeid(ilang::Function), "http.setListen takes a function for an argument");
 
 		_callback = args[0];
-		callback = boost::any_cast<Function>(args[0]->Get());
+		callback = *args[0]->cast<Function*>();
 
-		return ValuePass(new ilang::Value);
+		return ValuePass();
 	}
 
-	ValuePass Server::startListen(Scope *scope, vector<ValuePass> &args) {
+	ValuePass Server::startListen(Context &ctx, Arguments &args) {
 		error(args.size() <= 1, "httpd.start takes one argument");
 		error(listening == false, "httpd already listening");
 
 		if(args.size()) {
-			error(args[0]->Get().type() == typeid(long), "argument to httpd.start expected to be a number");
-			listenPort = boost::any_cast<long>(args[0]->Get());
+			error(args[0]->type() == typeid(long), "argument to httpd.start expected to be a number");
+			listenPort = args[0]->cast<int>();
 		}
 
 		// fill in
@@ -465,20 +469,20 @@ namespace {
 											on_connection_cb);
 		uv_run(loop, UV_RUN_DEFAULT);
 		if(r != 0) { cerr << "Problem opening up socket\n"; }
-		return ValuePass(new ilang::Value((bool)r == 0));
+		return valueMaker(bool(r==0));
 
 	}
-	ValuePass Server::stopListen(Scope *scope, vector<ValuePass> &args) {
+	ValuePass Server::stopListen(Context &ctx, Arguments &args) {
 		error(args.size()== 0, "httpd.stop takes no arguments");
 		error(listening == true, "httpd not listening");
 
 		// fill in
 		// close the socket on loop
 
-		return ValuePass(new ilang::Value);
+		return ValuePass();
 	}
 
-	ValuePass Server::waitEnd(Scope *scope, vector<ValuePass> &args) {
+	ValuePass Server::waitEnd(Context &ctx, Arguments &args) {
 		assert(0);
 	}
 
@@ -500,11 +504,11 @@ namespace {
 	}
 
 	Server::Server(ValuePass call, int port) {
-		assert(call->Get().type() == typeid(Function));
+		assert(call->type() == typeid(Function));
 		assert(port >= 0 && port <= 0xFFFF);
 		listening = false;
 		_callback = call;
-		callback = boost::any_cast<Function>(call->Get());
+		callback = *call->cast<Function*>();
 		listenPort = port;
 		Init();
 	}
@@ -518,12 +522,13 @@ namespace {
 	// Server end
 
 
-	ValuePass createServer(vector<ValuePass> &args) {
+	ValuePass createServer(Context &ctx, Arguments &args) {
 		error(args.size() == 2, "httpd.create takes 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "httpd.create 1st argument is a port number");
-		error(args[1]->Get().type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
-		Server *ser = new Server(args[1], boost::any_cast<long>(args[0]->Get()));
-		return ValuePass(new ilang::Value(new ilang::Object(ser)));
+		error(args[0]->type() == typeid(long), "httpd.create 1st argument is a port number");
+		error(args[1]->type() == typeid(ilang::Function), "httpd.create 2nd argument is a callback function");
+		Server *ser = new Server(args[1], args[0]->cast<int>());
+		//auto obj = make_handle<ilang::Object>(ser);
+		return valueMaker(true);//obj);
 	}
 }
 

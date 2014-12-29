@@ -2,13 +2,17 @@
 #include "import.h"
 #include "variable.h"
 
+#include "handle.h"
+
 #include <iostream>
 using namespace std;
+using namespace ilang;
 
 namespace {
-	ilang::ValuePass ttt (std::vector<ilang::ValuePass> &args) {
-		cout << "ttt function called" << endl;
-		debug(5, "what");
+	ilang::ValuePass ttt (Context &ctx, Arguments &args) {
+		//cout << "ttt function called" << endl;
+		//debug(5, "what");
+		return valueMaker("the ttt function called");
 	}
 
 	using namespace ilang;
@@ -17,31 +21,31 @@ namespace {
 	private:
 		ValuePass something;
 	public:
-		ilang::ValuePass eeee(std::vector<ilang::ValuePass> &args) {
-			cout << "calling the eeee function";
+		ilang::ValuePass eeee(Context &ctx, Arguments &args) {
+			return valueMaker("the eeee function called");
 		}
 
-		ValuePass set(std::vector<ValuePass> &args) {
+		ValuePass set(Context &ctx, Arguments &args) {
 			assert(args.size() == 1);
 			something = args[0];
-			return ValuePass(new ilang::Value);
+			return ValuePass();
 		}
-		ValuePass get(std::vector<ValuePass> &args) {
+		ValuePass get(Context &ctx, Arguments &args) {
 			return something;
 		}
 
 		//wwww ();
 		//};
-		wwww ()	 {
+		wwww (Context &ctx, Arguments &args)	 {
 			reg("eeee", &wwww::eeee);
 			reg("set", &wwww::set);
 			reg("get", &wwww::get);
-			cout << "new class wwww created\n";
+			//cout << "new class wwww created\n";
 			//assert(0);
 			//while(1);
 		}
 		virtual ~wwww () {
-			cout << "test class deleted\n";
+			//cout << "test class deleted\n";
 			//assert(0);
 		}
 	};

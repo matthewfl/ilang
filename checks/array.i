@@ -8,7 +8,7 @@ main = {
 	assert(CompArray(a, [1,2,3,4]));
 	assert(a.pop() == 4);
 	assert(CompArray(a, [1,2,3]));
-	Print(a);
+	//Print(a);
 	// need to finish off check of other array functions
 };
 

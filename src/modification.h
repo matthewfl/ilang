@@ -60,7 +60,7 @@ namespace ilang {
 		//union {
 		ilang::parserNode::Head* m_file;
 		ilang::parserNode::Node* m_node;
-		ilang::Value *m_value;
+		ilang::Value_Old *m_Value_old;
 		//};
 		std::string m_name;
 

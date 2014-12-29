@@ -6,6 +6,7 @@
 #include "import.h"
 #include "object.h"
 #include "function.h"
+#include "value_types.h"
 #include <string>
 
 #include <iostream>
@@ -14,103 +15,69 @@
 #define ILANG_FILE __FILE__
 #endif
 
-/*
-	namespace ilang {
-	// a very bad hack, I would like to find a better way
-	namespace {
-	ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(std::vector<ilang::ValuePass>&) ) {
-	ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
-	*ret = (*fun)(args);
-	};
-	return ValuePass(new ilang::Value(f));
-	}
-	ilang::ValuePass Function_Creater( ilang::ValuePass (*fun)(ilang::Scope*, std::vector<ilang::ValuePass>&) ) {
-	ilang::Function_ptr f = [fun](ilang::Scope *scope, std::vector<ilang::ValuePass> & args, ilang::ValuePass *ret) {
-	*ret = (*fun)(scope, args);
-	};
-	return ValuePass(new ilang::Value(f));
-	}
-	}
-	}
-*/
-
 
 
 namespace ilang {
 	// used to create wrapper for C++ classes
 	// other helpers for wrappers in import.cc
-	ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) );
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) );
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) );
+	// doesn't make since to not take a context anymore
+	ValuePass Function_Creater( ValuePass (*fun)(Context&, Arguments&) );
 
-	class C_Class {
+
+	class C_Class : public Object_ish {
 	private:
-		std::map<std::string, ilang::Variable*> m_members;
 	public:
-		C_Class() {}
+		C_Class();
 		virtual ~C_Class();
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(std::vector<ValuePass> &args) ) {
+		template <typename cls> void reg(Identifier name, ValuePass (cls::*fun)(Context &ctx, Arguments &args)) {
 			assert(m_members.find(name) == m_members.end());
-			cla *self = (cla*)this;
-			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(args);
-				assert(*ret);
-			};
-			std::list<std::string> mod = {"Const"};
-			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
-			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
+			// TODO: this breaks the reference counting, as it needs to know when this function was returned
+			Handle<cls> self((cls*)this);
+			ilang::Function f([fun, self](Context &ctx, Arguments &args, ValuePass *ret) {
+					*ret = (self.get() ->* fun)(ctx, args);
+					//assert(*ret);
+				});
+			// TODO: fix this, and save the functions elsewhere
+			Context ctx;
+			set(ctx, name, valueMaker(f));
 		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(Scope *s, std::vector<ValuePass> &args) ) {
-			assert(m_members.find(name) == m_members.end());
-			cla *self = (cla*)this;
-			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(scope.get(), args);
-				assert(*ret);
-			};
-			std::list<std::string> mod = {"Const"};
-			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
-			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
-		}
-		template <typename cla> void reg(std::string name, ValuePass (cla::*fun)(ScopePass s, std::vector<ValuePass> &args) ) {
-			assert(m_members.find(name) == m_members.end());
-			cla *self = (cla*)this;
-			//assert(self);
-			ilang::Function f;
-			f.native = true;
-			f.ptr = [fun, self](ScopePass scope, std::vector<ValuePass> &args, ValuePass *ret) {
-				*ret = (self ->* fun)(scope, args);
-				assert(*ret);
-			};
-			std::list<std::string> mod = {"Const"};
-			ilang::Variable *var = new ilang::Variable(name, mod);
-			var->Set(ValuePass(new ilang::Value(f)));
-			m_members.insert(std::pair<std::string, ilang::Variable*>(name, var));
-		}
-		ilang::Variable* operator[](std::string name) {
-			auto it = m_members.find(name);
-			if(it != m_members.end()) return it->second;
-			return NULL;
-		}
+		static bool interface(ValuePass v);
+		static bool instance(ValuePass v);
+
 	};
 
 	template<typename cc> class Class_Creater_class : public Class {
 	public:
-		Class_Creater_class () : Class(NULL, NULL, ScopePass()) {}
-		Object * NewClass (ValuePass self) {
-			return new Object(new cc);
+		// this should not end up using the context in this state
+		// need ot create a new constructure for this
+		Class_Creater_class () {}
+
+		ValuePass get(Context &ctx, Identifier i) override {
+			if(i == "new") {
+				ilang::Function nfun([](Context &ctx, Arguments &args, ValuePass *ret) {
+						auto r = make_handle<cc>(ctx, args);
+						*ret = valueMaker(static_pointer_cast<Hashable>(r));
+					});
+				return valueMaker(nfun);
+			}
+			if(i == "interface") {
+ 				ilang::Function inter([](Context &ctx, Arguments &args, ValuePass *ret) {
+						*ret = valueMaker(cc::interface(args[0]));
+					});
+				return valueMaker(inter);
+			}
+			if(i == "instance") {
+				ilang::Function inst([](Context &ctx, Arguments &args, ValuePass *ret) {
+						*ret = valueMaker(cc::instance(args[0]));
+					});
+				return valueMaker(inst);
+			}
 		}
+
 	};
 	template<typename cc> ValuePass Class_Creater() {
-		ilang::Class *c = new Class_Creater_class<cc>();
-		return ValuePass(new ilang::Value(c));
+		auto c = make_handle<Class_Creater_class<cc> >();
+		return valueMaker(dynamic_pointer_cast<Class>(c));
 	}
 }
 
@@ -155,7 +122,7 @@ namespace ilang {
 //#define ILANG_PATH(name, x) import->Local(name, x );
 
 #define ILANG_CLASS(name, x) import->Set(name, ilang::Class_Creater< x >() );
-#define ILANG_REGISTER(name) register(#name, name);
+//#define ILANG_REGISTER(name) register(#name, name);
 
 #define ILANG_FUNCTION(name, x) import->Set(name, ilang::Function_Creater( x ) );
 

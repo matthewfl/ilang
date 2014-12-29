@@ -62,4 +62,67 @@ need to get modifications working better first
 how would this work with threading if the code was changing and it was compiled, where would it know to change the code if it was creating new code instead of modifying the syntax tree
 
 
+3/15/2014
+Latest:
 keywork arguments
+Change the type checking system to not use keyworks, and instead of some identifer with a class, eg: have a class with some validate method and then call it when preforming the type validation
+
+The system needs to be cleaned up internally, since it is becoming difficult to work with.  The jit engine is not necessary in the sort term and might not be required since the theme should be mostly calling out to C++ functions that are doing the heavy lifting computationally, and then just stringing together the components.  Thinking that the system could use some unit tests are there are starting to get a number of interal components.  Then there needs to be cleaning relating to the abstracting of working with functions, classes and objects as the current interface is "leaking" all over the code base.
+
+5/13/2014 (Refactor)
+1) Functions need to be more abstracted.
+	 * Abstract the calling mechanism
+	 	 context of function created, this parameter, C++ vs ilang functions
+	 * better support for passing arguments
+	 	 this will allow for kwargs to be also passed
+2) variables/scope overall
+	 * make the variables hold the value themselves rather than being pointers
+	 * the system will use more oop and no more boost::any
+	 * this needs to have the support for there names and modifiers built in, since we should be relying on the parserNodes for that
+3) Using make_ptr to make std::smart_ptr
+4) There should be some common hash mapping representation.
+	 * this should be used to back objects and classes
+
+
+7/10/2014
+Need to add in error checking with 1/2 way reasonable errors to the parser tree
+
+7/16/2014
+We should be able to have "algebric" types by adding functions together, eg if we write {|Int + String a|};  Then the `Int + String` will validate that it passes the check for being an Int or a String.
+
+8/8/2014
+Better error handling for parser errors
+
+8/24/2014
+Possibly change the syntax for class/objects to look more like the rest of the language with using = and ; instead of : and ,.  Then there could also be support for using something like loops as one would in a function.  eg:
+object {
+			 a = 1;
+			 b = 5;
+			 while(b < a) {
+			      a += 1;
+			 }
+};
+
+maybe some yield-ish support??
+times(5) {
+
+}
+what is the use case for this that actually makes since, would it just allow people to implement their own object/class like systems and then object/classes could be implemented using the same methods
+
+8/28/2014
+Create some sort of proxy object concept, so that objects can be represented that are loaded on other machines or backed by something else, eg: db
+
+8/29/2014
+change to use berkeley db, when the system starts supporting distribuited, it will have units of code which will each be able to have their own dbs
+
+8/31/2014
+Assuming that support for using ones own {} with some function calling, then there could be some table like interface like:
+DB("name") something = Database.table {
+					 Database.name("column_name") Int Database.index random = null; // default value
+					 Database.unique Database.autoinc another = null;
+};
+
+something.find(`random, 123);
+
+
+thinking that the json loading/dumping of data is too specific of a use case, and there should be possibly some better way to dealing with the data

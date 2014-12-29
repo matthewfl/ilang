@@ -1,4 +1,4 @@
-Db cc = 10;
+DB("cc") cc = 10;
 
 main = {
 	// this is to be run after 1db_test.i

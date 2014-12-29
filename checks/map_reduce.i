@@ -1,9 +1,9 @@
 from i import map
 
 data = object {
- a: "a",
- b: "b",
- c: "c"
+ a = "a";
+ b = "b";
+ c = "c";
 };
 
 

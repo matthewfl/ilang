@@ -19,23 +19,25 @@ namespace {
 		timerData *m_data;
 		long m_timeout;
 		bool m_interval;
-		ValuePass stopTimer(std::vector<ValuePass> &args) {
+		ValuePass stopTimer(Context &ctx, Arguments &args) {
 			uv_timer_stop(&m_data->m_timer);
 			m_data->doDelete = true;
-			return ValuePass(new ilang::Value(true));
+			return valueMaker(true);
 		}
 
 		static void timer_callback(uv_timer_t *handle, int status) {
 			timerData *data = (timerData*)handle->data;
-			ilang::Function func = boost::any_cast<ilang::Function>(data->m_function->Get());
-			vector<ValuePass> params;
-			ValuePass ret = ValuePass(new ilang::Value);
-			if(func.object) {
-				ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
-				func.ptr(obj_scope, params, &ret);
-			}else{
-				func.ptr(ScopePass(), params, &ret);
-			}
+			ilang::Function func = *data->m_function->cast<Function*>();
+			//vector<ValuePass> params;
+			Context ctx; // this is a callback so there isn't really any scope ctx for this
+			ValuePass ret = func(ctx);
+			// ValuePass ret = ValuePass(new ilang::Value);
+			// if(func.object) {
+			// 	ScopePass obj_scope = ScopePass(new ObjectScope(boost::any_cast<ilang::Object*>(func.object->Get())));
+			// 	func.ptr(obj_scope, params, &ret);
+			// }else{
+			// 	func.ptr(ScopePass(), params, &ret);
+			// }
 			// ignore the return type
 
 			if(!uv_timer_get_repeat(&data->m_timer)) {
@@ -55,7 +57,7 @@ namespace {
 		timerManager(long time, ValuePass func, bool interval = false) :
 			m_timeout(time), m_interval(interval)
 		{
-			assert(func->Get().type() == typeid(ilang::Function));
+			assert(func->type() == typeid(ilang::Function));
 			m_data = new timerData;
 			m_data->parent = this;
 			m_data->m_function = func;
@@ -77,22 +79,26 @@ namespace {
 		}
 	};
 
-	ValuePass setTimer(std::vector<ValuePass> &args) {
+	ValuePass setTimer(Context &ctx, Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "first argument to setTimeout should be a time in ms");
-		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
-		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], false);
+		error(args[0]->type() == typeid(long), "first argument to setTimeout should be a time in ms");
+		error(args[1]->type() == typeid(ilang::Function), "second argument to setTimeout should be a function");
+		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], false);
 
-		return ValuePass(new ilang::Value(new ilang::Object(time)));
+		// TODO: returning class instance
+		//auto obj = make_handle<ilang::Object>(time);
+		return valueMaker(false);
 	}
 
-	ValuePass setInterval(std::vector<ValuePass> &args) {
+	ValuePass setInterval(Context &ctx, Arguments &args) {
 		error(args.size() == 2, "Expects 2 arguments");
-		error(args[0]->Get().type() == typeid(long), "first argument to setInterval should be a time in ms");
-		error(args[1]->Get().type() == typeid(ilang::Function), "second argument to setInterval should be a function");
-		timerManager *time = new timerManager(boost::any_cast<long>(args[0]->Get()), args[1], true);
+		error(args[0]->type() == typeid(long), "first argument to setInterval should be a time in ms");
+		error(args[1]->type() == typeid(ilang::Function), "second argument to setInterval should be a function");
+		timerManager *time = new timerManager(args[0]->cast<long>(), args[1], true);
 
-		return ValuePass(new ilang::Value(new ilang::Object(time)));
+		return valueMaker(Handle<Hashable>(time));
+		//auto obj = make_handle<ilang::Object>(time);
+		//return valueMaker(false); //obj);
 	}
 
 

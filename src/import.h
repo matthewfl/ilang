@@ -1,9 +1,6 @@
 #ifndef _ilang_import
 #define _ilang_import
 
-#include "debug.h"
-#include "variable.h"
-
 #include <string>
 #include <vector>
 #include <list>
@@ -11,10 +8,16 @@
 
 #include <boost/filesystem.hpp>
 
+#include "debug.h"
+#include "variable.h"
+#include "context.h"
+
 namespace ilang {
-	class Scope;
-	class FileScope;
-	class Object;
+
+	namespace parserNode {
+		class Head;
+	}
+
 	namespace fs = boost::filesystem;
 	class ImportScope;
 	extern std::vector<fs::path> ImportSearchPaths;
@@ -33,24 +36,27 @@ namespace ilang {
 		ImportScope(ImportScope*, boost::filesystem::path);
 		boost::filesystem::path locateFile(boost::filesystem::path search);
 		void Import (boost::filesystem::path p);
-		virtual void load(Object*) {};
-		void get(Object*, fs::path&);
+		virtual void load(Context &ctx, Handle<Hashable>) {};
+		void get(Context &ctx, Handle<Hashable>, fs::path&);
 	};
 	extern ImportScope GlobalImportScope;
 
 	class ImportScopeFile : public ImportScope {
 		// for ilang files
 	private:
-		FileScope *m_Scope;
-		std::list<std::pair<std::list<std::string>, fs::path> > imports;
-		Object * GetObject(Scope*, std::list<std::string>);
-		Object * GetObject(Object*, std::list<std::string>&);
+		//FileScope *m_Scope;
+		std::list<std::pair<std::vector<Identifier>, fs::path> > imports;
+		parserNode::Head *m_head = NULL;
+		Handle<Hashable> GetObject(Context &ctx, std::vector<Identifier>);
+		Handle<Hashable> GetObject(Context &ctx, Handle<Hashable>, std::vector<Identifier>&);
+		//Handle<Hashable> GetObject(std::vector<Identifier>);
+		friend class parserNode::Head;
 	public:
 		ImportScopeFile(fs::path p);
-		void push(std::list<std::string> *pre, std::list<std::string> *name);
-		void resolve(Scope*);
+		void push(std::vector<Identifier> *pre, std::vector<Identifier> *name);
+		void resolve(Context &ctx);
 
-		void load(Object*);
+		void load(Context &ctx, Handle<Hashable>) override;
 		//void provide(FileScope*);
 	};
 
@@ -63,10 +69,10 @@ namespace ilang {
 		ImportScopeC(char *);
 		explicit ImportScopeC(fs::path p);
 		void Set(char *name, ValuePass val);
-		void load(Object*);
+		void load(Context &ctx, Handle<Hashable>) override;
 	};
 
-	ilang::Object *ImportGetByName(std::string name);
+	Handle<ilang::Object> ImportGetByName(std::string name);
 }
 
 #endif // _ilang_import

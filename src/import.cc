@@ -1,3 +1,9 @@
+#include <stdio.h>
+//#include <dlfcn.h>
+#include <boost/algorithm/string/replace.hpp>
+
+#include <iostream>
+
 #include "import.h"
 #include "scope.h"
 #include "variable.h"
@@ -7,14 +13,10 @@
 #include "function.h"
 #include "error.h"
 
-#include <stdio.h>
-//#include <dlfcn.h>
-#include <boost/algorithm/string/replace.hpp>
+#include "ilang.h"
 
-#include <iostream>
 using namespace std;
 
-#include "ilang.h"
 
 namespace ilang {
 	std::vector<boost::filesystem::path> ImportSearchPaths;
@@ -45,6 +47,8 @@ namespace ilang {
 		exe.remove_filename();
 		exe /= "/modules";
 		ImportSearchPaths.push_back(exe);
+#else
+#warning "Path local to the execuitable location will not be included"
 #endif
 	}
 
@@ -99,19 +103,18 @@ namespace ilang {
 			cout << check << " " << fs::is_regular_file(check) <<	 endl;
 			if(fs::is_regular_file(check)) return check;
 		}
-		//ImportedFiles.find(search
 		return fs::path();
 	}
 
 	ImportScopeFile::ImportScopeFile(fs::path p) : ImportScope(&GlobalImportScope, p) {}
 
-	void ImportScopeFile::push(std::list<std::string> *pre, std::list<std::string> *name) {
+	void ImportScopeFile::push(std::vector<Identifier> *pre, std::vector<Identifier> *name) {
 		string str;
 		fs::path p;
 		if(pre) {
 			for(auto it : *pre) {
 				if(!str.empty()) str += "/";
-				str += it;
+				str += it.str();
 			}
 			// first look for the file name
 			// TODO: put this back in when the import system is advance enough to be able to handel importing individual items in
@@ -120,7 +123,7 @@ namespace ilang {
 			//if(p.empty()) {
 			for(auto it : *name) {
 				if(!str.empty()) str += "/";
-				str +=	it;
+				str +=	it.str();
 			}
 			look = str;
 			p = locateFile(look);
@@ -134,34 +137,25 @@ namespace ilang {
 			fs::path look(str);
 			p = locateFile(look);
 		}
-		assert(! p.empty() ); // not able to find the file that is getting imported
-		imports.push_back(pair<std::list<std::string>, fs::path>(*name, p));
+		error(! p.empty(), "not able to locate file " << str << " for importing");
+		imports.push_back(pair<std::vector<Identifier>, fs::path>(*name, p));
 		delete name;
 	}
 
-	/*void ImportScopeFile::provide(FileScope *scope) {
-		scope->vars.find("test");
-		}*/
-
-	void ImportScopeFile::load(Object *o) {
-		//ilang::Variable *v = o->operator[]("test");
-		//v->Set(new ilang::Value((long)123));
-
-		for(auto it : m_Scope->vars) {
-			cout << it.first << endl;
-			ilang::Variable *v = o->operator[](it.first);
-			v->Set(it.second->Get());
+	void ImportScopeFile::load(Context &ctx, Handle<Hashable> o) {
+		for(auto it : *m_head->GetScope()) {
+			o->set(ctx, it.first, it.second->Get(ctx));
 		}
 	}
 
-	void ImportScope::get(Object *obj, fs::path &pa) {
+	void ImportScope::get(Context &ctx, Handle<Hashable> obj, fs::path &pa) {
 		auto find = ImportedFiles.find(pa);
 		if(find != ImportedFiles.end()) {
-			find->second->load(obj);
+			find->second->load(ctx, obj);
 		}else{
 			auto find2 = StaticImportedFiles().find((std::string)pa.c_str());
 			if(find2 != StaticImportedFiles().end()) {
-				find2->second->load(obj);
+				find2->second->load(ctx, obj);
 			}else{
 				// TODO: check if it is a .io file or a .i file
 				// need to create a new file and load it in
@@ -191,64 +185,60 @@ namespace ilang {
 					//load_fun(imp);
 					*/
 				}else{
+					// TODO: error handling if there is no file
 					ilang::ImportScopeFile *imp = new ImportScopeFile(p);
 					FILE *f = fopen(p.c_str(), "r");
 					ilang::parserNode::Head *head = ilang::parser(f, imp, p.c_str());
 					fclose(f);
 					head->Link();
 					ImportedFiles.insert(pair<fs::path, ImportScope*>(p, imp));
-					imp->load(obj);
+					imp->load(ctx, obj);
 					// imp is save into the map of ImportedFiles and thus we want it to stay around
 				}
 			}
 		}
 	}
 
-	void ImportScopeFile::resolve(Scope *scope) {
-		assert(dynamic_cast<FileScope*>(scope));
-		m_Scope = dynamic_cast<FileScope*>(scope);
-		//std::list<std::string> tt = { "what_", "inthe", "world" };
-		//load(GetObject(scope, tt));
+	void ImportScopeFile::resolve(Context &ctx) {
 		for(auto it : imports) {
-			Object *obj = GetObject(scope, it.first);
-			get(obj, it.second);
+			// this looks wrong?
+			auto obj = GetObject(ctx, it.first);
+			get(ctx, obj, it.second);
 		}
 	}
 
-	Object * ImportScopeFile::GetObject(Scope *scope, std::list<std::string> path) {
-		assert(!path.empty());
-		ilang::Variable *var = scope->lookup(path.front());
-		Object *obj;
-		if(var->isSet()) {
-			boost::any &a = var->Get()->Get();
-			assert(a.type() == typeid(ilang::Object*));
-			obj = boost::any_cast<ilang::Object*>(a);
+	Handle<Hashable> ImportScopeFile::GetObject(Context &ctx, std::vector<Identifier> path) {
+		ValuePass obj;
+		Handle<Hashable> o;
+		if(ctx.scope->has(ctx, path.front())) {
+			obj = ctx.scope->get(ctx, path.front());
+			assert(obj->type() == typeid(Hashable*));
+			o = obj->cast<Hashable*>();
 		}else{
-			ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
-			var->Set(val);
+			o = make_handle<Object>();
+			obj = valueMaker(o);
+			ctx.scope->set(ctx, path.front(), obj);
 		}
-		return GetObject(obj, path);
+		return GetObject(ctx, o, path);
 	}
 
-	Object * ImportScopeFile::GetObject(Object *o, std::list<std::string> &path) {
-		path.pop_front();
-		if(path.empty()) return o;
-		ilang::Variable *var = o->operator[](path.front());
-		Object *obj;
-		if(var->isSet()) {
-			boost::any &a = var->Get()->Get();
-			assert(a.type() == typeid(ilang::Object*));
-			obj = boost::any_cast<ilang::Object*>(a);
+	Handle<Hashable> ImportScopeFile::GetObject(Context &ctx, Handle<Hashable> obj, std::vector<Identifier> &path) {
+		path.erase(path.begin());
+		if(path.empty()) return obj;
+		ValuePass val;
+		Handle<Hashable> nex;
+		if(obj->has(ctx, path.front())) {
+			val = obj->get(ctx, path.front());
+			nex = val->cast<Hashable*>();
 		}else{
-			ValuePass val = ValuePass(new ilang::Value(obj = new ilang::Object));
-			var->Set(val);
+			nex = make_handle<Object>();
+			val = valueMaker(nex);
+			obj->set(ctx, path.front(), val);
 		}
-		return GetObject(obj, path);
-
+		return GetObject(ctx, nex, path);
 	}
 
-	ImportScopeC::ImportScopeC (char *name) { //: m_name(name) {
-		//fs::path p(name);
+	ImportScopeC::ImportScopeC (char *name) {
 		StaticImportedFiles().insert(pair<std::string, ImportScope*>(name, this));
 	}
 	ImportScopeC::ImportScopeC(fs::path p) {
@@ -258,98 +248,51 @@ namespace ilang {
 		string n = name;
 		m_members.insert(pair<std::string, ValuePass>(n, val));
 	}
-	void ImportScopeC::load(Object *obj) {
+	void ImportScopeC::load(Context &ctx, Handle<Hashable> obj) {
 		for(auto it : m_members) {
-			//cout << "load: " << it.first << endl;
-			ilang::Variable *v = obj->operator[](it.first);
-			v->Set(it.second);
+			obj->set(ctx, Identifier(it.first), it.second);
 		}
 	}
 
 
 
-	ilang::Object *ImportGetByName(std::string name) {
-
+	Handle<ilang::Object> ImportGetByName(std::string name) {
+		Context ctx; // TODO: pass the context here?
 		boost::replace_all(name, ".", "\/");
 		fs::path p = GlobalImportScope.locateFile(name);
 		if(p.empty()) return NULL;
-		Object *obj = new Object;
-		GlobalImportScope.get(obj, p);
+		auto obj = make_handle<Object>();
+		GlobalImportScope.get(ctx, obj, p);
 
 		return obj;
 	}
 }
 
-namespace ilang {
-	ValuePass Function_Creater( ValuePass (*fun)(std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
-			*ret = (*fun)(args);
-			assert(*ret);
-		};
-		return ValuePass(new ilang::Value(f));
-	}
-	ValuePass Function_Creater( ValuePass (*fun)(Scope*, std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
-			*ret = (*fun)(scope.get(), args);
-			assert(*ret);
-		};
-		return ValuePass(new ilang::Value(f));
-	}
-	ValuePass Function_Creater( ValuePass (*fun)(ScopePass, std::vector<ValuePass>&) ) {
-		ilang::Function f;
-		f.native = true;
-		f.ptr = [fun](ScopePass scope, std::vector<ValuePass> & args, ValuePass *ret) {
-			*ret = (*fun)(scope, args);
-			assert(*ret);
-		};
-		return ValuePass(new ilang::Value(f));
-	}
-	C_Class::~C_Class() {
-		//std::cout << "---------------------deleting C_Class\n";
-		for(auto it : m_members) {
-			delete it.second;
-		}
-	}
-}
-
-
 namespace {
 	using namespace ilang;
-	ValuePass ilang_import_get(std::vector<ValuePass> &args) {
-		Object *obj = new Object;
+	ValuePass ilang_import_get(Context &ctx, Arguments &args) {
+		auto obj = make_handle<Object>();
 
 		error(args.size() == 1, "i.Import.check expects 1 argument");
-		error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
+		error(args[0]->type() == typeid(std::string), "i.Import.check expects a string");
 
-		std::string name = boost::any_cast<std::string>(args[0]->Get());
+		std::string name = args[0]->cast<std::string>();
 		boost::replace_all(name, ".", "\/");
-		/*auto it = ImportedFiles.find(name);
-			if(it == ImportedFiles.end());
-		*/
-		/*auto it = StaticImportedFiles().find(name);
-			if(it != StaticImportedFiles().end()) {
-			it->second->load(obj);
-			return ValuePass(new ilang::Value(obj));
-			}*/
 		fs::path p = GlobalImportScope.locateFile(name);
-		GlobalImportScope.get(obj, p);
+		GlobalImportScope.get(ctx, obj, p);
 
-		return ValuePass(new ilang::Value(obj));
+		return valueMaker(obj);
 	}
 
-	ValuePass ilang_import_check(std::vector<ValuePass> &args) {
+	ValuePass ilang_import_check(Context &ctx, Arguments &args) {
 		error(args.size() == 1, "i.Import.check expects 1 argument");
-		error(args[0]->Get().type() == typeid(std::string), "i.Import.check expects a string");
-		std::string name = boost::any_cast<std::string>(args[0]->Get());
+		error(args[0]->type() == typeid(std::string), "i.Import.check expects a string");
+		std::string name = args[0]->cast<std::string>();
 		boost::replace_all(name, ".", "\/");
 
 		fs::path p = GlobalImportScope.locateFile(name);
 
-		return ValuePass(new ilang::Value(! p.empty()));
+		return valueMaker(! p.empty());
 	}
 
 	ILANG_LIBRARY_NAME("i/Import",

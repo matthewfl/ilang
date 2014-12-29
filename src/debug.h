@@ -5,7 +5,6 @@
 
 #include <assert.h>
 #include <iostream>
-//#include "../deps/glog/src/glog/logging.h"
 
 #define ILANG_BASE_DEBUG_LEVEL 10
 

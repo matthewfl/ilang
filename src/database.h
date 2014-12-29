@@ -4,10 +4,9 @@
 #include "debug.h"
 #include "variable.h"
 
-#include "leveldb/db.h"
-
 #include <boost/filesystem.hpp>
 #include <stdio.h>
+#include <map>
 
 /* notes on the database
  * When networked: (raw storage, trust all nodes)
@@ -45,6 +44,9 @@
  * O: Object member
  */
 
+// berkeley db
+class Db;
+
 namespace ilang {
 	namespace fs = boost::filesystem;
 
@@ -77,17 +79,44 @@ namespace ilang {
 
 		virtual ~Database() {};
 	};
+
+	// legacy leveldb database
+	// class DatabaseFile : public Database {
+	// protected:
+	// 	//leveldb::DB *db;
+	// public:
+	// 	DatabaseFile (fs::path);
+	// 	~DatabaseFile();
+	// 	void Set(std::string name, storedData *data);
+	// 	storedData *Get(std::string name);
+
+	// 	void setMeta(std::string name, std::string data);
+	// 	std::string getMeta(std::string name);
+	// };
+
+
 	class DatabaseFile : public Database {
 	protected:
-		leveldb::DB *db;
+		Db *db;
 	public:
-		DatabaseFile (fs::path);
+		DatabaseFile(fs::path);
 		~DatabaseFile();
 		void Set(std::string name, storedData *data);
 		storedData *Get(std::string name);
 
 		void setMeta(std::string name, std::string data);
-		std::string getMeta(std::string name);
+		std::string getMeta(std::string);
+	};
+
+
+	class DatabaseDummy : public Database {
+	public:
+		std::map<std::string, std::string> _dat;
+		std::map<std::string, std::string> _meta;
+		void Set(std::string, storedData*);
+		storedData *Get(std::string);
+		void setMeta(std::string, std::string);
+		std::string getMeta(std::string);
 	};
 	int DatabaseLoad(std::string, FILE*);
 	int DatabaseDump(std::string, FILE*);
