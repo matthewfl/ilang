@@ -30,6 +30,7 @@ namespace ilang {
 	class Identifier;
 	class Class;
 	class Hashable;
+	class Tuple;
 
 	typedef Handle<Object> Object_ptr;
 
@@ -89,6 +90,7 @@ namespace ilang {
 		virtual Handle<Object> Cast(cast_chooser<Object*> c) RAISE_TYPE_ERROR(Object*);
 		virtual Handle<Array> Cast(cast_chooser<Array*> c) RAISE_TYPE_ERROR(Array*);
 		virtual Identifier Cast(cast_chooser<Identifier> c) RAISE_TYPE_ERROR(Identifier);
+		virtual Handle<Tuple> Cast(cast_chooser<Tuple*> c) RAISE_TYPE_ERROR(Tuple*);
 
 	public:
 		template <typename T> auto cast() {

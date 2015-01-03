@@ -11,6 +11,7 @@
 #include "thread.h"
 #include "debug.h"
 #include "error.h"
+#include "tuple.h"
 //#include "value_types.h"
 
 
@@ -1139,6 +1140,85 @@ namespace ilang {
 			}
 			p->p() << ")";
 		}
+
+		TupleRHS::TupleRHS(std::list<Node*> *vals) : values(vals) {
+			assert(values);
+			for(Node *n : *values) {
+				assert(dynamic_cast<Value*>(n));
+			}
+		}
+
+		void TupleRHS::Run(Context &ctx) {
+			for(Node *n : *values) {
+				n->Run(ctx);
+			}
+		}
+
+		ValuePass TupleRHS::GetValue(Context &ctx) {
+			auto ret = make_handle<ilang::Tuple>();
+			for(Node *n : *values) {
+				Value *v = dynamic_cast<Value*>(n);
+				// if(dynamic_cast<ValueNamed*>(v)) {
+				// 	assert(0);
+				// }
+				ret->push(v->GetValue(ctx));
+			}
+			return valueMaker(ret);
+		}
+
+		IdentifierSet TupleRHS::UndefinedElements() {
+			IdentifierSet ret;
+			for(Node *n : *values) {
+				ret = unionSets(ret, n->UndefinedElements());
+			}
+			return ret;
+		}
+
+		TupleLHS::TupleLHS(std::list<Node*> *val) : values(val), Variable(0, NULL) /* gg */ {
+			assert(values);
+			for(Node *n : *values) {
+				assert(dynamic_cast<Variable*>(n));
+			}
+		}
+
+		ValuePass TupleLHS::GetValue(Context &ctx) {
+			// TODO: determine how to make the names be present,
+			// or possible all for passing by both of the items, and just
+			// not matter, but then there are two value passes on each item
+			// I guess that I could create a pair where one is the position
+			// and the other is the position....
+			assert(0);
+			return ValuePass();
+		}
+
+		ilang::Variable * TupleLHS::Get(Context &ctx) {
+			assert(0);
+			// there is not really a variable that is defined for the tuple
+		}
+
+		void TupleLHS::Set(Context &ctx, ValuePass var, bool force) {
+			Handle<Tuple> tup = var->cast<Tuple*>();
+			auto it = tup->begin();
+			for(Node *n : *values) {
+				Variable *v = dynamic_cast<Variable*>(n);
+				ValuePass kv = tup->get(ctx, v->GetName());
+				if(kv) {
+					v->Set(ctx, kv);
+				} else {
+					v->Set(ctx, it->second);
+					it++;
+				}
+			}
+		}
+
+		IdentifierSet TupleLHS::UndefinedElements() {
+			IdentifierSet ret;
+			for(Node *n : *values) {
+				ret = unionSets(ret, n->UndefinedElements());
+			}
+			return ret;
+		}
+
 
 
 	} // namespace parserTree

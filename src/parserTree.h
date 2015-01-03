@@ -149,6 +149,7 @@ namespace ilang {
 			ValuePass GetValue(Context&);
 			void Print(Printer *p);
 		};
+
 		class FloatConst : public Constant {
 			friend class ilang::Modification;
 		private:
@@ -237,7 +238,7 @@ namespace ilang {
 		class Variable : public Value {
 			friend class ilang::Modification;
 		private:
-			friend class Variable_compare;
+			//friend class Variable_compare;
 			friend class ::ilang::Object;
 			friend class ::ilang::Class;
 
@@ -257,7 +258,6 @@ namespace ilang {
 			IdentifierSet UndefinedElements() override;
 			void PreRegister(Context &ctx);
 		};
-
 
 		class FieldAccess : public Variable {
 			friend class ilang::Modification;
@@ -411,6 +411,28 @@ namespace ilang {
 			Variable *m_target;
 			Value *m_value;
 			action Act;
+		};
+
+		class TupleRHS : public Value {
+			friend class ilang::Modification;
+			std::list<Node*> *values;
+		public:
+			TupleRHS(std::list<Node*> *val);
+			ValuePass GetValue(Context&) override;
+			void Run(Context&) override;
+			IdentifierSet UndefinedElements() override;
+		};
+
+		class TupleLHS : public Variable {
+			friend class ilang::Modification;
+			std::list<Node*> *values;
+		public:
+			TupleLHS(std::list<Node*> *val);
+			//void Run(Context&) override;
+			void Set(Context&, ValuePass var, bool force = false) override;
+			ilang::Variable * Get(Context&) override;
+			ValuePass GetValue(Context&) override;
+			IdentifierSet UndefinedElements() override;
 		};
 
 	} // namespace parserNode
