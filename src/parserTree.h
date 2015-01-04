@@ -421,6 +421,7 @@ namespace ilang {
 			ValuePass GetValue(Context&) override;
 			void Run(Context&) override;
 			IdentifierSet UndefinedElements() override;
+			void Print(Printer*) override;
 		};
 
 		class TupleLHS : public Variable {
@@ -433,6 +434,7 @@ namespace ilang {
 			ilang::Variable * Get(Context&) override;
 			ValuePass GetValue(Context&) override;
 			IdentifierSet UndefinedElements() override;
+			void Print(Printer*);
 		};
 
 	} // namespace parserNode

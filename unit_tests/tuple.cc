@@ -22,7 +22,7 @@ TEST_CASE("Tuple kwargs", "[tuple]") {
 	REQUIRE(d == 5);
 }
 
-TEST_CASE("tuple parse", "[tuple]") {
+TEST_CASE("tuple parse simple", "[tuple]") {
 	init();
 	RUN_CODE(
 					 main = {
@@ -33,3 +33,15 @@ TEST_CASE("tuple parse", "[tuple]") {
 					 );
 	REQUIRE(!asserted);
 }
+
+// TEST_CASE("tuple kwargs", "[tuple]") {
+// 	init();
+// 	RUN_CODE(
+// 					 main = {
+// 						 (a,b) = (b=1,a=2);
+// 						 assert(a == 2);
+// 						 assert(b == 1)
+// 					 };
+// 					 );
+// 	REQUIRE(!asserted);
+// }

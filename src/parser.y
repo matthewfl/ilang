@@ -87,8 +87,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 
 %type <identifier_list> ImportLoc
 %type <identifier> Identifier
-%type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType
-%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
+%type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType TupleRHS TupleRHScnt TupleLHS TupleLHScnt
+%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleRHSinner
 %type <object_map> ObjectList
 %type <object_pair> ObjectNode
 
@@ -115,6 +115,7 @@ ProgramList	:	ProgramList Expr ';'		{ ($$=$1)->push_back($2); }
 
 Variable	:	ModifierList Identifier		{ $$ = new Variable(Identifier($2), $1); }
 		|	LValue
+		|	TupleLHS
 		;
 
 LValue		:	Identifier			{ $$ = new FieldAccess(NULL, Identifier($1)); }
@@ -207,6 +208,28 @@ Call		:	ExprType '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
+TupleRHS	:	'(' TupleRHSinner ')'			{ $$ = new TupleRHS($2); }
+		;
+
+TupleRHSinner	:	TupleRHSinner ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		;
+
+TupleRHScnt	:	Identifier '=' Expr			{ $$=$3; }
+		|	Expr			
+		;
+
+TupleLHS	:	'(' TupleLHSinner ')'			{ $$ = new TupleLHS($2); }
+		;
+
+TupleLHSinner	:	TupleLHSinner ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		;
+
+TupleLHScnt	:	Args					{ $$ = $1; }
+		|	Args '=' Expr				{ $$ = $1; }
+		;
+
 Expr		:	Expr_
 		|	error				{ $$ = new IntConst(0); }
 		;
@@ -234,6 +257,7 @@ Expr_		:	ExprType
 		|	LValue T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
 		|	LValue T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
 		|	LValue T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
+		|	TupleRHS
 		;
 
 /* ExprType is something that can be used for the type checking */

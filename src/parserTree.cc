@@ -1174,6 +1174,17 @@ namespace ilang {
 			return ret;
 		}
 
+		void TupleRHS::Print(Printer *p) {
+			p->p() << "(";
+			bool first = true;
+			for(Node *n : *values) {
+				if(!first) p->p() << ", ";
+				n->Print(p);
+				first = false;
+			}
+			p->p() << ")";
+		}
+
 		TupleLHS::TupleLHS(std::list<Node*> *val) : values(val), Variable(0, NULL) /* gg */ {
 			assert(values);
 			for(Node *n : *values) {
@@ -1201,8 +1212,8 @@ namespace ilang {
 			auto it = tup->begin();
 			for(Node *n : *values) {
 				Variable *v = dynamic_cast<Variable*>(n);
-				ValuePass kv = tup->get(ctx, v->GetName());
-				if(kv) {
+				if(tup->has(ctx, v->GetName())) {
+					ValuePass kv = tup->get(ctx, v->GetName());
 					v->Set(ctx, kv);
 				} else {
 					v->Set(ctx, it->second);
@@ -1219,6 +1230,16 @@ namespace ilang {
 			return ret;
 		}
 
+		void TupleLHS::Print(Printer *p) {
+			p->p() << "(";
+			bool first = true;
+			for(Node *n : *values) {
+				if(!first) p->p() << ", ";
+				n->Print(p);
+				first = false;
+			}
+			p->p() << ")";
+		}
 
 
 	} // namespace parserTree
