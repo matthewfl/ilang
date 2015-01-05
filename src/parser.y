@@ -26,7 +26,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   using namespace std;
   //cerr << "error: " << msg << endl << yylloc.first_line;
   parser_handle->error_count++;
-  cerr << "\33[0;31error @" << loc->first_line << ": " << msg << "\33[0m\n";
+  cerr << "error @" << loc->first_line << ": " << msg << "\n";
 }
 
 #define YYDEBUG 1
@@ -76,7 +76,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %left '*' '/'
 %left '!'
 %right uMinus
-%left '(' ')'
+%left TuplePrec
+%left '(' ')' PrensPrec
 %left '.' '['
 
 %token <identifier> T_Identifier
@@ -201,7 +202,7 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	ExprType '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
+Call		:	ExprType '(' ParamList OptComma')'	{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
 		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
 		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
 		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
@@ -215,8 +216,8 @@ TupleRHSinner	:	TupleRHSinner ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
 		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
-TupleRHScnt	:	Identifier '=' Expr			{ $$=$3; }
-		|	Expr			
+TupleRHScnt	:	Identifier '=' Expr %dprec 2		 { $$ = new NamedValue(Identifier($1), dynamic_cast<Value*>($3)); }
+		|	Expr %dprec 1
 		;
 
 TupleLHS	:	'(' TupleLHSinner ')'			{ $$ = new TupleLHS($2); }
@@ -226,8 +227,8 @@ TupleLHSinner	:	TupleLHSinner ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
 		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
-TupleLHScnt	:	Args					{ $$ = $1; }
-		|	Args '=' Expr				{ $$ = $1; }
+TupleLHScnt	:	Args '=' Expr			{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
+		|	Args
 		;
 
 Expr		:	Expr_
@@ -257,7 +258,7 @@ Expr_		:	ExprType
 		|	LValue T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
 		|	LValue T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
 		|	LValue T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
-		|	TupleRHS
+		|	TupleRHS %prec TuplePrec
 		;
 
 /* ExprType is something that can be used for the type checking */
@@ -266,7 +267,7 @@ ExprType	:	Function
 		|	Object
 		|	Array
 		|	Call
-		|	'(' Expr ')'			{ $$ = $2; }
+		|	'(' Expr ')'	%prec PrensPrec		{ $$ = $2; }
 		|	LValue
 		;
 

@@ -34,14 +34,14 @@ TEST_CASE("tuple parse simple", "[tuple]") {
 	REQUIRE(!asserted);
 }
 
-// TEST_CASE("tuple kwargs", "[tuple]") {
-// 	init();
-// 	RUN_CODE(
-// 					 main = {
-// 						 (a,b) = (b=1,a=2);
-// 						 assert(a == 2);
-// 						 assert(b == 1)
-// 					 };
-// 					 );
-// 	REQUIRE(!asserted);
-// }
+TEST_CASE("tuple kwargs", "[tuple]") {
+	init();
+	RUN_CODE(
+					 main = {
+						 (a=3,b=4) = (b=1,a=2);
+						 assert(a == 2);
+						 assert(b == 1);
+					 };
+					 );
+	REQUIRE(!asserted);
+}

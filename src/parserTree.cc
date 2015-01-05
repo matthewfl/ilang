@@ -686,6 +686,10 @@ namespace ilang {
 			eval->Print(p);
 		}
 
+		Variable *AssignExpr::getVariable() {
+			return target;
+		}
+
 		MathEquation::MathEquation(Value *l, Value *r, action a) : left(l), right(r), Act(a) {
 			assert(left);
 			if(a != uMinus) assert(right);
@@ -1158,10 +1162,12 @@ namespace ilang {
 			auto ret = make_handle<ilang::Tuple>();
 			for(Node *n : *values) {
 				Value *v = dynamic_cast<Value*>(n);
-				// if(dynamic_cast<ValueNamed*>(v)) {
-				// 	assert(0);
-				// }
-				ret->push(v->GetValue(ctx));
+				NamedValue *nv = dynamic_cast<NamedValue*>(v);
+				if(nv) {
+					ret->set(nv->getName(), nv->GetValue(ctx));
+				} else {
+					ret->push(v->GetValue(ctx));
+				}
 			}
 			return valueMaker(ret);
 		}
@@ -1188,7 +1194,7 @@ namespace ilang {
 		TupleLHS::TupleLHS(std::list<Node*> *val) : values(val), Variable(0, NULL) /* gg */ {
 			assert(values);
 			for(Node *n : *values) {
-				assert(dynamic_cast<Variable*>(n));
+				assert(dynamic_cast<Variable*>(n) || dynamic_cast<AssignExpr*>(n));
 			}
 		}
 
@@ -1208,16 +1214,34 @@ namespace ilang {
 		}
 
 		void TupleLHS::Set(Context &ctx, ValuePass var, bool force) {
-			Handle<Tuple> tup = var->cast<Tuple*>();
+			Handle<Tuple> tup;
+			try {
+				tup = var->cast<Tuple*>();
+			} catch (BadValueCastType<Tuple*> e) {
+				// pass
+			}
+			if(!tup) {
+				// then we must not have a tuple type, so just act like we have a single value instead
+				assert(0);
+			}
 			auto it = tup->begin();
 			for(Node *n : *values) {
 				Variable *v = dynamic_cast<Variable*>(n);
+				AssignExpr *ae = NULL;
+				if(!v) {
+					ae = dynamic_cast<AssignExpr*>(n);
+					v = ae->getVariable();
+				}
 				if(tup->has(ctx, v->GetName())) {
 					ValuePass kv = tup->get(ctx, v->GetName());
 					v->Set(ctx, kv);
 				} else {
-					v->Set(ctx, it->second);
-					it++;
+					if(it == tup->end()) {
+						ae->Run(ctx);
+					} else {
+						v->Set(ctx, it->second);
+						it++;
+					}
 				}
 			}
 		}
@@ -1239,6 +1263,32 @@ namespace ilang {
 				first = false;
 			}
 			p->p() << ")";
+		}
+
+		NamedValue::NamedValue(Identifier n, Value *v) : name(n), val(v) {
+			assert(val);
+		}
+
+		ValuePass NamedValue::GetValue(Context &ctx) {
+			return val->GetValue(ctx);
+		}
+
+		void NamedValue::Run(Context &ctx) {
+			val->Run(ctx);
+		}
+
+		IdentifierSet NamedValue::UndefinedElements() {
+			return val->UndefinedElements();
+		}
+
+		void NamedValue::Print(Printer *p) {
+			p->p() << name.str();
+			p->p() << "= ";
+			val->Print(p);
+		}
+
+		Identifier NamedValue::getName() {
+			return name;
 		}
 
 

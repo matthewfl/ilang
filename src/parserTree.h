@@ -349,6 +349,7 @@ namespace ilang {
 			void Print(Printer*);
 			IdentifierSet UndefinedElements() override;
 			void PreRegister(Context &ctx);
+			Variable *getVariable(); // used for the tuple
 		};
 		class MathEquation : public Expression {
 			friend class ilang::Modification;
@@ -415,6 +416,7 @@ namespace ilang {
 
 		class TupleRHS : public Value {
 			friend class ilang::Modification;
+		private:
 			std::list<Node*> *values;
 		public:
 			TupleRHS(std::list<Node*> *val);
@@ -426,6 +428,7 @@ namespace ilang {
 
 		class TupleLHS : public Variable {
 			friend class ilang::Modification;
+		private:
 			std::list<Node*> *values;
 		public:
 			TupleLHS(std::list<Node*> *val);
@@ -436,6 +439,21 @@ namespace ilang {
 			IdentifierSet UndefinedElements() override;
 			void Print(Printer*);
 		};
+
+		class NamedValue : public Value {
+			friend class ilang::Modification;
+		private:
+			Identifier name;
+			Value *val;
+		public:
+			NamedValue(Identifier n, Value*);
+			ValuePass GetValue(Context&) override;
+			void Run(Context&) override;
+			IdentifierSet UndefinedElements() override;
+			void Print(Printer*) override;
+			Identifier getName();
+		};
+
 
 	} // namespace parserNode
 } // namespace ilang
