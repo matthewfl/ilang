@@ -52,8 +52,6 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   std::vector<ilang::Identifier> *identifier_list;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
-  std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *object_map;
-  std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*> *object_pair; // needs to be a pointer even though it is quick in use
   ilang::parserNode::Node *node;
   long intNumber;
   double floatNumber;
@@ -90,8 +88,6 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %type <identifier> Identifier
 %type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType TupleRHS TupleRHScnt TupleLHS TupleLHScnt
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleRHSinner
-%type <object_map> ObjectList
-%type <object_pair> ObjectNode
 
 
 %%
@@ -139,14 +135,6 @@ Stmt		: 	Expr ';'
 		|	WhileStmt
 		|	ForStmt
 		|	ReturnStmt
-		;
-
-ObjectNode	:	Variable ':' Expr		{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), $3); /* should not have any problems with the cast */  }
-		|	Variable			{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), NULL); }
-		;
-
-ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
-		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
 		;
 
 Object		:	T_object FunctionBasic			{ $$ = new Object(dynamic_cast<Function*>($2)); }
@@ -209,7 +197,7 @@ Call		:	ExprType '(' ParamList OptComma')'	{ $$ = new Call(dynamic_cast<Value*>(
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
-TupleRHS	:	'(' TupleRHSinner ')'			{ $$ = new TupleRHS($2); }
+TupleRHS	:	'(' TupleRHSinner OptComma ')'		{ $$ = new TupleRHS($2); }
 		;
 
 TupleRHSinner	:	TupleRHSinner ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
@@ -220,7 +208,7 @@ TupleRHScnt	:	Identifier '=' Expr %dprec 2		 { $$ = new NamedValue(Identifier($1
 		|	Expr %dprec 1
 		;
 
-TupleLHS	:	'(' TupleLHSinner ')'			{ $$ = new TupleLHS($2); }
+TupleLHS	:	'(' TupleLHSinner OptComma ')'		{ $$ = new TupleLHS($2); }
 		;
 
 TupleLHSinner	:	TupleLHSinner ',' TupleLHScnt		{ ($$=$1)->push_back($3); }

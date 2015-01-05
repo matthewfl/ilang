@@ -1236,7 +1236,7 @@ namespace ilang {
 					ValuePass kv = tup->get(ctx, v->GetName());
 					v->Set(ctx, kv);
 				} else {
-					if(it == tup->end()) {
+					if(it == tup->end() || !it->first.isInt()) {
 						ae->Run(ctx);
 					} else {
 						v->Set(ctx, it->second);

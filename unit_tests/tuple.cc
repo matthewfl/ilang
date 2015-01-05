@@ -45,3 +45,15 @@ TEST_CASE("tuple kwargs", "[tuple]") {
 					 );
 	REQUIRE(!asserted);
 }
+
+TEST_CASE("default tuple", "[tuple]") {
+	init();
+	RUN_CODE(
+					 main = {
+						 (a=3,b=4) = (b=1,);
+						 assert(a == 3);
+						 assert(b == 1);
+					 };
+					 );
+	REQUIRE(!asserted);
+}
