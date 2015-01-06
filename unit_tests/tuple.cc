@@ -57,3 +57,14 @@ TEST_CASE("default tuple", "[tuple]") {
 					 );
 	REQUIRE(!asserted);
 }
+
+TEST_CASE("types on tuples", "[tuple]") {
+	init();
+	RUN_CODE(
+					 main = {
+						 Neq = {|a| {|b| assert(a != b); }; };
+						 (Neq(1) e, Neq(2) i) = (i=2, e=1);
+					 };
+					 );
+	REQUIRE(asserted == 2);
+}

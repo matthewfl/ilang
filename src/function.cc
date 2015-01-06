@@ -137,10 +137,14 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 			}else{
 				func->PreRegister(ctx);
 				if(func->body) {
-					for(auto n : *func->body) {
-						if(ctx.returned) break;
-						assert(n);
-						n->Run(ctx);
+					if(func->body->size() == 1 && dynamic_cast<parserNode::Value*>(func->body->front())) {
+						ret = dynamic_cast<parserNode::Value*>(func->body->front())->GetValue(ctx);
+					} else {
+						for(auto n : *func->body) {
+							if(ctx.returned) break;
+							assert(n);
+							n->Run(ctx);
+						}
 					}
 				}
 				// this seems bad....

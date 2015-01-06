@@ -87,7 +87,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %type <identifier_list> ImportLoc
 %type <identifier> Identifier
 %type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType TupleRHS TupleRHScnt TupleLHS TupleLHScnt
-%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleRHSinner
+%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleLHSinner2 TupleRHSinner TupleRHSinner2
 
 
 %%
@@ -197,10 +197,15 @@ Call		:	ExprType '(' ParamList OptComma')'	{ $$ = new Call(dynamic_cast<Value*>(
 		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
 		;
 
-TupleRHS	:	'(' TupleRHSinner OptComma ')'		{ $$ = new TupleRHS($2); }
+TupleRHS	:	'(' TupleRHScnt ',' TupleRHSinner OptComma ')'		{ $4->push_front($2); $$ = new TupleRHS($4); }
 		;
 
-TupleRHSinner	:	TupleRHSinner ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
+TupleRHSinner	:	TupleRHSinner2 ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		|						{ $$ = new list<Node*>; }
+		;
+
+TupleRHSinner2	:	TupleRHSinner2 ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
 		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
@@ -208,10 +213,15 @@ TupleRHScnt	:	Identifier '=' Expr %dprec 2		 { $$ = new NamedValue(Identifier($1
 		|	Expr %dprec 1
 		;
 
-TupleLHS	:	'(' TupleLHSinner OptComma ')'		{ $$ = new TupleLHS($2); }
+TupleLHS	:	'(' TupleLHScnt ',' TupleLHSinner OptComma ')'		{ $4->push_front($2); $$ = new TupleLHS($4); }
 		;
 
-TupleLHSinner	:	TupleLHSinner ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
+TupleLHSinner	:	TupleLHSinner2 ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		|						{ $$ = new list<Node*>; }
+		;
+
+TupleLHSinner2	:	TupleLHSinner2 ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
 		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
 		;
 
