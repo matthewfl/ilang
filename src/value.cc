@@ -3,6 +3,7 @@
 #include "function.h"
 #include "hashable.h"
 #include "object.h"
+#include "tuple.h"
 
 using namespace ilang;
 using namespace std;
@@ -196,6 +197,10 @@ Handle<Hashable> HashableType::Cast(cast_chooser<Hashable*> c) {
 Handle<Class> HashableType::Cast(cast_chooser<Class*> c) {
 	auto p = *(Handle<Hashable>*)m_ptr;
 	return dynamic_pointer_cast<Class>(p);
+}
+Handle<Tuple> HashableType::Cast(cast_chooser<Tuple*> c) {
+	auto p = *(Handle<Hashable>*)m_ptr;
+	return dynamic_pointer_cast<Tuple>(p);
 }
 void HashableType::copyTo(void *d) {
 	new (d) HashableType(*this);

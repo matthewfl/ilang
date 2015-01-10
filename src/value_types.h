@@ -30,7 +30,7 @@ namespace ilang {
 	class Object;
 	class Class;
 	class Class_instance;
-	class Arguments;
+	class Tuple;
 	class HashableType : public Value {
 	public:
 		HashableType(Handle<Hashable>);
@@ -45,6 +45,7 @@ namespace ilang {
 		virtual void copyTo(void *d);
 		virtual Handle<Hashable> Cast(cast_chooser<Hashable*>);
 		virtual Handle<Class> Cast(cast_chooser<Class*>); // TODO: make an new type??
+		virtual Handle<Tuple> Cast(cast_chooser<Tuple*>) override;
 
 		ValuePass get(Context &ctx, Identifier key) override;
 		void set(Context &ctx, Identifier key, ValuePass value) override;
@@ -96,7 +97,8 @@ namespace ilang {
 		Handle<ilang::Class_instance>, HashableType,
 		Handle<ilang::Array>, HashableType,
 		Handle<ilang::Hashable>, HashableType,
-		Handle<ilang::Arguments>, HashableType
+		Handle<ilang::Tuple>, HashableType
+		//Handle<ilang::Arguments>, HashableType
 		>();
 }
 

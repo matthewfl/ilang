@@ -12,7 +12,7 @@ from fabricate import *
 
 
 TARGET = 'i'
-SRCS = 'parserTree.cc import.cc parser.cc database.cc error.cc print.cc init.cc thread.cc function.cc value.cc identifier.cc object.cc variable.cc scope.cc variable_modifiers.cc c_class.cc'.split()
+SRCS = 'parserTree.cc import.cc parser.cc database.cc error.cc print.cc init.cc thread.cc function.cc value.cc identifier.cc object.cc variable.cc scope.cc variable_modifiers.cc c_class.cc tuple.cc'.split()
 LIBS = '-lboost_filesystem -lboost_system -lboost_thread -lssl -lpthread -lsnappy -ltbb -lprotobuf -ldb_cxx -lcurl'
 
 CONFIG = dict(

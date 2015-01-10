@@ -26,7 +26,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   using namespace std;
   //cerr << "error: " << msg << endl << yylloc.first_line;
   parser_handle->error_count++;
-  cerr << "\33[0;31error @" << loc->first_line << ": " << msg << "\33[0m\n";
+  cerr << "error @" << loc->first_line << ": " << msg << "\n";
 }
 
 #define YYDEBUG 1
@@ -52,11 +52,10 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   std::vector<ilang::Identifier> *identifier_list;
   std::list<std::string> *string_list;
   std::list<ilang::parserNode::Node*> *node_list;
-  std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*> *object_map;
-  std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*> *object_pair; // needs to be a pointer even though it is quick in use
   ilang::parserNode::Node *node;
   long intNumber;
   double floatNumber;
+  ilang::parserNode::TupleRHS *tuple_rhs;
 }
 
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go T_local T_dynamic
@@ -76,7 +75,8 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %left '*' '/'
 %left '!'
 %right uMinus
-%left '(' ')'
+%left TuplePrec
+%left '(' ')' PrensPrec
 %left '.' '['
 
 %token <identifier> T_Identifier
@@ -87,11 +87,9 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 
 %type <identifier_list> ImportLoc
 %type <identifier> Identifier
-%type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType
-%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList
-%type <object_map> ObjectList
-%type <object_pair> ObjectNode
-
+%type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType TupleRHS TupleRHScnt TupleLHS TupleLHScnt
+%type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleLHSinner2 TupleRHSinner TupleRHSinner2
+%type <tuple_rhs> CallParams
 
 %%
 Program		:	Imports ProgramList		{ parser_handle->head = new ilang::parserNode::Head($2, parser_handle->import); }
@@ -115,6 +113,7 @@ ProgramList	:	ProgramList Expr ';'		{ ($$=$1)->push_back($2); }
 
 Variable	:	ModifierList Identifier		{ $$ = new Variable(Identifier($2), $1); }
 		|	LValue
+		|	TupleLHS
 		;
 
 LValue		:	Identifier			{ $$ = new FieldAccess(NULL, Identifier($1)); }
@@ -137,14 +136,6 @@ Stmt		: 	Expr ';'
 		|	WhileStmt
 		|	ForStmt
 		|	ReturnStmt
-		;
-
-ObjectNode	:	Variable ':' Expr		{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), $3); /* should not have any problems with the cast */  }
-		|	Variable			{ $$ = new std::pair<ilang::parserNode::Variable*, ilang::parserNode::Node*>(dynamic_cast<ilang::parserNode::Variable*>($1), NULL); }
-		;
-
-ObjectList	:	ObjectList ',' ObjectNode	{ ($$=$1)->insert(*$3); delete $3; }
-		|	ObjectNode			{ $$ = new std::map<ilang::parserNode::Variable*, ilang::parserNode::Node*>; $$->insert(*$1); delete $1;  }
 		;
 
 Object		:	T_object FunctionBasic			{ $$ = new Object(dynamic_cast<Function*>($2)); }
@@ -177,8 +168,8 @@ FunctionBasic	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		;
 
 Function	:	FunctionBasic
-		|	'{' '|' ArgsList OptComma '|' Stmts '}'	{ $$ = new Function($3, $6); }
-		|	'{' '|' ArgsList OptComma '|' '}'	{ $$ = new Function($3, NULL); }
+		|	'{' '|' TupleLHSinner OptComma '|' Stmts '}'	{ $$ = new Function(new TupleLHS($3), $6); }
+		|	'{' '|' TupleLHSinner OptComma '|' '}'		{ $$ = new Function(new TupleLHS($3), NULL); }
 		;
 
 ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
@@ -200,11 +191,46 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	ExprType '(' ParamList OptComma')'		{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
-		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
-		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
-		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
-		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
+Call		:	ExprType '(' CallParams ')'	{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
+		|	T_print '(' CallParams ')'	{ $$ = new PrintCall($3); }
+		|	T_assert '(' CallParams ')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
+		|	T_import '(' CallParams ')'	{ $$ = new ImportCall($3); }
+		|	T_go '(' CallParams ')'		{ $$ = new ThreadGoCall($3); }
+		;
+
+CallParams	:	TupleRHSinner OptComma			{ $$ = new TupleRHS($1); }
+		;
+
+TupleRHS	:	'(' TupleRHScnt ',' TupleRHSinner OptComma ')'		{ $4->push_front($2); $$ = new TupleRHS($4); }
+		;
+
+TupleRHSinner	:	TupleRHSinner2 ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		|						{ $$ = new list<Node*>; }
+		;
+
+TupleRHSinner2	:	TupleRHSinner2 ',' TupleRHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleRHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		;
+
+TupleRHScnt	:	Identifier '=' Expr %dprec 2		 { $$ = new NamedValue(Identifier($1), dynamic_cast<Value*>($3)); }
+		|	Expr %dprec 1
+		;
+
+TupleLHS	:	'(' TupleLHScnt ',' TupleLHSinner OptComma ')'		{ $4->push_front($2); $$ = new TupleLHS($4); }
+		;
+
+TupleLHSinner	:	TupleLHSinner2 ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		|						{ $$ = new list<Node*>; }
+		;
+
+TupleLHSinner2	:	TupleLHSinner2 ',' TupleLHScnt		{ ($$=$1)->push_back($3); }
+		|	TupleLHScnt				{ ($$ = new list<Node*>)->push_back($1); }
+		;
+
+TupleLHScnt	:	Args '=' Expr			{ $$ = new AssignExpr(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3)); }
+		|	Args
 		;
 
 Expr		:	Expr_
@@ -234,6 +260,7 @@ Expr_		:	ExprType
 		|	LValue T_subEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::subtract); }
 		|	LValue T_mulEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::multiply); }
 		|	LValue T_divEqual Expr	{ $$ = new SingleExpression(dynamic_cast<Variable*>($1), dynamic_cast<Value*>($3), SingleExpression::divide); }
+		|	TupleRHS %prec TuplePrec
 		;
 
 /* ExprType is something that can be used for the type checking */
@@ -242,7 +269,7 @@ ExprType	:	Function
 		|	Object
 		|	Array
 		|	Call
-		|	'(' Expr ')'			{ $$ = $2; }
+		|	'(' Expr ')'	%prec PrensPrec		{ $$ = $2; }
 		|	LValue
 		;
 

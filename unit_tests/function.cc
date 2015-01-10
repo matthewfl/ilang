@@ -183,3 +183,17 @@ TEST_CASE("arguments as variale", "[function]") {
 					 );
 	REQUIRE(!asserted);
 }
+
+TEST_CASE("kwargs to function", "[function]") {
+	init();
+	RUN_CODE(
+					 gg = {|a=1,b=2|
+							 assert(a == 1);
+						   assert(b == 1);
+					 };
+					 main = {
+						 gg(b=1);
+					 };
+					 );
+	REQUIRE(!asserted);
+}

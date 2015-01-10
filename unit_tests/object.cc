@@ -144,8 +144,8 @@ TEST_CASE("setting value of member", "[object]") {
 						 assert(g.a == 1);
 						 g.b(5);
 						 assert(gg.a == 1);
-						 //assert(g.a == 5);
-						 //assert(g.c() == 5);
+						 assert(g.a == 5);
+						 assert(g.c() == 5);
 					 };
 					 );
 	REQUIRE(!asserted);

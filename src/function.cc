@@ -5,65 +5,65 @@
 using namespace ilang;
 using namespace std;
 
-Arguments::Arguments() {
-}
+// Arguments::Arguments() {
+// }
 
-Arguments::Arguments(const Arguments &o) {
-	m_args = o.m_args;
-	m_next_identifier = o.m_next_identifier;
-}
+// Arguments::Arguments(const Arguments &o) {
+//	m_args = o.m_args;
+//	m_next_identifier = o.m_next_identifier;
+// }
 
-Arguments::Arguments(std::vector<ValuePass> pargs) {
-	for(auto it : pargs)
-		push(it);
-}
+// Arguments::Arguments(std::vector<ValuePass> pargs) {
+//	for(auto it : pargs)
+//		push(it);
+// }
 
-void Arguments::push(ilang::ValuePass value) {
-	m_args.insert(make_pair(Identifier(m_next_identifier++), value));
-}
+// void Arguments::push(ilang::ValuePass value) {
+//	m_args.insert(make_pair(Identifier(m_next_identifier++), value));
+// }
 
-void Arguments::set(Context &ctx, Identifier key, ilang::ValuePass value) {
-	m_args.insert(make_pair(key, value));
-}
+// void Arguments::set(Context &ctx, Identifier key, ilang::ValuePass value) {
+//	m_args.insert(make_pair(key, value));
+// }
 
-void Arguments::populate(Context &ctx, Function *func) {
-	if(!func->native && func->func->params) {
-		// there is some function with arguments that can be used to determine what to set values to
+// void Arguments::populate(Context &ctx, Function *func) {
+//	if(!func->native && func->func->params) {
+//		// there is some function with arguments that can be used to determine what to set values to
 
-		auto it = func->func->params->begin(); // wtf was I thinking
-		auto end = func->func->params->end();
-		for(auto ait : m_args) {
-			if(it == end) break;
-			if(ait.first.isInt()) {
-				dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, ait.second, true);
-			}
-			it++;
-		}
-	}
-}
+//		auto it = func->func->params->begin(); // wtf was I thinking
+//		auto end = func->func->params->end();
+//		for(auto ait : m_args) {
+//			if(it == end) break;
+//			if(ait.first.isInt()) {
+//				dynamic_cast<parserNode::Variable*>(*it)->Set(ctx, ait.second, true);
+//			}
+//			it++;
+//		}
+//	}
+// }
 
-ValuePass Arguments::get(Context &ctx, Identifier i) {
-	auto it = m_args.find(i);
-	if(it != m_args.end()) {
-		return it->second;
-	}
-	if(i == "length") {
-		return valueMaker(size());
-	}
-	assert(0);
-}
+// ValuePass Arguments::get(Context &ctx, Identifier i) {
+//	auto it = m_args.find(i);
+//	if(it != m_args.end()) {
+//		return it->second;
+//	}
+//	if(i == "length") {
+//		return valueMaker(size());
+//	}
+//	assert(0);
+// }
 
-bool Arguments::has(Context &ctx, Identifier i) {
-	return m_args.find(i) != m_args.end();
-}
+// bool Arguments::has(Context &ctx, Identifier i) {
+//	return m_args.find(i) != m_args.end();
+// }
 
-size_t Arguments::size() {
-	return m_args.size();
-}
+// size_t Arguments::size() {
+//	return m_args.size();
+// }
 
-Handle<Variable> Arguments::getVariable(Context &ctx, Identifier i) {
-	return make_variable(get(ctx, i));
-}
+// Handle<Variable> Arguments::getVariable(Context &ctx, Identifier i) {
+//	return make_variable(get(ctx, i));
+// }
 
 class ScopeFake : public Hashable {
 private:
@@ -127,20 +127,27 @@ ValuePass Function::call(Context &ctx, ilang::Arguments & args) {
 		{
 
 			Scope scope(ctx);
-			args.populate(ctx, this);
+			ValuePass args_val = valueMaker(make_handle<Arguments>(args));
+			if(!native && func->params)
+				func->params->Set(ctx, args_val, true);
+			//args.populate(ctx, this);
 
 			// TODO: use std::move here?
-			ctx.scope->set(ctx, "arguments", valueMaker(make_handle<Arguments>(args)));
+			ctx.scope->set(ctx, "arguments", args_val);
 
 			if(native) {
 				ptr(ctx, args, &ret);
 			}else{
 				func->PreRegister(ctx);
 				if(func->body) {
-					for(auto n : *func->body) {
-						if(ctx.returned) break;
-						assert(n);
-						n->Run(ctx);
+					if(func->body->size() == 1 && dynamic_cast<parserNode::Value*>(func->body->front())) {
+						ret = dynamic_cast<parserNode::Value*>(func->body->front())->GetValue(ctx);
+					} else {
+						for(auto n : *func->body) {
+							if(ctx.returned) break;
+							assert(n);
+							n->Run(ctx);
+						}
 					}
 				}
 				// this seems bad....
@@ -181,7 +188,7 @@ Function Function::bind(ilang::ValuePass object) {
 }
 
 Function Function::bind(Context &ctx) {
-  return bind(ctx.scope);
+	return bind(ctx.scope);
 }
 
 Function Function::bind(Hashable* h) {

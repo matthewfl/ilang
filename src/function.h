@@ -11,11 +11,11 @@
 #include "scope.h"
 #include "parserTree.h"
 #include "hashable.h"
+#include "tuple.h"
 
 
 namespace ilang {
 	class Function;
-	class Arguments;
 	class Object;
 
 
@@ -23,67 +23,69 @@ namespace ilang {
 		class Function;
 	}
 
+	typedef ilang::Tuple Arguments;
+
 	// TODO: change this to use std
 	typedef boost::function3<void, Context&, ilang::Arguments&, ValuePass*> Function_ptr;
 
 	// TODO: refactor this into being a tuple system, which can then be reused elsewhere
-	class Arguments : public Hashable {
+	// class Arguments : public Hashable {
 
-		std::map<ilang::Identifier, ilang::ValuePass> m_args;
-		unsigned long m_next_identifier = 0;
+	// 	std::map<ilang::Identifier, ilang::ValuePass> m_args;
+	// 	unsigned long m_next_identifier = 0;
 
-		template<typename T> void unwrap(T t) {
-			push(valueMaker(t));
-		}
-		void unwrap(ilang::ValuePass t) {
-			push(t);
-		}
-		template<typename T, typename... types> void unwrap(T t, types... values) {
-			unwrap(t);
-			unwrap(values...);
-		}
-		void populate(Context &ctx, Function*);
+	// 	template<typename T> void unwrap(T t) {
+	// 		push(valueMaker(t));
+	// 	}
+	// 	void unwrap(ilang::ValuePass t) {
+	// 		push(t);
+	// 	}
+	// 	template<typename T, typename... types> void unwrap(T t, types... values) {
+	// 		unwrap(t);
+	// 		unwrap(values...);
+	// 	}
+	// 	void populate(Context &ctx, Function*);
 
-		void injector(std::map<Identifier, ValuePass>::iterator it) {}
-		template<typename T, typename... types> void injector(std::map<Identifier, ValuePass>::iterator it, T &t, types & ... values) {
-			assert(it != end());
-			it->second->inject(t);
-			it++;
-			injector(it, values...);
-		}
+	// 	void injector(std::map<Identifier, ValuePass>::iterator it) {}
+	// 	template<typename T, typename... types> void injector(std::map<Identifier, ValuePass>::iterator it, T &t, types & ... values) {
+	// 		assert(it != end());
+	// 		it->second->inject(t);
+	// 		it++;
+	// 		injector(it, values...);
+	// 	}
 
-		friend class Function;
-	public:
-		void set(Context &ctx, Identifier, ilang::ValuePass) override;
-		bool has(Context &ctx, Identifier) override;
-		ValuePass get(Context &ctx, Identifier i) override;
+	// 	friend class Function;
+	// public:
+	// 	void set(Context &ctx, Identifier, ilang::ValuePass) override;
+	// 	bool has(Context &ctx, Identifier) override;
+	// 	ValuePass get(Context &ctx, Identifier i) override;
 
-		Handle<Variable> getVariable(Context &ctx, Identifier i);
+	// 	Handle<Variable> getVariable(Context &ctx, Identifier i);
 
-		void push(ilang::ValuePass);
+	// 	void push(ilang::ValuePass);
 
-		// hm...constructing the context here
-		ValuePass operator[](Identifier i) { Context ctx; return get(ctx, i); }
-		ValuePass operator[](unsigned long i) { Context ctx; return get(ctx, Identifier(i)); }
+	// 	// hm...constructing the context here
+	// 	ValuePass operator[](Identifier i) { Context ctx; return get(ctx, i); }
+	// 	ValuePass operator[](unsigned long i) { Context ctx; return get(ctx, Identifier(i)); }
 
-		auto begin() { return m_args.begin(); }
-		auto end() { return m_args.end(); }
+	// 	auto begin() { return m_args.begin(); }
+	// 	auto end() { return m_args.end(); }
 
-		size_t size();
+	// 	size_t size();
 
-		Arguments();
-		Arguments(const Arguments&);
-		Arguments(std::vector<ValuePass> pargs);
-		template<typename... types> Arguments(types... values) {
-			unwrap(values...);
-		}
+	// 	Arguments();
+	// 	Arguments(const Arguments&);
+	// 	Arguments(std::vector<ValuePass> pargs);
+	// 	template<typename... types> Arguments(types... values) {
+	// 		unwrap(values...);
+	// 	}
 
-		template <typename... types> void inject(types & ... values) {
-		// int a; std::stinrg b; args.inject(a, b);
-			injector(begin(), values...);
-		}
+	// 	template <typename... types> void inject(types & ... values) {
+	// 	// int a; std::stinrg b; args.inject(a, b);
+	// 		injector(begin(), values...);
+	// 	}
 
-	};
+	// };
 
 
 	class Function final {
@@ -91,7 +93,7 @@ namespace ilang {
 		bool native = false;
 		Function_ptr ptr;
 		ilang::parserNode::Function *func = NULL;
-		friend class Arguments;
+		//friend class Arguments;
 		std::map<ilang::Identifier, Handle<Variable> > m_bound;
 		void bind_self(Hashable*, bool rebind = false);
 
