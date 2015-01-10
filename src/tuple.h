@@ -43,7 +43,7 @@ namespace ilang {
     //void populate(Context &ctx, Function*);
 
     void injector(std::map<Identifier, ValuePass>::iterator it) {}
-		template<typename T, typename... types> void injector(std::map<Identifier, ValuePass>::iterator it, Tuple_kwarg_helper h, T &t, types & ... values) {
+		template<typename T, typename... types> void injector(std::map<Identifier, ValuePass>::iterator it, Tuple_kwarg_helper &h, T &t, types & ... values) {
 			auto fi = m_args.find(h.id);
 			if(fi != m_args.end()) {
 				fi->second->inject(t);
@@ -96,10 +96,10 @@ namespace ilang {
 
 	// a class for being on the left hand side of an expression
 	// will have variables instead of values as it is what is being set
-	class TupleLHS {
-		friend class Tuple;
+	// class TupleLHS {
+	// 	friend class Tuple;
 
-	};
+	// };
 }
 
 #endif // _ilang_tuple

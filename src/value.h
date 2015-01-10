@@ -24,7 +24,8 @@ namespace ilang {
 
 	class Value;
 	class Function;
-	class Arguments;
+	class Tuple;
+	typedef Tuple Arguments;
 	class Object;
 	class Array;
 	class Identifier;

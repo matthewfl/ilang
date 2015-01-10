@@ -24,7 +24,8 @@ namespace ilang {
 	class Class;
 	class Modification;
 	class Function;
-	class Arguments;
+	class Tuple;
+
 
 	namespace parserNode {
 
@@ -208,15 +209,16 @@ namespace ilang {
 			IdentifierSet UndefinedElements() override;
 		};
 
+		class TupleLHS;
 		class Function : public Value {
 			friend class ilang::Modification;
 			friend class ilang::Function;
-			friend class ilang::Arguments;
 		private:
 			std::list<Node*> *body;
-			std::list<Node*> *params;
+			//std::list<Node*> *params;
+			TupleLHS *params;
 		public:
-			Function(std::list<Node*> *p, std::list<Node*> *b);
+			Function(TupleLHS *p, std::list<Node*> *b);
 			void Run(Context&);
 			void Constructor(Context&);
 			ValuePass GetValue(Context&);
@@ -288,14 +290,15 @@ namespace ilang {
 			IdentifierSet UndefinedElements() override;
 		};
 
+		class TupleRHS;
 		class Call : public Value {
 			friend class ilang::Modification;
 		private:
 			Value *calling;
 		protected:
-			std::list<Node*> *params;
+			TupleRHS *params;
 		public:
-			Call(Value *call, std::list<Node*> *args);
+			Call(Value *call, TupleRHS *args);
 			void Run(Context&);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
@@ -304,7 +307,7 @@ namespace ilang {
 		class PrintCall : public Call {
 			friend class ilang::Modification;
 		public:
-			PrintCall(std::list<Node*> *args);
+			PrintCall(TupleRHS *args);
 			ValuePass GetValue (Context&);
 			void Print(Printer*);
 		};
@@ -315,7 +318,7 @@ namespace ilang {
 			int lineN;
 			std::string fileName;
 		public:
-			AssertCall(int line, const char *name, std::list<Node*> *args);
+			AssertCall(int line, const char *name, TupleRHS *args);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
@@ -323,7 +326,7 @@ namespace ilang {
 		class ImportCall : public Call {
 			friend class ilang::Modification;
 		public:
-			ImportCall(std::list<Node*> *args);
+			ImportCall(TupleRHS *args);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
@@ -331,7 +334,7 @@ namespace ilang {
 		class ThreadGoCall : public Call {
 			friend class ilang::Modification;
 		public:
-			ThreadGoCall(std::list<Node*> *args);
+			ThreadGoCall(TupleRHS *args);
 			ValuePass GetValue(Context&);
 			void Print(Printer*);
 		};
@@ -424,6 +427,7 @@ namespace ilang {
 			void Run(Context&) override;
 			IdentifierSet UndefinedElements() override;
 			void Print(Printer*) override;
+			int size() { return values->size(); }
 		};
 
 		class TupleLHS : public Variable {
@@ -437,6 +441,7 @@ namespace ilang {
 			ilang::Variable * Get(Context&) override;
 			ValuePass GetValue(Context&) override;
 			IdentifierSet UndefinedElements() override;
+			IdentifierSet VariableNames();
 			void Print(Printer*);
 		};
 

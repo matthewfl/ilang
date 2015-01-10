@@ -266,13 +266,13 @@ namespace ilang {
 			}
 		}
 
-		Function::Function (list<Node*> *p, list<Node*> *b):body(b), params(p) {
+		Function::Function (TupleLHS *p, list<Node*> *b):body(b), params(p) {
 			debug(-5, "\t\t\tfunction constructed" );
-			if(params)
-				for(auto it : *params) {
-					// argument list can only be variables
-					assert(dynamic_cast<parserNode::Variable*>(it));
-				}
+			// if(params)
+			// 	for(auto it : *params) {
+			// 		// argument list can only be variables
+			// 		assert(dynamic_cast<parserNode::Variable*>(it));
+			// 	}
 
 		}
 		void Function::Run(Context &ctx) {
@@ -314,12 +314,12 @@ namespace ilang {
 					ret = unionSets(ret, (*it)->UndefinedElements());
 				}
 			if(params) {
-				for(auto it : *params) {
-					ret = unionSets(ret, it->UndefinedElements());
-					ret.erase(dynamic_cast<Variable*>(it)->GetName());
+				ret = unionSets(ret, params->UndefinedElements());
+				IdentifierSet vnames = params->VariableNames();
+				for(Identifier i : vnames) {
+					ret.erase(i);
 				}
 			}
-
 			return ret;
 			// TODO: filter out elements that will be forced New, eg variables with types set for them
 		}
@@ -339,14 +339,15 @@ namespace ilang {
 				return;
 			}
 			p->p() << "{";
-			if(params && !params->empty()) {
+			if(params) {
 				p->p() << "|";
-				bool first=true;
-				for(Node *it : *params) {
-					if(!first) p->p() << ", ";
-					it->Print(p);
-					first = false;
-				}
+				// bool first=true;
+				// for(Node *it : *params) {
+				// 	if(!first) p->p() << ", ";
+				// 	it->Print(p);
+				// 	first = false;
+				// }
+				params->Print(p); // TODO: xxx this will be wrong since it will print out () around the items
 				p->p() << "|";
 			}
 			if(body && !body->empty()) {
@@ -582,7 +583,7 @@ namespace ilang {
 			p->p() << "]";
 		}
 
-		Call::Call (Value *call, list<Node*> *args):
+		Call::Call (Value *call, TupleRHS *args):
 			calling(call), params(args) {
 			debug(-5,"\t\t\tCalling function");
 		}
@@ -595,65 +596,75 @@ namespace ilang {
 
 			ValuePass func = calling->GetValue(ctx);
 
-			ilang::Arguments args;
-			for(Node *n : *params) {
-				// so nasty
-				// TODO: support for kwargs
-				assert(dynamic_cast<parserNode::Value*>(n));
-				args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(ctx));
-			}
+			// ilang::Arguments args;
+			// for(Node *n : *params) {
+			// 	// so nasty
+			// 	// TODO: support for kwargs
+			// 	assert(dynamic_cast<parserNode::Value*>(n));
+			// 	args.push(dynamic_cast<parserNode::Value*>(n)->GetValue(ctx));
+			// }
+			ValuePass tup = params->GetValue(ctx);
 
-			ValuePass ret = func->call(ctx, args);
+			ValuePass ret = func->call(ctx, *tup->cast<Tuple*>());
 			return ret;
 		}
 
 		IdentifierSet Call::UndefinedElements() {
-			IdentifierSet ret;
-			if(calling) {
-				ret = calling->UndefinedElements();
-			}
-			for(auto it : *params) {
-				ret = unionSets(ret, it->UndefinedElements());
-			}
-			return ret;
+			if(calling)
+				return unionSets(calling->UndefinedElements(), params->UndefinedElements());
+			return params->UndefinedElements();
+			// IdentifierSet ret;
+			// if(calling) {
+			// 	ret = calling->UndefinedElements();
+			// }
+			// for(auto it : *params) {
+			// 	ret = unionSets(ret, it->UndefinedElements());
+			// }
+			// return ret;
 		}
 
 		void Call::Print(Printer *p) {
 			calling->Print(p);
-			p->p() << "(";
-			bool first=true;
-			for(auto it : *params) {
-				if(!first) p->p() << ", ";
-				it->Print(p);
-				first = false;
-			}
-			p->p() << ")";
+			params->Print(p);
+			// p->p() << "(";
+			// bool first=true;
+			// for(auto it : *params) {
+			// 	if(!first) p->p() << ", ";
+			// 	it->Print(p);
+			// 	first = false;
+			// }
+			// p->p() << ")";
 		}
 
-		PrintCall::PrintCall(list<Node*> *args):
+		PrintCall::PrintCall(TupleRHS *args):
 			Call(NULL, args) {}
 
 		ValuePass PrintCall::GetValue (Context &ctx) {
 			errorTrace("Print call");
 			debug(-6,"made into the print Call");
-			for(Node *it : *params) {
-				assert(dynamic_cast<parserNode::Value*>(it));
-				dynamic_cast<parserNode::Value*>((it))->GetValue(ctx)->Print();
+			ValuePass val = params->GetValue(ctx);
+			for(auto it : *val->cast<Tuple*>()) {
+				it.second->Print();
 			}
+			// for(Node *it : *params) {
+			// 	assert(dynamic_cast<parserNode::Value*>(it));
+			// 	dynamic_cast<parserNode::Value*>((it))->GetValue(ctx)->Print();
+			// }
 			debug(-5,"made it out of print");
 			return ValuePass();
 		}
 
 		void PrintCall::Print (Printer *p) {
-			p->p() << "Print(";
-			bool first = true;
-			for(Node *it : *params) {
-				if(!first) p->p() << ", ";
-				it->Print(p);
-				first = false;
-			}
-			p->p() << ")";
-		}
+			p->p() << "Print";
+			params->Print(p);
+			// bool first = true;
+			// for(Node *it : *params) {
+			// 	if(!first) p->p() << ", ";
+			// 	it->Print(p);
+			// 	first = false;
+			// }
+			// p->p() << ")";
+ 		}
 
 
 		AssignExpr::AssignExpr (Variable *t, Value *v):target(t), eval(v) {
@@ -1047,15 +1058,15 @@ namespace ilang {
 			p->p() << "]";
 		}
 
-		AssertCall::AssertCall(int line, const char *name, list<Node*> *args): Call(NULL, args), lineN(line), fileName(name) {
-			for(auto it : *args) {
-				error(dynamic_cast<Value*>(it), "Arguments to assert need to have some Value");
-			}
+		AssertCall::AssertCall(int line, const char *name, TupleRHS *args): Call(NULL, args), lineN(line), fileName(name) {
+			// for(auto it : *args) {
+			// 	error(dynamic_cast<Value*>(it), "Arguments to assert need to have some Value");
+			// }
 		}
 		ValuePass AssertCall::GetValue(Context &ctx) {
-			for(auto it : *params) {
-				ValuePass val = dynamic_cast<Value*>(it)->GetValue(ctx);
-				if(!val->isTrue()) {
+			ValuePass tup = params->GetValue(ctx);
+			for(auto it : *tup->cast<Tuple*>()) {
+				if(!it.second->isTrue()) {
 					// used for unit testing
 					if(ilang_Assert_fails) {
 						ilang_Assert_fails++;
@@ -1066,26 +1077,33 @@ namespace ilang {
 					exit(2);
 				}
 			}
+			// for(auto it : *params) {
+			// 	ValuePass val = dynamic_cast<Value*>(it)->GetValue(ctx);
+			// 	if(!val->isTrue()) {
+			//
+			// }
 			return ValuePass();
 		}
 		void AssertCall::Print (Printer *p) {
-			p->p() << "assert(";
-			bool first=true;
-			for(Node *it : *params) {
-				if(!first) { p->p() << ", "; }
-				first = false;
-				it->Print(p);
-			}
-			p->p() << ")";
+			p->p() << "assert";
+			params->Print(p);
+			// bool first=true;
+			// for(Node *it : *params) {
+			// 	if(!first) { p->p() << ", "; }
+			// 	first = false;
+			// 	it->Print(p);
+			// }
+			// p->p() << ")";
 		}
 
-		ImportCall::ImportCall(list<Node*> *args) : Call(NULL, args) {
+		ImportCall::ImportCall(TupleRHS *args) : Call(NULL, args) {
 			error(args->size() == 1, "import() expects 1 argument");
-			error(dynamic_cast<parserNode::Value*>(args->front()), "import() expects a Value");
+			//error(dynamic_cast<parserNode::Value*>(args->front()), "import() expects a Value");
 		}
 
 		ValuePass ImportCall::GetValue(Context &ctx) {
-			ValuePass val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
+			ValuePass tup = params->GetValue(ctx);
+			ValuePass val = tup->get(ctx, Identifier((unsigned long)0));
 			std::string name = val->cast<std::string>();
 
 			auto obj = ImportGetByName(name);
@@ -1096,35 +1114,49 @@ namespace ilang {
 		}
 
 		void ImportCall::Print(Printer *p) {
-			p->p() << "import(";
-			params->front()->Print(p);
-			p->p() << ")";
+			p->p() << "import";
+			params->Print(p);
+			// params->front()->Print(p);
+			// p->p() << ")";
 		}
 
 
-		ThreadGoCall::ThreadGoCall(list<Node*> *args) : Call(NULL, args) {
+		ThreadGoCall::ThreadGoCall(TupleRHS *args) : Call(NULL, args) {
 			// first argument is the function that will be called
 			// following arguments are values to be passed to the function, but they will be evaluated in the current thread
 			error(args->size() >= 1, "go call expects at least 1 argument " << args->size());
-			for(auto it : *args) {
-				assert(dynamic_cast<parserNode::Value*>(it));
-			}
+			// for(auto it : *args) {
+			// 	assert(dynamic_cast<parserNode::Value*>(it));
+			// }
 		}
 
 		ValuePass ThreadGoCall::GetValue(Context &ctx) {
 			// TODO: rewrite, this is shit
-			ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
+			// ValuePass calling_val = dynamic_cast<Value*>(params->front())->GetValue(ctx);
+			// //ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
+			// ilang::Arguments *arguments = new ilang::Arguments;
+			// auto it = params->begin();
+			// it++;
+			// while(it != params->end()) {
+			// 	arguments->push(dynamic_cast<Value*>(*it)->GetValue(ctx));
+			// 	it++;
+			// }
+			ValuePass tup = params->GetValue(ctx);
+			ValuePass calling_val = tup->get(ctx, Identifier((unsigned long)0));
 			error(calling_val->type() == typeid(ilang::Function), "go expects argument to be a function");
 			// TODO: should allocate this function along with the arguments
 			ilang::Function calling = *calling_val->cast<ilang::Function*>();
-			//ilang::Function calling = boost::any_cast<ilang::Function>(calling_val->Get());
-			ilang::Arguments *arguments = new ilang::Arguments;
-			auto it = params->begin();
-			it++;
-			while(it != params->end()) {
-				arguments->push(dynamic_cast<Value*>(*it)->GetValue(ctx));
-				it++;
+			Tuple *arguments = new ilang::Tuple;
+			for(auto it : *tup->cast<Tuple*>()) {
+				// TODO: way to pop the first value from an argument
+				if(it.first.raw() == 0)
+					continue;
+				if(it.first.isInt())
+					arguments->push(it.second);
+				else
+					arguments->set(it.first, it.second);
 			}
+
 			assert(ilang::global_EventPool());
 			Event thread = ilang::global_EventPool()->CreateEvent([arguments, calling](void *data) {
 					Context ctx;
@@ -1138,11 +1170,12 @@ namespace ilang {
 		}
 
 		void ThreadGoCall::Print(Printer *p) {
-			p->p() << "go(";
-			for(auto it : *params) {
-				it->Print(p);
-			}
-			p->p() << ")";
+			p->p() << "go";
+			params->Print(p);
+			// for(auto it : *params) {
+			// 	it->Print(p);
+			// }
+			// p->p() << ")";
 		}
 
 		TupleRHS::TupleRHS(std::list<Node*> *vals) : values(vals) {
@@ -1164,9 +1197,11 @@ namespace ilang {
 				Value *v = dynamic_cast<Value*>(n);
 				NamedValue *nv = dynamic_cast<NamedValue*>(v);
 				if(nv) {
-					ret->set(nv->getName(), nv->GetValue(ctx));
+					ValuePass val = nv->GetValue(ctx);
+					ret->set(nv->getName(), val);
 				} else {
-					ret->push(v->GetValue(ctx));
+					ValuePass val = v->GetValue(ctx);
+					ret->push(val);
 				}
 			}
 			return valueMaker(ret);
@@ -1234,12 +1269,12 @@ namespace ilang {
 				}
 				if(tup->has(ctx, v->GetName())) {
 					ValuePass kv = tup->get(ctx, v->GetName());
-					v->Set(ctx, kv);
+					v->Set(ctx, kv, force);
 				} else {
 					if(it == tup->end() || !it->first.isInt()) {
 						ae->Run(ctx);
 					} else {
-						v->Set(ctx, it->second);
+						v->Set(ctx, it->second, force);
 						it++;
 					}
 				}
@@ -1250,6 +1285,18 @@ namespace ilang {
 			IdentifierSet ret;
 			for(Node *n : *values) {
 				ret = unionSets(ret, n->UndefinedElements());
+			}
+			return ret;
+		}
+
+		IdentifierSet TupleLHS::VariableNames() {
+			IdentifierSet ret;
+			for(Node *n : *values) {
+				Variable *v = dynamic_cast<Variable*>(n);
+				if(!v) {
+					v = dynamic_cast<AssignExpr*>(n)->getVariable();
+				}
+				ret.insert(v->GetName());
 			}
 			return ret;
 		}

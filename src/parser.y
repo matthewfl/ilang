@@ -55,6 +55,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
   ilang::parserNode::Node *node;
   long intNumber;
   double floatNumber;
+  ilang::parserNode::TupleRHS *tuple_rhs;
 }
 
 %token T_import T_from T_as T_if T_while T_for T_print T_class T_else T_object T_new T_assert T_go T_local T_dynamic
@@ -88,7 +89,7 @@ void yyerror(YYLTYPE *loc, void *, ilang::parser_data *parser_handle, const char
 %type <identifier> Identifier
 %type <node> Function FunctionBasic Variable LValue Expr Expr_ ExprType Call Stmt IfStmt ReturnStmt Object Class Array WhileStmt ForStmt Args ModifierType TupleRHS TupleRHScnt TupleLHS TupleLHScnt
 %type <node_list> Stmts ParamList ArgsList ProgramList ModifierList TupleLHSinner TupleLHSinner2 TupleRHSinner TupleRHSinner2
-
+%type <tuple_rhs> CallParams
 
 %%
 Program		:	Imports ProgramList		{ parser_handle->head = new ilang::parserNode::Head($2, parser_handle->import); }
@@ -167,8 +168,8 @@ FunctionBasic	:	'{' '}'				{ $$ = new Function(NULL, NULL); }
 		;
 
 Function	:	FunctionBasic
-		|	'{' '|' ArgsList OptComma '|' Stmts '}'	{ $$ = new Function($3, $6); }
-		|	'{' '|' ArgsList OptComma '|' '}'	{ $$ = new Function($3, NULL); }
+		|	'{' '|' TupleLHSinner OptComma '|' Stmts '}'	{ $$ = new Function(new TupleLHS($3), $6); }
+		|	'{' '|' TupleLHSinner OptComma '|' '}'		{ $$ = new Function(new TupleLHS($3), NULL); }
 		;
 
 ArgsList	:	Args				{ ($$ = new std::list<Node*>)->push_back($1); }
@@ -190,11 +191,14 @@ ParamList	:	ParamList ',' Expr		{ ($$=$1)->push_back($3); }
 		|					{ $$ = new list<Node*>; }
 		;
 
-Call		:	ExprType '(' ParamList OptComma')'	{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
-		|	T_print '(' ParamList OptComma')'	{ $$ = new PrintCall($3); }
-		|	T_assert '(' ParamList OptComma')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
-		|	T_import '(' ParamList OptComma')'	{ $$ = new ImportCall($3); }
-		|	T_go '(' ParamList OptComma')'		{ $$ = new ThreadGoCall($3); }
+Call		:	ExprType '(' CallParams ')'	{ $$ = new Call(dynamic_cast<Value*>($1), $3); }
+		|	T_print '(' CallParams ')'	{ $$ = new PrintCall($3); }
+		|	T_assert '(' CallParams ')' 	{ $$ = new AssertCall(@1.first_line, parser_handle->fileName, $3); }
+		|	T_import '(' CallParams ')'	{ $$ = new ImportCall($3); }
+		|	T_go '(' CallParams ')'		{ $$ = new ThreadGoCall($3); }
+		;
+
+CallParams	:	TupleRHSinner OptComma			{ $$ = new TupleRHS($1); }
 		;
 
 TupleRHS	:	'(' TupleRHScnt ',' TupleRHSinner OptComma ')'		{ $4->push_front($2); $$ = new TupleRHS($4); }
