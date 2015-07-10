@@ -1,7 +1,6 @@
-#define private public
+#define ILANG_MAKE_PUBLIC
 #include "base.h"
 #include "handle.h"
-#undef private
 
 
 class Handle_test : public Handle_base {

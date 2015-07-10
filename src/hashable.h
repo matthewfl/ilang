@@ -25,7 +25,11 @@ namespace ilang {
 	};
 
 	class Hashable_iterator : public std::iterator<std::output_iterator_tag, std::pair<ilang::Identifier, ilang::Handle<ilang::Variable>>> {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		typedef std::map<ilang::Identifier, ilang::Handle<ilang::Variable> > map_type;
 		map_type m_items;
 		map_type::iterator it;

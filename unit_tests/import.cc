@@ -1,4 +1,4 @@
-#define private public
+#define ILANG_MAKE_PUBLIC
 #include "base.h"
 #include "import.h"
 #include "function.h"

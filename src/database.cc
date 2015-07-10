@@ -651,7 +651,7 @@ namespace ilang {
 		std::stringstream ss;
 		// TODO:
 		//value->toJSON(ss);
-		cout << ss;
+		//cout << ss;
 
 	}
 }

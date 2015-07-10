@@ -22,7 +22,11 @@ namespace ilang {
 	}
 
 	class Object_ish : public Iterable /* Hashable */ {
+#ifndef ILANG_MAKE_PUBLIC
 	protected:
+#else
+	public:
+#endif
 		std::map<Identifier, Handle<Variable> > m_members;
 		Object_ish() {}
 	public:
@@ -36,7 +40,11 @@ namespace ilang {
 	};
 
 	class Class : public Object_ish {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		std::vector<ValuePass> m_parents;
   public:
 		Class();
@@ -48,7 +56,11 @@ namespace ilang {
 	};
 
 	class Class_instance : public Object_ish {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		Handle<Class> m_class;
 	public:
 		Class_instance(Handle<Class> c);

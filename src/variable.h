@@ -13,7 +13,11 @@ namespace ilang {
 
 	// TODO: make this into a variable instance and have an variable interface
 	class Variable : public Handle_base {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		std::vector<ilang::ValuePass> m_modifiers;
 		ilang::ValuePass m_value;
 	public:
@@ -37,7 +41,12 @@ namespace ilang {
 	}
 
 	class BoundVariable : public Variable {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
+
 		Variable_ptr m_parent;
 		ValuePass m_bound;
 	public:

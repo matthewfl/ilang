@@ -17,7 +17,11 @@ namespace ilang {
 	}
 
 	class Handle_base {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		mutable std::atomic<unsigned int> ptr_count;
 		friend void handle_ptr_add_ref(const Handle_base *);
 		friend bool handle_ptr_release(const Handle_base *);

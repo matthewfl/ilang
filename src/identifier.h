@@ -10,7 +10,11 @@ namespace ilang {
 	const unsigned long Identifier_max_int = 0x0100000000000000;
 
 	class Identifier {
+#ifndef ILANG_MAKE_PUBLIC
 	private:
+#else
+	public:
+#endif
 		unsigned long m_id;
 		static std::string lookup(unsigned long id);
 		static unsigned long lookup(std::string);

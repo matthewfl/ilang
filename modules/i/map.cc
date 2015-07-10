@@ -1,10 +1,12 @@
 // this is a very bad hack to make this work, in the future I would like to be able to have some sort of visitor system that allows for this to be done in a clean way.
 
-#define private public
-#define protected public
+//#define private public
+//#define protected public
+
+#define ILANG_MAKE_PUBLIC
 #include "object.h"
-#undef private
-#undef protected
+//#undef private
+//#undef protected
 
 #include "ilang.h"
 #include "error.h"
